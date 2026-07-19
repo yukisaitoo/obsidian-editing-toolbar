@@ -1,30 +1,29 @@
 {
   "permissions": {
     "allow": [
-      "Read(./**)",
-      "Bash(echo:*)",
-      "Bash(ls:*)",
+      "ReadFile(./**)",
+      "Bash(ls *)",
       "Bash(pwd)",
-      "Bash(cat:*)",
-      "Bash(head:*)",
-      "Bash(tail:*)",
-      "Bash(wc:*)",
-      "Bash(grep:*)",
-      "Bash(find:*)",
+      "Bash(cat *)",
+      "Bash(head *)",
+      "Bash(tail *)",
+      "Bash(wc *)",
+      "Bash(grep *)",
+      "Bash(find *)",
       "Bash(git status)",
-      "Bash(git diff:*)",
-      "Bash(git log:*)",
-      "Bash(git show:*)",
+      "Bash(git diff *)",
+      "Bash(git log *)",
+      "Bash(git show *)",
       "Bash(npm run build)",
       "Bash(pnpm run build)",
-      "Bash(npx tsc:*)"
+      "Bash(npx tsc *)"
     ],
     "deny": [
-      "Bash(rm:*)",
-      "Bash(git push:*)",
-      "Bash(git reset:*)",
-      "Bash(curl:*)",
-      "Bash(wget:*)"
+      "Bash(rm *)",
+      "Bash(git push *)",
+      "Bash(git reset *)",
+      "Bash(curl *)",
+      "Bash(wget *)"
     ]
   }
 }

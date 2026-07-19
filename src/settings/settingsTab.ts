@@ -14,12 +14,11 @@ import type { AppearanceByStyle, StyleAppearanceSettings, ToolbarStyleKey } from
 import { AESTHETIC_STYLES, APPEND_METHODS, POSITION_STYLES } from "src/settings/settingsData";
 import { text } from 'src/translations/helper';
 import { GenNonDuplicateID } from "src/util/util";
-import { ToolbarCommand } from './ToolbarSettings';
 interface SubmenuCommand {
   id: string;
   name: string;
   icon: string;
-  SubmenuCommands: ToolbarCommand[];
+  SubmenuCommands: Command[];
 }
 
 interface SettingTab {
