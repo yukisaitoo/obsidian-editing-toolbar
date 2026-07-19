@@ -52,16 +52,13 @@ const localeMap: { [k: string]: Partial<typeof en> } = {
   'zh-tw': zhTW,
 };
 
-const locale = localeMap[moment.locale()];
+const locale = localeMap[moment.locale()] ?? en;
 
 export function text(str: keyof typeof en | string): string {
   if (typeof str !== 'string' || str.length === 0) {
     return '';
   }
 
-  return (
-    (locale && locale[str as keyof typeof en]) ||
-    en[str as keyof typeof en] ||
-    str
-  );
+  const key = str as keyof typeof en;
+  return locale[key] || en[key] || str;
 }
