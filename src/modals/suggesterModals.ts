@@ -1,11 +1,10 @@
-import type editingToolbarPlugin from "src/plugin/main";
+import { App, Command, FuzzyMatch, FuzzySuggestModal, Modal, Notice, SliderComponent, TextAreaComponent, TextComponent, debounce, setIcon } from "obsidian";
 import { appIcons } from "src/icons/appIcons";
-import { Notice, Command, setIcon, FuzzyMatch, FuzzySuggestModal, Modal, SliderComponent, TextAreaComponent, TextComponent, debounce, App } from "obsidian";
-import { findmenuID } from "src/util/util";
+import type editingToolbarPlugin from "src/plugin/main";
+import { text } from "src/translations/helper";
 import { setBottomValue, setHorizontalValue } from "src/util/statusBarConstants";
-import { t } from "src/translations/helper";
+import { findmenuID } from "src/util/util";
 
-// 通用的图标选择回调类型
 export type IconSelectCallback = (iconId: string) => void;
 
 export class ChooseFromIconList extends FuzzySuggestModal<string> {
@@ -26,7 +25,7 @@ export class ChooseFromIconList extends FuzzySuggestModal<string> {
     this.command = command;
     this.issub = issub;
     this.customCallback = callback || null;
-    this.setPlaceholder(t("Choose an icon"));
+    this.setPlaceholder(text("Choose an icon"));
     this.currentEditingConfig = currentEditingConfig || "";
   }
 
@@ -64,9 +63,7 @@ export class ChooseFromIconList extends FuzzySuggestModal<string> {
   }
 
   async onChooseItem(item: string): Promise<void> {
-    // 处理自定义图标选项
     if (item === "Custom") {
-      // 如果有自定义回调，打开自定义图标输入框并将结果传递给回调
       if (this.customCallback) {
         new CustomIcon(
           this.app, 
@@ -74,41 +71,33 @@ export class ChooseFromIconList extends FuzzySuggestModal<string> {
           { id: this.command.id, name: this.command.name, icon: "" }, 
           this.issub, 
           (customIconValue) => {
-            // 当自定义图标输入完成后，将值传递给原始回调
             this.customCallback(customIconValue);
           }
         ).open();
         return;
       } else {
-        // 没有自定义回调，使用默认逻辑打开自定义图标输入框
         new CustomIcon(this.app, this.plugin, this.command, this.issub,null,this.currentEditingConfig).open();
         return;
       }
     }
     
-    // 处理普通图标选项
     if (this.customCallback) {
-      // 如果有自定义回调，直接调用回调并传递选中的图标
       this.customCallback(item);
       return;
     }
     
-    // 获取当前命令配置
     const currentCommands = this.plugin.getCurrentCommands(this.currentEditingConfig);
-    // 没有自定义回调，使用默认的命令图标设置逻辑
-    if (this.command.icon) { // 存在就修改不存在新增
+    if (this.command.icon) {
       let menuID = findmenuID(this.plugin, this.command, this.issub,currentCommands);
       if (this.issub) {
         currentCommands[menuID['index']].SubmenuCommands[menuID['subindex']].icon = item;
       } else {
         currentCommands[menuID['index']].icon = item;
       }
-      // 更新当前配置，传递配置样式参数
       this.plugin.updateCurrentCommands(currentCommands, this.currentEditingConfig);
     } else {
       this.command.icon = item;
       currentCommands.push(this.command);
-      // 更新当前配置，传递配置样式参数
       this.plugin.updateCurrentCommands(currentCommands, this.currentEditingConfig);
     }
 
@@ -123,7 +112,6 @@ export class ChooseFromIconList extends FuzzySuggestModal<string> {
   }
 }
 
-// 自定义图标输入模态框
 export class CustomIcon extends Modal {
   plugin: editingToolbarPlugin;
   item: Command;
@@ -152,7 +140,7 @@ export class CustomIcon extends Modal {
 
   onOpen() {
     const { contentEl } = this;
-    contentEl.createEl("b", { text: t("Enter the icon code, format as <svg>.... </svg>") });
+    contentEl.createEl("b", { text: text("Enter the icon code, format as <svg>.... </svg>") });
     
     const textComponent = document.createElement("textarea");
     textComponent.className = "wideInputPromptInputEl";
@@ -165,18 +153,16 @@ export class CustomIcon extends Modal {
     textComponent.addEventListener("input", async () => {
       const value = textComponent.value;
       
-      // 如果有自定义回调，则使用自定义回调
       if (this.customCallback) {
         this.item.icon = value;
         return;
       }
 
-      // 否则使用默认的命令图标设置逻辑
       this.item.icon = value;
       const currentCommands = this.plugin.getCurrentCommands(this.currentEditingConfig);
       const menuID = findmenuID(this.plugin, this.item, this.issub,currentCommands);
       
-      if (!this.issub) { // 不是子项
+      if (!this.issub) {
         let index = menuID['index'];
         index === -1 
           ? this.plugin.settings.menuCommands.push(this.item) 
@@ -200,7 +186,6 @@ export class CustomIcon extends Modal {
     const { contentEl } = this;
     contentEl.empty();
     
-    // 如果有自定义回调，则在关闭时调用
     if (this.customCallback) {
       this.customCallback(this.item.icon || '');
     } else {
@@ -218,7 +203,7 @@ export class CommandPicker extends FuzzySuggestModal<Command> {
   constructor(private plugin: editingToolbarPlugin,currentEditingConfig?:string) {
     super(plugin.app);
     this.app;
-    this.setPlaceholder(t("Choose a command"));
+    this.setPlaceholder(text("Choose a command"));
     this.currentEditingConfig = currentEditingConfig || "";
   }
 
@@ -228,25 +213,22 @@ export class CommandPicker extends FuzzySuggestModal<Command> {
   }
 
   getItemText(item: Command): string {
-    return t(item.name as any);
+    return text(item.name as any);
   }
 
   async onChooseItem(item: Command): Promise<void> {
-    // 获取当前命令配置
     
     const currentCommands = this.plugin.getCurrentCommands(this.currentEditingConfig);
 
     let index = currentCommands.findIndex((v) => v.id == item.id);
 
-    if (index > -1) // 命令已存在
+    if (index > -1)
     {
-      new Notice(t("The command") + t(item.name as any) + t("already exists"), 3000);
+      new Notice(text("The command") + text(item.name as any) + text("already exists"), 3000);
       return;
     } else {
       if (item.icon) {
-        // 添加命令到当前配置
         currentCommands.push(item);
-        // 更新当前配置，传递配置样式参数
         this.plugin.updateCurrentCommands(currentCommands, this.currentEditingConfig);
         await this.plugin.saveSettings();
         setTimeout(() => {
@@ -257,7 +239,6 @@ export class CommandPicker extends FuzzySuggestModal<Command> {
           "color: Violet"
         );
       } else {
-        // 使用统一的图标选择器，传递当前编辑的配置
         new ChooseFromIconList(this.plugin, item, false, null, this.currentEditingConfig).open();
       }
     }
@@ -284,19 +265,18 @@ export class ChangeCmdname extends Modal {
   }
   onOpen() {
     const { contentEl } = this;
-    contentEl.createEl("b", { text: t("Please enter a new name: ") });
+    contentEl.createEl("b", { text: text("Please enter a new name: ") });
 
     const textComponent = new TextComponent(contentEl);
     textComponent.inputEl.classList.add('InputPromptInputEl');
     textComponent.setPlaceholder("")
       .setValue(this.item.name ?? '')
       .onChange(debounce(async (value) => {
-        // 获取当前命令配置
         const currentCommands = this.plugin.getCurrentCommands(this.currentEditingConfig);
         
         let menuID = findmenuID(this.plugin, this.item, this.issub,currentCommands)
         this.item.name = value;
-        if (!this.issub) //不是子项
+        if (!this.issub)
         {
           let index = menuID['index']
           //  console.log(index,"index")
@@ -314,7 +294,6 @@ export class ChangeCmdname extends Modal {
           }
         }
         
-        // 更新当前配置
         this.plugin.updateCurrentCommands(currentCommands);
         await this.plugin.saveSettings();
       }, 100, true))
@@ -341,26 +320,20 @@ export class openSlider extends Modal {
 
   onOpen() {
     const { contentEl } = this;
-    contentEl.createEl("p", { text: t("Drag the slider to move the position") });
+    contentEl.createEl("p", { text: text("Drag the slider to move the position") });
 
-    // 创建一个容器来放置滑动条和按钮
     const containerEl = contentEl.createDiv({ cls: "slider-container" });
 
-    // 创建垂直位置控制区域
     const verticalContainer = containerEl.createDiv({ cls: "vertical-slider-container" });
-    verticalContainer.createEl("p", { text: t("Vertical Position") });
+    verticalContainer.createEl("p", { text: text("Vertical Position") });
 
-    // 创建水平位置控制区域
     const horizontalContainer = containerEl.createDiv({ cls: "horizontal-slider-container" });
-    horizontalContainer.createEl("p", { text: t("Horizontal Position") });
-      // 添加列数控制区域
+    horizontalContainer.createEl("p", { text: text("Horizontal Position") });
       const columnsContainer = containerEl.createDiv({ cls: "columns-slider-container" });
-      columnsContainer.createEl("p", { text: t("Editing Toolbar Columns") });
-    // 获取body容器的高度和宽度
+      columnsContainer.createEl("p", { text: text("Editing Toolbar Columns") });
     const bodyHeight = document.body.clientHeight;
     const bodyWidth = document.body.clientWidth;
 
-    // 根据容器尺寸计算滑块范围
     const verticalMax = Math.floor(bodyHeight / 3);
     const verticalMin = -Math.floor(bodyHeight);
     const horizontalMax = Math.floor(bodyWidth / 2);
@@ -376,7 +349,6 @@ export class openSlider extends Modal {
       }, 100, true))
       .setDynamicTooltip();
 
-    // 添加水平滑动条
     const horizontalSlider = new SliderComponent(horizontalContainer)
       .setLimits(horizontalMin, horizontalMax, 10)
       .setValue(this.plugin.settings.horizontalPosition || 0)
@@ -386,7 +358,6 @@ export class openSlider extends Modal {
         setHorizontalValue(this.plugin.settings);
       }, 100, true))
       .setDynamicTooltip();
-    // 添加列数滑动条
     const columnsSlider = new SliderComponent(columnsContainer)
       .setLimits(1, 32, 1)
       .setValue(this.plugin.settings.cMenuNumRows || 12)
@@ -401,12 +372,10 @@ export class openSlider extends Modal {
       .setDynamicTooltip();
 
 
-    // 添加复位按钮容器
     const resetContainer = containerEl.createDiv({ cls: "reset-container" });
 
-    // 复位按钮
     resetContainer.createEl("button", {
-      text: t("Reset"),
+      text: text("Reset"),
       cls: "reset-button"
     }).addEventListener("click", () => {
       this.needSave = true;
@@ -426,7 +395,6 @@ export class openSlider extends Modal {
     const { contentEl } = this;
     contentEl.empty();
 
-    // 只有在有修改时才保存设置
     if (this.needSave) {
       await this.plugin.saveSettings();
     }

@@ -117,7 +117,6 @@ export function fullscreenMode(app: App) {
 
     }
 
-    // 添加类型定义
     interface HTMLElementWithFullscreen extends HTMLElement {
       [key: string]: any;
     }
@@ -126,7 +125,6 @@ export function fullscreenMode(app: App) {
       [key: string]: any;
     }
 
-    // 修改相关代码
     function getCurrentElement(el: HTMLElement): HTMLElementWithFullscreen {
       return el as HTMLElementWithFullscreen;
     }

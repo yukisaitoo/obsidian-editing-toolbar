@@ -1,36 +1,36 @@
 import {
-  Editor,
   Command,
-  Notice,
+  Editor,
   MarkdownView,
+  Notice,
   htmlToMarkdown,
 } from "obsidian";
 
-import { setMenuVisibility } from "src/util/statusBarConstants";
 import {
+  quiteFormatbrushes,
   selfDestruct,
   setFormateraser,
-  quiteFormatbrushes,
 } from "src/modals/editingToolbarModal";
-import {
-  setHeader,
-  setFontcolor,
-  setBackgroundcolor,
-  renumberSelection,
-} from "src/util/util";
-import { fullscreenMode, workplacefullscreenMode } from "src/util/fullscreen";
-import editingToolbarPlugin from "src/plugin/main";
 import { InsertCalloutModal } from "src/modals/insertCalloutModal";
 import { InsertLinkModal } from "src/modals/insertLinkModal";
+import {
+  IExtractBetweenResult,
+  IExtractColumnResult,
+  IWrapInputResult,
+  TextInputModal,
+} from "src/modals/TextInputModal";
+import editingToolbarPlugin from "src/plugin/main";
 import { CustomCommand } from "src/settings/settingsData";
-import { t } from "src/translations/helper";
+import { text } from "src/translations/helper";
+import { fullscreenMode, workplacefullscreenMode } from "src/util/fullscreen";
+import { setMenuVisibility } from "src/util/statusBarConstants";
 import { TextEnhancement } from "src/util/textEnhancement";
 import {
-  TextInputModal,
-  IWrapInputResult,
-  IExtractColumnResult,
-  IExtractBetweenResult,
-} from "src/modals/TextInputModal";
+  renumberSelection,
+  setBackgroundcolor,
+  setFontcolor,
+  setHeader,
+} from "src/util/util";
 
 export class CommandsManager {
   private plugin: editingToolbarPlugin;
@@ -39,7 +39,6 @@ export class CommandsManager {
     this.plugin = plugin;
   }
 
-  // 执行命令时保持编辑器焦点的辅助函数
   private executeCommandWithoutBlur = async (
     editor: Editor,
     callback: () => any
@@ -48,11 +47,6 @@ export class CommandsManager {
       await callback();
 
       editor.focus();
-
-      // 取消选中
-      // if (selection) {
-      //     editor.setSelection(cursor);
-      // }
     }
   };
 
@@ -131,7 +125,6 @@ export class CommandsManager {
     return null;
   }
 
-  // 命令配置类型定义
   private _commandsMap: Record<string, CommandPlot> = {
     hrline: {
       char: 5,
@@ -198,7 +191,6 @@ export class CommandsManager {
     },
   };
 
-  // 完整的内置编辑器命令列表
   private modCommands: Command[] = [
     {
       id: "editor:insert-embed",
@@ -278,9 +270,7 @@ export class CommandsManager {
     },
   ];
 
-  // 应用格式化命令的辅助函数
   public applyCommand = (command: CommandPlot, editor: Editor) => {
-    // 获取选中的文本
     const selectedText = editor.getSelection();
     const curserStart = editor.getCursor("from");
     const curserEnd = editor.getCursor("to");
@@ -326,10 +316,8 @@ export class CommandsManager {
         curserStart.ch + command.char + selectedText.length
       );
     } else {
-      // 记录原始选中范围的起始位置
       const originalSelectionStart = curserStart;
 
-      // 计算新的选中范围
       const newSelectionStart = {
         line: originalSelectionStart.line,
         ch: originalSelectionStart.ch + prefix.length,
@@ -339,46 +327,37 @@ export class CommandsManager {
         ch: newSelectionStart.ch + selectedText.length,
       };
 
-      // 重新设置选中状态
       editor.setSelection(newSelectionStart, newSelectionEnd);
     }
   };
 
-  // 应用正则表达式命令
   public async applyRegexCommand(editor: Editor, command: CustomCommand) {
     try {
-      // 获取选中的文本
       let selectedText = editor.getSelection();
       let curserStart = editor.getCursor("from");
       let curserEnd = editor.getCursor("to");
 
-      // 如果没有选中文本，根据设置决定行为
       if (!selectedText) {
         if (this.plugin.settings.useCurrentLineForRegex) {
-          // 新行为：使用当前光标所在行的内容
           const currentLine = curserStart.line;
           const lineText = editor.getLine(currentLine);
 
           if (!lineText || lineText.trim() === "") {
             new Notice(
-              t(
+              text(
                 "Current line is empty, please select text or move to a non-empty line"
               )
             );
             return;
           }
 
-          // 使用当前行的内容
           selectedText = lineText;
 
-          // 更新光标位置为整行
           curserStart = { line: currentLine, ch: 0 };
           curserEnd = { line: currentLine, ch: lineText.length };
 
-          // 选中当前行
           editor.setSelection(curserStart, curserEnd);
         } else {
-          // 旧行为：尝试从剪贴板读取
           try {
             const clipboardItems = await this.readClipboard();
 
@@ -391,48 +370,41 @@ export class CommandsManager {
 
             if (!selectedText) {
               new Notice(
-                t("Please select text or copy text to clipboard first")
+                text("Please select text or copy text to clipboard first")
               );
               return;
             }
 
-            // 将剪贴板文本插入到当前光标位置
             editor.replaceRange(selectedText, curserStart, curserStart);
-            // 更新光标位置
             const newEnd = editor.offsetToPos(
               editor.posToOffset(curserStart) + selectedText.length
             );
             editor.setSelection(curserStart, newEnd);
           } catch (error) {
             console.error("读取剪贴板失败:", error);
-            new Notice(t("Please select text first"));
+            new Notice(text("Please select text first"));
             return;
           }
         }
       }
 
-      // 检查条件匹配
       if (command.useCondition && command.conditionPattern) {
         const conditionRegex = new RegExp(command.conditionPattern);
         if (!conditionRegex.test(selectedText)) {
-          // 如果不满足条件，则不执行操作
           new Notice(
-            t("The selected text does not meet the condition requirements")
+            text("The selected text does not meet the condition requirements")
           );
           return;
         }
       }
 
-      // 构建正则表达式标志
       let flags = "";
       if (command.regexGlobal !== false) flags += "g";
       if (command.regexCaseInsensitive) flags += "i";
       if (command.regexMultiline) flags += "m";
 
-      // 创建正则表达式
       const regex = new RegExp(command.regexPattern, flags);
 
-      // 获取更新后的光标位置
       const updatedCurserStart = editor.getCursor("from");
       const updatedCurserEnd = editor.getCursor("to");
 
@@ -456,20 +428,17 @@ export class CommandsManager {
       editor.setSelection(newStart, newEnd);
     } catch (error) {
       console.error("正则表达式命令执行错误:", error);
-      new Notice(t("Regex command execution error: ") + error.message);
+      new Notice(text("Regex command execution error: ") + error.message);
     }
   }
 
-  // 添加读取剪贴板的方法
   private async readClipboard(): Promise<Record<string, string>> {
     const items: Record<string, string> = {};
 
     try {
-      // 尝试读取剪贴板项目
       const clipboardItems = await navigator.clipboard.read();
 
       for (const clipboardItem of clipboardItems) {
-        // 获取所有可用的类型
         const types = clipboardItem.types;
 
         for (const type of types) {
@@ -484,7 +453,6 @@ export class CommandsManager {
         }
       }
     } catch (e) {
-      // 如果无法访问剪贴板 API，回退到基本文本读取
       try {
         const text = await navigator.clipboard.readText();
         items["text/plain"] = text;
@@ -503,14 +471,12 @@ export class CommandsManager {
       return activeEditor.editor;
     }
 
-    // 最后尝试从活跃叶子获取编辑器
     try {
       const activeLeafEditor = this.plugin.app.workspace.activeLeaf?.view?.editor;
       if (activeLeafEditor) {
         return activeLeafEditor;
       }
     } catch {
-      // 第三方插件可能导致 view.editor 访问抛出异常
     }
     return null;
   }
@@ -526,7 +492,6 @@ export class CommandsManager {
           );
       },
     });
-    // 隐藏/显示菜单命令
     this.plugin.addCommand({
       id: "hide-show-menu",
       name: "Hide/Show ",
@@ -546,7 +511,6 @@ export class CommandsManager {
       },
     });
 
-    // Top 工具栏开关命令
     this.plugin.addCommand({
       id: "toggle-top-toolbar",
       name: "Toggle Top Toolbar",
@@ -570,7 +534,6 @@ export class CommandsManager {
       },
     });
 
-    // Following 工具栏开关命令
     this.plugin.addCommand({
       id: "toggle-following-toolbar",
       name: "Toggle Following Toolbar",
@@ -594,7 +557,6 @@ export class CommandsManager {
       },
     });
 
-    // Fixed 工具栏开关命令
     this.plugin.addCommand({
       id: "toggle-fixed-toolbar",
       name: "Toggle Fixed Toolbar",
@@ -618,7 +580,6 @@ export class CommandsManager {
       },
     });
 
-    // 文本增强功能命令
     this.plugin.addCommand({
       id: "get-plain-text",
       name: "Get Plain Text",
@@ -673,18 +634,18 @@ export class CommandsManager {
       editorCallback: (editor: Editor) => {
         new TextInputModal(
           this.plugin.app,
-          t("Add Prefix/Suffix"),
+          text("Add Prefix/Suffix"),
           [
             {
               key: "prefix",
-              label: t("Prefix"),
-              placeholder: t("Enter prefix"),
+              label: text("Prefix"),
+              placeholder: text("Enter prefix"),
               defaultValue: "",
             },
             {
               key: "suffix",
-              label: t("Suffix"),
-              placeholder: t("Enter suffix"),
+              label: text("Suffix"),
+              placeholder: text("Enter suffix"),
               defaultValue: "",
             },
           ],
@@ -707,34 +668,32 @@ export class CommandsManager {
       editorCallback: (editor: Editor) => {
         new TextInputModal(
           this.plugin.app,
-          t("Number Lines Configuration"),
+          text("Number Lines Configuration"),
           [
             {
               key: "start",
-              label: t("Start Number"),
+              label: text("Start Number"),
               placeholder: "1",
               defaultValue: "1",
             },
             {
               key: "step",
-              label: t("Step"),
+              label: text("Step"),
               placeholder: "1",
               defaultValue: "1",
             },
             {
               key: "sep",
-              label: t("Separator"),
+              label: text("Separator"),
               placeholder: ". ",
               defaultValue: ". ",
             },
           ],
           (result) => {
-            // 将输入转换为对应的类型
             const start = parseInt(result.start) || 1;
             const step = parseInt(result.step) || 1;
             const sep = result.sep || ". ";
 
-            // 调用你改进后的 numberList
             TextEnhancement.numberList(editor, start, step, sep, "");
           }
         ).open();
@@ -766,16 +725,15 @@ export class CommandsManager {
     });
     this.plugin.addCommand({
       id: "list-to-table",
-      name: t("List to Table"),
+      name: text("List to Table"),
       editorCallback: (editor: Editor) => {
      TextEnhancement.convertListToTableMultiDim(editor);
       },
     });
 
-    // 表格 -> 列表
     this.plugin.addCommand({
       id: "table-to-list",
-      name: t("Table to List"),
+      name: text("Table to List"),
       editorCallback: (editor: Editor) =>
         TextEnhancement.convertTableToList(editor),
     });
@@ -785,18 +743,18 @@ export class CommandsManager {
       editorCallback: (editor: Editor) => {
         new TextInputModal(
           this.plugin.app,
-          t("Extract Between Strings"),
+          text("Extract Between Strings"),
           [
             {
               key: "start",
-              label: t("Start String"),
-              placeholder: t("Enter start string"),
+              label: text("Start String"),
+              placeholder: text("Enter start string"),
               defaultValue: "[",
             },
             {
               key: "end",
-              label: t("End String"),
-              placeholder: t("Enter end string"),
+              label: text("End String"),
+              placeholder: text("Enter end string"),
               defaultValue: "]",
             },
           ],
@@ -814,24 +772,23 @@ export class CommandsManager {
 
     this.plugin.addCommand({
       id: "merge-lines",
-      name: t("Merge Lines"),
+      name: text("Merge Lines"),
       editorCallback: (editor: Editor) => {
         new TextInputModal(
           this.plugin.app,
-          t("Merge Lines Settings"),
+          text("Merge Lines Settings"),
           [
             {
               key: "sep",
-              label: t("Separator (leave empty for smart spacing)"),
-              placeholder: t("e.g., comma, pipe, arrow"),
+              label: text("Separator (leave empty for smart spacing)"),
+              placeholder: text("e.g., comma, pipe, arrow"),
               defaultValue: "",
             },
           ],
           (result) => {
-            // 如果用户输入了分隔符，则强制使用；如果留空，则进入智能模式
             TextEnhancement.mergeLines(editor, {
               separator: result.sep,
-              preserveParagraphs: result.sep === "", // 只有智能模式下才尝试保留段落
+              preserveParagraphs: result.sep === "",
               trimLines: true,
             });
           }
@@ -839,7 +796,6 @@ export class CommandsManager {
       },
     });
 
-    // 格式擦相关命令
     this.plugin.addCommand({
       id: "format-eraser",
       name: "Format Eraser",
@@ -853,7 +809,6 @@ export class CommandsManager {
       icon: `eraser`,
     });
 
-    // 添加字体颜色相关命令
     this.plugin.addCommand({
       id: "change-font-color",
       name: "Change Font Color",
@@ -948,7 +903,6 @@ export class CommandsManager {
         const editor = this.getActiveEditor();
         if (editor) {
           this.executeCommandWithoutBlur(editor, () => {
-            // 执行编辑器操作
             editor.toggleMarkdownFormatting("bold");
           });
         }
@@ -1110,7 +1064,6 @@ export class CommandsManager {
       icon: "remix-SplitCellsHorizontal",
     });
 
-    // 添加标题相关命令
     for (let i = 0; i <= 6; i++) {
       this.plugin.addCommand({
         id: `header${i}-text`,
@@ -1126,7 +1079,6 @@ export class CommandsManager {
       });
     }
 
-    // 添加HTML格式化命令
     Object.keys(this._commandsMap).forEach((type) => {
       this.plugin.addCommand({
         id: `${type}`,
@@ -1142,7 +1094,6 @@ export class CommandsManager {
       });
     });
 
-    // 增强编辑器命令
     this.modCommands.forEach((type) => {
       this.plugin.addCommand({
         id: `${type["id"]}`,
@@ -1164,7 +1115,6 @@ export class CommandsManager {
       });
     });
 
-    // 添加格式刷命令
     this.plugin.addCommand({
       id: "toggle-format-brush",
       name: "Toggle Format Brush",
@@ -1174,10 +1124,8 @@ export class CommandsManager {
       },
     });
 
-    // 注册自定义命令
     this.registerCustomCommands();
 
-    // 修改格式刷相关代码，确保包含自定义命令
     const formatCommands = [
       "toggle-bold",
       "toggle-italics",
@@ -1199,7 +1147,6 @@ export class CommandsManager {
       "undent-list",
       "change-font-color",
       "change-background-color",
-      // 添加所有自定义命令
       ...this.plugin.settings.customCommands.map((cmd) => `${cmd.id}`),
       ...Object.keys(this._commandsMap),
     ];
@@ -1229,26 +1176,20 @@ export class CommandsManager {
     }
   }
 
-  // 添加重新加载自定义命令的方法
   public reloadCustomCommands() {
-    // 移除旧的自定义命令
     this.plugin.settings.customCommands.forEach((command) => {
       const commandId = `${command.id}`;
       if (this.plugin.app.commands.commands[`editing-toolbar:${commandId}`]) {
-        // 从命令注册表中移除命令
         delete this.plugin.app.commands.commands[
           `editing-toolbar:${commandId}`
         ];
       }
     });
 
-    // 注册新的自定义命令
     this.registerCustomCommands();
   }
 
-  // 注册自定义命令
   private registerCustomCommands() {
-    // 遍历自定义命令并注册
     this.plugin.settings.customCommands.forEach((command) => {
       const commandId = `${command.id}`;
 
@@ -1257,18 +1198,15 @@ export class CommandsManager {
         name: command.name,
         icon: command.icon,
         editorCallback: (editor) => {
-          // 检查是否使用正则表达式替换
           if (command.useRegex && command.regexPattern) {
             editor &&
               this.executeCommandWithoutBlur(editor, () => {
-                // 应用命令
                 this.applyRegexCommand(editor, command);
                 this.plugin.setLastExecutedCommand(
                   `editing-toolbar:${commandId}`
                 );
               });
           } else {
-            // 创建命令配置对象
             const commandConfig: CommandPlot = {
               prefix: command.prefix,
               suffix: command.suffix,
@@ -1280,20 +1218,17 @@ export class CommandsManager {
 
             editor &&
               this.executeCommandWithoutBlur(editor, () => {
-                // 应用命令
                 this.applyCommand(commandConfig, editor);
                 this.plugin.setLastExecutedCommand(
                   `editing-toolbar:${commandId}`
                 );
               });
           }
-          // 记录为最后执行的命令，以支持格式刷
         },
       });
     });
   }
 
-  // 添加 commandsMap 的访问器
   public get commandsMap(): Record<string, CommandPlot> {
     return this._commandsMap;
   }

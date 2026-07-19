@@ -19,7 +19,7 @@ export interface AppearanceByStyle {
 declare module 'obsidian' {
   export interface Command {
     SubmenuCommands?: Command[];
-    menuType?: 'submenu' | 'dropdown'; // 'submenu' 为子按钮展开，'dropdown' 为下拉菜单
+    menuType?: 'submenu' | 'dropdown';
   }
 }
 export interface CustomCommand {

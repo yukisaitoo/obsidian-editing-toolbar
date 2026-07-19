@@ -1,8 +1,8 @@
-import { App, Modal, Setting, Notice, setIcon, TextComponent } from "obsidian";
-import editingToolbarPlugin from "src/plugin/main";
-import { ChooseFromIconList } from "src/modals/suggesterModals";
+import { App, Modal, Notice, setIcon, Setting, TextComponent } from "obsidian";
 import { RegexCommandModal } from "src/modals/RegexCommandModal";
-import { t } from 'src/translations/helper';
+import { ChooseFromIconList } from "src/modals/suggesterModals";
+import editingToolbarPlugin from "src/plugin/main";
+import { text } from 'src/translations/helper';
 export class CustomCommandModal extends Modal {
   private plugin: editingToolbarPlugin;
   private commandIndex: number | null;
@@ -24,7 +24,6 @@ export class CustomCommandModal extends Modal {
     this.plugin = plugin;
     this.commandIndex = commandIndex;
    
-    // 如果是编辑现有命令，则加载命令数据
     if (commandIndex !== null) {
       const command = plugin.settings.customCommands[commandIndex];
       this.commandId = command.id;
@@ -36,7 +35,6 @@ export class CustomCommandModal extends Modal {
       this.islinehead = command.islinehead;
       this.icon = command.icon || '';
     } else {
-      // 默认值
       this.commandId = '';
       this.commandName = '';
       this.prefix = '';
@@ -52,15 +50,14 @@ export class CustomCommandModal extends Modal {
     const { contentEl } = this;
     this.modalEl.addClass('custom-commands-modal');
     contentEl.empty();
-    contentEl.createEl('h2', { text: this.commandIndex !== null ? t('Edit Custom Command') : t('Add Custom Command') });
+    contentEl.createEl('h2', { text: this.commandIndex !== null ? text('Edit Custom Command') : text('Add Custom Command') });
 
-    // 添加切换到正则表达式命令的按钮
     const switchButtonContainer = contentEl.createDiv('switch-to-regex-container');
     switchButtonContainer.style.marginBottom = '20px';
     switchButtonContainer.style.textAlign = 'center';
 
     const switchButton = switchButtonContainer.createEl('button', {
-      text: t('Switch Regex Command Window')
+      text: text('Switch Regex Command Window')
     });
     switchButton.addClass('mod-cta');
     switchButton.addEventListener('click', () => {
@@ -69,19 +66,17 @@ export class CustomCommandModal extends Modal {
     });
 
     const commandIdSetting = new Setting(contentEl)
-      .setName(t('Command ID'))
-      .setDesc(t('Unique identifier, no spaces, e.g.: "my-custom-format"'))
+      .setName(text('Command ID'))
+      .setDesc(text('Unique identifier, no spaces, e.g.: "my-custom-format"'))
       .addText(text => {
         this.commandIdInput = text;
         text.setValue(this.commandId);
-        // 如果是编辑模式，设置为只读
         if (this.commandIndex !== null) {
           text.setDisabled(true);
           text.inputEl.addClass('id-is-disabled');
         } else {
           text.onChange(value => {
             this.commandId = value;
-            // 更新命令ID输入框的值
 
             if (this.commandNameInput) {
               this.commandNameInput.setValue(value);
@@ -93,24 +88,22 @@ export class CustomCommandModal extends Modal {
       });
 
     const commandNameSetting = new Setting(contentEl)
-      .setName(t('Command Name'))
-      .setDesc(t('Displayed name in toolbar and menu'))
+      .setName(text('Command Name'))
+      .setDesc(text('Displayed name in toolbar and menu'))
       .addText(text => this.commandNameInput = text
         .setValue(this.commandName)
         .onChange(value => this.commandName = value)
       );
 
 
-// 定义特殊字符和占位符的映射
 const specialCharMap = {
-  '\n': '↵',  // 换行符
-  '\t': '⇥',  // 制表符
+  '\n': '↵',
+  '\t': '⇥',
 };
 const reverseSpecialCharMap = Object.fromEntries(
   Object.entries(specialCharMap).map(([key, value]) => [value, key])
 );
 
-// 将特殊字符转换为占位符（用于显示）
 function toDisplayText(text:string) {
   let result = text;
   for (const [char, placeholder] of Object.entries(specialCharMap)) {
@@ -119,7 +112,6 @@ function toDisplayText(text:string) {
   return result;
 }
 
-// 将占位符转换为特殊字符（用于存储）
 function toStoredText(text:string) {
   let result = text;
   for (const [placeholder, char] of Object.entries(reverseSpecialCharMap)) {
@@ -128,7 +120,6 @@ function toStoredText(text:string) {
   return result;
 }
 
-// 创建按钮标签
 const specialCharButtons = Object.entries(specialCharMap).map(([char, placeholder]) => {
   let label = placeholder;
   switch (char) {
@@ -137,7 +128,6 @@ const specialCharButtons = Object.entries(specialCharMap).map(([char, placeholde
   }
   return { placeholder, label };
 });
-// 插入特殊字符到文本框的辅助函数
 // function insertSpecialChar(input:HTMLInputElement, placeholder:string) {
 //   if (input instanceof HTMLInputElement) {
 //     const start = input.selectionStart;
@@ -147,7 +137,6 @@ const specialCharButtons = Object.entries(specialCharMap).map(([char, placeholde
 //     input.value = newValue;
 //     input.focus();
 //     input.setSelectionRange(start + placeholder.length, start + placeholder.length);
-//     // 手动触发 change 事件，确保 onChange 回调被调用
 //     const changeEvent = new Event('change', { bubbles: true });
 //     input.dispatchEvent(changeEvent);
 //     return newValue;
@@ -155,22 +144,16 @@ const specialCharButtons = Object.entries(specialCharMap).map(([char, placeholde
 //   return '';
 // }
 
-// 为设置项添加特殊字符按钮
-// 为设置项添加特殊字符只读组件
 function addSpecialCharButtons(setting: Setting, input: HTMLInputElement) {
-  // 将输入框设为只读
   
-  // 添加复制提示
   input.setAttribute('title', '点击可选择并复制文本');
   
-  // 添加按钮容器
   const buttonContainer = setting.controlEl.createDiv({ cls: 'special-char-buttons' });
   buttonContainer.style.display = 'flex';
   buttonContainer.style.flexWrap = 'wrap';
   buttonContainer.style.gap = '5px';
   buttonContainer.style.marginTop = '5px';
   
-  // 为每个特殊字符创建一个可复制的按钮
   specialCharButtons.forEach(({ placeholder, label }) => {
     const charContainer = buttonContainer.createDiv({ cls: 'char-copy-container' });
     charContainer.style.position = 'relative';
@@ -184,12 +167,10 @@ function addSpecialCharButtons(setting: Setting, input: HTMLInputElement) {
     button.style.cursor = 'pointer';
     button.setAttribute('data-char', placeholder);
     
-    // 添加复制功能
     button.addEventListener('click', (e) => {
       e.preventDefault();
       navigator.clipboard.writeText(placeholder)
         .then(() => {
-          // 显示复制成功提示
           const tooltip = charContainer.createDiv({ cls: 'copy-tooltip' });
           tooltip.style.position = 'absolute';
           tooltip.style.bottom = '100%';
@@ -205,7 +186,6 @@ function addSpecialCharButtons(setting: Setting, input: HTMLInputElement) {
           tooltip.style.zIndex = '100';
           tooltip.textContent = '已复制!';
           
-          // 2秒后移除提示
           setTimeout(() => {
             tooltip.remove();
           }, 2000);
@@ -215,7 +195,6 @@ function addSpecialCharButtons(setting: Setting, input: HTMLInputElement) {
         });
     });
     
-    // 添加悬停效果
     button.addEventListener('mouseenter', () => {
       button.style.backgroundColor = 'var(--interactive-accent)';
       button.style.color = 'var(--text-on-accent)';
@@ -230,74 +209,65 @@ function addSpecialCharButtons(setting: Setting, input: HTMLInputElement) {
   
  
 }
-// 前缀设置
 const prefixSetting = new Setting(contentEl)
-  .setName(t('Prefix'))
-  .setDesc(t('Add content before selected text')+t('Use ↵ to represent line breaks'))
+  .setName(text('Prefix'))
+  .setDesc(text('Add content before selected text')+text('Use ↵ to represent line breaks'))
   .addText(text => text
-    .setValue(toDisplayText(this.prefix)) // 显示时转换特殊字符为占位符
+    .setValue(toDisplayText(this.prefix))
     .onChange(value => {
-      this.prefix = toStoredText(value); // 存储时转换占位符为特殊字符
+      this.prefix = toStoredText(value);
 
-      // 获取前缀的镜像文字作为后缀
       const mirrorText = this.getMirrorText(value);
 
-      // 只有在找到有效的镜像文字时才更新后缀
       if (mirrorText) {
         this.suffix = toStoredText(mirrorText);
-        // 更新后缀输入框的值
         this.suffixInput.setValue(mirrorText);
       }
     })
   )
-// 为前缀添加特殊字符按钮
 addSpecialCharButtons(prefixSetting, prefixSetting.controlEl.querySelector('input'));
 
-// 后缀设置
 const suffixSetting = new Setting(contentEl)
-  .setName(t('Suffix'))
-  .setDesc(t('Add content after selected text'))
+  .setName(text('Suffix'))
+  .setDesc(text('Add content after selected text'))
   .addText(text => {
     this.suffixInput = text;
-    text.setValue(toDisplayText(this.suffix)) // 显示时转换特殊字符为占位符
+    text.setValue(toDisplayText(this.suffix))
       .onChange(value => {
-        this.suffix = toStoredText(value); // 存储时转换占位符为特殊字符
+        this.suffix = toStoredText(value);
       });
   })
- // 为后缀添加特殊字符按钮
 addSpecialCharButtons(suffixSetting, suffixSetting.controlEl.querySelector('input'));
 
 
     const charSetting = new Setting(contentEl)
-      .setName(t('Cursor Position Offset'))
-      .setDesc(t('Default 0, format will keep the text selected'))
+      .setName(text('Cursor Position Offset'))
+      .setDesc(text('Default 0, format will keep the text selected'))
       .addText(text => text
         .setValue(this.char.toString())
         .onChange(value => this.char = parseInt(value) || 0)
       );
 
     const lineSetting = new Setting(contentEl)
-      .setName(t('Line Offset'))
-      .setDesc(t('Line offset of cursor after formatting'))
+      .setName(text('Line Offset'))
+      .setDesc(text('Line offset of cursor after formatting'))
       .addText(text => text
         .setValue(this.line.toString())
         .onChange(value => this.line = parseInt(value) || 0)
       );
 
     new Setting(contentEl)
-      .setName(t('Line Head Format'))
-      .setDesc(t('Whether to insert at the beginning of the next line'))
+      .setName(text('Line Head Format'))
+      .setDesc(text('Whether to insert at the beginning of the next line'))
       .addToggle(toggle => toggle
         .setValue(this.islinehead)
         .onChange(value => this.islinehead = value)
       );
 
-    // 创建图标选择设置
     const iconSetting = new Setting(contentEl)
-      .setName(t('Icon'))
-      .setDesc(t('Command icon (click to select)'));
+      .setName(text('Icon'))
+      .setDesc(text('Command icon (click to select)'));
 
-    // 添加图标预览
     this.iconDisplay = iconSetting.controlEl.createDiv('editingToolbarSettingsIcon');
     if (this.icon) {
       try {
@@ -309,9 +279,8 @@ addSpecialCharButtons(suffixSetting, suffixSetting.controlEl.querySelector('inpu
 
 
 
-    // 添加选择图标按钮
     iconSetting.addButton(button => button
-      .setButtonText(t('Choose Icon'))
+      .setButtonText(text('Choose Icon'))
       .onClick(() => {
         const command = {
           id: this.commandId,
@@ -325,7 +294,6 @@ addSpecialCharButtons(suffixSetting, suffixSetting.controlEl.querySelector('inpu
           false,
           (selectedIcon) => {
             this.icon = selectedIcon;
-            // 更新图标预览
             this.iconDisplay.empty();
             if (this.icon) {
               try {
@@ -334,7 +302,6 @@ addSpecialCharButtons(suffixSetting, suffixSetting.controlEl.querySelector('inpu
                 this.iconDisplay.setText(this.icon);
               }
             }
-            // 更新输入框
             const iconInput = iconSetting.controlEl.querySelector('input');
             if (iconInput) {
               iconInput.value = this.icon;
@@ -346,37 +313,32 @@ addSpecialCharButtons(suffixSetting, suffixSetting.controlEl.querySelector('inpu
 
 
 
-    // 添加保存和取消按钮
     new Setting(contentEl)
       .addButton(button => button
-        .setButtonText(t('Save'))
+        .setButtonText(text('Save'))
         .setCta()
         .onClick(() => {
-          // 验证必填字段
           if (!this.commandId || !this.commandName) {
-            new Notice(t('Command ID and command name cannot be empty'));
+            new Notice(text('Command ID and command name cannot be empty'));
             return;
           }
 
-          // 验证ID格式
           if (this.commandId.includes(' ')) {
-            new Notice(t('Command ID cannot contain spaces'));
+            new Notice(text('Command ID cannot contain spaces'));
             return;
           }
           const commandId = this.commandIndex === null ? `custom-${this.commandId}` : this.commandId;
-          // 检查ID是否已存在（编辑时除外）
           if (this.commandIndex === null) {
             
             const existingIndex = this.plugin.settings.customCommands.findIndex(
               cmd => cmd.id === commandId
             );
             if (existingIndex >= 0) {
-              new Notice(t("The command") + this.commandId + t("already exists"), 8000);
+              new Notice(text("The command") + this.commandId + text("already exists"), 8000);
               return;
             }
           }
       
-          // 创建命令对象
           const command = {
             id: commandId,
             name: this.commandName,
@@ -388,19 +350,15 @@ addSpecialCharButtons(suffixSetting, suffixSetting.controlEl.querySelector('inpu
             icon: this.icon
           };
 
-          // 如果是编辑现有命令且图标发生变化
           if (this.commandIndex !== null) {
             const oldCommand = this.plugin.settings.customCommands[this.commandIndex];
             const oldIcon = oldCommand.icon;
 
             if (oldIcon !== this.icon) {
-              // 更新所有配置中的相关命令图标
               const customCommandId = `editing-toolbar:${commandId}`;
 
-              // 更新 menuCommands
               this.updateCommandIcon(this.plugin.settings.menuCommands, customCommandId);
 
-              // 如果启用了多配置，更新其他配置
               if (this.plugin.settings.enableMultipleConfig) {
                 this.updateCommandIcon(this.plugin.settings.followingCommands, customCommandId);
                 this.updateCommandIcon(this.plugin.settings.topCommands, customCommandId);
@@ -412,14 +370,11 @@ addSpecialCharButtons(suffixSetting, suffixSetting.controlEl.querySelector('inpu
               }
             }
 
-            // 更新自定义命令
             this.plugin.settings.customCommands[this.commandIndex] = command;
           } else {
-            // 添加新命令
             this.plugin.settings.customCommands.push(command);
           }
 
-          // 保存设置并关闭模态框
           this.plugin.saveSettings().then(() => {
             this.close();
             setTimeout(() => {
@@ -430,11 +385,10 @@ addSpecialCharButtons(suffixSetting, suffixSetting.controlEl.querySelector('inpu
         })
       )
       .addButton(button => button
-        .setButtonText(t('Cancel'))
+        .setButtonText(text('Cancel'))
         .onClick(() => this.close())
       );
 
-    // 设置光标聚焦逻辑
     setTimeout(() => {
       if (this.commandIndex)
         this.commandIdInput.inputEl.focus();
@@ -443,7 +397,6 @@ addSpecialCharButtons(suffixSetting, suffixSetting.controlEl.querySelector('inpu
     }, 10);
   }
 
-  // 添加更新命令图标的辅助方法
   private updateCommandIcon(commands: any[], commandId: string) {
     if (!commands) return;
 
@@ -451,7 +404,6 @@ addSpecialCharButtons(suffixSetting, suffixSetting.controlEl.querySelector('inpu
       if (cmd.id === commandId) {
         cmd.icon = this.icon;
       }
-      // 检查子菜单
       if (cmd.SubmenuCommands) {
         this.updateCommandIcon(cmd.SubmenuCommands, commandId);
       }
@@ -463,23 +415,21 @@ addSpecialCharButtons(suffixSetting, suffixSetting.controlEl.querySelector('inpu
     contentEl.empty();
   }
 
-  // 添加获取镜像文字的辅助方法
   private getMirrorText(text: string): string {
-    // 常见的Markdown成对标记
     const commonPairs: { [key: string]: string } = {
-      '**': '**',    // 粗体
-      '*': '*',      // 斜体
-      '__': '__',    // 粗体
-      '_': '_',      // 斜体
-      '~~': '~~',    // 删除线
-      '`': '`',      // 行内代码
-      '```': '```',  // 代码块
-      '$': '$',      // 行内LaTeX
-      '$$': '$$',    // LaTeX块
-      '(': ')',      // 括号
-      '[': ']',      // 方括号
-      '{': '}',      // 花括号
-      '<': '>',       // 尖括号
+      '**': '**',
+      '*': '*',
+      '__': '__',
+      '_': '_',
+      '~~': '~~',
+      '`': '`',
+      '```': '```',
+      '$': '$',
+      '$$': '$$',
+      '(': ')',
+      '[': ']',
+      '{': '}',
+      '<': '>',
       '==': '==',
       '*==': '==*',
       '**==': '==**',
@@ -487,21 +437,17 @@ addSpecialCharButtons(suffixSetting, suffixSetting.controlEl.querySelector('inpu
 
     };
 
-    // 如果文本为空，返回空字符串
     if (!text) return '';
 
-    // 检查是否是常见的Markdown标记
     if (text in commonPairs) {
       return commonPairs[text];
     }
 
-    // 处理HTML标签
     const htmlTagMatch = text.match(/^<(\w+)([^>]*)>$/);
     if (htmlTagMatch) {
       return `</${htmlTagMatch[1]}>`;
     }
 
-    // 如果没有找到对应的镜像，返回空字符串
     return '';
   }
 } 

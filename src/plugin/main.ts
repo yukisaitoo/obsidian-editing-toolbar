@@ -1,39 +1,35 @@
 import {
-  Menu,
-  Plugin,
-  Notice,
-  Command,
-  setIcon,
-  Platform,
-  Editor,
-  MarkdownView,
-  ItemView,
-  ToggleComponent,
-  requireApiVersion,
   App,
+  Command,
   debounce,
+  Editor,
+  ItemView,
+  MarkdownView,
+  Menu,
+  Notice,
+  Platform,
+  Plugin,
+  requireApiVersion,
+  setIcon,
+  ToggleComponent,
   View,
 } from "obsidian";
-import { editingToolbarSettingTab } from '../settings/settingsTab';
-import { selfDestruct, editingToolbarPopover, quiteFormatbrushes, createFollowingbar, setFormateraser, isExistoolbar, resetToolbar } from "src/modals/editingToolbarModal";
-import { editingToolbarSettings, DEFAULT_SETTINGS } from "src/settings/settingsData";
-import { t } from 'src/translations/helper';
-import addIcons, {
-  // addFeatherIcons,
-  // addRemixIcons
-  // addBoxIcons
-} from "src/icons/customIcons";
-import { setFontcolor, setBackgroundcolor } from "src/util/util";
-import { ViewUtils } from 'src/util/viewUtils';
-import { StatusBar } from "src/components/StatusBar";
 import { CommandsManager } from "src/commands/commands";
-import { InsertLinkModal } from "src/modals/insertLinkModal";
+import { StatusBar } from "src/components/StatusBar";
+import addIcons from "src/icons/customIcons";
+import { createFollowingbar, editingToolbarPopover, isExistoolbar, quiteFormatbrushes, resetToolbar, selfDestruct, setFormateraser } from "src/modals/editingToolbarModal";
 import { InsertCalloutModal } from "src/modals/insertCalloutModal";
+import { InsertLinkModal } from "src/modals/insertLinkModal";
+import { DEFAULT_SETTINGS, editingToolbarSettings } from "src/settings/settingsData";
+import { text } from 'src/translations/helper';
+import { setBackgroundcolor, setFontcolor } from "src/util/util";
+import { ViewUtils } from 'src/util/viewUtils';
+import { editingToolbarSettingTab } from '../settings/settingsTab';
 
 let activeDocument: Document;
 
 // ---- Per-style appearance support (patch v3, integrated) ----
-import type { AppearanceByStyle, ToolbarStyleKey, StyleAppearanceSettings} from "src/settings/settingsData";
+import type { AppearanceByStyle, StyleAppearanceSettings, ToolbarStyleKey } from "src/settings/settingsData";
 
 const STYLE_KEYS: ToolbarStyleKey[] = ["top", "following", "fixed", "mobile"];
 
@@ -92,7 +88,6 @@ interface AdmonitionPluginPublic {
   admonitions: Map<string, AdmonitionDefinition>;
   postprocessors: Map<string, any>;
 }
-// ... 常量定义 ...
 interface EditorContextMenuAction {
   title: string;
   commandId?: string;
@@ -107,18 +102,16 @@ export default class editingToolbarPlugin extends Plugin {
   settings: editingToolbarSettings;
   statusBarIcon: HTMLElement;
   statusBar: StatusBar;
-  public toolbarIconSize: number; // 新增全局变量
+  public toolbarIconSize: number;
   public positionStyle: string;
   
   // NEW: which style's appearance is being edited in the settings UI
   public appearanceEditStyle: ToolbarStyleKey | null = null;
   
-  // 修改为公共属性
   commandsManager: CommandsManager;
   public admonitionDefinitions: Record<string, AdmonitionDefinition> | null =
     null;
 
-  // 添加缺失的属性定义
   IS_MORE_Button: boolean;
   EN_BG_Format_Brush: boolean;
   EN_FontColor_Format_Brush: boolean;
@@ -126,18 +119,14 @@ export default class editingToolbarPlugin extends Plugin {
   Temp_Notice: Notice;
   Leaf_Width: number;
 
-  // 添加格式刷相关属性
   lastExecutedCommand: string | null = null;
   formatBrushActive: boolean = false;
   formatBrushNotice: Notice | null = null;
   lastCalloutType: string | null = null;
-  // 添加一个属性来存储上一个命令的可读名称
   lastExecutedCommandName: string | null = null;
 
-  // 添加设置标签页引用
   settingTab: editingToolbarSettingTab;
 
-  // 性能优化：工具栏 DOM 缓存
   private toolbarCache: Map<ToolbarStyleKey, HTMLElement> = new Map();
   private popoverCache: Map<ToolbarStyleKey, HTMLElement> = new Map();
 
@@ -253,39 +242,39 @@ export default class editingToolbarPlugin extends Plugin {
 
     if (hasSelection) {
       actions.push(
-        { title: t("Split Lines"), commandId: "split-lines" },
-        { title: t("Merge Lines"), commandId: "merge-lines" },
-        { title: t("Full Half Converter"), commandId: "smart-symbols" },
-        { title: t("Dedupe Lines"), commandId: "dedupe-lines" },
-        { title: t("Add Prefix/Suffix"), commandId: "add-wrap" },
-        { title: t("Number Lines (Custom)"), commandId: "number-lines" },
-        { title: t("Trim Line Ends"), commandId: "remove-whitespace-trim" },
-        { title: t("Shrink Extra Spaces"), commandId: "remove-whitespace-compress" },
-        { title: t("Remove All Whitespace"), commandId: "remove-whitespace-all" },
-        { title: t("Extract Between Strings"), commandId: "extract-between" },
-        { title: t("List to Table"), commandId: "list-to-table" },
-        { title: t("Table to List"), commandId: "table-to-list" },
+        { title: text("Split Lines"), commandId: "split-lines" },
+        { title: text("Merge Lines"), commandId: "merge-lines" },
+        { title: text("Full Half Converter"), commandId: "smart-symbols" },
+        { title: text("Dedupe Lines"), commandId: "dedupe-lines" },
+        { title: text("Add Prefix/Suffix"), commandId: "add-wrap" },
+        { title: text("Number Lines (Custom)"), commandId: "number-lines" },
+        { title: text("Trim Line Ends"), commandId: "remove-whitespace-trim" },
+        { title: text("Shrink Extra Spaces"), commandId: "remove-whitespace-compress" },
+        { title: text("Remove All Whitespace"), commandId: "remove-whitespace-all" },
+        { title: text("Extract Between Strings"), commandId: "extract-between" },
+        { title: text("List to Table"), commandId: "list-to-table" },
+        { title: text("Table to List"), commandId: "table-to-list" },
       );
     }
 
     if (!hasSelection) {
       actions.push(
-        { title: t("Add Prefix/Suffix"), commandId: "add-wrap" },
-        { title: t("Insert Blank Lines"), commandId: "insert-blank-lines" },
-        { title: t("Extract Between Strings"), commandId: "extract-between" },
+        { title: text("Add Prefix/Suffix"), commandId: "add-wrap" },
+        { title: text("Insert Blank Lines"), commandId: "insert-blank-lines" },
+        { title: text("Extract Between Strings"), commandId: "extract-between" },
       );
     }
 
     if (isOrderedListLine) {
-      actions.push({ title: t("Renumber List"), commandId: "renumber-ordered-list" });
+      actions.push({ title: text("Renumber List"), commandId: "renumber-ordered-list" });
     }
 
     if (!hasSelection && isTableContext) {
-      actions.push({ title: t("Table to List"), commandId: "table-to-list" });
+      actions.push({ title: text("Table to List"), commandId: "table-to-list" });
     }
 
     if (!actions.length) {
-      actions.push({ title: t("Select text to see more tools"), disabled: true });
+      actions.push({ title: text("Select text to see more tools"), disabled: true });
     }
 
     return actions;
@@ -296,11 +285,11 @@ export default class editingToolbarPlugin extends Plugin {
     editor: Editor,
     _view: MarkdownView,
   ): void => {
-    this.addEditorContextSubmenu(menu, t("Text Tools"), "whole-word", this.buildTextContextActions(editor));
+    this.addEditorContextSubmenu(menu, text("Text Tools"), "whole-word", this.buildTextContextActions(editor));
   };
 
   async onload(): Promise<void> {
-    const currentVersion = this.manifest.version; // 设置当前版本号
+    const currentVersion = this.manifest.version;
     console.log("editingToolbar v" + currentVersion + " loaded");
   
     requireApiVersion("0.15.0") ? activeDocument = activeWindow.document : activeDocument = window.document;
@@ -357,7 +346,6 @@ export default class editingToolbarPlugin extends Plugin {
     }
     const isThinoEnabled = this.app.plugins.enabledPlugins.has("obsidian-memos");
     if (isThinoEnabled) {
-      // @ts-ignore - 自定义事件
       this.registerEvent( this.app.workspace.on("thino-editor-created", this.handleeditingToolbar)
       );
     }
@@ -394,17 +382,14 @@ export default class editingToolbarPlugin extends Plugin {
       },
     );
 
-// 最好等待工作区布局准备好，确保所有插件都已加载
 this.app.workspace.onLayoutReady(async () => {
   await this.tryGetAdmonitionTypes();
 });
 
-    // // 注册右键菜单
     // this.registerEvent(
     //   this.app.workspace.on('editor-menu', (menu: Menu, editor: Editor, view: MarkdownView) => {
     //     const selection = editor.getSelection();
     //     if (selection) {
-    //       // 检查是否为链接或图片（包括带大小参数的图片）
     //       if (/(!)?\[.*(?:\|(?:\d+x\d+|\d+))?\]\([a-zA-Z]+:\/\/[^\s)]+(?:\s+["'][^"']*["'])?\)/.test(selection.trim())) {
     //         menu.addItem((item) =>
     //           item
@@ -413,19 +398,15 @@ this.app.workspace.onLayoutReady(async () => {
     //             .onClick(() => new InsertLinkModal(this).open())
     //         );
     //       }
-    //       return; // 有选中文本时，不继续检查光标周围
     //     }
-    //     // 如果没有选中文本，检查光标周围是否为链接或图片
     //     const cursor = editor.getCursor();
     //     const lineText = editor.getLine(cursor.line);
     //     const cursorPos = cursor.ch;
-    //     // 使用合并的正则表达式，同时匹配链接和图片
     //     const combinedRegex = /(!)?\[([^\]]+)(?:\|(\d+x\d+|\d+))?\]\(([a-zA-Z]+:\/\/[^\s)]+)(?:\s+["'][^"']*["'])?\)/g;
     //     let match;
     //     while ((match = combinedRegex.exec(lineText)) !== null) {
     //       const linkStart = match.index;
     //       const linkEnd = match.index + match[0].length;
-    //       // 检查光标是否在链接或图片范围内（包括边缘）
     //       if (cursorPos >= linkStart && cursorPos <= linkEnd) {
     //         menu.addItem((item) =>
     //           item
@@ -433,20 +414,16 @@ this.app.workspace.onLayoutReady(async () => {
     //             .setIcon('link')
     //             .onClick(() => new InsertLinkModal(this).open())
     //         );
-    //         break; // 找到匹配后退出
     //       }
     //     }
     //   })
     // );
-    // 注册右键菜单
     this.registerEvent(
       this.app.workspace.on("editor-menu", this.handleEditorContextMenu)
-          // 判断光标是否在有序列表行（简单匹配数字开头）
     );
     this.registerEvent(
       // @ts-ignore
       this.app.workspace.on('url-menu', (menu: Menu, url: string, view: MarkdownView) => {
-        // 添加自定义菜单项
         menu.addItem((item) =>
           item
             .setTitle('Edit Link(Modal)')
@@ -459,11 +436,9 @@ this.app.workspace.onLayoutReady(async () => {
         );
       })
     );
-    // 初始化图标
     addIcons();
     this.toolbarIconSize = this.settings.toolbarIconSize;
     this.positionStyle = this.settings.positionStyle;
-    // 初始化 CSS 变量
     activeDocument.documentElement.style.setProperty(
       "--editing-toolbar-background-color",
       this.settings.toolbarBackgroundColor
@@ -498,7 +473,7 @@ this.app.workspace.onLayoutReady(async () => {
     if (
       admonitionPlugin.admonitions &&
       typeof admonitionPlugin.admonitions === "object" &&
-      !Array.isArray(admonitionPlugin.admonitions) && // 确保不是数组
+      !Array.isArray(admonitionPlugin.admonitions) &&
       Object.keys(admonitionPlugin.admonitions).length > 0
     ) {
       registeredTypes = Object.keys(admonitionPlugin.admonitions);
@@ -517,7 +492,6 @@ this.app.workspace.onLayoutReady(async () => {
       : false;
     if (Platform.isMobileApp && !isLoadOnMobile) {
       if (screenWidth <= 768) {
-        // 移动设备且屏幕宽度小于等于 768px，默认不开启toolbar
         console.log("editing toolbar disable loading on mobile");
         return false;
       }
@@ -526,21 +500,17 @@ this.app.workspace.onLayoutReady(async () => {
   }
 
   onunload(): void {
-    // 注销工作区事件
     this.app.workspace.off("active-leaf-change", this.handleeditingToolbar);
     this.app.workspace.off("layout-change", this.handleeditingToolbar_layout);
     this.app.workspace.off("resize", this.handleeditingToolbar_resize);
 
-    // 移除格式刷通知
     if (this.formatBrushNotice) {
       this.formatBrushNotice.hide();
       this.formatBrushNotice = null;
     }
 
-    // 清理格式刷相关状态
     this.quiteAllFormatBrushes();
 
-    // 销毁工具栏
     selfDestruct(this);
 
     console.log("editingToolbar unloaded");
@@ -720,18 +690,12 @@ this.app.workspace.onLayoutReady(async () => {
     const loadedData = await this.loadData();
     this.settings = Object.assign({}, DEFAULT_SETTINGS, loadedData);
 
-    // 配置迁移逻辑：将旧的 positionStyle 配置迁移到新的 enable 开关
-    // 判断条件：所有新开关都是 false（说明用户还没有配置过新版）
     const isLegacyConfig =
       !this.settings.enableTopToolbar &&
       !this.settings.enableFollowingToolbar &&
       !this.settings.enableFixedToolbar;
 
     if (isLegacyConfig && this.settings.positionStyle) {
-      // 根据旧的 positionStyle 值，自动设置对应的新开关
-      // 这样可以确保：
-      // 1. 新用户：默认 positionStyle 是 "top"，会自动启用 top 工具栏
-      // 2. 旧用户升级：根据之前的 positionStyle 设置，自动启用对应的工具栏
       switch (this.settings.positionStyle) {
         case "top":
           this.settings.enableTopToolbar = true;
@@ -744,18 +708,15 @@ this.app.workspace.onLayoutReady(async () => {
           break;
       }
 
-      // 保存迁移后的配置
       await this.saveSettings();
     }
   }
 
-  // 获取当前位置样式对应的命令配置
   getCurrentCommands(style?: string): any[] {
     if (!this.settings.enableMultipleConfig) {
       return this.settings.menuCommands;
     }
     let currentstyle = style || this.positionStyle;
-    // 如果移动端模式开启且在移动设备上
     if (this.settings.isLoadOnMobile && Platform.isMobileApp) {
       return this.settings.mobileCommands;
     }
@@ -772,15 +733,12 @@ this.app.workspace.onLayoutReady(async () => {
     }
   }
 
-  // 更新指定样式对应的命令配置（设置页可以显式指定样式）
 updateCurrentCommands(commands: any[], style?: string): void {
-  // 单一配置模式：一直使用 menuCommands
   if (!this.settings.enableMultipleConfig) {
     this.settings.menuCommands = commands;
     return;
   }
 
-  // 如果没有显式传入 style，则保持旧逻辑：根据当前环境决定目标样式
   let targetStyle = style;
 
   if (!targetStyle) {
@@ -813,33 +771,26 @@ updateCurrentCommands(commands: any[], style?: string): void {
     await this.saveData(this.settings);
   }
 
-  // 修改 setLastExecutedCommand 方法，同时保存命令名称
   setLastExecutedCommand(commandId: string): void {
     this.lastExecutedCommand = commandId;
 
-    // 获取命令的可读名称
     const command = this.app.commands.commands[commandId];
     if (command && command.name) {
       this.lastExecutedCommandName = command.name;
     } else {
-      // 如果找不到命令名称，使用命令ID的最后部分
       const parts = commandId.split(":");
       this.lastExecutedCommandName = parts[parts.length - 1].replace(/-/g, " ");
     }
   }
 
-  // 修改 toggleFormatBrush 方法，在通知中显示具体命令
   toggleFormatBrush(): void {
     const editor = this.commandsManager.getActiveEditor();
     let detectedFormat = false;
     let calloutType = "";
-    // 判断是否有选中文本
     if (editor) {
       if (editor.somethingSelected()) {
         const selectedText = editor.getSelection();
-        // 检测选中文本的格式
         if (/^\*\*.*\*\*$/.test(selectedText)) {
-          // 粗体
           this.lastExecutedCommand = "editor:toggle-bold";
           this.lastExecutedCommandName = "Bold";
           detectedFormat = true;
@@ -847,32 +798,26 @@ updateCurrentCommands(commands: any[], style?: string): void {
           /^\*.*\*$/.test(selectedText) ||
           /^_.*_$/.test(selectedText)
         ) {
-          // 斜体
           this.lastExecutedCommand = "editor:toggle-italics";
           this.lastExecutedCommandName = "Italic";
           detectedFormat = true;
         } else if (/^~~.*~~$/.test(selectedText)) {
-          // 删除线
           this.lastExecutedCommand = "editor:toggle-strikethrough";
           this.lastExecutedCommandName = "Strikethrough";
           detectedFormat = true;
         } else if (/^==.*==$/.test(selectedText)) {
-          // 高亮
           this.lastExecutedCommand = "editor:toggle-highlight";
           this.lastExecutedCommandName = "Highlight";
           detectedFormat = true;
         } else if (/^`.*`$/.test(selectedText)) {
-          // 代码
           this.lastExecutedCommand = "editor:toggle-code";
           this.lastExecutedCommandName = "Code";
           detectedFormat = true;
         } else if (/^<font color=".*">.*<\/font>$/.test(selectedText)) {
-          // 字体颜色
           this.lastExecutedCommand = "editing-toolbar:change-font-color";
           this.lastExecutedCommandName = "Font Color";
           detectedFormat = true;
         } else if (/^<mark style="background:.*">.*<\/mark>$/.test(selectedText)) {
-          // 背景颜色
           this.lastExecutedCommand = "editing-toolbar:change-background-color";
           this.lastExecutedCommandName = "Background Color";
           detectedFormat = true;
@@ -916,10 +861,9 @@ updateCurrentCommands(commands: any[], style?: string): void {
             this.lastExecutedCommand = "editor:insert-callout";
             this.lastExecutedCommandName = "Callout-" + match[1].toLowerCase();
             detectedFormat = true;
-            calloutType = match[1].toLowerCase(); // 转换为小写
+            calloutType = match[1].toLowerCase();
           }
         }
-        // 检测标题格式
         else if (/^# /.test(selectedText)) {
           this.lastExecutedCommand = "editor:set-heading-1";
           this.lastExecutedCommandName = "Heading 1";
@@ -946,15 +890,12 @@ updateCurrentCommands(commands: any[], style?: string): void {
           detectedFormat = true;
         }
       } else {
-        // 没有选中文本时，探测光标周围的格式
         const cursor = editor.getCursor();
         const lineText = editor.getLine(cursor.line);
         const cursorPos = cursor.ch;
 
-        // 用于记录找到的所有格式及其范围
         const foundFormats = [];
 
-        // 检测下划线
         const underlineRegex = /<u>([^<]+)<\/u>/g;
         let match;
         while ((match = underlineRegex.exec(lineText)) !== null) {
@@ -972,7 +913,6 @@ updateCurrentCommands(commands: any[], style?: string): void {
           }
         }
 
-        // 检测居中
         const centerRegex = /<center>([^<]+)<\/center>/g;
         while ((match = centerRegex.exec(lineText)) !== null) {
           const formatStart = match.index;
@@ -989,7 +929,6 @@ updateCurrentCommands(commands: any[], style?: string): void {
           }
         }
 
-        // 检测居左
         const leftRegex = /<p align="left">([^<]+)<\/p>/g;
         while ((match = leftRegex.exec(lineText)) !== null) {
           const formatStart = match.index;
@@ -1006,7 +945,6 @@ updateCurrentCommands(commands: any[], style?: string): void {
           }
         }
 
-        // 检测居右
         const rightRegex = /<p align="right">([^<]+)<\/p>/g;
         while ((match = rightRegex.exec(lineText)) !== null) {
           const formatStart = match.index;
@@ -1023,7 +961,6 @@ updateCurrentCommands(commands: any[], style?: string): void {
           }
         }
 
-        // 检测两端对齐
         const justifyRegex = /<p align="justify">([^<]+)<\/p>/g;
         while ((match = justifyRegex.exec(lineText)) !== null) {
           const formatStart = match.index;
@@ -1040,7 +977,6 @@ updateCurrentCommands(commands: any[], style?: string): void {
           }
         }
 
-        // 检测上标
         const superscriptRegex = /<sup>([^<]+)<\/sup>/g;
         while ((match = superscriptRegex.exec(lineText)) !== null) {
           const formatStart = match.index;
@@ -1057,7 +993,6 @@ updateCurrentCommands(commands: any[], style?: string): void {
           }
         }
 
-        // 检测下标
         const subscriptRegex = /<sub>([^<]+)<\/sub>/g;
         while ((match = subscriptRegex.exec(lineText)) !== null) {
           const formatStart = match.index;
@@ -1074,7 +1009,6 @@ updateCurrentCommands(commands: any[], style?: string): void {
           }
         }
 
-        // 检测光标是否在粗体中
         const boldRegex = /\*\*([^*]+)\*\*/g;
 
         while ((match = boldRegex.exec(lineText)) !== null) {
@@ -1092,7 +1026,6 @@ updateCurrentCommands(commands: any[], style?: string): void {
           }
         }
 
-        // 检测删除线
         const strikeRegex = /~~([^~]+)~~/g;
         while ((match = strikeRegex.exec(lineText)) !== null) {
           const formatStart = match.index;
@@ -1109,7 +1042,6 @@ updateCurrentCommands(commands: any[], style?: string): void {
           }
         }
 
-        // 检测高亮
         const highlightRegex = /==([^=]+)==/g;
         while ((match = highlightRegex.exec(lineText)) !== null) {
           const formatStart = match.index;
@@ -1126,7 +1058,6 @@ updateCurrentCommands(commands: any[], style?: string): void {
           }
         }
 
-        // 检测代码
         const codeRegex = /`([^`]+)`/g;
         while ((match = codeRegex.exec(lineText)) !== null) {
           const formatStart = match.index;
@@ -1143,7 +1074,6 @@ updateCurrentCommands(commands: any[], style?: string): void {
           }
         }
 
-        // 检测字体颜色
         const fontColorRegex = /<font color="([^"]+)">([^<]+)<\/font>/g;
         while ((match = fontColorRegex.exec(lineText)) !== null) {
           const formatStart = match.index;
@@ -1160,7 +1090,6 @@ updateCurrentCommands(commands: any[], style?: string): void {
           }
         }
 
-        // 检测背景颜色
         const bgColorRegex = /<span style="background:([^"]+)">([^<]+)<\/span>/g;
         while ((match = bgColorRegex.exec(lineText)) !== null) {
           const formatStart = match.index;
@@ -1178,17 +1107,14 @@ updateCurrentCommands(commands: any[], style?: string): void {
         }
 
         if (foundFormats.length > 0) {
-          // 按照距离排序，距离最小的在前
           foundFormats.sort((a, b) => a.distance - b.distance);
 
-          // 使用距离最近的格式
           const nearestFormat = foundFormats[0];
           this.lastExecutedCommand = nearestFormat.command;
           this.lastExecutedCommandName = nearestFormat.name;
           detectedFormat = true;
         }
 
-        // 如果不是粗体，检测是否在斜体中
         if (!detectedFormat) {
           const italicRegex = /(\*|_)([^*_]+)(\*|_)/g;
           while ((match = italicRegex.exec(lineText)) !== null) {
@@ -1198,7 +1124,6 @@ updateCurrentCommands(commands: any[], style?: string): void {
           }
         }
 
-        // 检测标题
         if (!detectedFormat) {
           if (/^# /.test(lineText) && cursorPos > 0) {
             this.lastExecutedCommand = "editor:set-heading-1";
@@ -1230,7 +1155,7 @@ updateCurrentCommands(commands: any[], style?: string): void {
     }
     if (!detectedFormat && !this.lastExecutedCommand) {
       new Notice(
-        t(
+        text(
           "Please execute a format command or select format text first, then enable the format brush"
         )
       );
@@ -1242,51 +1167,41 @@ updateCurrentCommands(commands: any[], style?: string): void {
     if (this.formatBrushActive) {
 
       activeDocument.body.classList.add('format-brush-cursor');
-      // 关闭其他格式刷
       this.EN_FontColor_Format_Brush = false;
       this.EN_BG_Format_Brush = false;
       this.EN_Text_Format_Brush = false;
-      // 存储 Callout 类型
       this.lastCalloutType = calloutType;
-      // 显示通知，包含具体命令名称
       if (this.formatBrushNotice) this.formatBrushNotice.hide();
       this.formatBrushNotice = new Notice(
-        t("Format brush ON! Select text to apply【") +
+        text("Format brush ON! Select text to apply【") +
           this.lastExecutedCommandName +
-          t("】format"),
+          text("】format"),
         0
       );
     } else {
       activeDocument.body.classList.remove("format-brush-cursor");
-      // 关闭通知
       if (this.formatBrushNotice) {
         this.formatBrushNotice.hide();
         this.formatBrushNotice = null;
       }
     }
   }
-  // 应用 Callout 的方法
   applyCalloutFormat(editor: Editor, text: string, calloutType: string) {
-    // 移除现有的 Callout 前缀（如果存在）
     const calloutPrefixRegex =
       /^> \[!(note|tip|warning|danger|info|success|question|quote)\] ?/i;
     const cleanedText = text.replace(calloutPrefixRegex, "").trim();
 
-    // 处理多行 Callout 文本，去除第二行及以后的行首 >
     const lines = cleanedText.split("\n");
     const processedLines = lines.map((line, index) =>
       line.replace(/^\s*>\s*/, "")
     );
 
-    // 构建新的 Callout 文本
     const newText = `> [!${calloutType}]\n> ${processedLines.join("\n> ")}`;
 
-    // 替换文本
     editor.replaceSelection(newText);
   }
   applyFormatBrush(editor: Editor): void {
     if (!this.lastExecutedCommand || !this.formatBrushActive) return;
-    // 执行保存的命令
     const command = this.app.commands.commands[this.lastExecutedCommand];
     if (command && command.callback) {
       command.callback();
@@ -1299,7 +1214,6 @@ updateCurrentCommands(commands: any[], style?: string): void {
     }
   }
 
-  // 扩展现有方法以支持格式刷
   quiteAllFormatBrushes(): void {
     this.EN_FontColor_Format_Brush = false;
     this.EN_BG_Format_Brush = false;
@@ -1319,7 +1233,6 @@ updateCurrentCommands(commands: any[], style?: string): void {
     }
   }
 
-  // 添加公共方法来访问 commandsManager
   public getCommandsManager(): CommandsManager {
     return this.commandsManager;
   }
@@ -1329,33 +1242,28 @@ updateCurrentCommands(commands: any[], style?: string): void {
   }
 
   init_evt(container: Document, editor: Editor) {
-    // 重置状态
     this.resetFormatBrushStates();
 
-    // 防抖的文本选择处理
     const debouncedHandleTextSelection = debounce(() => {
       this.handleTextSelection();
     }, 100);
 
-    // 统一的鼠标事件处理
     this.registerDomEvent(container, "mousedown", (e: MouseEvent) => {
       if (!this.isView() || !this.commandsManager.getActiveEditor()) return;
 
-      const mouseDownTime = Date.now(); // 记录按下时间
+      const mouseDownTime = Date.now();
       if (e.button === 1) {
         this.registerDomEvent(container, "mouseup", (e2: MouseEvent) => {
-          const mouseUpTime = Date.now(); // 记录释放时间
+          const mouseUpTime = Date.now();
           if (mouseUpTime - mouseDownTime < 300 && e2.button === 1) {
             this.handleMiddleClickToolbar(e2);
           }
         });
       }
 
-      // 格式刷重置
       this.resetFormatBrushIfActive(container, e);
     });
 
-    // 跨平台选择处理
     if (Platform.isMobileApp) {
       this.registerDomEvent(container, "selectionchange", () => {
         debouncedHandleTextSelection();
@@ -1368,10 +1276,8 @@ updateCurrentCommands(commands: any[], style?: string): void {
       });
     }
 
-    // 键盘选择处理
     this.registerDomEvent(container, "keyup", this.handleKeyboardSelection);
 
-    // 滚动和失焦隐藏工具栏
     this.registerScrollAndBlurEvents(container);
   }
 
@@ -1382,15 +1288,12 @@ updateCurrentCommands(commands: any[], style?: string): void {
     this.formatBrushActive = false;
   }
 
-  // 性能优化：缓存工具栏 DOM 引用
   public getCachedToolbar(style: ToolbarStyleKey): HTMLElement | null {
     const cached = this.toolbarCache.get(style);
-    // 验证缓存的元素是否仍在 DOM 中
     if (cached && cached.isConnected) {
     
       return cached;
     }
-    // 缓存失效，清除
     if (cached) {
       this.toolbarCache.delete(style);
     }
@@ -1482,18 +1385,14 @@ updateCurrentCommands(commands: any[], style?: string): void {
 
   private resetFormatBrushIfActive(container: Document, e: MouseEvent) {
     if (e.button === 2 && this.isFormatBrushActive()) {
-      // 1. 定义一个临时拦截函数
       const preventMenu = (ev: MouseEvent) => {
         ev.preventDefault();
         ev.stopPropagation();
-        // 2. 拦截一次后立即移除自己，确保下次右键正常
         container.removeEventListener("contextmenu", preventMenu, {
           capture: true,
         });
       };
-      // 3. 注册拦截
       container.addEventListener("contextmenu", preventMenu, { capture: true });
-      // 4. 执行退出格式刷逻辑
       quiteFormatbrushes(this);
     }
   }
@@ -1609,7 +1508,6 @@ updateCurrentCommands(commands: any[], style?: string): void {
     };
   }
 
-  // 抽取显示"following"工具栏的逻辑
   private showFollowingToolbar(editor: Editor) {
     if (!this.isFollowingToolbarActive()) return;
 
@@ -1622,10 +1520,8 @@ updateCurrentCommands(commands: any[], style?: string): void {
       followingToolbar.classList.add("editingToolbarFlex");
       followingToolbar.classList.remove("editingToolbarGrid");
 
-      // 使用 createFollowingbar 的定位逻辑（会根据选择重新定位）
       createFollowingbar(this.app, this.toolbarIconSize, this, editor, true, targetDocument);
     } else {
-      // 如果还没有构建 following 工具栏，则创建并定位
       createFollowingbar(this.app, this.toolbarIconSize, this, editor, true, targetDocument);
     }
   }
@@ -1646,28 +1542,28 @@ updateCurrentCommands(commands: any[], style?: string): void {
           if (!this.settings.followingCommands || this.settings.followingCommands.length === 0) {
             this.settings.followingCommands = [...this.settings.menuCommands];
             this.saveSettings();
-            new Notice(t("Following style commands successfully initialized"));
+            new Notice(text("Following style commands successfully initialized"));
           }
           break;
         case "top":
           if (!this.settings.topCommands || this.settings.topCommands.length === 0) {
             this.settings.topCommands = [...this.settings.menuCommands];
             this.saveSettings();
-            new Notice(t("Top style commands successfully initialized"));
+            new Notice(text("Top style commands successfully initialized"));
           }
           break;
         case "fixed":
           if (!this.settings.fixedCommands || this.settings.fixedCommands.length === 0) {
             this.settings.fixedCommands = [...this.settings.menuCommands];
             this.saveSettings();
-            new Notice(t("Fixed style commands successfully initialized"));
+            new Notice(text("Fixed style commands successfully initialized"));
           }
           break;
         case "mobile":
           if (!this.settings.mobileCommands || this.settings.mobileCommands.length === 0) {
             this.settings.mobileCommands = [...this.settings.menuCommands];
             this.saveSettings();
-            new Notice(t("Mobile style commands successfully initialized"));
+            new Notice(text("Mobile style commands successfully initialized"));
           }
           break;
       }

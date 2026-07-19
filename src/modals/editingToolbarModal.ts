@@ -1,21 +1,18 @@
+import { App, ButtonComponent, Editor, ItemView, MarkdownView, Menu, Notice, Platform, requireApiVersion, setIcon, WorkspaceParent, WorkspaceParentExt, WorkspaceWindow } from "obsidian";
 import type editingToolbarPlugin from "src/plugin/main";
-import { App, Notice, requireApiVersion, ItemView, MarkdownView, ButtonComponent, WorkspaceParent, WorkspaceWindow, WorkspaceParentExt, Menu, setIcon, Platform } from "obsidian";
-import { backcolorpicker, colorpicker } from "src/util/util";
-import { t } from "src/translations/helper";
 import {
-  editingToolbarSettings,
-  ToolbarStyleKey,
-  StyleAppearanceSettings,
   AppearanceByStyle,
+  editingToolbarSettings,
+  StyleAppearanceSettings,
+  ToolbarStyleKey,
 } from "src/settings/settingsData";
-import { ViewUtils } from 'src/util/viewUtils';
+import { text } from "src/translations/helper";
 import { setBottomValue, setHorizontalValue } from "src/util/statusBarConstants";
-import { Editor } from "obsidian";
-import { setFontcolor, setBackgroundcolor } from "src/util/util";
+import { backcolorpicker, colorpicker, setBackgroundcolor, setFontcolor } from "src/util/util";
+import { ViewUtils } from 'src/util/viewUtils';
 
 let activeDocument: Document;
 
-// 定义视图类型到目标DOM选择器的映射
 const viewTypeToSelectorMap: { [key: string]: string } = {
   markdown: ".markdown-source-view",
   thino_view: ".markdown-source-view",
@@ -69,7 +66,6 @@ export function resetToolbar(plugin?: editingToolbarPlugin) {
     element.remove();
   });
 
-  // 性能优化：清理缓存
   if (plugin) {
     plugin.clearToolbarCache();
   }
@@ -101,10 +97,8 @@ export function selfDestruct(plugin: editingToolbarPlugin) {
     });
   };
 
-  // 清理主文档中的工具栏
   clearToolbar(activeDocument);
 
-  // 清理各个 root split 容器中的工具栏
   if (rootSplits) {
     rootSplits.forEach((rootSplit: WorkspaceParentExt) => {
       if (rootSplit?.containerEl) {
@@ -113,7 +107,6 @@ export function selfDestruct(plugin: editingToolbarPlugin) {
     });
   }
 
-  // 性能优化：清理缓存
   if (plugin) {
     plugin.clearToolbarCache();
   }
@@ -132,15 +125,12 @@ export function isExistoolbar(
 
   activeDocument = targetDocument;
 
-  // 决定要查找的样式；未显式传入时，保持原有行为
   const targetStyle: ToolbarStyleKey =
     (style ||
       (plugin.positionStyle as ToolbarStyleKey) ||
       (plugin.settings.positionStyle as ToolbarStyleKey) ||
       "top") as ToolbarStyleKey;
 
-  // 性能优化：先检查缓存
-  // 注意：Top 工具栏不使用缓存，因为每个 leaf 都有独立的工具栏
   if (targetStyle !== "top") {
     const cached = plugin.getCachedToolbar(targetStyle);
     if (cached && cached.ownerDocument === targetDocument) {
@@ -148,23 +138,19 @@ export function isExistoolbar(
     }
   }
 
-  // 缓存未命中，执行 DOM 查询
   const selector = `.editingToolbarModalBar[data-toolbar-style="${targetStyle}"]`;
 
   let container: HTMLElement | null = null;
 
   if (targetStyle === "top") {
-    // top 样式的工具栏挂在当前活动 leaf 容器下
     container =
       (app.workspace.activeLeaf?.view.containerEl?.querySelector(
         selector
       ) as HTMLElement) || null;
   } else {
-    // 其它样式的工具栏在整个文档范围查找
     container = targetDocument.querySelector(selector) as HTMLElement;
   }
 
-  // 如果找到，缓存起来（但 top 工具栏不缓存）
   if (container && targetStyle !== "top") {
     plugin.setCachedToolbar(targetStyle, container);
   }
@@ -309,10 +295,8 @@ export function createTablecell(app: App, plugin: editingToolbarPlugin, el: stri
     let rows = tab.rows;
     let rlen = rows.length;
     for (let i = 1; i < rlen; i++) {
-      //遍历所有行
-      let cells = rows[i].cells; //得到这一行的所有单元格
+      let cells = rows[i].cells;
       for (let j = 0; j < cells.length; j++) {
-        //给每一个单元格添加click事件
         cells[j].onclick = function (event: MouseEvent) {
           event.preventDefault();
           event.stopPropagation();
@@ -453,7 +437,7 @@ export function createMoremenu(app: App, plugin: editingToolbarPlugin, selector:
   let morebutton = new ButtonComponent(cMoreMenu);
   morebutton
     .setClass("editingToolbarCommandItem")
-    .setTooltip(t("More"))
+    .setTooltip(text("More"))
     .onClick(() => {
       if (Morecontainer.style.visibility == "hidden") {
         Morecontainer.style.visibility = "visible";
@@ -488,11 +472,7 @@ export function setFormateraser(plugin: editingToolbarPlugin, editor: Editor) {
   //   plugin.Temp_Notice = new Notice(t("Clear formatting brush ON!\nClick the  mouse middle or right key to close the formatting-brush"), 0);
 
   // } else {
-  // 处理 callout 格式
-  // 处理最外层的 callout 格式，每次只脱一层壳
-  // 检查是否是 callout 格式
   if (selectText.match(/^>\s*\[\![\w\s]*\]/m)) {
-    // 处理 callout 格式
     let lines = selectText.split('\n');
     let result = [];
     let inCallout = false;
@@ -502,14 +482,11 @@ export function setFormateraser(plugin: editingToolbarPlugin, editor: Editor) {
     for (let i = 0; i < lines.length; i++) {
       let line = lines[i];
 
-      // 检测 callout 开始
       let calloutMatch = line.match(/^(>+)\s*\[\!([\w\s]*)\]\s*(.*?)$/);
       if (calloutMatch && !foundFirstCallout) {
-        // 找到第一个 callout，记录其级别
         calloutLevel = calloutMatch[1].length;
         foundFirstCallout = true;
 
-        // 如果有标题，保留标题
         if (calloutMatch[3].trim()) {
           result.push(calloutMatch[3].trim());
         }
@@ -518,18 +495,13 @@ export function setFormateraser(plugin: editingToolbarPlugin, editor: Editor) {
         continue;
       }
 
-      // 处理 callout 内容
       if (inCallout) {
         let linePrefix = line.match(/^(>+)\s*/);
         if (linePrefix && linePrefix[1].length >= calloutLevel) {
-          // 这行是当前 callout 的一部分
-          // 去除与当前 callout 级别相同的前缀
           let newLine = line.replace(new RegExp(`^>{${calloutLevel}}\\s*`), '');
 
-          // 如果有更深层次的 >，保留它们
           result.push(newLine);
         } else {
-          // 这行不是当前 callout 的一部分
           inCallout = false;
           result.push(line);
         }
@@ -579,10 +551,8 @@ export function createFollowingbar(
     app.workspace.activeLeaf?.view?.containerEl?.ownerDocument ||
     (requireApiVersion("0.15.0") ? activeWindow.document : window.document);
 
-  // 获取或创建“following”样式的工具栏
   let editingToolbarModalBar = isExistoolbar(app, plugin, "following", targetDocument);
 
-  // 检查视图类型
   const view = app.workspace.getActiveViewOfType(ItemView);
   if (!ViewUtils.isAllowedViewType(view)) {
     if (editingToolbarModalBar) {
@@ -591,7 +561,6 @@ export function createFollowingbar(
     return;
   }
 
-  // 仅处理 following 样式（支持新开关 & 向后兼容）
   const followingEnabled =
     // New multi-toolbar toggle
     plugin.settings.enableFollowingToolbar ||
@@ -618,33 +587,25 @@ export function createFollowingbar(
   }
 
   if (isMarkdownView) {
-    // 处理 Markdown 视图
     if (ViewUtils.isSourceMode(view)) {
-      // 源码模式
       if (editingToolbarModalBar) {
-        // 当 forceShow 为 true 或有文本选中时显示工具栏
         const shouldShow = forceShow || editor.somethingSelected();
         editingToolbarModalBar.style.visibility = shouldShow ? "visible" : "hidden";
 
-        // 仅在工具栏可见时执行后续操作
         if (editingToolbarModalBar.style.visibility === "visible") {
-          // 设置工具栏样式
           editingToolbarModalBar.style.height = height + "px";
           editingToolbarModalBar.addClass("editingToolbarFlex");
           editingToolbarModalBar.removeClass("editingToolbarGrid");
 
-          // 计算工具栏位置
           positionToolbar(editingToolbarModalBar, editor);
         }
       }
     } else {
-      // 阅读模式隐藏工具栏
       if (editingToolbarModalBar) {
         editingToolbarModalBar.style.visibility = "hidden";
       }
     }
   } else {
-    // 处理其他视图类型（canvas等）
     if (editingToolbarModalBar) {
       editingToolbarModalBar.style.visibility = "visible";
       editingToolbarModalBar.style.height = height + "px";
@@ -654,7 +615,6 @@ export function createFollowingbar(
   }
 }
 
-// 新增：计算并设置工具栏位置的辅助函数
 function positionToolbar(toolbar: HTMLElement, editor: Editor) {
   const editorRect = editor.containerEl.getBoundingClientRect();
   const toolbarWidth = toolbar.offsetWidth;
@@ -663,21 +623,17 @@ function positionToolbar(toolbar: HTMLElement, editor: Editor) {
   const rightMargin = 12;
   const windowWidth = toolbar.ownerDocument.defaultView?.innerWidth ?? window.innerWidth;
 
-  // 获取选择的起点和终点位置
   const from = editor.getCursor("from");
   const to = editor.getCursor("to");
   //@ts-ignore
-  const coords = editor.coordsAtPos(from); //选择开始位置
+  const coords = editor.coordsAtPos(from);
 
-  // 计算左侧位置
   const sideDockWidth = activeDocument.getElementsByClassName("mod-left-split")[0]?.clientWidth ?? 0;
   const sideDockRibbonWidth = activeDocument.getElementsByClassName("side-dock-ribbon mod-left")[0]?.clientWidth ?? 0;
   const leftSideDockWidth = sideDockWidth + sideDockRibbonWidth;
 
-  // 计算水平位置，确保不超出屏幕右侧
   let leftPosition = coords.left - leftSideDockWidth - 28;
 
-  // 检查是否超出屏幕右侧
   const rightEdge = leftPosition + toolbarWidth;
   if (rightEdge > windowWidth - leftSideDockWidth) {
 
@@ -685,22 +641,17 @@ function positionToolbar(toolbar: HTMLElement, editor: Editor) {
 
   }
 
-  // 确保不会超出左侧
   leftPosition = Math.max(0, leftPosition);
 
-  // 计算顶部位置（保持原有逻辑）
   let topPosition = calculateTopPosition(editor, coords, editorRect, toolbarHeight);
 
-  // 确保不会超出左上角
   topPosition = Math.max(0, topPosition);
 
 
-  // 设置位置
   toolbar.style.left = `${leftPosition}px`;
   toolbar.style.top = `${topPosition}px`;
 }
 
-// 单独提取垂直位置计算逻辑
 function calculateTopPosition(
   editor: Editor,
   coords: { top: number; left: number; bottom: number; },
@@ -710,7 +661,7 @@ function calculateTopPosition(
   const from = editor.getCursor("from");
   const to = editor.getCursor("to");
   //@ts-ignore
-  const coordsTO = editor.coordsAtPos(to); //选择结束位置
+  const coordsTO = editor.coordsAtPos(to);
 
   const isSingleLineSelection = from.line === to.line;
   let topPosition = coords.top - toolbarHeight - 10;
@@ -719,7 +670,6 @@ function calculateTopPosition(
       topPosition = coordsTO.bottom + 10;
     }
   } else {
-    // 多行选择：使用原来的逻辑
     const isSelectionFromBottomToTop = editor.getCursor("head").ch == editor.getCursor("from").ch;
 
     if (isSelectionFromBottomToTop) {
@@ -727,7 +677,7 @@ function calculateTopPosition(
       if (topPosition <= editorRect.top) topPosition = editorRect.top + 2 * toolbarHeight;
     } else {
       const cursorCoords = getCoords(editor);
-      topPosition = cursorCoords.bottom + 10; //光标位置
+      topPosition = cursorCoords.bottom + 10;
       if (topPosition >= editorRect.bottom - toolbarHeight) topPosition = editorRect.bottom - 2 * toolbarHeight;
     }
   }
@@ -821,12 +771,10 @@ export function editingToolbarPopover(
 
   function createMenu() {
     function applyAestheticStyle(element: HTMLElement, style: string) {
-      // 移除所有美观风格类
       Object.values(aestheticStyleMap).forEach(className => {
         element.removeClass(className);
       });
 
-      // 添加当前选择的风格类
       const selectedClass = aestheticStyleMap[style] || aestheticStyleMap.default;
       element.addClass(selectedClass);
     }
@@ -836,10 +784,8 @@ export function editingToolbarPopover(
       let leafwidth = 0;
       let buttonWidth = resolvedIconSize + 8;
     
-      // 主工具栏容器
       let editingToolbar = createEl("div");
       if (editingToolbar) {
-        // 标记为编辑工具栏，并带上样式信息
         editingToolbar.addClass("editingToolbarModalBar");
         editingToolbar.setAttribute("data-toolbar-style", effectiveStyle);
     
@@ -856,7 +802,6 @@ export function editingToolbarPopover(
           }
           // If cMenuVisibility is false, visibility is already set to hidden above
         } else if (effectiveStyle === "following") {
-          // following 工具栏初始隐藏，待选中文本后定位并显示
           editingToolbar.style.visibility = "hidden";
         } else if (effectiveStyle === "fixed") {
           const Rowsize = resolvedIconSize || 18;
@@ -868,19 +813,15 @@ export function editingToolbarPopover(
           editingToolbar.setAttribute("style", baseStyle);
         }
       }
-      // 继续保留旧的 id，以兼容当前 CSS
       editingToolbar.setAttribute("id", "editingToolbarModalBar");
     
-      // 二级弹出菜单
       let PopoverMenu = createEl("div");
       PopoverMenu.addClass("editingToolbarpopover");
       PopoverMenu.addClass("editingToolbarTinyAesthetic");
     
-      // 标记为 Popover 工具栏，并带上样式信息
       PopoverMenu.addClass("editingToolbarPopoverBar");
       PopoverMenu.setAttribute("data-toolbar-style", effectiveStyle);
     
-      // 继续保留旧的 id，以兼容当前 CSS
       PopoverMenu.setAttribute("id", "editingToolbarPopoverBar");
     
       PopoverMenu.style.visibility = "hidden";
@@ -925,19 +866,15 @@ export function editingToolbarPopover(
       if (effectiveStyle === "top") {
         let currentleaf = app.workspace.activeLeaf.view.containerEl;
 
-        // 确定要插入工具栏的目标元素
         let targetDom: HTMLElement | null = null;
 
-        // 获取当前视图类型
         const viewType = app.workspace.activeLeaf.view.getViewType();
 
-        // 使用映射选择目标DOM
         const selector = viewTypeToSelectorMap[viewType];
         if (selector) {
           targetDom = currentleaf?.querySelector<HTMLElement>(selector);
         }
 
-        // 如果没有找到目标DOM，尝试查找view-content后的第一个div元素
         if (!targetDom) {
           const viewContent = currentleaf?.querySelector<HTMLElement>(".view-content");
           if (viewContent) {
@@ -946,13 +883,11 @@ export function editingToolbarPopover(
           }
         }
 
-        // 如果没有找到任何目标元素，则退出
         if (!targetDom) {
           console.log("Editing Toolbar: Failed to find target DOM element for toolbar insertion");
           return;
         }
 
-        // 只有在没有工具栏时才添加 PopoverMenu
         const canvasToolbarAnchor =
           viewType === "canvas"
             ? currentleaf?.querySelector<HTMLElement>(".view-content")
@@ -980,7 +915,6 @@ export function editingToolbarPopover(
          }
         }
 
-        // 获取宽度
         const targetWidth = targetDom?.clientWidth || targetDom?.offsetWidth || 0;
         const leafWidth = currentleaf?.clientWidth || currentleaf?.getBoundingClientRect().width || 0;
         const viewportWidth = targetDocument.defaultView?.innerWidth || 0;
@@ -1039,7 +973,7 @@ export function editingToolbarPopover(
 
       // Use per-style commands based on the toolbar we are rendering
       const currentCommands = plugin.getCurrentCommands(effectiveStyle);
-      const getLocalizedLabel = (label: string): string => t(label as any);
+      const getLocalizedLabel = (label: string): string => text(label as any);
       const getLocalizedTooltip = (label: string, hotkey: string): string => {
         const localizedLabel = getLocalizedLabel(label);
         return hotkey === "–" ? localizedLabel : `${localizedLabel}(${hotkey})`;
@@ -1051,9 +985,7 @@ export function editingToolbarPopover(
           let _btn: any;
 
           if (shouldMoveButtonToMoreMenu(btnwidth, buttonWidth, leafwidth, buttonWidth, effectiveStyle)) {
-            //说明已经溢出
             plugin.setIS_MORE_Button(true);
-            // globalThis.IS_MORE_Button = true; //需要添加更多按钮
             _btn = new ButtonComponent(resolveButtonHost(true));
           } else _btn = new ButtonComponent(editingToolbar);
 
@@ -1072,11 +1004,9 @@ export function editingToolbarPopover(
 
           btnwidth += buttonWidth + 2;
 
-          // 判断菜单类型：dropdown 或 submenu（默认）
           const menuType = item.menuType || 'submenu';
 
           if (menuType === 'dropdown') {
-            // 下拉菜单模式
             _btn.setClass("editingToolbarDropdownButton");
             let hotkey = getHotkey(app, item.id);
             tip = getLocalizedTooltip(item.name, hotkey);
@@ -1086,34 +1016,27 @@ export function editingToolbarPopover(
               const menu = new Menu();
 
               item.SubmenuCommands.forEach((subitem: { name: string; id: any; icon: string }) => {
-                // 检查是否是分割线
                 if (subitem.id === "editingToolbar-Divider-Line") {
-                  // 添加分割线和分类标题
                   menu.addSeparator();
-                  // 添加一个禁用的菜单项作为分类标题，使用翻译函数
                   menu.addItem((menuItem) => {
                     menuItem
-                      .setTitle(t(subitem.name as any))  // 使用翻译函数，添加类型断言
+                      .setTitle(text(subitem.name as any))
                       .setDisabled(true);
 
                     applyMenuItemIcon(menuItem, "");
                   });
                 } else {
-                  // 添加普通菜单项，也使用翻译函数
                   menu.addItem((menuItem) => {
-                    // 获取快捷键
                     const hotkey = getHotkey(app, subitem.id, false);
-                    const title = t(subitem.name as any);
+                    const title = text(subitem.name as any);
 
-                    // 如果有快捷键，添加到标题后面
                     const displayTitle = hotkey !== "–" ? `${title}` : title;
 
                     menuItem
-                      .setTitle(displayTitle)  // 使用翻译函数进行国际化
+                      .setTitle(displayTitle)
                       .onClick(() => {
                         app.commands.executeCommandById(subitem.id);
 
-                        // 检查命令执行后是否仍有文本选中
                         const editor = plugin.commandsManager.getActiveEditor();
                         const hasSelection = editor && editor.somethingSelected();
 
@@ -1130,7 +1053,6 @@ export function editingToolbarPopover(
 
                     applyMenuItemIcon(menuItem, subitem.icon);
 
-                    // 如果有快捷键，添加到 DOM 元素
                     if (hotkey !== "—") {
                       const hotkeyEl = menuItem.dom.createSpan({ cls: "menu-item-hotkey" });
                       hotkeyEl.setText(hotkey);
@@ -1139,14 +1061,11 @@ export function editingToolbarPopover(
                 }
               });
 
-              // 给菜单添加自定义类
               menu.dom.addClass("editing-toolbar-dropdown-menu");
 
-              // 在按钮下方显示菜单
               menu.showAtMouseEvent(evt);
             });
           } else {
-            // 原有的子按钮展开模式
             let submenu = createDiv("subitem");
             if (submenu) {
               item.SubmenuCommands.forEach(
@@ -1160,7 +1079,6 @@ export function editingToolbarPopover(
 
                       app.commands.executeCommandById(subitem.id);
 
-                      // 检查命令执行后是否仍有文本选中
                       const editor = plugin.commandsManager.getActiveEditor();
                       const hasSelection = editor && editor.somethingSelected();
 
@@ -1199,7 +1117,7 @@ export function editingToolbarPopover(
             let button2 = new ButtonComponent(editingToolbar);
             button2
               .setClass("editingToolbarCommandsubItem-font-color")
-              .setTooltip(t("Font Colors"))
+              .setTooltip(text("Font Colors"))
               .onClick((event: MouseEvent) => {
                 const target = event.target as HTMLElement | null;
                 if (target?.closest(".x-color-picker-wrapper") || target?.closest(".subitem")) {
@@ -1208,7 +1126,6 @@ export function editingToolbarPopover(
 
                 app.commands.executeCommandById(item.id);
 
-                // 检查命令执行后是否仍有文本选中
                 const editor = plugin.commandsManager.getActiveEditor();
                 const hasSelection = editor && editor.somethingSelected();
   
@@ -1247,13 +1164,13 @@ export function editingToolbarPopover(
               let button3 = new ButtonComponent(el);
               button3
                 .setIcon("paintbrush")
-                .setTooltip(t("Format Brush"))
+                .setTooltip(text("Format Brush"))
                 .onClick(() => {
                   quiteFormatbrushes(plugin);
                   plugin.setEN_FontColor_Format_Brush(true);
                   //  globalThis.EN_FontColor_Format_Brush = true;
                   plugin.Temp_Notice = new Notice(
-                    t("Font-Color formatting brush ON!"),
+                    text("Font-Color formatting brush ON!"),
                     0
                   );
 
@@ -1261,19 +1178,16 @@ export function editingToolbarPopover(
               let button4 = new ButtonComponent(el);
               button4
                 .setIcon("palette")
-                .setTooltip(t("Custom Font Color"))
+                .setTooltip(text("Custom Font Color"))
                 .onClick(() => {
                   app.setting.open();
                   app.setting.openTabById("editing-toolbar");
                   setTimeout(() => {
-                    // 获取标签页容器
                     const tabsContainer = app.setting.activeTab.containerEl.querySelector(".editing-toolbar-tabs");
                     if (tabsContainer) {
-                      // 获取第二个标签页按钮(appearance)并触发点击
                       const appearanceTab = tabsContainer.children[0] as HTMLElement;
                       appearanceTab?.click();
 
-                      // 等待标签页切换完成后定位到颜色设置
                       setTimeout(() => {
                         let settingEI = app.setting.activeTab.containerEl.querySelector(".custom_font");
                         if (settingEI) { settingEI.addClass?.("toolbar-cta"); }
@@ -1287,7 +1201,7 @@ export function editingToolbarPopover(
             let button2 = new ButtonComponent(editingToolbar);
             button2
               .setClass("editingToolbarCommandsubItem-font-color")
-              .setTooltip(t("Background Color"))
+              .setTooltip(text("Background Color"))
               .onClick((event: MouseEvent) => {
                 const target = event.target as HTMLElement | null;
                 if (target?.closest(".x-color-picker-wrapper") || target?.closest(".subitem")) {
@@ -1296,7 +1210,6 @@ export function editingToolbarPopover(
 
                 app.commands.executeCommandById(item.id);
 
-                // 检查命令执行后是否仍有文本选中
                 const editor = plugin.commandsManager.getActiveEditor();
                 const hasSelection = editor && editor.somethingSelected();
   
@@ -1334,13 +1247,13 @@ export function editingToolbarPopover(
               let button3 = new ButtonComponent(el);
               button3
                 .setIcon("paintbrush")
-                .setTooltip(t("Format Brush"))
+                .setTooltip(text("Format Brush"))
                 .onClick(() => {
                   quiteFormatbrushes(plugin);
                   plugin.setEN_BG_Format_Brush(true);
                   //  globalplugin.EN_BG_Format_Brush = true;
                   plugin.Temp_Notice = new Notice(
-                    t("Font-Color formatting brush ON!"),
+                    text("Font-Color formatting brush ON!"),
                     0
                   );
 
@@ -1348,19 +1261,16 @@ export function editingToolbarPopover(
               let button4 = new ButtonComponent(el);
               button4
                 .setIcon("palette")
-                .setTooltip(t("Custom Backgroud Color"))
+                .setTooltip(text("Custom Backgroud Color"))
                 .onClick(() => {
                   app.setting.open();
                   app.setting.openTabById("editing-toolbar");
                   setTimeout(() => {
-                    // 获取标签页容器
                     const tabsContainer = app.setting.activeTab.containerEl.querySelector(".editing-toolbar-tabs");
                     if (tabsContainer) {
-                      // 获取第二个标签页按钮(appearance)并触发点击
                       const appearanceTab = tabsContainer.children[0] as HTMLElement;
                       appearanceTab?.click();
 
-                      // 等待标签页切换完成后定位到颜色设置
                       setTimeout(() => {
                         let settingEI = app.setting.activeTab.containerEl.querySelector(".custom_bg");
                         if (settingEI) { settingEI.addClass?.("toolbar-cta"); }
@@ -1374,9 +1284,7 @@ export function editingToolbarPopover(
           } else {
             let button;
             if (shouldMoveButtonToMoreMenu(btnwidth, buttonWidth, leafwidth, buttonWidth, effectiveStyle)) {
-              //说明已经溢出
               plugin.setIS_MORE_Button(true);
-              //globalpluginIS_MORE_Button = true; //需要添加更多按钮
               button = new ButtonComponent(resolveButtonHost(true));
             } else button = new ButtonComponent(editingToolbar);
             let hotkey = getHotkey(app, item.id);
@@ -1385,7 +1293,6 @@ export function editingToolbarPopover(
             button.setTooltip(tip).onClick(() => {
               app.commands.executeCommandById(item.id);
 
-              // 检查命令执行后是否仍有文本选中
               const editor = plugin.commandsManager.getActiveEditor();
               const hasSelection = editor && editor.somethingSelected();
 
@@ -1440,11 +1347,8 @@ export function editingToolbarPopover(
     if (!plugin.isLoadMobile()) return;
     const view = app.workspace.getActiveViewOfType(ItemView);
     if (ViewUtils.isAllowedViewType(view)) {
-      // 性能优化：检查是否已存在工具栏，如果存在则复用
-      // 注意：Top 工具栏每个 leaf 都有独立的，不能复用
       const existingToolbar = isExistoolbar(app, plugin, effectiveStyle, targetDocument);
       if (existingToolbar && effectiveStyle !== "top") {
-        // 工具栏已存在，只需要更新可见性和样式
         // Check cMenuVisibility first - if disabled, hide all toolbars with display: none
         if (!settings.cMenuVisibility) {
           existingToolbar.style.display = "none";
@@ -1456,7 +1360,6 @@ export function editingToolbarPopover(
           existingToolbar.style.display = ""; // Reset display to allow visibility to work
         }
 
-        // 更新 CSS 变量（可能用户更改了设置）
         if (resolvedBgColor) {
           existingToolbar.style.setProperty(
             "--editing-toolbar-background-color",
@@ -1476,17 +1379,15 @@ export function editingToolbarPopover(
           );
         }
 
-        return; // 复用现有工具栏，不重新创建
+        return;
       }
 
-      // 工具栏不存在，创建新的
   
       generateMenu();
      
 
   
 
-      // 缓存新创建的工具栏（但 top 工具栏不缓存，因为每个 leaf 都有独立的工具栏）
       // Note: cMenuVisibility is already checked at function start, so toolbars are only created when visible
       if (effectiveStyle !== "top") {
         const newToolbar = isExistoolbar(app, plugin, effectiveStyle, targetDocument);
@@ -1510,11 +1411,9 @@ export function editingToolbarPopover(
 function setsvgColor(fontcolor: string, bgcolor: string) {
   requireApiVersion("0.15.0") ? activeDocument = activeWindow.document : activeDocument = window.document;
 
-  // 性能优化：缓存选择器，减少重复查询
   const fontColorIcons = activeDocument.querySelectorAll("#change-font-color-icon");
   const bgColorIcons = activeDocument.querySelectorAll("#change-background-color-icon");
 
-  // 批量更新样式
   if (fontColorIcons.length > 0) {
     fontColorIcons.forEach(element => {
       (element as HTMLElement).style.fill = fontcolor;

@@ -3,7 +3,6 @@ import { syntaxTree } from '@codemirror/language';
 export async function wait(delay: number) {
   return new Promise((resolve) => setTimeout(resolve, delay));
 }
-// GenNonDuplicateID(3) 将生成类似 ix49wl2978w 的ID
 export function GenNonDuplicateID(randomLength: number) {
   let idStr = Date.now().toString(36)
   idStr += Math.random().toString(36).substr(3, randomLength)
@@ -286,7 +285,6 @@ export function setFontcolor(color: string, editor?: Editor) {
                       (sel.anchor.line === sel.head.line && sel.anchor.ch < sel.head.ch);
 
     if (isForward) {
-      // 从前到后选择
       return {
         anchor: {
           line: sel.anchor.line,
@@ -298,7 +296,6 @@ export function setFontcolor(color: string, editor?: Editor) {
         }
       };
     } else {
-      // 从后到前选择
       return {
         anchor: {
           line: sel.anchor.line,
@@ -334,7 +331,6 @@ export function setBackgroundcolor(color: string, editor?: Editor) {
 
   // Function to check if the text is already wrapped in the same background color
   const isAlreadyInSameColor = (text: string, targetColor: string): boolean => {
-    // 转义正则表达式中的特殊字符，特别是对于rgba格式
     const escapedColor = targetColor.replace(/([()[{*+.$^\\|?])/g, '\\$1');
     const cleanColorRegex = new RegExp(`^<mark\\s+style=["']?background:${escapedColor}["']?>([\s\S]+)<\\/mark>$`);
     return cleanColorRegex.test(text.trim());
@@ -348,10 +344,8 @@ export function setBackgroundcolor(color: string, editor?: Editor) {
   let finalText;
   
   if (hasColorTag) {
-    // 如果已经有背景色标签，只替换颜色值
     finalText = selectText.replace(/(background:)(?:#[0-9a-fA-F]{3,6}|rgba?\([^)]+\))/gi, `$1${color}`);
   } else {
-    // 如果没有背景色标签，为每行添加背景色
     finalText = selectText.split('\n').map(line => 
       line.trim() ? `<mark style="background:${color}">${line}</mark>` : line
     ).join('\n');
@@ -365,7 +359,6 @@ export function setBackgroundcolor(color: string, editor?: Editor) {
                       (sel.anchor.line === sel.head.line && sel.anchor.ch < sel.head.ch);
 
     if (isForward) {
-      // 从前到后选择
       return {
         anchor: {
           line: sel.anchor.line,
@@ -377,7 +370,6 @@ export function setBackgroundcolor(color: string, editor?: Editor) {
         }
       };
     } else {
-      // 从后到前选择
       return {
         anchor: {
           line: sel.anchor.line,
@@ -397,7 +389,6 @@ export function setBackgroundcolor(color: string, editor?: Editor) {
   // Restore the original selection
   editor.setSelections(adjustedSelections);
 }
-// 重编号选中的行
 export function renumberSelection(editor: Editor) {
   const selection = editor.getSelection();
   if (!selection) {
@@ -410,11 +401,9 @@ export function renumberSelection(editor: Editor) {
       const isListStart = prevLineNum < 0 || !/^\s*\d+\.\s/.test(prevLine) || (prevLine.match(/^\s*/)?.[0].length || 0) < currentIndent;
 
       if (isListStart) {
-        // 光标在列表首行，处理整个连续列表
         const { startLine, endLine } = getFullListRange(editor, cursor.line);
         renumberLines(editor, startLine, endLine);
       } else {
-        // 光标在列表中间行，处理从当前行开始的列表
         const { startLine, endLine } = getListRangeForCursor(editor, cursor.line);
         renumberLines(editor, startLine, endLine);
       }
@@ -433,7 +422,6 @@ function getSelectionLines(editor: Editor): { lines: string[]; startLine: number
 }
 
 function processSelectionWithContext(lines: string[], startLine: number, editor: Editor) {
-  // 检查是否选中的行中有列表项
   let hasListItems = false;
   for (const line of lines) {
     if (/^\s*\d+\.\s/.test(line.trim())) {
@@ -445,29 +433,25 @@ function processSelectionWithContext(lines: string[], startLine: number, editor:
     return;
   };
 
-  // 获取 CodeMirror 视图和语法树
   const view = editor.cm;
   if (!view) return;
 
   const state = view.state;
   const tree = syntaxTree(state);
 
-  // 计算选中范围的字符位置
   const docStartPos = editor.posToOffset({ line: startLine, ch: 0 });
   let prevListEndPos = -1;
 
-  // 遍历语法树，找到上一个有序列表的结束位置
   tree.iterate({
     from: 0,
     to: docStartPos,
     enter: (node) => {
       if (node.name === 'OrderedList') {
-        prevListEndPos = node.to; // 记录最后一个有序列表的结束位置
+        prevListEndPos = node.to;
       }
     },
   });
 
-  // 在上一个列表后插入空行（如果需要）
   if (prevListEndPos >= 0) {
     const prevListEndLine = editor.offsetToPos(prevListEndPos).line;
     const nextLineAfterPrevList = prevListEndLine + 1;
@@ -477,11 +461,10 @@ function processSelectionWithContext(lines: string[], startLine: number, editor:
         { line: nextLineAfterPrevList, ch: 0 },
         { line: nextLineAfterPrevList, ch: 0 }
       );
-      startLine++; // 调整选中范围的起始行
+      startLine++;
     }
   }
 
-  // 检查选中列表是否已经正确编号
   let isAlreadyNumberedCorrectly = true;
   let expectedNumbers: number[] = [];
   let prevIndentLevel = -1;
@@ -506,7 +489,6 @@ function processSelectionWithContext(lines: string[], startLine: number, editor:
     }
   }
 
-  // 处理选中部分
   let result: string[] = [];
   const prevLineNum = startLine - 1;
   const prevLine = prevLineNum >= 0 ? editor.getLine(prevLineNum).trim() : '';
@@ -557,12 +539,11 @@ function getListRangeForCursor(editor: Editor, currentLine: number): { startLine
 
   const currentIndent = editor.getLine(currentLine).match(/^\s*/)?.[0].length || 0;
 
-  // 向下查找同级列表或子列表
   while (endLine < editor.lineCount() - 1) {
     const nextLine = editor.getLine(endLine + 1);
     const nextIndent = nextLine.match(/^\s*/)?.[0].length || 0;
     if (!/^\s*\d+\.\s/.test(nextLine.trim()) || nextIndent < currentIndent) {
-      break; // 遇到非列表行或上级列表，停止
+      break;
     }
     endLine++;
   }
@@ -574,20 +555,18 @@ function getFullListRange(editor: Editor, currentLine: number): { startLine: num
   let startLine = currentLine;
   let endLine = currentLine;
 
-  // 向上查找顶级列表起点
   while (startLine > 0) {
     const prevLine = editor.getLine(startLine - 1);
     if (!/^\s*\d+\.\s/.test(prevLine.trim())) {
-      break; // 遇到非列表行，停止
+      break;
     }
     startLine--;
   }
 
-  // 向下查找顶级列表终点
   while (endLine < editor.lineCount() - 1) {
     const nextLine = editor.getLine(endLine + 1);
     if (!/^\s*\d+\.\s/.test(nextLine.trim())) {
-      break; // 遇到非列表行，停止
+      break;
     }
     endLine++;
   }
@@ -603,4 +582,3 @@ function renumberLines(editor: Editor, startLine: number, endLine: number) {
   processSelectionWithContext(lines, startLine, editor);
 }
 
-// 重编号选中的行结束

@@ -1,8 +1,7 @@
 import { App, Modal, Setting, TFile, parseLinktext } from "obsidian";
+import { text } from "src/translations/helper";
 import { compactContent } from "src/util/contextCompactor";
-import { t } from "src/translations/helper";
 
-// 定义输入结果的接口
 export interface ITextInputResult {
     [key: string]: string;
 }
@@ -112,7 +111,6 @@ export class TextInputModal extends Modal {
         this.onSubmit = onSubmit;
         this.options = options;
 
-        // 初始化默认值
         fields.forEach(field => {
             this.result[field.key] = field.defaultValue || "";
         });
@@ -134,7 +132,6 @@ export class TextInputModal extends Modal {
 
         contentEl.createEl("h2", { text: this.title });
 
-        // 为每个字段创建输入框
         this.fields.forEach(field => {
             if (field.hideLabel) {
                 this.renderFullWidthField(contentEl, field);
@@ -190,12 +187,10 @@ export class TextInputModal extends Modal {
                     ? text.inputEl.parentElement
                     : setting.controlEl);
 
-                // 第一个输入框自动聚焦
                 if (field === this.fields[0]) {
                     setTimeout(() => text.inputEl.focus(), 10);
                 }
 
-                // 支持回车提交
                 text.inputEl.addEventListener("keydown", (e) => {
                     if (this.handleLinkedNoteKeydown(field.key, e)) {
                         return;
@@ -242,7 +237,7 @@ export class TextInputModal extends Modal {
             this.linkedContextWrapEl.style.display = "none";
             this.linkedContextWrapEl.createDiv({
                 cls: "editing-toolbar-text-input-context-label",
-                text: this.options.linkedNotes?.contextLabel || t("Referenced notes"),
+                text: this.options.linkedNotes?.contextLabel || text("Referenced notes"),
             });
             this.linkedContextItemsEl = this.linkedContextWrapEl.createDiv();
             void this.syncLinkedNoteContextsForEnabledFields();
@@ -252,7 +247,7 @@ export class TextInputModal extends Modal {
             const suggestionsWrap = contentEl.createDiv({ cls: "editing-toolbar-text-input-suggestions" });
             suggestionsWrap.createDiv({
                 cls: "editing-toolbar-text-input-suggestions-label",
-                text: t("Suggestions"),
+                text: text("Suggestions"),
             });
 
             const chipsWrap = suggestionsWrap.createDiv({ cls: "editing-toolbar-text-input-suggestions-chips" });
@@ -271,7 +266,7 @@ export class TextInputModal extends Modal {
 
         const footerHints = [
             this.options.linkedNotes?.enabled
-                ? (this.options.linkedNotes.hint || t("Type [[]] to reference document content."))
+                ? (this.options.linkedNotes.hint || text("Type [[]] to reference document content."))
                 : "",
             this.options.footerHint || "",
         ].filter((hint) => hint.trim().length > 0);
@@ -281,16 +276,15 @@ export class TextInputModal extends Modal {
             footerHintEl.textContent = footerHints.join(" ");
         }
 
-        // 添加按钮
         new Setting(contentEl)
             .addButton(btn => btn
-                .setButtonText(t("Confirm"))
+                .setButtonText(text("Confirm"))
                 .setCta()
                 .onClick(() => {
                     void this.submit();
                 }))
             .addButton(btn => btn
-                .setButtonText(t("Cancel"))
+                .setButtonText(text("Cancel"))
                 .onClick(() => {
                     this.close();
                 }));

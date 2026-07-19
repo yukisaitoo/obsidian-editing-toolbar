@@ -1,12 +1,30 @@
 {
   "permissions": {
     "allow": [
-      "Bash(npm run build)",
+      "Read(./**)",
+      "Bash(echo:*)",
+      "Bash(ls:*)",
+      "Bash(pwd)",
       "Bash(cat:*)",
-      "Bash(npx tsc:*)",
+      "Bash(head:*)",
+      "Bash(tail:*)",
+      "Bash(wc:*)",
+      "Bash(grep:*)",
+      "Bash(find:*)",
       "Bash(git status)",
       "Bash(git diff:*)",
-      "Read(./**)"
+      "Bash(git log:*)",
+      "Bash(git show:*)",
+      "Bash(npm run build)",
+      "Bash(pnpm run build)",
+      "Bash(npx tsc:*)"
+    ],
+    "deny": [
+      "Bash(rm:*)",
+      "Bash(git push:*)",
+      "Bash(git reset:*)",
+      "Bash(curl:*)",
+      "Bash(wget:*)"
     ]
   }
 }
