@@ -2,13 +2,13 @@
  * Context compaction utilities for managing large file content.
  */
 
-export interface CompactionConfig {
+interface CompactionConfig {
   previewCharsPerSection: number;
   maxSections: number;
   verbatimThreshold: number;
 }
 
-export const DEFAULT_COMPACTION_CONFIG: CompactionConfig = {
+const DEFAULT_COMPACTION_CONFIG: CompactionConfig = {
   previewCharsPerSection: 2000,
   maxSections: 50,
   verbatimThreshold: 50000,

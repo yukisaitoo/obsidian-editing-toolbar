@@ -2,7 +2,7 @@ import { App, Modal, Setting, TFile, parseLinktext } from "obsidian";
 import { text } from "src/translations/helper";
 import { compactContent } from "src/util/contextCompactor";
 
-export interface ITextInputResult {
+interface ITextInputResult {
     [key: string]: string;
 }
 
@@ -21,7 +21,7 @@ export interface IExtractBetweenResult {
     end: string;
 }
 
-export interface ITextInputField {
+interface ITextInputField {
     key: string;
     label: string;
     placeholder?: string;
@@ -30,20 +30,20 @@ export interface ITextInputField {
     hideLabel?: boolean;
 }
 
-export interface ITextInputSuggestion {
+interface ITextInputSuggestion {
     label: string;
     value: string;
     fieldKey?: string;
     replace?: boolean;
 }
 
-export interface ITextInputContextItem {
+interface ITextInputContextItem {
     label: string;
     preview: string;
     title?: string;
 }
 
-export interface ITextInputLinkedContextItem {
+interface ITextInputLinkedContextItem {
     fieldKey: string;
     reference: string;
     label: string;
@@ -53,20 +53,20 @@ export interface ITextInputLinkedContextItem {
     filePath: string;
 }
 
-export interface ITextInputSubmitMeta {
+interface ITextInputSubmitMeta {
     cleanedResult: ITextInputResult;
     linkedContextItems: ITextInputLinkedContextItem[];
     linkedContextByField: Record<string, ITextInputLinkedContextItem[]>;
 }
 
-export interface ITextInputLinkedNotesOptions {
+interface ITextInputLinkedNotesOptions {
     enabled?: boolean;
     fieldKeys?: string[];
     hint?: string;
     contextLabel?: string;
 }
 
-export interface ITextInputModalOptions {
+interface ITextInputModalOptions {
     modalClassName?: string;
     suggestions?: ITextInputSuggestion[];
     contextLabel?: string;

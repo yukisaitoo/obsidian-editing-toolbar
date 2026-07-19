@@ -14,6 +14,7 @@ import type { AppearanceByStyle, StyleAppearanceSettings, ToolbarStyleKey } from
 import { AESTHETIC_STYLES, APPEND_METHODS, POSITION_STYLES } from "src/settings/settingsData";
 import { text } from 'src/translations/helper';
 import { GenNonDuplicateID } from "src/util/util";
+
 interface SubmenuCommand {
   id: string;
   name: string;
@@ -55,7 +56,7 @@ const SETTING_TABS: SettingTab[] = [
   },
 ];
 
-export function getPickrSettings(opts: {
+function getPickrSettings(opts: {
   isView: boolean;
   el: HTMLElement;
   containerEl: HTMLElement;
@@ -88,7 +89,7 @@ export function getPickrSettings(opts: {
     },
   };
 }
-export function getComandindex(item: any, arr: any[]): number {
+function getComandindex(item: any, arr: any[]): number {
   if (!arr || !Array.isArray(arr)) {
     return -1;
   }

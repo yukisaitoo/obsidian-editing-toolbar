@@ -1,8 +1,5 @@
 import { Editor,Command,MarkdownView } from "obsidian";
 import { syntaxTree } from '@codemirror/language';
-export async function wait(delay: number) {
-  return new Promise((resolve) => setTimeout(resolve, delay));
-}
 export function GenNonDuplicateID(randomLength: number) {
   let idStr = Date.now().toString(36)
   idStr += Math.random().toString(36).substr(3, randomLength)

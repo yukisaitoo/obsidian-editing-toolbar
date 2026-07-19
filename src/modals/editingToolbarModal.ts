@@ -23,7 +23,7 @@ const viewTypeToSelectorMap: { [key: string]: string } = {
   meld_encrypted_view: ".markdown-source-view",
 };
 
-export function getRootSplits(app: App): WorkspaceParentExt[] {
+function getRootSplits(app: App): WorkspaceParentExt[] {
 
   const rootSplits: WorkspaceParentExt[] = [];
 
@@ -189,7 +189,7 @@ function getHotkey(app: App, cmdid: string, highlight = false) {
 
 
 
-export const getCoords = (editor: any) => {
+const getCoords = (editor: any) => {
   let cursorFrom = editor.getCursor("head");
   if (editor.getCursor("head").ch !== editor.getCursor("from").ch) cursorFrom.ch = Math.max(0, cursorFrom.ch - 1);
 
@@ -285,7 +285,7 @@ export function createDiv(selector: string) {
 }
 
 
-export function createTablecell(app: App, plugin: editingToolbarPlugin, el: string, root?: ParentNode) {
+function createTablecell(app: App, plugin: editingToolbarPlugin, el: string, root?: ParentNode) {
   requireApiVersion("0.15.0") ? activeDocument = activeWindow.document : activeDocument = window.document;
 
   const container = root || (isExistoolbar(app, plugin) as HTMLElement | null);
@@ -335,7 +335,7 @@ export function createTablecell(app: App, plugin: editingToolbarPlugin, el: stri
 }
 
 
-export const setcolorHex = function (color: string) {
+const setcolorHex = function (color: string) {
   let that = color;
 
   let reg = /^#([0-9a-fA-f]{3}|[0-9a-fA-f]{6})$/;
@@ -372,7 +372,7 @@ export const setcolorHex = function (color: string) {
   }
 };
 
-export function createMoremenu(app: App, plugin: editingToolbarPlugin, selector: HTMLDivElement) {
+function createMoremenu(app: App, plugin: editingToolbarPlugin, selector: HTMLDivElement) {
   const view = app.workspace.getActiveViewOfType(ItemView);
   if (!ViewUtils.isAllowedViewType(view)) return;
 

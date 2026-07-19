@@ -5,7 +5,7 @@ import { text } from "src/translations/helper";
 import { setBottomValue, setHorizontalValue } from "src/util/statusBarConstants";
 import { findmenuID } from "src/util/util";
 
-export type IconSelectCallback = (iconId: string) => void;
+type IconSelectCallback = (iconId: string) => void;
 
 export class ChooseFromIconList extends FuzzySuggestModal<string> {
   plugin: editingToolbarPlugin;
@@ -112,7 +112,7 @@ export class ChooseFromIconList extends FuzzySuggestModal<string> {
   }
 }
 
-export class CustomIcon extends Modal {
+class CustomIcon extends Modal {
   plugin: editingToolbarPlugin;
   item: Command;
   issub: boolean;

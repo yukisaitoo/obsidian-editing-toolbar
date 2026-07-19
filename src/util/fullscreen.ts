@@ -1,5 +1,7 @@
 import { App, MarkdownView, requireApiVersion } from "obsidian";
+
 let activeDocument: Document;
+
 export function workplacefullscreenMode(app: App) {
     requireApiVersion("0.15.0") ? activeDocument = activeWindow.document : activeDocument = window.document;
     let currentleaf = activeDocument;
