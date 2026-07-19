@@ -446,7 +446,7 @@ function processSelectionWithContext(lines: string[], startLine: number, editor:
   };
 
   // 获取 CodeMirror 视图和语法树
-  const view = (app.workspace.getActiveViewOfType(MarkdownView) as MarkdownView)?.editor.cm;
+  const view = editor.cm;
   if (!view) return;
 
   const state = view.state;

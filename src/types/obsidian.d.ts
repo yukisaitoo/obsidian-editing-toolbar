@@ -1,7 +1,5 @@
 import "obsidian";
 
-
-
 declare module "obsidian" {
 	export interface App {
 		foldManager: FoldManager

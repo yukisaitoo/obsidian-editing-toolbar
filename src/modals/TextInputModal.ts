@@ -1,5 +1,5 @@
 import { App, Modal, Setting, TFile, parseLinktext } from "obsidian";
-import { compactContent } from "src/ai/contextCompactor";
+import { compactContent } from "src/util/contextCompactor";
 import { t } from "src/translations/helper";
 
 // 定义输入结果的接口

@@ -12,9 +12,6 @@ import { ViewUtils } from 'src/util/viewUtils';
 import { setBottomValue, setHorizontalValue } from "src/util/statusBarConstants";
 import { Editor } from "obsidian";
 import { setFontcolor, setBackgroundcolor } from "src/util/util";
-import { AI_TOOLBAR_COMMAND_ID } from "src/ai/toolbarCommand";
-import { AI_TOOLBOX_ACTIONS } from "src/ai/toolboxActions";
-import { DEFAULT_REWRITE_ACTIONS, type RewriteInstruction } from "src/ai/types";
 
 let activeDocument: Document;
 
@@ -29,7 +26,7 @@ const viewTypeToSelectorMap: { [key: string]: string } = {
   meld_encrypted_view: ".markdown-source-view",
 };
 
-export function getRootSplits(): WorkspaceParentExt[] {
+export function getRootSplits(app: App): WorkspaceParentExt[] {
 
   const rootSplits: WorkspaceParentExt[] = [];
 
@@ -78,12 +75,12 @@ export function resetToolbar(plugin?: editingToolbarPlugin) {
   }
 }
 
-export function selfDestruct(plugin?: editingToolbarPlugin) {
+export function selfDestruct(plugin: editingToolbarPlugin) {
   requireApiVersion("0.15.0")
     ? (activeDocument = activeWindow.document)
     : (activeDocument = window.document);
 
-  const rootSplits = getRootSplits();
+  const rootSplits = getRootSplits(plugin.app);
 
   const clearToolbar = (root: ParentNode) => {
     const toolbars = root.querySelectorAll(".editingToolbarModalBar");
@@ -273,121 +270,6 @@ function syncToolbarVisibilityAfterAction(
   }
 }
 
-function positionAISubmenu(buttonEl: HTMLElement, submenuEl: HTMLElement) {
-  const viewportWidth = window.innerWidth || document.documentElement.clientWidth || 0;
-  if (!viewportWidth) return;
-
-  const margin = 12;
-  const buttonRect = buttonEl.getBoundingClientRect();
-  const submenuWidth = Math.min(submenuEl.offsetWidth || 280, viewportWidth - margin * 2);
-  const idealLeft = buttonRect.left + buttonRect.width / 2 - submenuWidth / 2;
-  const clampedLeft = Math.max(margin, Math.min(idealLeft, viewportWidth - submenuWidth - margin));
-  const relativeLeft = clampedLeft - buttonRect.left;
-
-  submenuEl.style.left = `${relativeLeft}px`;
-  submenuEl.style.right = "auto";
-}
-
-const AI_REWRITE_ICON_MAP: Record<RewriteInstruction, string> = {
-  improve: "lucide-wand-2",
-  "fix-grammar": "lucide-spell-check-2",
-  "make-shorter": "lucide-minimize-2",
-  "make-longer": "lucide-maximize-2",
-  simplify: "lucide-align-left",
-  professional: "lucide-briefcase",
-  casual: "lucide-message-circle-more",
-  "translate-en": "lucide-languages",
-  "translate-zh": "lucide-languages",
-  "translate-ja": "lucide-languages",
-  "translate-de": "lucide-languages",
-  "translate-fr": "lucide-languages",
-  "translate-es": "lucide-languages",
-  explain: "lucide-info",
-  summarize: "lucide-file-text",
-  continue: "lucide-pencil-line",
-  custom: "lucide-message-square",
-};
-
-const AI_BUTTON_LABEL_KEYS: Record<string, string> = {
-  "editing-toolbar:ai-inline-completion": "AI Complete",
-  "editing-toolbar:ai-canvas-expand": "AI Canvas Expand",
-  "editing-toolbar:ai-canvas-global-prompt": "AI Canvas Prompt",
-  "editing-toolbar:ai-rewrite-improve": "AI Rewrite",
-  "editing-toolbar:ai-rewrite-continue": "AI Continue",
-  "editing-toolbar:ai-rewrite-custom": "AI Custom",
-  "editing-toolbar:ai-tools:improve": "AI Rewrite",
-  "editing-toolbar:ai-tools:fix-grammar": "AI Fix",
-  "editing-toolbar:ai-tools:make-shorter": "AI Shorten",
-  "editing-toolbar:ai-tools:make-longer": "AI Expand",
-  "editing-toolbar:ai-tools:simplify": "AI Simplify",
-  "editing-toolbar:ai-tools:professional": "AI Professional",
-  "editing-toolbar:ai-tools:casual": "AI Casual",
-  "editing-toolbar:ai-tools:translate-en": "AI Translate",
-  "editing-toolbar:ai-tools:translate-zh": "AI Translate",
-  "editing-toolbar:ai-tools:translate-ja": "AI Translate",
-  "editing-toolbar:ai-tools:translate-de": "AI Translate",
-  "editing-toolbar:ai-tools:translate-fr": "AI Translate",
-  "editing-toolbar:ai-tools:translate-es": "AI Translate",
-  "editing-toolbar:ai-tools:explain": "AI Explain",
-  "editing-toolbar:ai-tools:summarize": "AI Summarize",
-  "editing-toolbar:ai-tools:continue": "AI Continue",
-  "editing-toolbar:ai-tools:custom": "AI Custom",
-  "editing-toolbar:ai-toolbox:list": "AI List",
-  "editing-toolbar:ai-toolbox:table": "AI Table",
-  "editing-toolbar:ai-toolbox:frontmatter": "AI Frontmatter",
-  "editing-toolbar:ai-toolbox:canvas": "AI Canvas",
-};
-
-const CANVAS_ONLY_AI_ACTION_IDS = new Set<string>([
-  "editing-toolbar:ai-canvas-expand",
-  "editing-toolbar:ai-canvas-global-prompt",
-]);
-
-function setLastAIAction(plugin: editingToolbarPlugin, commandId: string) {
-  plugin.lastExecutedCommand = commandId;
-  plugin.lastExecutedCommandName = AI_BUTTON_LABEL_KEYS[commandId]
-    ? t(AI_BUTTON_LABEL_KEYS[commandId] as any)
-    : t("AI");
-}
-
-function isCanvasOnlyAIAction(commandId?: string | null): boolean {
-  return !!commandId && CANVAS_ONLY_AI_ACTION_IDS.has(commandId);
-}
-
-function getAIToolbarButtonLabel(plugin: editingToolbarPlugin): string {
-  const commandId = plugin.lastExecutedCommand;
-  const isCanvasScene = plugin.app.workspace.activeLeaf?.view?.getViewType?.() === "canvas";
-  const activeEditor = plugin.commandsManager?.getActiveEditor?.();
-
-  if ((!commandId || isCanvasOnlyAIAction(commandId)) && isCanvasScene && !activeEditor) {
-    return t("AI Canvas Prompt");
-  }
-
-  if (commandId && AI_BUTTON_LABEL_KEYS[commandId] && (!isCanvasOnlyAIAction(commandId) || isCanvasScene)) {
-    return t(AI_BUTTON_LABEL_KEYS[commandId] as any);
-  }
-
-  if (commandId?.startsWith("editing-toolbar:ai") && plugin.lastExecutedCommandName && (!isCanvasOnlyAIAction(commandId) || isCanvasScene)) {
-    return plugin.lastExecutedCommandName;
-  }
-
-  return t("AI");
-}
-
-function estimateAIToolbarButtonWidth(
-  plugin: editingToolbarPlugin,
-  effectiveStyle: ToolbarStyleKey | string,
-  buttonWidth: number,
-): number {
-  if (effectiveStyle === "fixed") {
-    return buttonWidth + 6;
-  }
-
-  const label = getAIToolbarButtonLabel(plugin);
-  const estimatedLabelWidth = Math.min(Math.max(label.length * 6.2, 12), 32);
-  return Math.max(buttonWidth + estimatedLabelWidth + 18, 57);
-}
-
 function shouldMoveButtonToMoreMenu(
   currentWidth: number,
   nextWidth: number,
@@ -408,54 +290,6 @@ function shouldMoveButtonToMoreMenu(
   const availableWidth = Math.max(leafwidth - 16, buttonWidth * 2);
 
   return currentWidth + nextWidth + estimatedGapWidth + reservedMoreButtonWidth + reservedFollowingBufferWidth + reservedTouchBufferWidth >= availableWidth;
-}
-
-async function executeAIToolbarAction(
-  plugin: editingToolbarPlugin,
-  actionId: string,
-  editor?: Editor | null,
-): Promise<boolean> {
-  if ((await plugin.aiManager.getToolbarRouteState()) === "unavailable") {
-    new Notice(await plugin.aiManager.getProviderRouteStatusText());
-    return false;
-  }
-
-  if (actionId === "editing-toolbar:ai-canvas-expand") {
-    return plugin.aiManager.openCanvasNodeExpansionModal();
-  }
-
-  if (actionId === "editing-toolbar:ai-canvas-global-prompt") {
-    return plugin.aiManager.openCanvasGlobalPromptModal();
-  }
-
-  if (actionId === "editing-toolbar:ai-inline-completion") {
-    return plugin.aiManager.triggerInlineCompletion(editor);
-  }
-
-  if (actionId === "editing-toolbar:ai-tools:custom" || actionId === "editing-toolbar:ai-rewrite-custom") {
-    if (plugin.app.workspace.activeLeaf?.view?.getViewType?.() === "canvas" && !editor) {
-      return plugin.aiManager.openCanvasGlobalPromptModal();
-    }
-    return plugin.aiManager.openCustomRewrite(editor);
-  }
-
-  if (actionId.startsWith("editing-toolbar:ai-toolbox:")) {
-    return plugin.aiManager.runToolboxAction(editor, actionId.replace("editing-toolbar:ai-toolbox:", ""));
-  }
-
-  const rewriteInstruction = actionId.startsWith("editing-toolbar:ai-tools:")
-    ? actionId.replace("editing-toolbar:ai-tools:", "")
-    : actionId === "editing-toolbar:ai-rewrite-improve"
-      ? "improve"
-      : actionId === "editing-toolbar:ai-rewrite-continue"
-        ? "continue"
-        : null;
-
-  if (rewriteInstruction) {
-    return plugin.aiManager.startRewrite(editor, rewriteInstruction as RewriteInstruction);
-  }
-
-  return plugin.aiManager.triggerInlineCompletion(editor);
 }
 
 export function createDiv(selector: string) {
@@ -1361,285 +1195,7 @@ export function editingToolbarPopover(
             }
           }
         } else {
-          if (item.id == AI_TOOLBAR_COMMAND_ID) {
-            const estimatedAIButtonWidth = estimateAIToolbarButtonWidth(plugin, effectiveStyle, buttonWidth);
-            const shouldUseMoreMenu = shouldMoveButtonToMoreMenu(btnwidth, estimatedAIButtonWidth, leafwidth, buttonWidth, effectiveStyle);
-            if (shouldUseMoreMenu) {
-              plugin.setIS_MORE_Button(true);
-            }
-            const aiButtonHost = resolveButtonHost(shouldUseMoreMenu);
-            let button2 = new ButtonComponent(aiButtonHost);
-            button2
-              .setClass("editingToolbarCommandsubItem" + index)
-              .setClass("editingToolbarDropdownButton")
-              .setClass("editingToolbarCommandsubItem-ai")
-              .setTooltip(t("AI Tools"));
-
-            if (index >= settings.cMenuNumRows) {
-              button2.setClass("editingToolbarSecond");
-            } else if (effectiveStyle !== "top") {
-              button2.buttonEl.setAttribute("aria-label-position", "top");
-            }
-
-            checkHtml(item.icon)
-              ? (button2.buttonEl.innerHTML = item.icon)
-              : button2.setIcon(item.icon);
-
-            const isCompactAIButton = effectiveStyle === "fixed";
-            button2.setClass(isCompactAIButton ? "editing-toolbar-ai-button-fixed" : "editing-toolbar-ai-button-inline");
-
-            let aiLabel: HTMLSpanElement | null = null;
-            if (!isCompactAIButton) {
-              const aiMain = document.createElement("span");
-              aiMain.className = "editing-toolbar-ai-button-main";
-              aiLabel = document.createElement("span");
-              aiLabel.className = "editing-toolbar-ai-button-label";
-              aiLabel.textContent = getAIToolbarButtonLabel(plugin);
-              aiMain.appendChild(aiLabel);
-              button2.buttonEl.appendChild(aiMain);
-            }
-
-            const aiArrow = document.createElement("span");
-            aiArrow.className = "editing-toolbar-ai-button-arrow";
-            aiArrow.setAttribute("aria-hidden", "true");
-            aiArrow.textContent = String.fromCharCode(9662);
-            button2.buttonEl.appendChild(aiArrow);
-
-            btnwidth += estimatedAIButtonWidth;
-
-            const openAIMenu = async (evt: MouseEvent) => {
-              ignorePrimaryActionUntil = Date.now() + 240;
-              const providerReady = (await plugin.aiManager.getToolbarRouteState()) !== "unavailable";
-              const editor = plugin.commandsManager.getActiveEditor();
-              const isCanvasScene = app.workspace.activeLeaf?.view?.getViewType?.() === "canvas";
-              const completionHotkey = getHotkey(app, "editing-toolbar:ai-inline-completion", false);
-              const inlineBadge = completionHotkey.includes("+") ? completionHotkey : "";
-              const menu = new Menu();
-
-              const closeAIMenu = () => {
-                menu.hide();
-              };
-
-              const addAction = (options: {
-                title: string;
-                icon: string;
-                hotkey?: string;
-                action: () => Promise<boolean | void> | boolean | void;
-                commandIdForLabel?: string;
-              }) => {
-                const runAction = async () => {
-                  if (!providerReady) {
-                    new Notice(await plugin.aiManager.getProviderRouteStatusText());
-                    return;
-                  }
-
-                  const result = await options.action();
-                  if (result === false) {
-                    return;
-                  }
-
-                  closeAIMenu();
-
-                  if (options.commandIdForLabel) {
-                    setLastAIAction(plugin, options.commandIdForLabel);
-                    if (aiLabel) aiLabel.textContent = getAIToolbarButtonLabel(plugin);
-                  }
-                  syncToolbarVisibilityAfterAction(editingToolbar, settings, effectiveStyle, plugin);
-                };
-
-                menu.addItem((menuItem) => {
-                  menuItem
-                    .setTitle(t(options.title as any))
-                    .setIcon(options.icon)
-                    .onClick(runAction);
-
-                  if (options.hotkey) {
-                    const hotkeyEl = menuItem.dom.createSpan({ cls: "menu-item-hotkey" });
-                    hotkeyEl.setText(options.hotkey);
-                  }
-                });
-              };
-
-              const addSubmenu = (
-                title: string,
-                icon: string,
-                actions: Array<{
-                  title: string;
-                  icon: string;
-                  hotkey?: string;
-                  commandIdForLabel?: string;
-                  action: () => Promise<boolean | void> | boolean | void;
-                }>,
-              ) => {
-                menu.addItem((menuItem) => {
-                  menuItem.setTitle(t(title as any)).setIcon(icon);
-                  const submenu = menuItem.setSubmenu();
-                  actions.forEach((action) => {
-                    submenu.addItem((subItem) => {
-                      subItem
-                        .setTitle(t(action.title as any))
-                        .setIcon(action.icon)
-                        .onClick(async () => {
-                          if (!providerReady) {
-                            new Notice(await plugin.aiManager.getProviderRouteStatusText());
-                            return;
-                          }
-
-                          const result = await action.action();
-                          if (result === false) {
-                            return;
-                          }
-
-                          closeAIMenu();
-
-                          if (action.commandIdForLabel) {
-                            setLastAIAction(plugin, action.commandIdForLabel);
-                            if (aiLabel) aiLabel.textContent = getAIToolbarButtonLabel(plugin);
-                          }
-                          syncToolbarVisibilityAfterAction(editingToolbar, settings, effectiveStyle, plugin);
-                        });
-
-                      if (action.hotkey) {
-                        const hotkeyEl = subItem.dom.createSpan({ cls: "menu-item-hotkey" });
-                        hotkeyEl.setText(action.hotkey);
-                      }
-                    });
-                  });
-                });
-              };
-              if (isCanvasScene) {
-                addAction({
-                  title: t("Canvas global prompt"),
-                  icon: "lucide-sparkles",
-                  commandIdForLabel: "editing-toolbar:ai-canvas-global-prompt",
-                  action: () => {
-                    return plugin.aiManager.openCanvasGlobalPromptModal();
-                  },
-                });
-                addAction({
-                  title: t("Expand current canvas node"),
-                  icon: "lucide-waypoints",
-                  commandIdForLabel: "editing-toolbar:ai-canvas-expand",
-                  action: () => {
-                    return plugin.aiManager.openCanvasNodeExpansionModal();
-                  },
-                });
-              }
-
-              if (!isCanvasScene || !!editor) {
-                addAction({
-                  title: "Trigger AI Inline Completion",
-                  icon: "lucide-sparkles",
-                  hotkey: inlineBadge || undefined,
-                  commandIdForLabel: "editing-toolbar:ai-inline-completion",
-                  action: () => {
-                    return plugin.aiManager.triggerInlineCompletion(editor);
-                  },
-                });
-
-                const groupedActions = new Map<string, typeof DEFAULT_REWRITE_ACTIONS>();
-                DEFAULT_REWRITE_ACTIONS.forEach((action) => {
-                  const group = groupedActions.get(action.group) ?? [];
-                  group.push(action);
-                  groupedActions.set(action.group, group);
-                });
-
-                const groupIconMap: Record<string, string> = {
-                  Edit: "lucide-wand-sparkles",
-                  Tone: "lucide-messages-square",
-                  Translate: "lucide-languages",
-                  Generate: "lucide-bot",
-                };
-
-                groupedActions.forEach((actions, groupName) => {
-                  addSubmenu(
-                    groupName,
-                    groupIconMap[groupName] ?? "lucide-sparkles",
-                    actions.map((action) => ({
-                      title: action.label,
-                      icon: AI_REWRITE_ICON_MAP[action.instruction],
-                      commandIdForLabel: `editing-toolbar:ai-tools:${action.instruction}`,
-                      action: async () => {
-                        await plugin.aiManager.startRewrite(editor, action.instruction);
-                      },
-                    })),
-                  );
-                });
-
-                if (!isCanvasScene) {
-                  addAction({
-                    title: "AI Custom Rewrite",
-                    icon: AI_REWRITE_ICON_MAP.custom,
-                    commandIdForLabel: "editing-toolbar:ai-tools:custom",
-                    action: () => {
-                      return plugin.aiManager.openCustomRewrite(editor);
-                    },
-                  });
-                }
-
-                addSubmenu(
-                  "AI Toolbox",
-                  "lucide-boxes",
-                  AI_TOOLBOX_ACTIONS.map((action) => ({
-                    title: action.label,
-                    icon: action.icon,
-                    commandIdForLabel: `editing-toolbar:ai-toolbox:${action.id}`,
-                    action: async () => {
-                      return plugin.aiManager.runToolboxAction(editor, action.id);
-                    },
-                  })),
-                );
-              }
-
-              menu.dom.addClass("editing-toolbar-dropdown-menu");
-              menu.dom.addClass("editing-toolbar-ai-dropdown-menu");
-              menu.showAtMouseEvent(evt);
-            };
-
-            let ignorePrimaryActionUntil = 0;
-
-            aiArrow.addEventListener("click", async (evt: MouseEvent) => {
-              evt.preventDefault();
-              evt.stopPropagation();
-              await openAIMenu(evt);
-            });
-
-            button2.buttonEl.addEventListener("click", async (evt: MouseEvent) => {
-              evt.preventDefault();
-              evt.stopPropagation();
-
-              if (Date.now() < ignorePrimaryActionUntil) {
-                return;
-              }
-
-              const target = evt.target as HTMLElement | null;
-              if (target?.closest(".editing-toolbar-ai-button-arrow")) {
-                await openAIMenu(evt);
-                return;
-              }
-
-              if (Platform.isMobileApp || effectiveStyle === "mobile") {
-                await openAIMenu(evt);
-                return;
-              }
-
-              const editor = plugin.commandsManager.getActiveEditor();
-              const isCanvasScene = app.workspace.activeLeaf?.view?.getViewType?.() === "canvas";
-              const preferredActionId = plugin.lastExecutedCommand;
-              const actionId = isCanvasScene && !editor
-                ? ((preferredActionId === "editing-toolbar:ai-canvas-expand" || preferredActionId === "editing-toolbar:ai-canvas-global-prompt" || preferredActionId === "editing-toolbar:ai-tools:custom" || preferredActionId === "editing-toolbar:ai-rewrite-custom")
-                  ? (preferredActionId as string)
-                  : "editing-toolbar:ai-canvas-global-prompt")
-                : (AI_BUTTON_LABEL_KEYS[preferredActionId || ""] && !isCanvasOnlyAIAction(preferredActionId))
-                  ? (preferredActionId as string)
-                  : "editing-toolbar:ai-inline-completion";
-              const result = await executeAIToolbarAction(plugin, actionId, editor);
-              if (result !== false) {
-                if (aiLabel) aiLabel.textContent = getAIToolbarButtonLabel(plugin);
-              }
-              syncToolbarVisibilityAfterAction(editingToolbar, settings, effectiveStyle, plugin);
-            });
-          } else if (item.id == "editing-toolbar:change-font-color") {
+          if (item.id == "editing-toolbar:change-font-color") {
             let button2 = new ButtonComponent(editingToolbar);
             button2
               .setClass("editingToolbarCommandsubItem-font-color")

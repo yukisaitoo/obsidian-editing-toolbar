@@ -3,8 +3,10 @@
     "allow": [
       "Bash(npm run build)",
       "Bash(cat:*)",
-      "Bash(python:*)",
-      "Bash(npx tsc:*)"
+      "Bash(npx tsc:*)",
+      "Bash(git status)",
+      "Bash(git diff:*)",
+      "Read(./**)"
     ]
   }
 }

@@ -1,8 +1,7 @@
-import { settings } from "cluster";
-import { App, Modal, Setting, Notice, TextAreaComponent, ButtonComponent } from "obsidian";
+import { App, ButtonComponent, Modal, Notice, Setting, TextAreaComponent } from "obsidian";
+import { ConfirmModal } from "src/modals/ConfirmModal";
 import type editingToolbarPlugin from "src/plugin/main";
 import { t } from 'src/translations/helper';
-import { ConfirmModal } from "src/modals/ConfirmModal";
 export class ImportExportModal extends Modal {
   plugin: editingToolbarPlugin;
   mode: 'import' | 'export';
@@ -557,7 +556,7 @@ export class ImportExportModal extends Modal {
   // 导入一般设置
   importGeneralSettings(importData: any) {
     const generalSettings = [
-      'positionStyle', 'aestheticStyle', 'appendMethod', 'autohide','Iscentered',
+      'positionStyle', 'aestheticStyle', 'appendMethod', 'autohide', 'Iscentered',
       'isLoadOnMobile', 'cMenuNumRows', 'enableMultipleConfig',
       'custom_bg1', 'custom_bg2', 'custom_bg3', 'custom_bg4', 'custom_bg5',
       'custom_fc1', 'custom_fc2', 'custom_fc3', 'custom_fc4', 'custom_fc5',

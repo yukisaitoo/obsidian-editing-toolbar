@@ -25,8 +25,6 @@ import { InsertLinkModal } from "src/modals/insertLinkModal";
 import { CustomCommand } from "src/settings/settingsData";
 import { t } from "src/translations/helper";
 import { TextEnhancement } from "src/util/textEnhancement";
-import { AI_TOOLBOX_ACTIONS } from "src/ai/toolboxActions";
-import { DEFAULT_REWRITE_ACTIONS, type RewriteInstruction } from "src/ai/types";
 import {
   TextInputModal,
   IWrapInputResult,
@@ -36,30 +34,6 @@ import {
 
 export class CommandsManager {
   private plugin: editingToolbarPlugin;
-
-  private formatAICommandName(...segments: string[]): string {
-    return [t("AI"), ...segments.map((segment) => t(segment as any))].join(" / ");
-  }
-
-  private aiRewriteCommandIcons: Record<RewriteInstruction, string> = {
-    improve: "lucide-wand-2",
-    "fix-grammar": "lucide-spell-check-2",
-    "make-shorter": "lucide-minimize-2",
-    "make-longer": "lucide-maximize-2",
-    simplify: "lucide-align-left",
-    professional: "lucide-briefcase",
-    casual: "lucide-message-circle-more",
-    "translate-en": "lucide-languages",
-    "translate-zh": "lucide-languages",
-    "translate-ja": "lucide-languages",
-    "translate-de": "lucide-languages",
-    "translate-fr": "lucide-languages",
-    "translate-es": "lucide-languages",
-    explain: "lucide-info",
-    summarize: "lucide-file-text",
-    continue: "lucide-pencil-line",
-    custom: "lucide-message-square",
-  };
 
   constructor(plugin: editingToolbarPlugin) {
     this.plugin = plugin;
@@ -669,100 +643,6 @@ export class CommandsManager {
     });
 
     this.plugin.addCommand({
-      id: "ai-login-pkmer",
-      name: this.formatAICommandName("Account", "Login to PKMer AI"),
-      icon: "lucide-log-in",
-      callback: async () => {
-        await this.plugin.aiManager.loginWithPKMer();
-      },
-    });
-
-    this.plugin.addCommand({
-      id: "ai-logout-pkmer",
-      name: this.formatAICommandName("Account", "Logout from PKMer"),
-      icon: "lucide-log-out",
-      callback: async () => {
-        await this.plugin.aiManager.logoutFromPKMer();
-      },
-    });
-
-    this.plugin.addCommand({
-      id: "ai-inline-completion",
-      name: this.formatAICommandName("Complete", "Quick Trigger"),
-      icon: "lucide-sparkles",
-      hotkeys: [{ modifiers: ["Mod"], key: "j" }],
-      editorCallback: (editor: Editor) => {
-        this.plugin.aiManager.triggerInlineCompletion(editor);
-      },
-    });
-
-    const registerRewriteCommand = (id: string, name: string, instruction: RewriteInstruction, icon: string) => {
-      this.plugin.addCommand({
-        id,
-        name: this.formatAICommandName("Rewrite", name),
-        icon,
-        editorCallback: (editor: Editor) => {
-          void this.plugin.aiManager.startRewrite(editor, instruction);
-        },
-      });
-    };
-
-    registerRewriteCommand("ai-rewrite-improve", "Improve Selection", "improve", "lucide-wand-2");
-    registerRewriteCommand("ai-rewrite-continue", "Continue writing", "continue", "lucide-pencil-line");
-
-    DEFAULT_REWRITE_ACTIONS.forEach((action) => {
-      const commandId = `ai-rewrite-${action.instruction}`;
-      if (action.instruction === "improve" || action.instruction === "continue") {
-        return;
-      }
-
-      registerRewriteCommand(
-        commandId,
-        action.label,
-        action.instruction,
-        this.aiRewriteCommandIcons[action.instruction],
-      );
-    });
-
-    this.plugin.addCommand({
-      id: "ai-rewrite-custom",
-      name: this.formatAICommandName("Rewrite", "Custom Rewrite"),
-      icon: "lucide-message-square",
-      editorCallback: (editor: Editor) => {
-        this.plugin.aiManager.openCustomRewrite(editor);
-      },
-    });
-
-    this.plugin.addCommand({
-      id: "ai-canvas-expand",
-      name: this.formatAICommandName("Canvas", "Expand Current Node"),
-      icon: "lucide-waypoints",
-      callback: () => {
-        void this.plugin.aiManager.openCanvasNodeExpansionModal();
-      },
-    });
-
-    this.plugin.addCommand({
-      id: "ai-canvas-global-prompt",
-      name: this.formatAICommandName("Canvas", "Global Prompt"),
-      icon: "lucide-sparkles",
-      callback: () => {
-        void this.plugin.aiManager.openCanvasGlobalPromptModal();
-      },
-    });
-
-    AI_TOOLBOX_ACTIONS.forEach((action) => {
-      this.plugin.addCommand({
-        id: `ai-toolbox-${action.id}`,
-        name: this.formatAICommandName("Toolbox", action.label),
-        icon: action.icon,
-        editorCallback: (editor: Editor) => {
-          void this.plugin.aiManager.runToolboxAction(editor, action.id);
-        },
-      });
-    });
-
-    this.plugin.addCommand({
       id: "split-lines",
       name: "Split Lines",
       editorCallback: (editor: Editor) => {
@@ -1216,7 +1096,7 @@ export class CommandsManager {
       name: "Toggle Fullscreen Focus Mode",
       hotkeys: [{ modifiers: ["Mod", "Shift"], key: "F11" }],
       callback: () => {
-        return fullscreenMode(app);
+        return fullscreenMode(this.plugin.app);
       },
       icon: "fullscreen",
     });
@@ -1224,7 +1104,7 @@ export class CommandsManager {
       id: "workplace-fullscreen-focus",
       name: "Toggle Workplace Fullscreen Focus",
       callback: () => {
-        return workplacefullscreenMode(app);
+        return workplacefullscreenMode(this.plugin.app);
       },
       hotkeys: [{ modifiers: ["Mod"], key: "F11" }],
       icon: "remix-SplitCellsHorizontal",

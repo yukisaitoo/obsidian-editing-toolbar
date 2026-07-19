@@ -1,5 +1,5 @@
 /**
- * Context compaction utilities for managing large file content
+ * Context compaction utilities for managing large file content.
  */
 
 export interface CompactionConfig {
@@ -85,15 +85,4 @@ function truncateWithEllipsis(text: string, maxLength: number): string {
   }
 
   return truncated + "...";
-}
-
-export function estimateTokens(text: string): number {
-  return Math.ceil(text.length / 4);
-}
-
-export function formatContextStats(charCount: number, tokenEstimate: number): string {
-  if (charCount < 1000) {
-    return `${charCount} 字符 (~${tokenEstimate} tokens)`;
-  }
-  return `${(charCount / 1000).toFixed(1)}k 字符 (~${tokenEstimate} tokens)`;
 }

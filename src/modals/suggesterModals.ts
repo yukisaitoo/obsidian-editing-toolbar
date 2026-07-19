@@ -224,7 +224,7 @@ export class CommandPicker extends FuzzySuggestModal<Command> {
 
   getItems(): Command[] {
     //@ts-ignore
-    return app.commands.listCommands();
+    return this.app.commands.listCommands();
   }
 
   getItemText(item: Command): string {
