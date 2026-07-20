@@ -587,13 +587,12 @@ export class editingToolbarSettingTab extends PluginSettingTab {
           const sourceCommands = this.getCommandsArrayByType(selectedSourceStyle);
 
           if (!sourceCommands || sourceCommands.length === 0) {
-            new Notice('The selected style has no commands to import.');
+            new Notice(strings.selectedStyleNoCommandsImport);
             return;
           }
 
           const confirmMessage =
-            'Import commands from' + ' ' + `"${selectedSourceStyle}"` + ' to ' + `"${this.currentEditingConfig}" ` + strings.configuration + '?'
-            ;
+            `${strings.importCommandsFrom} "${selectedSourceStyle}" ${strings.toLabel} "${this.currentEditingConfig}" ${strings.configuration}?`;
           ConfirmModal.show(this.app, {
             message: confirmMessage,
             onConfirm: async () => {
@@ -615,7 +614,7 @@ export class editingToolbarSettingTab extends PluginSettingTab {
                   break;
               }
               await this.plugin.saveSettings();
-              new Notice('Commands imported successfully from' + ' ' + `"${selectedSourceStyle}"` + ' to ' + `"${this.currentEditingConfig}" ` + strings.configuration);
+              new Notice(`${strings.commandsImportedFrom} "${selectedSourceStyle}" ${strings.toLabel} "${this.currentEditingConfig}" ${strings.configuration}`);
               this.display();
             }
           })
@@ -644,7 +643,7 @@ export class editingToolbarSettingTab extends PluginSettingTab {
                   break;
               }
               await this.plugin.saveSettings();
-              new Notice('All commands have been removed.');
+              new Notice(strings.allCommandsHaveBeenRemoved);
               this.display();
             }
           })

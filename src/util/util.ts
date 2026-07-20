@@ -239,7 +239,6 @@ export function setFontcolor(color: string, editor?: Editor) {
   const selectText = editor.getSelection();
 
   if (!selectText || selectText.trim() === "") {
-    this.plugin.setLastExecutedCommand("editing-toolbar:change-font-color");
     return;
   }
 
@@ -329,7 +328,7 @@ export function setBackgroundcolor(color: string, editor?: Editor) {
   // Function to check if the text is already wrapped in the same background color
   const isAlreadyInSameColor = (text: string, targetColor: string): boolean => {
     const escapedColor = targetColor.replace(/([()[{*+.$^\\|?])/g, '\\$1');
-    const cleanColorRegex = new RegExp(`^<mark\\s+style=["']?background:${escapedColor}["']?>([\s\S]+)<\\/mark>$`);
+    const cleanColorRegex = new RegExp(`^<mark\\s+style=["']?background:${escapedColor}["']?>([\\s\\S]+)<\\/mark>$`);
     return cleanColorRegex.test(text.trim());
   };
 

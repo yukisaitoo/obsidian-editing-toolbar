@@ -480,6 +480,30 @@ export class CommandsManager {
   }
 
   public registerCommands() {
+    this.registerCoreCommands();
+    this.registerToolbarToggleCommands();
+    this.registerTextToolCommands();
+    this.registerFormattingCommands();
+    this.registerClipboardAndHistoryCommands();
+    this.registerInsertCommands();
+    this.registerHeadingCommands();
+    this.registerMappedCommands();
+
+    this.plugin.addCommand({
+      id: "toggle-format-brush",
+      name: "Toggle Format Brush",
+      icon: "paintbrush",
+      editorCallback: (editor: Editor) => {
+        this.plugin.toggleFormatBrush();
+      },
+    });
+
+    this.registerCustomCommands();
+
+    this.trackFormatCommandExecution();
+  }
+
+  private registerCoreCommands() {
     this.plugin.addCommand({
       id: "renumber-ordered-list",
       name: "Renumber Ordered List",
@@ -509,6 +533,9 @@ export class CommandsManager {
       },
     });
 
+  }
+
+  private registerToolbarToggleCommands() {
     this.plugin.addCommand({
       id: "toggle-top-toolbar",
       name: "Toggle Top Toolbar",
@@ -578,6 +605,9 @@ export class CommandsManager {
       },
     });
 
+  }
+
+  private registerTextToolCommands() {
     this.plugin.addCommand({
       id: "get-plain-text",
       name: "Get Plain Text",
@@ -794,6 +824,9 @@ export class CommandsManager {
       },
     });
 
+  }
+
+  private registerFormattingCommands() {
     this.plugin.addCommand({
       id: "format-eraser",
       name: "Format Eraser",
@@ -955,6 +988,9 @@ export class CommandsManager {
           );
       },
     });
+  }
+
+  private registerClipboardAndHistoryCommands() {
     this.plugin.addCommand({
       id: "editor-undo",
       name: "Undo Edit",
@@ -1025,6 +1061,9 @@ export class CommandsManager {
       icon: "lucide-scissors",
     });
 
+  }
+
+  private registerInsertCommands() {
     this.plugin.addCommand({
       id: "insert-callout",
       name: "Insert Callout(Modal)",
@@ -1062,6 +1101,9 @@ export class CommandsManager {
       icon: "remix-SplitCellsHorizontal",
     });
 
+  }
+
+  private registerHeadingCommands() {
     for (let i = 0; i <= 6; i++) {
       this.plugin.addCommand({
         id: `header${i}-text`,
@@ -1077,6 +1119,9 @@ export class CommandsManager {
       });
     }
 
+  }
+
+  private registerMappedCommands() {
     Object.keys(this._commandsMap).forEach((type) => {
       this.plugin.addCommand({
         id: `${type}`,
@@ -1113,17 +1158,9 @@ export class CommandsManager {
       });
     });
 
-    this.plugin.addCommand({
-      id: "toggle-format-brush",
-      name: "Toggle Format Brush",
-      icon: "paintbrush",
-      editorCallback: (editor: Editor) => {
-        this.plugin.toggleFormatBrush();
-      },
-    });
+  }
 
-    this.registerCustomCommands();
-
+  private trackFormatCommandExecution() {
     const formatCommands = [
       "toggle-bold",
       "toggle-italics",
@@ -1161,6 +1198,7 @@ export class CommandsManager {
       }
     });
   }
+
 
   private getCharacterOffset(commandId: string): number {
     switch (commandId) {

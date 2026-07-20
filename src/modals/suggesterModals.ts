@@ -294,7 +294,7 @@ export class ChangeCmdname extends Modal {
           }
         }
         
-        this.plugin.updateCurrentCommands(currentCommands);
+        this.plugin.updateCurrentCommands(currentCommands, this.currentEditingConfig);
         await this.plugin.saveSettings();
       }, 100, true))
       .inputEl.addEventListener('keydown', this.submitEnterCallback);

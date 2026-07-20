@@ -1036,19 +1036,7 @@ export function editingToolbarPopover(
                       .setTitle(displayTitle)
                       .onClick(() => {
                         app.commands.executeCommandById(subitem.id);
-
-                        const editor = plugin.commandsManager.getActiveEditor();
-                        const hasSelection = editor && editor.somethingSelected();
-
-                        if (settings.cMenuVisibility == false) {
-                          editingToolbar.style.visibility = "hidden";
-                        } else if (effectiveStyle === "following") {
-                          if (!hasSelection) {
-                            editingToolbar.style.visibility = "hidden";
-                          }
-                        } else {
-                          editingToolbar.style.visibility = "visible";
-                        }
+                        syncToolbarVisibilityAfterAction(editingToolbar, settings, effectiveStyle, plugin);
                       });
 
                     applyMenuItemIcon(menuItem, subitem.icon);
@@ -1078,20 +1066,7 @@ export function editingToolbarPopover(
                     .onClick(() => {
 
                       app.commands.executeCommandById(subitem.id);
-
-                      const editor = plugin.commandsManager.getActiveEditor();
-                      const hasSelection = editor && editor.somethingSelected();
-
-                      if (settings.cMenuVisibility == false) {
-                        editingToolbar.style.visibility = "hidden";
-                      } else if (effectiveStyle === "following") {
-                        // For the following toolbar, only show when there is a selection.
-                        if (!hasSelection) {
-                          editingToolbar.style.visibility = "hidden";
-                        }
-                      } else {
-                        editingToolbar.style.visibility = "visible";
-                      }
+                      syncToolbarVisibilityAfterAction(editingToolbar, settings, effectiveStyle, plugin);
 
                     });
                   if (index < settings.cMenuNumRows) {
@@ -1125,20 +1100,7 @@ export function editingToolbarPopover(
                 }
 
                 app.commands.executeCommandById(item.id);
-
-                const editor = plugin.commandsManager.getActiveEditor();
-                const hasSelection = editor && editor.somethingSelected();
-  
-                if (settings.cMenuVisibility == false) {
-                  editingToolbar.style.visibility = "hidden";
-                } else if (effectiveStyle === "following") {
-                  // For the following toolbar, only show when there is a selection.
-                  if (!hasSelection) {
-                    editingToolbar.style.visibility = "hidden";
-                  }
-                } else {
-                  editingToolbar.style.visibility = "visible";
-                }
+                syncToolbarVisibilityAfterAction(editingToolbar, settings, effectiveStyle, plugin);
 
               });
             checkHtml(item.icon)
@@ -1209,20 +1171,7 @@ export function editingToolbarPopover(
                 }
 
                 app.commands.executeCommandById(item.id);
-
-                const editor = plugin.commandsManager.getActiveEditor();
-                const hasSelection = editor && editor.somethingSelected();
-  
-                if (settings.cMenuVisibility == false) {
-                  editingToolbar.style.visibility = "hidden";
-                } else if (effectiveStyle === "following") {
-                  // For the following toolbar, only show when there is a selection.
-                  if (!hasSelection) {
-                    editingToolbar.style.visibility = "hidden";
-                  }
-                } else {
-                  editingToolbar.style.visibility = "visible";
-                }
+                syncToolbarVisibilityAfterAction(editingToolbar, settings, effectiveStyle, plugin);
 
               });
             checkHtml(item.icon)
@@ -1292,20 +1241,7 @@ export function editingToolbarPopover(
             tip = getLocalizedTooltip(item.name, hotkey);
             button.setTooltip(tip).onClick(() => {
               app.commands.executeCommandById(item.id);
-
-              const editor = plugin.commandsManager.getActiveEditor();
-              const hasSelection = editor && editor.somethingSelected();
-
-              if (settings.cMenuVisibility == false) {
-                editingToolbar.style.visibility = "hidden";
-              } else if (effectiveStyle === "following") {
-                // For the following toolbar, only show when there is a selection.
-                if (!hasSelection) {
-                  editingToolbar.style.visibility = "hidden";
-                }
-              } else {
-                editingToolbar.style.visibility = "visible";
-              }
+              syncToolbarVisibilityAfterAction(editingToolbar, settings, effectiveStyle, plugin);
 
             });
 

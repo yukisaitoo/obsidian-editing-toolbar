@@ -476,7 +476,7 @@ export class RegexCommandModal extends Modal {
 
     new Setting(contentEl)
       .addButton(button => button
-        .setButtonText('保存')
+        .setButtonText(strings.save)
         .setCta()
         .onClick(() => {
           if (!this.commandId || !this.commandName) {

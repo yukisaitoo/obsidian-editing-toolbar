@@ -182,19 +182,6 @@ export class TextEnhancement {
 
     return bestSeparator;
   }
-  static async smartPaste(editor: Editor): Promise<void> {
-    try {
-      const text = await navigator.clipboard.readText();
-      if (!text) return;
-
-      let processed = text.replace(/(\r\n|\n){3,}/g, "\n\n");
-      processed = processed.replace(/[ \t]+$/gm, "");
-
-      editor.replaceSelection(processed);
-    } catch (err) {
-      new Notice(strings.pasteFailed);
-    }
-  }
 
   static smartTypography(editor: Editor): void {
     const selection = editor.getSelection();

@@ -776,387 +776,171 @@ updateCurrentCommands(commands: any[], style?: string): void {
     }
   }
 
+  // Ordered list of "wrap" formats to match against a whole selection.
+  // First match wins, mirroring the original if/else chain.
+  private static readonly SELECTION_WRAP_FORMATS: Array<{
+    re: RegExp;
+    command: string;
+    name: string;
+  }> = [
+    { re: /^\*\*.*\*\*$/, command: "editor:toggle-bold", name: "Bold" },
+    { re: /^\*.*\*$/, command: "editor:toggle-italics", name: "Italic" },
+    { re: /^_.*_$/, command: "editor:toggle-italics", name: "Italic" },
+    { re: /^~~.*~~$/, command: "editor:toggle-strikethrough", name: "Strikethrough" },
+    { re: /^==.*==$/, command: "editor:toggle-highlight", name: "Highlight" },
+    { re: /^`.*`$/, command: "editor:toggle-code", name: "Code" },
+    { re: /^<font color=".*">.*<\/font>$/, command: "editing-toolbar:change-font-color", name: "Font Color" },
+    { re: /^<mark style="background:.*">.*<\/mark>$/, command: "editing-toolbar:change-background-color", name: "Background Color" },
+    { re: /^<u>([^<]+)<\/u>$/, command: "editor:toggle-underline", name: "Underline" },
+    { re: /^<center>([^<]+)<\/center>$/, command: "editing-toolbar:center", name: "Center" },
+    { re: /^<p align="left">(.*?)<\/p>$/, command: "editing-toolbar:left", name: "Left Align" },
+    { re: /^<p align="right">(.*?)<\/p>$/, command: "editing-toolbar:right", name: "Right Align" },
+    { re: /^<p align="justify">(.*?)<\/p>$/, command: "editing-toolbar:justify", name: "Justify" },
+    { re: /^<sup>(.*?)<\/sup>$/, command: "editing-toolbar:superscript", name: "Superscript" },
+    { re: /^<sub>(.*?)<\/sub>$/, command: "editing-toolbar:subscript", name: "Subscript" },
+  ];
+
+  // Inline formats scanned around the cursor when nothing is selected.
+  // Order doesn't matter here; the nearest match to the cursor is chosen.
+  private static readonly CURSOR_INLINE_FORMATS: Array<{
+    re: RegExp;
+    command: string;
+    name: string;
+  }> = [
+    { re: /<u>([^<]+)<\/u>/g, command: "editing-toolbar:toggle-underline", name: "Underline" },
+    { re: /<center>([^<]+)<\/center>/g, command: "editing-toolbar:center", name: "Center" },
+    { re: /<p align="left">([^<]+)<\/p>/g, command: "editing-toolbar:left", name: "Left Align" },
+    { re: /<p align="right">([^<]+)<\/p>/g, command: "editing-toolbar:right", name: "Right Align" },
+    { re: /<p align="justify">([^<]+)<\/p>/g, command: "editing-toolbar:justify", name: "Justify" },
+    { re: /<sup>([^<]+)<\/sup>/g, command: "editing-toolbar:superscript", name: "Superscript" },
+    { re: /<sub>([^<]+)<\/sub>/g, command: "editing-toolbar:subscript", name: "Subscript" },
+    { re: /\*\*([^*]+)\*\*/g, command: "editor:toggle-bold", name: "Bold" },
+    { re: /~~([^~]+)~~/g, command: "editor:toggle-strikethrough", name: "Strikethrough" },
+    { re: /==([^=]+)==/g, command: "editor:toggle-highlight", name: "Highlight" },
+    { re: /`([^`]+)`/g, command: "editor:toggle-code", name: "Code" },
+    { re: /<font color="([^"]+)">([^<]+)<\/font>/g, command: "editing-toolbar:change-font-color", name: "Font Color" },
+    { re: /<span style="background:([^"]+)">([^<]+)<\/span>/g, command: "editing-toolbar:change-background-color", name: "Background Color" },
+  ];
+
+  // Returns the heading level (1-6) if the text starts with that many '#'
+  // followed by a space, otherwise 0.
+  private matchLeadingHeading(text: string): number {
+    const headings = [/^# /, /^## /, /^### /, /^#### /, /^##### /, /^###### /];
+    for (let i = 0; i < headings.length; i++) {
+      if (headings[i].test(text)) return i + 1;
+    }
+    return 0;
+  }
+
+  private detectSelectionFormat(
+    selectedText: string
+  ): { command: string; name: string; calloutType: string } | null {
+    for (const { re, command, name } of editingToolbarPlugin.SELECTION_WRAP_FORMATS) {
+      if (re.test(selectedText)) {
+        return { command, name, calloutType: "" };
+      }
+    }
+
+    const calloutMatch = selectedText.match(
+      /^> \[!(note|tip|warning|danger|info|success|question|quote)\]/i
+    );
+    if (calloutMatch) {
+      const calloutType = calloutMatch[1].toLowerCase();
+      return {
+        command: "editor:insert-callout",
+        name: "Callout-" + calloutType,
+        calloutType,
+      };
+    }
+
+    const headingLevel = this.matchLeadingHeading(selectedText);
+    if (headingLevel > 0) {
+      return {
+        command: `editor:set-heading-${headingLevel}`,
+        name: `Heading ${headingLevel}`,
+        calloutType: "",
+      };
+    }
+
+    return null;
+  }
+
+  private detectCursorFormat(
+    lineText: string,
+    cursorPos: number
+  ): { command: string; name: string } | null {
+    const foundFormats: Array<{ command: string; name: string; distance: number }> = [];
+
+    for (const { re, command, name } of editingToolbarPlugin.CURSOR_INLINE_FORMATS) {
+      let match: RegExpExecArray | null;
+      while ((match = re.exec(lineText)) !== null) {
+        const formatStart = match.index;
+        const formatEnd = match.index + match[0].length;
+        if (cursorPos > formatStart && cursorPos < formatEnd) {
+          foundFormats.push({
+            command,
+            name,
+            distance: Math.min(cursorPos - formatStart, formatEnd - cursorPos),
+          });
+        }
+      }
+    }
+
+    if (foundFormats.length > 0) {
+      foundFormats.sort((a, b) => a.distance - b.distance);
+      return { command: foundFormats[0].command, name: foundFormats[0].name };
+    }
+
+    // Italic uses single * or _ and is only a fallback when nothing else matched.
+    if (/(\*|_)([^*_]+)(\*|_)/.test(lineText)) {
+      return { command: "editor:toggle-italics", name: "Italic" };
+    }
+
+    const headingLevel = this.matchLeadingHeading(lineText);
+    if (headingLevel > 0 && cursorPos > headingLevel - 1) {
+      return {
+        command: `editor:set-heading-${headingLevel}`,
+        name: `Heading ${headingLevel}`,
+      };
+    }
+
+    return null;
+  }
+
   toggleFormatBrush(): void {
     const editor = this.commandsManager.getActiveEditor();
     let detectedFormat = false;
     let calloutType = "";
+
     if (editor) {
       if (editor.somethingSelected()) {
-        const selectedText = editor.getSelection();
-        if (/^\*\*.*\*\*$/.test(selectedText)) {
-          this.lastExecutedCommand = "editor:toggle-bold";
-          this.lastExecutedCommandName = "Bold";
-          detectedFormat = true;
-        } else if (
-          /^\*.*\*$/.test(selectedText) ||
-          /^_.*_$/.test(selectedText)
-        ) {
-          this.lastExecutedCommand = "editor:toggle-italics";
-          this.lastExecutedCommandName = "Italic";
-          detectedFormat = true;
-        } else if (/^~~.*~~$/.test(selectedText)) {
-          this.lastExecutedCommand = "editor:toggle-strikethrough";
-          this.lastExecutedCommandName = "Strikethrough";
-          detectedFormat = true;
-        } else if (/^==.*==$/.test(selectedText)) {
-          this.lastExecutedCommand = "editor:toggle-highlight";
-          this.lastExecutedCommandName = "Highlight";
-          detectedFormat = true;
-        } else if (/^`.*`$/.test(selectedText)) {
-          this.lastExecutedCommand = "editor:toggle-code";
-          this.lastExecutedCommandName = "Code";
-          detectedFormat = true;
-        } else if (/^<font color=".*">.*<\/font>$/.test(selectedText)) {
-          this.lastExecutedCommand = "editing-toolbar:change-font-color";
-          this.lastExecutedCommandName = "Font Color";
-          detectedFormat = true;
-        } else if (/^<mark style="background:.*">.*<\/mark>$/.test(selectedText)) {
-          this.lastExecutedCommand = "editing-toolbar:change-background-color";
-          this.lastExecutedCommandName = "Background Color";
-          detectedFormat = true;
-        } else if (/^<u>([^<]+)<\/u>$/.test(selectedText)) {
-          this.lastExecutedCommand = "editor:toggle-underline";
-          this.lastExecutedCommandName = "Underline";
-          detectedFormat = true;
-        } else if (/^<center>([^<]+)<\/center>$/.test(selectedText)) {
-          this.lastExecutedCommand = "editing-toolbar:center";
-          this.lastExecutedCommandName = "Center";
-          detectedFormat = true;
-        } else if (/^<p align="left">(.*?)<\/p>$/.test(selectedText)) {
-          this.lastExecutedCommand = "editing-toolbar:left";
-          this.lastExecutedCommandName = "Left Align";
-          detectedFormat = true;
-        } else if (/^<p align="right">(.*?)<\/p>$/.test(selectedText)) {
-          this.lastExecutedCommand = "editing-toolbar:right";
-          this.lastExecutedCommandName = "Right Align";
-          detectedFormat = true;
-        } else if (/^<p align="justify">(.*?)<\/p>$/.test(selectedText)) {
-          this.lastExecutedCommand = "editing-toolbar:justify";
-          this.lastExecutedCommandName = "Justify";
-          detectedFormat = true;
-        } else if (/^<sup>(.*?)<\/sup>$/.test(selectedText)) {
-          this.lastExecutedCommand = "editing-toolbar:superscript";
-          this.lastExecutedCommandName = "Superscript";
-          detectedFormat = true;
-        } else if (/^<sub>(.*?)<\/sub>$/.test(selectedText)) {
-          this.lastExecutedCommand = "editing-toolbar:subscript";
-          this.lastExecutedCommandName = "Subscript";
-          detectedFormat = true;
-        } else if (
-          /^> \[!(note|tip|warning|danger|info|success|question|quote)\]/i.test(
-            selectedText
-          )
-        ) {
-          const match = selectedText.match(
-            /^> \[!(note|tip|warning|danger|info|success|question|quote)\]/i
-          );
-          if (match) {
-            this.lastExecutedCommand = "editor:insert-callout";
-            this.lastExecutedCommandName = "Callout-" + match[1].toLowerCase();
-            detectedFormat = true;
-            calloutType = match[1].toLowerCase();
-          }
-        }
-        else if (/^# /.test(selectedText)) {
-          this.lastExecutedCommand = "editor:set-heading-1";
-          this.lastExecutedCommandName = "Heading 1";
-          detectedFormat = true;
-        } else if (/^## /.test(selectedText)) {
-          this.lastExecutedCommand = "editor:set-heading-2";
-          this.lastExecutedCommandName = "Heading 2";
-          detectedFormat = true;
-        } else if (/^### /.test(selectedText)) {
-          this.lastExecutedCommand = "editor:set-heading-3";
-          this.lastExecutedCommandName = "Heading 3";
-          detectedFormat = true;
-        } else if (/^#### /.test(selectedText)) {
-          this.lastExecutedCommand = "editor:set-heading-4";
-          this.lastExecutedCommandName = "Heading 4";
-          detectedFormat = true;
-        } else if (/^##### /.test(selectedText)) {
-          this.lastExecutedCommand = "editor:set-heading-5";
-          this.lastExecutedCommandName = "Heading 5";
-          detectedFormat = true;
-        } else if (/^###### /.test(selectedText)) {
-          this.lastExecutedCommand = "editor:set-heading-6";
-          this.lastExecutedCommandName = "Heading 6";
+        const result = this.detectSelectionFormat(editor.getSelection());
+        if (result) {
+          this.lastExecutedCommand = result.command;
+          this.lastExecutedCommandName = result.name;
+          calloutType = result.calloutType;
           detectedFormat = true;
         }
       } else {
         const cursor = editor.getCursor();
         const lineText = editor.getLine(cursor.line);
-        const cursorPos = cursor.ch;
-
-        const foundFormats = [];
-
-        const underlineRegex = /<u>([^<]+)<\/u>/g;
-        let match;
-        while ((match = underlineRegex.exec(lineText)) !== null) {
-          const formatStart = match.index;
-          const formatEnd = match.index + match[0].length;
-          if (cursorPos > formatStart && cursorPos < formatEnd) {
-            foundFormats.push({
-              command: "editing-toolbar:toggle-underline",
-              name: "Underline",
-              distance: Math.min(
-                cursorPos - formatStart,
-                formatEnd - cursorPos
-              ),
-            });
-          }
-        }
-
-        const centerRegex = /<center>([^<]+)<\/center>/g;
-        while ((match = centerRegex.exec(lineText)) !== null) {
-          const formatStart = match.index;
-          const formatEnd = match.index + match[0].length;
-          if (cursorPos > formatStart && cursorPos < formatEnd) {
-            foundFormats.push({
-              command: "editing-toolbar:center",
-              name: "Center",
-              distance: Math.min(
-                cursorPos - formatStart,
-                formatEnd - cursorPos
-              ),
-            });
-          }
-        }
-
-        const leftRegex = /<p align="left">([^<]+)<\/p>/g;
-        while ((match = leftRegex.exec(lineText)) !== null) {
-          const formatStart = match.index;
-          const formatEnd = match.index + match[0].length;
-          if (cursorPos > formatStart && cursorPos < formatEnd) {
-            foundFormats.push({
-              command: "editing-toolbar:left",
-              name: "Left Align",
-              distance: Math.min(
-                cursorPos - formatStart,
-                formatEnd - cursorPos
-              ),
-            });
-          }
-        }
-
-        const rightRegex = /<p align="right">([^<]+)<\/p>/g;
-        while ((match = rightRegex.exec(lineText)) !== null) {
-          const formatStart = match.index;
-          const formatEnd = match.index + match[0].length;
-          if (cursorPos > formatStart && cursorPos < formatEnd) {
-            foundFormats.push({
-              command: "editing-toolbar:right",
-              name: "Right Align",
-              distance: Math.min(
-                cursorPos - formatStart,
-                formatEnd - cursorPos
-              ),
-            });
-          }
-        }
-
-        const justifyRegex = /<p align="justify">([^<]+)<\/p>/g;
-        while ((match = justifyRegex.exec(lineText)) !== null) {
-          const formatStart = match.index;
-          const formatEnd = match.index + match[0].length;
-          if (cursorPos > formatStart && cursorPos < formatEnd) {
-            foundFormats.push({
-              command: "editing-toolbar:justify",
-              name: "Justify",
-              distance: Math.min(
-                cursorPos - formatStart,
-                formatEnd - cursorPos
-              ),
-            });
-          }
-        }
-
-        const superscriptRegex = /<sup>([^<]+)<\/sup>/g;
-        while ((match = superscriptRegex.exec(lineText)) !== null) {
-          const formatStart = match.index;
-          const formatEnd = match.index + match[0].length;
-          if (cursorPos > formatStart && cursorPos < formatEnd) {
-            foundFormats.push({
-              command: "editing-toolbar:superscript",
-              name: "Superscript",
-              distance: Math.min(
-                cursorPos - formatStart,
-                formatEnd - cursorPos
-              ),
-            });
-          }
-        }
-
-        const subscriptRegex = /<sub>([^<]+)<\/sub>/g;
-        while ((match = subscriptRegex.exec(lineText)) !== null) {
-          const formatStart = match.index;
-          const formatEnd = match.index + match[0].length;
-          if (cursorPos > formatStart && cursorPos < formatEnd) {
-            foundFormats.push({
-              command: "editing-toolbar:subscript",
-              name: "Subscript",
-              distance: Math.min(
-                cursorPos - formatStart,
-                formatEnd - cursorPos
-              ),
-            });
-          }
-        }
-
-        const boldRegex = /\*\*([^*]+)\*\*/g;
-
-        while ((match = boldRegex.exec(lineText)) !== null) {
-          const formatStart = match.index;
-          const formatEnd = match.index + match[0].length;
-          if (cursorPos > formatStart && cursorPos < formatEnd) {
-            foundFormats.push({
-              command: "editor:toggle-bold",
-              name: "Bold",
-              distance: Math.min(
-                cursorPos - formatStart,
-                formatEnd - cursorPos
-              ),
-            });
-          }
-        }
-
-        const strikeRegex = /~~([^~]+)~~/g;
-        while ((match = strikeRegex.exec(lineText)) !== null) {
-          const formatStart = match.index;
-          const formatEnd = match.index + match[0].length;
-          if (cursorPos > formatStart && cursorPos < formatEnd) {
-            foundFormats.push({
-              command: "editor:toggle-strikethrough",
-              name: "Strikethrough",
-              distance: Math.min(
-                cursorPos - formatStart,
-                formatEnd - cursorPos
-              ),
-            });
-          }
-        }
-
-        const highlightRegex = /==([^=]+)==/g;
-        while ((match = highlightRegex.exec(lineText)) !== null) {
-          const formatStart = match.index;
-          const formatEnd = match.index + match[0].length;
-          if (cursorPos > formatStart && cursorPos < formatEnd) {
-            foundFormats.push({
-              command: "editor:toggle-highlight",
-              name: "Highlight",
-              distance: Math.min(
-                cursorPos - formatStart,
-                formatEnd - cursorPos
-              ),
-            });
-          }
-        }
-
-        const codeRegex = /`([^`]+)`/g;
-        while ((match = codeRegex.exec(lineText)) !== null) {
-          const formatStart = match.index;
-          const formatEnd = match.index + match[0].length;
-          if (cursorPos > formatStart && cursorPos < formatEnd) {
-            foundFormats.push({
-              command: "editor:toggle-code",
-              name: "Code",
-              distance: Math.min(
-                cursorPos - formatStart,
-                formatEnd - cursorPos
-              ),
-            });
-          }
-        }
-
-        const fontColorRegex = /<font color="([^"]+)">([^<]+)<\/font>/g;
-        while ((match = fontColorRegex.exec(lineText)) !== null) {
-          const formatStart = match.index;
-          const formatEnd = match.index + match[0].length;
-          if (cursorPos > formatStart && cursorPos < formatEnd) {
-            foundFormats.push({
-              command: "editing-toolbar:change-font-color",
-              name: "Font Color",
-              distance: Math.min(
-                cursorPos - formatStart,
-                formatEnd - cursorPos
-              ),
-            });
-          }
-        }
-
-        const bgColorRegex = /<span style="background:([^"]+)">([^<]+)<\/span>/g;
-        while ((match = bgColorRegex.exec(lineText)) !== null) {
-          const formatStart = match.index;
-          const formatEnd = match.index + match[0].length;
-          if (cursorPos > formatStart && cursorPos < formatEnd) {
-            foundFormats.push({
-              command: "editing-toolbar:change-background-color",
-              name: "Background Color",
-              distance: Math.min(
-                cursorPos - formatStart,
-                formatEnd - cursorPos
-              ),
-            });
-          }
-        }
-
-        if (foundFormats.length > 0) {
-          foundFormats.sort((a, b) => a.distance - b.distance);
-
-          const nearestFormat = foundFormats[0];
-          this.lastExecutedCommand = nearestFormat.command;
-          this.lastExecutedCommandName = nearestFormat.name;
+        const result = this.detectCursorFormat(lineText, cursor.ch);
+        if (result) {
+          this.lastExecutedCommand = result.command;
+          this.lastExecutedCommandName = result.name;
           detectedFormat = true;
-        }
-
-        if (!detectedFormat) {
-          const italicRegex = /(\*|_)([^*_]+)(\*|_)/g;
-          while ((match = italicRegex.exec(lineText)) !== null) {
-            this.lastExecutedCommand = "editor:toggle-italics";
-            this.lastExecutedCommandName = "Italic";
-            detectedFormat = true;
-          }
-        }
-
-        if (!detectedFormat) {
-          if (/^# /.test(lineText) && cursorPos > 0) {
-            this.lastExecutedCommand = "editor:set-heading-1";
-            this.lastExecutedCommandName = "Heading 1";
-            detectedFormat = true;
-          } else if (/^## /.test(lineText) && cursorPos > 1) {
-            this.lastExecutedCommand = "editor:set-heading-2";
-            this.lastExecutedCommandName = "Heading 2";
-            detectedFormat = true;
-          } else if (/^### /.test(lineText) && cursorPos > 2) {
-            this.lastExecutedCommand = "editor:set-heading-3";
-            this.lastExecutedCommandName = "Heading 3";
-            detectedFormat = true;
-          } else if (/^#### /.test(lineText) && cursorPos > 3) {
-            this.lastExecutedCommand = "editor:set-heading-4";
-            this.lastExecutedCommandName = "Heading 4";
-            detectedFormat = true;
-          } else if (/^##### /.test(lineText) && cursorPos > 4) {
-            this.lastExecutedCommand = "editor:set-heading-5";
-            this.lastExecutedCommandName = "Heading 5";
-            detectedFormat = true;
-          } else if (/^###### /.test(lineText) && cursorPos > 5) {
-            this.lastExecutedCommand = "editor:set-heading-6";
-            this.lastExecutedCommandName = "Heading 6";
-            detectedFormat = true;
-          }
         }
       }
     }
+
     if (!detectedFormat && !this.lastExecutedCommand) {
-      new Notice(
-        strings.pleaseExecuteFormatCommandSelect
-      );
+      new Notice(strings.pleaseExecuteFormatCommandSelect);
       return;
     }
 
     this.formatBrushActive = !this.formatBrushActive;
 
     if (this.formatBrushActive) {
-
       activeDocument.body.classList.add('format-brush-cursor');
       this.EN_FontColor_Format_Brush = false;
       this.EN_BG_Format_Brush = false;

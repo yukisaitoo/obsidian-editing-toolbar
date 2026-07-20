@@ -390,7 +390,7 @@ addSpecialCharButtons(suffixSetting, suffixSetting.controlEl.querySelector('inpu
       );
 
     setTimeout(() => {
-      if (this.commandIndex)
+      if (this.commandIndex !== null)
         this.commandIdInput.inputEl.focus();
       else
         this.commandNameInput.inputEl.focus();
