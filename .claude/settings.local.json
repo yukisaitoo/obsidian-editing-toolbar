@@ -18,7 +18,7 @@
       "Bash(pnpm run build)",
       "Bash(npx tsc *)"
     ],
-    "deny": [
+    "ask": [
       "Bash(rm *)",
       "Bash(git push *)",
       "Bash(git reset *)",

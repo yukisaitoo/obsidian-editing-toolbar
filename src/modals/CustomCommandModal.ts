@@ -2,7 +2,7 @@ import { App, Modal, Notice, setIcon, Setting, TextComponent } from "obsidian";
 import { RegexCommandModal } from "src/modals/RegexCommandModal";
 import { ChooseFromIconList } from "src/modals/suggesterModals";
 import editingToolbarPlugin from "src/plugin/main";
-import { t } from 'src/translations/helper';
+import { strings } from 'src/translations/helper';
 export class CustomCommandModal extends Modal {
   private plugin: editingToolbarPlugin;
   private commandIndex: number | null;
@@ -50,14 +50,14 @@ export class CustomCommandModal extends Modal {
     const { contentEl } = this;
     this.modalEl.addClass('custom-commands-modal');
     contentEl.empty();
-    contentEl.createEl('h2', { text: this.commandIndex !== null ? t('Edit Custom Command') : t('Add Custom Command') });
+    contentEl.createEl('h2', { text: this.commandIndex !== null ? strings.editCustomCommand : strings.addCustomCommand });
 
     const switchButtonContainer = contentEl.createDiv('switch-to-regex-container');
     switchButtonContainer.style.marginBottom = '20px';
     switchButtonContainer.style.textAlign = 'center';
 
     const switchButton = switchButtonContainer.createEl('button', {
-      text: t('Switch Regex Command Window')
+      text: strings.switchRegexCommandWindow
     });
     switchButton.addClass('mod-cta');
     switchButton.addEventListener('click', () => {
@@ -66,8 +66,8 @@ export class CustomCommandModal extends Modal {
     });
 
     const commandIdSetting = new Setting(contentEl)
-      .setName(t('Command ID'))
-      .setDesc(t('Unique identifier, no spaces, e.g.: "my-custom-format"'))
+      .setName(strings.commandId)
+      .setDesc(strings.uniqueIdentifierSpacesEG)
       .addText(text => {
         this.commandIdInput = text;
         text.setValue(this.commandId);
@@ -88,8 +88,8 @@ export class CustomCommandModal extends Modal {
       });
 
     const commandNameSetting = new Setting(contentEl)
-      .setName(t('Command Name'))
-      .setDesc(t('Displayed name in toolbar and menu'))
+      .setName(strings.commandName)
+      .setDesc(strings.displayedNameToolbarMenu)
       .addText(text => this.commandNameInput = text
         .setValue(this.commandName)
         .onChange(value => this.commandName = value)
@@ -210,8 +210,8 @@ function addSpecialCharButtons(setting: Setting, input: HTMLInputElement) {
  
 }
 const prefixSetting = new Setting(contentEl)
-  .setName(t('Prefix'))
-  .setDesc(t('Add content before selected text')+t('Use ↵ to represent line breaks'))
+  .setName(strings.prefix)
+  .setDesc(strings.addContentBeforeSelectedText+strings.useRepresentLineBreaks)
   .addText(text => text
     .setValue(toDisplayText(this.prefix))
     .onChange(value => {
@@ -228,8 +228,8 @@ const prefixSetting = new Setting(contentEl)
 addSpecialCharButtons(prefixSetting, prefixSetting.controlEl.querySelector('input'));
 
 const suffixSetting = new Setting(contentEl)
-  .setName(t('Suffix'))
-  .setDesc(t('Add content after selected text'))
+  .setName(strings.suffix)
+  .setDesc(strings.addContentAfterSelectedText)
   .addText(text => {
     this.suffixInput = text;
     text.setValue(toDisplayText(this.suffix))
@@ -241,32 +241,32 @@ addSpecialCharButtons(suffixSetting, suffixSetting.controlEl.querySelector('inpu
 
 
     const charSetting = new Setting(contentEl)
-      .setName(t('Cursor Position Offset'))
-      .setDesc(t('Default 0, format will keep the text selected'))
+      .setName(strings.cursorPositionOffset)
+      .setDesc(strings.default0FormatKeepText)
       .addText(text => text
         .setValue(this.char.toString())
         .onChange(value => this.char = parseInt(value) || 0)
       );
 
     const lineSetting = new Setting(contentEl)
-      .setName(t('Line Offset'))
-      .setDesc(t('Line offset of cursor after formatting'))
+      .setName(strings.lineOffset)
+      .setDesc(strings.lineOffsetCursorAfterFormatting)
       .addText(text => text
         .setValue(this.line.toString())
         .onChange(value => this.line = parseInt(value) || 0)
       );
 
     new Setting(contentEl)
-      .setName(t('Line Head Format'))
-      .setDesc(t('Whether to insert at the beginning of the next line'))
+      .setName(strings.lineHeadFormat)
+      .setDesc(strings.whetherInsertBeginningNextLine)
       .addToggle(toggle => toggle
         .setValue(this.islinehead)
         .onChange(value => this.islinehead = value)
       );
 
     const iconSetting = new Setting(contentEl)
-      .setName(t('Icon'))
-      .setDesc(t('Command icon (click to select)'));
+      .setName(strings.icon)
+      .setDesc(strings.commandIconClickSelect);
 
     this.iconDisplay = iconSetting.controlEl.createDiv('editingToolbarSettingsIcon');
     if (this.icon) {
@@ -280,7 +280,7 @@ addSpecialCharButtons(suffixSetting, suffixSetting.controlEl.querySelector('inpu
 
 
     iconSetting.addButton(button => button
-      .setButtonText(t('Choose Icon'))
+      .setButtonText(strings.chooseIcon)
       .onClick(() => {
         const command = {
           id: this.commandId,
@@ -315,16 +315,16 @@ addSpecialCharButtons(suffixSetting, suffixSetting.controlEl.querySelector('inpu
 
     new Setting(contentEl)
       .addButton(button => button
-        .setButtonText(t('Save'))
+        .setButtonText(strings.save)
         .setCta()
         .onClick(() => {
           if (!this.commandId || !this.commandName) {
-            new Notice(t('Command ID and command name cannot be empty'));
+            new Notice(strings.commandIdCommandNameCannot);
             return;
           }
 
           if (this.commandId.includes(' ')) {
-            new Notice(t('Command ID cannot contain spaces'));
+            new Notice(strings.commandIdCannotContainSpaces);
             return;
           }
           const commandId = this.commandIndex === null ? `custom-${this.commandId}` : this.commandId;
@@ -334,7 +334,7 @@ addSpecialCharButtons(suffixSetting, suffixSetting.controlEl.querySelector('inpu
               cmd => cmd.id === commandId
             );
             if (existingIndex >= 0) {
-              new Notice(t("The command") + this.commandId + t("already exists"), 8000);
+              new Notice(strings.command2 + this.commandId + strings.alreadyExists, 8000);
               return;
             }
           }
@@ -385,7 +385,7 @@ addSpecialCharButtons(suffixSetting, suffixSetting.controlEl.querySelector('inpu
         })
       )
       .addButton(button => button
-        .setButtonText(t('Cancel'))
+        .setButtonText(strings.cancel)
         .onClick(() => this.close())
       );
 

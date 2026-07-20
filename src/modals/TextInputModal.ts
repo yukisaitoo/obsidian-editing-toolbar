@@ -1,5 +1,5 @@
 import { App, Modal, Setting, TFile, parseLinktext } from "obsidian";
-import { t } from "src/translations/helper";
+import { strings } from "src/translations/helper";
 import { compactContent } from "src/util/contextCompactor";
 
 interface ITextInputResult {
@@ -237,7 +237,7 @@ export class TextInputModal extends Modal {
             this.linkedContextWrapEl.style.display = "none";
             this.linkedContextWrapEl.createDiv({
                 cls: "editing-toolbar-text-input-context-label",
-                text: this.options.linkedNotes?.contextLabel || t("Referenced notes"),
+                text: this.options.linkedNotes?.contextLabel || strings.referencedNotes,
             });
             this.linkedContextItemsEl = this.linkedContextWrapEl.createDiv();
             void this.syncLinkedNoteContextsForEnabledFields();
@@ -247,7 +247,7 @@ export class TextInputModal extends Modal {
             const suggestionsWrap = contentEl.createDiv({ cls: "editing-toolbar-text-input-suggestions" });
             suggestionsWrap.createDiv({
                 cls: "editing-toolbar-text-input-suggestions-label",
-                text: t("Suggestions"),
+                text: strings.suggestions,
             });
 
             const chipsWrap = suggestionsWrap.createDiv({ cls: "editing-toolbar-text-input-suggestions-chips" });
@@ -266,7 +266,7 @@ export class TextInputModal extends Modal {
 
         const footerHints = [
             this.options.linkedNotes?.enabled
-                ? (this.options.linkedNotes.hint || t("Type [[]] to reference document content."))
+                ? (this.options.linkedNotes.hint || strings.typeReferenceDocumentContent)
                 : "",
             this.options.footerHint || "",
         ].filter((hint) => hint.trim().length > 0);
@@ -278,13 +278,13 @@ export class TextInputModal extends Modal {
 
         new Setting(contentEl)
             .addButton(btn => btn
-                .setButtonText(t("Confirm"))
+                .setButtonText(strings.confirm)
                 .setCta()
                 .onClick(() => {
                     void this.submit();
                 }))
             .addButton(btn => btn
-                .setButtonText(t("Cancel"))
+                .setButtonText(strings.cancel)
                 .onClick(() => {
                     this.close();
                 }));

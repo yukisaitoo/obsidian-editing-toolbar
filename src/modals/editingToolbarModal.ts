@@ -6,7 +6,7 @@ import {
   StyleAppearanceSettings,
   ToolbarStyleKey,
 } from "src/settings/settingsData";
-import { t } from "src/translations/helper";
+import { strings, t } from "src/translations/helper";
 import { setBottomValue, setHorizontalValue } from "src/util/statusBarConstants";
 import { backcolorpicker, colorpicker, setBackgroundcolor, setFontcolor } from "src/util/util";
 import { ViewUtils } from 'src/util/viewUtils';
@@ -437,7 +437,7 @@ function createMoremenu(app: App, plugin: editingToolbarPlugin, selector: HTMLDi
   let morebutton = new ButtonComponent(cMoreMenu);
   morebutton
     .setClass("editingToolbarCommandItem")
-    .setTooltip(t("More"))
+    .setTooltip(strings.more)
     .onClick(() => {
       if (Morecontainer.style.visibility == "hidden") {
         Morecontainer.style.visibility = "visible";
@@ -469,7 +469,7 @@ export function setFormateraser(plugin: editingToolbarPlugin, editor: Editor) {
   // if (selectText == null || selectText == "") {
   //   quiteFormatbrushes(plugin);
   //   plugin.setEN_Text_Format_Brush(true);
-  //   plugin.Temp_Notice = new Notice(t("Clear formatting brush ON!\nClick the  mouse middle or right key to close the formatting-brush"), 0);
+  //   plugin.Temp_Notice = new Notice(strings.clearFormattingBrushClickMouse, 0);
 
   // } else {
   if (selectText.match(/^>\s*\[\![\w\s]*\]/m)) {
@@ -1117,7 +1117,7 @@ export function editingToolbarPopover(
             let button2 = new ButtonComponent(editingToolbar);
             button2
               .setClass("editingToolbarCommandsubItem-font-color")
-              .setTooltip(t("Font Colors"))
+              .setTooltip(strings.fontColors)
               .onClick((event: MouseEvent) => {
                 const target = event.target as HTMLElement | null;
                 if (target?.closest(".x-color-picker-wrapper") || target?.closest(".subitem")) {
@@ -1164,13 +1164,13 @@ export function editingToolbarPopover(
               let button3 = new ButtonComponent(el);
               button3
                 .setIcon("paintbrush")
-                .setTooltip(t("Format Brush"))
+                .setTooltip(strings.formatBrush)
                 .onClick(() => {
                   quiteFormatbrushes(plugin);
                   plugin.setEN_FontColor_Format_Brush(true);
                   //  globalThis.EN_FontColor_Format_Brush = true;
                   plugin.Temp_Notice = new Notice(
-                    t("Font-Color formatting brush ON!"),
+                    strings.fontColorFormattingBrush,
                     0
                   );
 
@@ -1178,7 +1178,7 @@ export function editingToolbarPopover(
               let button4 = new ButtonComponent(el);
               button4
                 .setIcon("palette")
-                .setTooltip(t("Custom Font Color"))
+                .setTooltip(strings.customFontColor)
                 .onClick(() => {
                   app.setting.open();
                   app.setting.openTabById("editing-toolbar");
@@ -1201,7 +1201,7 @@ export function editingToolbarPopover(
             let button2 = new ButtonComponent(editingToolbar);
             button2
               .setClass("editingToolbarCommandsubItem-font-color")
-              .setTooltip(t("Background Color"))
+              .setTooltip(strings.backgroundColor)
               .onClick((event: MouseEvent) => {
                 const target = event.target as HTMLElement | null;
                 if (target?.closest(".x-color-picker-wrapper") || target?.closest(".subitem")) {
@@ -1247,13 +1247,13 @@ export function editingToolbarPopover(
               let button3 = new ButtonComponent(el);
               button3
                 .setIcon("paintbrush")
-                .setTooltip(t("Format Brush"))
+                .setTooltip(strings.formatBrush)
                 .onClick(() => {
                   quiteFormatbrushes(plugin);
                   plugin.setEN_BG_Format_Brush(true);
                   //  globalplugin.EN_BG_Format_Brush = true;
                   plugin.Temp_Notice = new Notice(
-                    t("Font-Color formatting brush ON!"),
+                    strings.fontColorFormattingBrush,
                     0
                   );
 
@@ -1261,7 +1261,7 @@ export function editingToolbarPopover(
               let button4 = new ButtonComponent(el);
               button4
                 .setIcon("palette")
-                .setTooltip(t("Custom Backgroud Color"))
+                .setTooltip(strings.customBackgroudColor)
                 .onClick(() => {
                   app.setting.open();
                   app.setting.openTabById("editing-toolbar");

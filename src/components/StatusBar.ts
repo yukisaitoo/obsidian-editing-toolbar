@@ -3,7 +3,7 @@ import { selfDestruct } from "src/modals/editingToolbarModal";
 import { CommandPicker, openSlider } from "src/modals/suggesterModals";
 import type editingToolbarPlugin from "src/plugin/main";
 import { AESTHETIC_STYLES } from "src/settings/settingsData";
-import { t } from "src/translations/helper";
+import { strings } from "src/translations/helper";
 import { setMenuVisibility } from "src/util/statusBarConstants";
 import { ViewUtils } from "src/util/viewUtils";
 
@@ -53,7 +53,7 @@ export class StatusBar {
 
   private addVisibilityToggle(menu: Menu): void {
     menu.addItem((item) => {
-      item.setTitle(t("Hide & Show"));
+      item.setTitle(strings.hideShow);
       requireApiVersion("0.15.0") ? item.setSection("settings") : true;
       const itemDom = (item as any).dom as HTMLElement;
       const toggleComponent = new ToggleComponent(itemDom)
@@ -80,14 +80,14 @@ export class StatusBar {
     });
 
     menu.addItem((item) => {
-      item.setTitle(t("Toolbar Position"));
+      item.setTitle(strings.toolbarPosition);
       requireApiVersion("0.15.0") ? item.setSection("settings") : true;
       item.setIcon("dock");
 
       const submenu = item.setSubmenu();
 
       submenu.addItem((subItem) => {
-        subItem.setTitle(t("Top Toolbar"));
+        subItem.setTitle(strings.topToolbar);
         const itemDom = (subItem as any).dom as HTMLElement;
         const toggleComponent = new ToggleComponent(itemDom)
           .setValue(this.plugin.settings.enableTopToolbar || false)
@@ -117,7 +117,7 @@ export class StatusBar {
       });
 
       submenu.addItem((subItem) => {
-        subItem.setTitle(t("Following Toolbar"));
+        subItem.setTitle(strings.followingToolbar);
         const itemDom = (subItem as any).dom as HTMLElement;
         const toggleComponent = new ToggleComponent(itemDom)
           .setValue(this.plugin.settings.enableFollowingToolbar || false)
@@ -147,7 +147,7 @@ export class StatusBar {
       });
 
       submenu.addItem((subItem) => {
-        subItem.setTitle(t("Fixed Toolbar"));
+        subItem.setTitle(strings.fixedToolbar);
         const itemDom = (subItem as any).dom as HTMLElement;
         const toggleComponent = new ToggleComponent(itemDom)
           .setValue(this.plugin.settings.enableFixedToolbar || false)
@@ -185,7 +185,7 @@ export class StatusBar {
     const viewType = view.getViewType();
     
     menu.addItem((item) => {
-      item.setTitle(t("Current View: ") + viewType);
+      item.setTitle(strings.currentView + viewType);
       requireApiVersion("0.15.0") ? item.setSection("settings") : true;
       item.setIcon("layout-template");
       
@@ -194,7 +194,7 @@ export class StatusBar {
       const isAllowed = ViewUtils.isAllowedViewType(view);
       
       submenu.addItem(subItem => {
-        subItem.setTitle(isAllowed ? t("Disable toolbar for this view") : t("Enable toolbar for this view"));
+        subItem.setTitle(isAllowed ? strings.disableToolbarView : strings.enableToolbarView);
         subItem.setIcon(isAllowed ? "eye-off" : "eye");
         subItem.onClick(async () => {
           if (!this.plugin.settings.viewTypeSettings) {
@@ -213,7 +213,7 @@ export class StatusBar {
       });
       
       submenu.addItem(subItem => {
-        subItem.setTitle(t("Manage all view types"));
+        subItem.setTitle(strings.manageAllViewTypes);
         subItem.setIcon("settings-2");
         
         const allViewsSubmenu = subItem.setSubmenu();
@@ -277,7 +277,7 @@ export class StatusBar {
     const controls = [
       {
         icon: "plus",
-        title: t("Add Command"),
+        title: strings.addCommand,
         click: () => new CommandPicker(this.plugin).open()
       }
     ];
@@ -285,7 +285,7 @@ export class StatusBar {
     if (this.plugin.positionStyle === "fixed") {
       controls.push({
         icon: "file-sliders",
-        title: t("Position Settings"),
+        title: strings.positionSettings,
         click: () => new openSlider(this.plugin.app, this.plugin).open()
       });
     }
@@ -305,7 +305,7 @@ export class StatusBar {
 
   private addAestheticStyleToggle(menu: Menu): void {
     menu.addItem((item) => {
-      item.setTitle(t("Appearance Style"));
+      item.setTitle(strings.appearanceStyle);
       requireApiVersion("0.15.0") ? item.setSection("settings") : true;
       item.setIcon("cherry");
 

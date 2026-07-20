@@ -1,5 +1,5 @@
 import { App, ButtonComponent, Modal } from 'obsidian';
-import { t } from 'src/translations/helper';
+import { strings } from 'src/translations/helper';
 
 interface ConfirmModalOptions {
     title?: string;
@@ -15,9 +15,9 @@ export class ConfirmModal extends Modal {
     constructor(app: App, options: ConfirmModalOptions) {
         super(app);
         this.options = {
-            title: t('Confirm'),
-            confirmText: t('Confirm'),
-            cancelText: t('Cancel'),
+            title: strings.confirm,
+            confirmText: strings.confirm,
+            cancelText: strings.cancel,
             ...options
         };
     }

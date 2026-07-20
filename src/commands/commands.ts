@@ -21,7 +21,7 @@ import {
 } from "src/modals/TextInputModal";
 import editingToolbarPlugin from "src/plugin/main";
 import { CustomCommand } from "src/settings/settingsData";
-import { t } from "src/translations/helper";
+import { strings } from "src/translations/helper";
 import { fullscreenMode, workplacefullscreenMode } from "src/util/fullscreen";
 import { setMenuVisibility } from "src/util/statusBarConstants";
 import { TextEnhancement } from "src/util/textEnhancement";
@@ -344,9 +344,7 @@ export class CommandsManager {
 
           if (!lineText || lineText.trim() === "") {
             new Notice(
-              t(
-                "Current line is empty, please select text or move to a non-empty line"
-              )
+              strings.currentLineEmptyPleaseSelect
             );
             return;
           }
@@ -370,7 +368,7 @@ export class CommandsManager {
 
             if (!selectedText) {
               new Notice(
-                t("Please select text or copy text to clipboard first")
+                strings.pleaseSelectTextCopyText
               );
               return;
             }
@@ -382,7 +380,7 @@ export class CommandsManager {
             editor.setSelection(curserStart, newEnd);
           } catch (error) {
             console.error("读取剪贴板失败:", error);
-            new Notice(t("Please select text first"));
+            new Notice(strings.pleaseSelectTextFirst);
             return;
           }
         }
@@ -392,7 +390,7 @@ export class CommandsManager {
         const conditionRegex = new RegExp(command.conditionPattern);
         if (!conditionRegex.test(selectedText)) {
           new Notice(
-            t("The selected text does not meet the condition requirements")
+            strings.selectedTextDoesNotMeet
           );
           return;
         }
@@ -428,7 +426,7 @@ export class CommandsManager {
       editor.setSelection(newStart, newEnd);
     } catch (error) {
       console.error("正则表达式命令执行错误:", error);
-      new Notice(t("Regex command execution error: ") + error.message);
+      new Notice(strings.regexCommandExecutionError + error.message);
     }
   }
 
@@ -634,18 +632,18 @@ export class CommandsManager {
       editorCallback: (editor: Editor) => {
         new TextInputModal(
           this.plugin.app,
-          t("Add Prefix/Suffix"),
+          strings.addPrefixSuffix,
           [
             {
               key: "prefix",
-              label: t("Prefix"),
-              placeholder: t("Enter prefix"),
+              label: strings.prefix,
+              placeholder: strings.enterPrefix,
               defaultValue: "",
             },
             {
               key: "suffix",
-              label: t("Suffix"),
-              placeholder: t("Enter suffix"),
+              label: strings.suffix,
+              placeholder: strings.enterSuffix,
               defaultValue: "",
             },
           ],
@@ -668,23 +666,23 @@ export class CommandsManager {
       editorCallback: (editor: Editor) => {
         new TextInputModal(
           this.plugin.app,
-          t("Number Lines Configuration"),
+          strings.numberLinesConfiguration,
           [
             {
               key: "start",
-              label: t("Start Number"),
+              label: strings.startNumber,
               placeholder: "1",
               defaultValue: "1",
             },
             {
               key: "step",
-              label: t("Step"),
+              label: strings.step,
               placeholder: "1",
               defaultValue: "1",
             },
             {
               key: "sep",
-              label: t("Separator"),
+              label: strings.separator,
               placeholder: ". ",
               defaultValue: ". ",
             },
@@ -725,7 +723,7 @@ export class CommandsManager {
     });
     this.plugin.addCommand({
       id: "list-to-table",
-      name: t("List to Table"),
+      name: strings.listTable,
       editorCallback: (editor: Editor) => {
      TextEnhancement.convertListToTableMultiDim(editor);
       },
@@ -733,7 +731,7 @@ export class CommandsManager {
 
     this.plugin.addCommand({
       id: "table-to-list",
-      name: t("Table to List"),
+      name: strings.tableList,
       editorCallback: (editor: Editor) =>
         TextEnhancement.convertTableToList(editor),
     });
@@ -743,18 +741,18 @@ export class CommandsManager {
       editorCallback: (editor: Editor) => {
         new TextInputModal(
           this.plugin.app,
-          t("Extract Between Strings"),
+          strings.extractBetweenStrings,
           [
             {
               key: "start",
-              label: t("Start String"),
-              placeholder: t("Enter start string"),
+              label: strings.startString,
+              placeholder: strings.enterStartString,
               defaultValue: "[",
             },
             {
               key: "end",
-              label: t("End String"),
-              placeholder: t("Enter end string"),
+              label: strings.endString,
+              placeholder: strings.enterEndString,
               defaultValue: "]",
             },
           ],
@@ -772,16 +770,16 @@ export class CommandsManager {
 
     this.plugin.addCommand({
       id: "merge-lines",
-      name: t("Merge Lines"),
+      name: strings.mergeLines,
       editorCallback: (editor: Editor) => {
         new TextInputModal(
           this.plugin.app,
-          t("Merge Lines Settings"),
+          strings.mergeLinesSettings,
           [
             {
               key: "sep",
-              label: t("Separator (leave empty for smart spacing)"),
-              placeholder: t("e.g., comma, pipe, arrow"),
+              label: strings.separatorLeaveEmptySmartSpacing,
+              placeholder: strings.eGCommaPipeArrow,
               defaultValue: "",
             },
           ],

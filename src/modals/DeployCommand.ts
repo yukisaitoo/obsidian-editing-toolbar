@@ -1,6 +1,6 @@
 import { App, Modal, Notice, setIcon, Setting, ToggleComponent } from "obsidian";
 import editingToolbarPlugin from "src/plugin/main";
-import { t } from 'src/translations/helper';
+import { strings } from 'src/translations/helper';
 
 interface DeployOption {
   id: string;
@@ -20,12 +20,12 @@ export class DeployCommandModal extends Modal {
       this.plugin = plugin;
       this.command = command;
       this.deployOptions = [
-        { id: 'following', name: t('Following Style'), enabled: true },
-        { id: 'top', name: t('Top Style'), enabled: true },
-        { id: 'fixed', name: t('Fixed Style'), enabled: true },
+        { id: 'following', name: strings.followingStyle, enabled: true },
+        { id: 'top', name: strings.topStyle, enabled: true },
+        { id: 'fixed', name: strings.fixedStyle, enabled: true },
       ];
       if (this.plugin.settings.isLoadOnMobile) {
-        this.deployOptions.push({ id: 'mobile', name: t('Mobile Style'), enabled: true });
+        this.deployOptions.push({ id: 'mobile', name: strings.mobileStyle, enabled: true });
       }
     }
   
@@ -33,7 +33,7 @@ export class DeployCommandModal extends Modal {
       const { contentEl } = this;
       contentEl.empty();
       
-      contentEl.createEl('h3', { text: t('Deploy command to configurations') });
+      contentEl.createEl('h3', { text: strings.deployCommandConfigurations });
       
       const allContainer = contentEl.createDiv('deploy-option');
   
@@ -55,14 +55,14 @@ export class DeployCommandModal extends Modal {
       const buttonContainer = contentEl.createDiv('deploy-buttons');
       new Setting(buttonContainer)
         .addButton(button => button
-          .setButtonText(t('Deploy'))
+          .setButtonText(strings.deploy)
           .setCta()
           .onClick(() => {
             this.deployCommand();
             this.close();
           }))
         .addButton(button => button
-          .setButtonText(t('Cancel'))
+          .setButtonText(strings.cancel)
           .onClick(() => {
             this.close();
           }));
@@ -122,10 +122,10 @@ export class DeployCommandModal extends Modal {
             .map(opt => opt.name)
             .join(', ');
           
-          message = t('Command deployed to: ') + deployedConfigs;
+          message = strings.commandDeployed + deployedConfigs;
         
         } else {
-          message = t('Command already exists in selected configurations');
+          message = strings.commandAlreadyExistsSelectedConfigurations;
         }
 
         new Notice(message);

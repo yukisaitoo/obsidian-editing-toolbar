@@ -2,7 +2,7 @@ import { App, Modal, Notice, setIcon, Setting, TextComponent, ToggleComponent } 
 import { ChooseFromIconList } from "src/modals/suggesterModals";
 import editingToolbarPlugin from "src/plugin/main";
 import { CustomCommand } from "src/settings/settingsData";
-import { t } from 'src/translations/helper';
+import { strings } from 'src/translations/helper';
 
 export class RegexCommandModal extends Modal {
   private plugin: editingToolbarPlugin;
@@ -68,13 +68,13 @@ export class RegexCommandModal extends Modal {
     const { contentEl } = this;
     this.modalEl.addClass('custom-commands-modal');
     contentEl.empty();
-    contentEl.createEl('h2', { text: this.commandIndex !== null ? t('Edit regular expression command') : t('Add regular expression command') });
+    contentEl.createEl('h2', { text: this.commandIndex !== null ? strings.editRegularExpressionCommand : strings.addRegularExpressionCommand });
 
     const basicSettingsContainer = contentEl.createDiv('basic-settings-container');
 
     const commandIdSetting = new Setting(basicSettingsContainer)
-      .setName(t('Command ID'))
-      .setDesc(t('Unique identifier, no spaces, e.g.: "my-custom-format"'))
+      .setName(strings.commandId)
+      .setDesc(strings.uniqueIdentifierSpacesEG)
       .addText(text => {
         text.setValue(this.commandId);
         if (this.commandIndex !== null) {
@@ -94,8 +94,8 @@ export class RegexCommandModal extends Modal {
       });
 
     const commandNameSetting = new Setting(basicSettingsContainer)
-      .setName(t('Command Name'))
-      .setDesc(t('Displayed name in toolbar and menu'))
+      .setName(strings.commandName)
+      .setDesc(strings.displayedNameToolbarMenu)
       .addText(text => text
         .setValue(this.commandName)
         .onChange(value => this.commandName = value)
@@ -112,7 +112,7 @@ export class RegexCommandModal extends Modal {
     aiHelpContainer.style.borderRadius = '5px';
     aiHelpContainer.style.overflow = 'hidden';
 
-    const aiHelpSummary = aiHelpContainer.createEl('summary', { text: t('How to use AI to get regular expressions?') });
+    const aiHelpSummary = aiHelpContainer.createEl('summary', { text: strings.howUseAiGetRegular });
     aiHelpSummary.style.padding = '8px 12px';
     aiHelpSummary.style.backgroundColor = 'var(--background-secondary)';
     aiHelpSummary.style.cursor = 'pointer';
@@ -131,17 +131,17 @@ export class RegexCommandModal extends Modal {
     aiHelpContent.style.userSelect = 'text';
 
     aiHelpContent.innerHTML = `
-      <p><strong>${t('AI question template:')}</strong><br>
-    ${t('[Description]')}:
-      ${t('I need to convert the url to a markdown format link')}
+      <p><strong>${strings.aiQuestionTemplate}</strong><br>
+    ${strings.description}:
+      ${strings.iNeedConvertUrlMarkdown}
     <br>
-    ${t('[Example]')}: 
-      ${t('For example, convert https://example.com to [https://example.com](https://example.com)')}
+    ${strings.example}: 
+      ${strings.exampleConvertHttpsExampleCom}
     <br>
-    ${t('[Requirements]')}:  
-      ${t('Use js regular expression to implement, and output the parameters in the following format (the result does not need to be escaped with json)')}
+    ${strings.requirements}:  
+      ${strings.useJsRegularExpressionImplement}
     <br>
-    ${t('[Output]')}:
+    ${strings.output}:
     <br>
       "name": "[Descriptive Name]", <br>
       "pattern": "[Regex Pattern]", <br>
@@ -151,8 +151,8 @@ export class RegexCommandModal extends Modal {
     `;
 
     new Setting(regexContainer)
-      .setName(t('Matching pattern'))
-      .setDesc(t('Regex pattern to match'))
+      .setName(strings.matchingPattern)
+      .setDesc(strings.regexPatternMatch)
       .addText(text =>
         this.regexPatternInput = text
           .setValue(this.regexPattern)
@@ -163,8 +163,8 @@ export class RegexCommandModal extends Modal {
       );
 
     new Setting(regexContainer)
-      .setName(t('Replacement pattern'))
-      .setDesc(t('Replacement pattern (use $1, $2, etc. to reference capture groups)')+t('Use \\n to represent line breaks'))
+      .setName(strings.replacementPattern)
+      .setDesc(strings.replacementPatternUse12+strings.useNRepresentLineBreaks)
       .addText(text =>
         this.regexReplacementInput = text
       .setValue(this.regexReplacement.replace(/\n/g, '\\n'))
@@ -179,8 +179,8 @@ export class RegexCommandModal extends Modal {
     regexOptionsContainer.style.gap = '8px';
 
     new Setting(regexOptionsContainer)
-      .setName(t('Ignore case'))
-      .setDesc(t('Match case-insensitive'))
+      .setName(strings.ignoreCase)
+      .setDesc(strings.matchCaseInsensitive)
       .addToggle(toggle => toggle
         .setValue(this.regexCaseInsensitive)
         .onChange(value => {
@@ -190,8 +190,8 @@ export class RegexCommandModal extends Modal {
       );
 
     new Setting(regexOptionsContainer)
-      .setName(t('Global replace'))
-      .setDesc(t('Replace all matches'))
+      .setName(strings.globalReplace)
+      .setDesc(strings.replaceAllMatches)
       .addToggle(toggle => toggle
         .setValue(this.regexGlobal)
         .onChange(value => {
@@ -201,8 +201,8 @@ export class RegexCommandModal extends Modal {
       );
 
     new Setting(regexOptionsContainer)
-      .setName(t('Multiline mode'))
-      .setDesc(t('^ and $ match the start and end of each line'))
+      .setName(strings.multilineMode)
+      .setDesc(strings.matchStartEndEachLine)
       .addToggle(toggle =>
         this.regexMultilineToggle = toggle
           .setValue(this.regexMultiline)
@@ -216,8 +216,8 @@ export class RegexCommandModal extends Modal {
     const conditionContainer = regexContainer.createDiv('condition-container');
 
     new Setting(conditionContainer)
-      .setName(t('Use condition'))
-      .setDesc(t('Only apply custom command when text matches the condition'))
+      .setName(strings.useCondition)
+      .setDesc(strings.onlyApplyCustomCommandWhen)
       .addToggle(toggle =>
         this.useConditionToggle = toggle
           .setValue(this.useCondition)
@@ -235,8 +235,8 @@ export class RegexCommandModal extends Modal {
     conditionSettingsContainer.style.marginBottom = '15px';
 
     new Setting(conditionSettingsContainer)
-      .setName(t('Condition pattern'))
-      .setDesc(t('Must exist regular expression or text'))
+      .setName(strings.conditionPattern)
+      .setDesc(strings.mustExistRegularExpressionText)
       .addText(text =>
         this.conditionPatternInput = text
           .setValue(this.conditionPattern)
@@ -246,8 +246,8 @@ export class RegexCommandModal extends Modal {
       );
 
     const iconSetting = new Setting(regexContainer)
-      .setName(t('Icon'))
-      .setDesc(t('Command icon (click to select)'));
+      .setName(strings.icon)
+      .setDesc(strings.commandIconClickSelect);
 
     this.iconDisplay = iconSetting.controlEl.createDiv('editingToolbarSettingsIcon');
     if (this.icon) {
@@ -259,7 +259,7 @@ export class RegexCommandModal extends Modal {
     }
 
     iconSetting.addButton(button => button
-      .setButtonText(t('Choose icon'))
+      .setButtonText(strings.chooseIcon3)
       .onClick(() => {
         const command = {
           id: this.commandId,
@@ -295,7 +295,7 @@ export class RegexCommandModal extends Modal {
     regexExamplesContainer.style.borderRadius = '5px';
     regexExamplesContainer.style.overflow = 'hidden';
 
-    const examplesSummary = regexExamplesContainer.createEl('summary', { text: t('Regular expression examples') });
+    const examplesSummary = regexExamplesContainer.createEl('summary', { text: strings.regularExpressionExamples });
     examplesSummary.style.padding = '8px 12px';
     examplesSummary.style.backgroundColor = 'var(--background-secondary)';
     examplesSummary.style.cursor = 'pointer';
@@ -316,60 +316,60 @@ export class RegexCommandModal extends Modal {
 
     const examples = [
       {
-        name: t('URL to Markdown link'),
+        name: strings.urlMarkdownLink,
         pattern: '(https?://\\S+)',
         replacement: '[$1]($1)'
       },
       {
-        name: t('Convert MM/DD/YYYY to YYYY-MM-DD'),
+        name: strings.convertMmDdYyyyYyyy,
         pattern: '(\\d{1,2})/(\\d{1,2})/(\\d{4})',
         replacement: '$3-$1-$2'
       },
       {
-        name: t('Add bold to keywords'),
+        name: strings.addBoldKeywords,
         pattern: '\\b(important|critical|urgent)\\b',
         replacement: '**$1**'
       },
       {
-        name: t('Format phone number'),
+        name: strings.formatPhoneNumber,
         pattern: '(\\d{3})(\\d{3})(\\d{4})',
         replacement: '($1) $2-$3'
       },
       {
-        name: t('Remove extra spaces'),
+        name: strings.removeExtraSpaces,
         pattern: '\\s{2,}',
         replacement: ' '
       },
       {
-        name: t('Convert HTML bold tags to Markdown format'),
+        name: strings.convertHtmlBoldTagsMarkdown,
         pattern: '<strong>(.*?)</strong>',
         replacement: '**$1**'
       },
   
       {
-        name: t('Convert quoted text to quote block'),
+        name: strings.convertQuotedTextQuoteBlock,
         pattern: '"([^"]+)"',
         replacement: '> $1'
       },
       {
-        name: t('Add uniform alias to Markdown links'),
+        name: strings.addUniformAliasMarkdownLinks,
         pattern: '\\[([^\\]]+)\\]\\(([^\\)]+)\\)',
         replacement: '[$1|alias]($2)'
       },
       {
-        name: t('Delete empty lines (multiline mode)'),
+        name: strings.deleteEmptyLinesMultilineMode,
         pattern: '^\\s*$\\n',
         replacement: '',
         toggleMultiline: true
       },
       {
-        name: t('Add list symbol to each line (multiline mode)'),
+        name: strings.addListSymbolEachLine,
         pattern: '^(.+)$',
         replacement: '- $1',
         toggleMultiline: true
       },
       {
-        name: t('If the text contains important, set the text highlight (conditional format)'),
+        name: strings.ifTextContainsImportantSet,
         pattern: '(.+)',
         replacement: '==$1==',
         useCondition: true,
@@ -433,19 +433,19 @@ export class RegexCommandModal extends Modal {
     previewContainer.style.padding = '10px';
     previewContainer.style.borderRadius = '5px';
 
-    const previewLabel = previewContainer.createEl('label', { text: t('Preview') });
+    const previewLabel = previewContainer.createEl('label', { text: strings.preview });
 
 
     const previewInputContainer = previewContainer.createDiv('preview-input-container');
     previewInputContainer.style.marginBottom = '10px';
 
-    const previewInputLabel = previewInputContainer.createEl('label', { text: t('Example text:') });
+    const previewInputLabel = previewInputContainer.createEl('label', { text: strings.exampleText });
     previewInputLabel.style.display = 'block';
     previewInputLabel.style.marginBottom = '5px';
 
     this.previewInput = previewInputContainer.createEl('textarea', {
       attr: {
-        placeholder: t('Input example text to view the formatting effect of the command...')
+        placeholder: strings.inputExampleTextViewFormatting
       }
     });
     this.previewInput.style.height = 'auto';
@@ -461,7 +461,7 @@ export class RegexCommandModal extends Modal {
 
     const previewOutputContainer = previewContainer.createDiv('preview-output-container');
 
-    const previewOutputLabel = previewOutputContainer.createEl('label', { text: t('Result: ') });
+    const previewOutputLabel = previewOutputContainer.createEl('label', { text: strings.result });
     previewOutputLabel.style.display = 'block';
     previewOutputLabel.style.marginBottom = '5px';
 
@@ -480,17 +480,17 @@ export class RegexCommandModal extends Modal {
         .setCta()
         .onClick(() => {
           if (!this.commandId || !this.commandName) {
-            new Notice(t('Command ID and command name cannot be empty'));
+            new Notice(strings.commandIdCommandNameCannot);
             return;
           }
 
           if (this.commandId.includes(' ')) {
-            new Notice(t('Command ID cannot contain spaces'));
+            new Notice(strings.commandIdCannotContainSpaces);
             return;
           }
 
           if (!this.regexPattern) {
-            new Notice(t('Regex pattern cannot be empty'));
+            new Notice(strings.regexPatternCannotEmpty);
             return;
           }
           const commandId = this.commandIndex === null ? `custom-${this.commandId}` : this.commandId;
@@ -499,7 +499,7 @@ export class RegexCommandModal extends Modal {
               cmd => cmd.id === commandId
             );
             if (existingIndex >= 0) {
-              new Notice(t('Command')+' ' + this.commandId +' '+ t('already exists'), 8000);
+              new Notice(strings.command+' ' + this.commandId +' '+ strings.alreadyExists, 8000);
               return;
             }
           }
@@ -540,7 +540,7 @@ export class RegexCommandModal extends Modal {
         })
       )
       .addButton(button => button
-        .setButtonText(t('Cancel'))
+        .setButtonText(strings.cancel)
         .onClick(() => this.close())
       );
   }
@@ -577,7 +577,7 @@ export class RegexCommandModal extends Modal {
       });
       this.previewOutput.style.color = 'var(--text-normal)';
     } catch (error) {
-      this.previewOutput.setText(t('Error: ') + error.message);
+      this.previewOutput.setText(strings.error + error.message);
       this.previewOutput.style.color = 'var(--text-error)';
 
       const codeContainer = this.previewOutput.parentElement?.querySelector('.regex-code-container');
@@ -598,12 +598,12 @@ export class RegexCommandModal extends Modal {
       (codeContainer as HTMLDivElement).style.borderTop = '1px solid var(--background-modifier-border)';
       (codeContainer as HTMLDivElement).style.paddingTop = '10px';
 
-      const codeTitle = codeContainer.createEl('div', { text: t('Complete regular expression code (copy to AI for explanation)') });
+      const codeTitle = codeContainer.createEl('div', { text: strings.completeRegularExpressionCodeCopy });
       codeTitle.style.marginBottom = '5px';
       codeTitle.style.fontWeight = 'bold';
     } else {
       codeContainer.empty();
-      const codeTitle = codeContainer.createEl('div', { text: t('Complete regular expression code (copy to AI for explanation)') });
+      const codeTitle = codeContainer.createEl('div', { text: strings.completeRegularExpressionCodeCopy });
       codeTitle.style.marginBottom = '5px';
       codeTitle.style.fontWeight = 'bold';
     }
@@ -616,22 +616,22 @@ export class RegexCommandModal extends Modal {
     codeBlock.style.fontFamily = 'monospace';
     codeBlock.style.fontSize = 'var(--font-smaller)';
 
-    let codeText = `//${t('Explain the syntax of JavaScript regular expressions')}\n`;
+    let codeText = `//${strings.explainSyntaxJavascriptRegularExpressions}\n`;
     codeText += `const regex = /${this.escapeRegexForDisplay(this.regexPattern)}/${flags};\n`;
     codeText += `const result = text.replace(regex, "${this.escapeStringForDisplay(this.regexReplacement)}");\n`;
 
     if (this.useCondition && this.conditionPattern) {
-      codeText += `\n//${t('Conditional matching')}\n`;
+      codeText += `\n//${strings.conditionalMatching}\n`;
       codeText += `const condition = /${this.escapeRegexForDisplay(this.conditionPattern)}/;\n`;
       codeText += `if (condition.test(text)) {\n`;
-      codeText += `  //${t('Apply regular expression replacement')}\n`;
+      codeText += `  //${strings.applyRegularExpressionReplacement}\n`;
       codeText += `  const result = text.replace(regex, "${this.escapeStringForDisplay(this.regexReplacement)}");\n`;
       codeText += `}`;
     }
 
     codeBlock.textContent = codeText;
 
-    const copyButton = codeContainer.createEl('button', { text: t('Copy code') });
+    const copyButton = codeContainer.createEl('button', { text: strings.copyCode });
     copyButton.style.marginTop = '5px';
     copyButton.style.padding = '4px 8px';
     copyButton.style.borderRadius = '4px';
@@ -639,9 +639,9 @@ export class RegexCommandModal extends Modal {
 
     copyButton.addEventListener('click', () => {
       navigator.clipboard.writeText(codeText).then(() => {
-        copyButton.textContent = t('Copied!');
+        copyButton.textContent = strings.copied;
         setTimeout(() => {
-          copyButton.textContent = t('Copy code');
+          copyButton.textContent = strings.copyCode;
         }, 2000);
       }).catch(err => {
         console.error('Failed to copy code: ', err);

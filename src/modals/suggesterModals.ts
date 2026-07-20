@@ -1,7 +1,7 @@
 import { App, Command, FuzzyMatch, FuzzySuggestModal, Modal, Notice, SliderComponent, TextAreaComponent, TextComponent, debounce, setIcon } from "obsidian";
 import { appIcons } from "src/icons/appIcons";
 import type editingToolbarPlugin from "src/plugin/main";
-import { t } from "src/translations/helper";
+import { strings, t } from "src/translations/helper";
 import { setBottomValue, setHorizontalValue } from "src/util/statusBarConstants";
 import { findmenuID } from "src/util/util";
 
@@ -25,7 +25,7 @@ export class ChooseFromIconList extends FuzzySuggestModal<string> {
     this.command = command;
     this.issub = issub;
     this.customCallback = callback || null;
-    this.setPlaceholder(t("Choose an icon"));
+    this.setPlaceholder(strings.chooseIcon2);
     this.currentEditingConfig = currentEditingConfig || "";
   }
 
@@ -140,7 +140,7 @@ class CustomIcon extends Modal {
 
   onOpen() {
     const { contentEl } = this;
-    contentEl.createEl("b", { text: t("Enter the icon code, format as <svg>.... </svg>") });
+    contentEl.createEl("b", { text: strings.enterIconCodeFormatSvg });
     
     const textComponent = document.createElement("textarea");
     textComponent.className = "wideInputPromptInputEl";
@@ -203,7 +203,7 @@ export class CommandPicker extends FuzzySuggestModal<Command> {
   constructor(private plugin: editingToolbarPlugin,currentEditingConfig?:string) {
     super(plugin.app);
     this.app;
-    this.setPlaceholder(t("Choose a command"));
+    this.setPlaceholder(strings.chooseCommand);
     this.currentEditingConfig = currentEditingConfig || "";
   }
 
@@ -224,7 +224,7 @@ export class CommandPicker extends FuzzySuggestModal<Command> {
 
     if (index > -1)
     {
-      new Notice(t("The command") + t(item.name as any) + t("already exists"), 3000);
+      new Notice(strings.command2 + t(item.name as any) + strings.alreadyExists, 3000);
       return;
     } else {
       if (item.icon) {
@@ -265,7 +265,7 @@ export class ChangeCmdname extends Modal {
   }
   onOpen() {
     const { contentEl } = this;
-    contentEl.createEl("b", { text: t("Please enter a new name: ") });
+    contentEl.createEl("b", { text: strings.pleaseEnterNewName });
 
     const textComponent = new TextComponent(contentEl);
     textComponent.inputEl.classList.add('InputPromptInputEl');
@@ -320,17 +320,17 @@ export class openSlider extends Modal {
 
   onOpen() {
     const { contentEl } = this;
-    contentEl.createEl("p", { text: t("Drag the slider to move the position") });
+    contentEl.createEl("p", { text: strings.dragSliderMovePosition });
 
     const containerEl = contentEl.createDiv({ cls: "slider-container" });
 
     const verticalContainer = containerEl.createDiv({ cls: "vertical-slider-container" });
-    verticalContainer.createEl("p", { text: t("Vertical Position") });
+    verticalContainer.createEl("p", { text: strings.verticalPosition });
 
     const horizontalContainer = containerEl.createDiv({ cls: "horizontal-slider-container" });
-    horizontalContainer.createEl("p", { text: t("Horizontal Position") });
+    horizontalContainer.createEl("p", { text: strings.horizontalPosition });
       const columnsContainer = containerEl.createDiv({ cls: "columns-slider-container" });
-      columnsContainer.createEl("p", { text: t("Editing Toolbar Columns") });
+      columnsContainer.createEl("p", { text: strings.editingToolbarColumns });
     const bodyHeight = document.body.clientHeight;
     const bodyWidth = document.body.clientWidth;
 
@@ -375,7 +375,7 @@ export class openSlider extends Modal {
     const resetContainer = containerEl.createDiv({ cls: "reset-container" });
 
     resetContainer.createEl("button", {
-      text: t("Reset"),
+      text: strings.reset,
       cls: "reset-button"
     }).addEventListener("click", () => {
       this.needSave = true;

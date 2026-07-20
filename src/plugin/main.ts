@@ -21,7 +21,7 @@ import { createFollowingbar, editingToolbarPopover, isExistoolbar, quiteFormatbr
 import { InsertCalloutModal } from "src/modals/insertCalloutModal";
 import { InsertLinkModal } from "src/modals/insertLinkModal";
 import { DEFAULT_SETTINGS, editingToolbarSettings } from "src/settings/settingsData";
-import { t } from 'src/translations/helper';
+import { strings } from 'src/translations/helper';
 import { setBackgroundcolor, setFontcolor } from "src/util/util";
 import { ViewUtils } from 'src/util/viewUtils';
 import { editingToolbarSettingTab } from '../settings/settingsTab';
@@ -242,39 +242,39 @@ export default class editingToolbarPlugin extends Plugin {
 
     if (hasSelection) {
       actions.push(
-        { title: t("Split Lines"), commandId: "split-lines" },
-        { title: t("Merge Lines"), commandId: "merge-lines" },
-        { title: t("Full Half Converter"), commandId: "smart-symbols" },
-        { title: t("Dedupe Lines"), commandId: "dedupe-lines" },
-        { title: t("Add Prefix/Suffix"), commandId: "add-wrap" },
-        { title: t("Number Lines (Custom)"), commandId: "number-lines" },
-        { title: t("Trim Line Ends"), commandId: "remove-whitespace-trim" },
-        { title: t("Shrink Extra Spaces"), commandId: "remove-whitespace-compress" },
-        { title: t("Remove All Whitespace"), commandId: "remove-whitespace-all" },
-        { title: t("Extract Between Strings"), commandId: "extract-between" },
-        { title: t("List to Table"), commandId: "list-to-table" },
-        { title: t("Table to List"), commandId: "table-to-list" },
+        { title: strings.splitLines, commandId: "split-lines" },
+        { title: strings.mergeLines, commandId: "merge-lines" },
+        { title: strings.fullHalfConverter, commandId: "smart-symbols" },
+        { title: strings.dedupeLines, commandId: "dedupe-lines" },
+        { title: strings.addPrefixSuffix, commandId: "add-wrap" },
+        { title: strings.numberLinesCustom, commandId: "number-lines" },
+        { title: strings.trimLineEnds, commandId: "remove-whitespace-trim" },
+        { title: strings.shrinkExtraSpaces, commandId: "remove-whitespace-compress" },
+        { title: strings.removeAllWhitespace, commandId: "remove-whitespace-all" },
+        { title: strings.extractBetweenStrings, commandId: "extract-between" },
+        { title: strings.listTable, commandId: "list-to-table" },
+        { title: strings.tableList, commandId: "table-to-list" },
       );
     }
 
     if (!hasSelection) {
       actions.push(
-        { title: t("Add Prefix/Suffix"), commandId: "add-wrap" },
-        { title: t("Insert Blank Lines"), commandId: "insert-blank-lines" },
-        { title: t("Extract Between Strings"), commandId: "extract-between" },
+        { title: strings.addPrefixSuffix, commandId: "add-wrap" },
+        { title: strings.insertBlankLines, commandId: "insert-blank-lines" },
+        { title: strings.extractBetweenStrings, commandId: "extract-between" },
       );
     }
 
     if (isOrderedListLine) {
-      actions.push({ title: t("Renumber List"), commandId: "renumber-ordered-list" });
+      actions.push({ title: strings.renumberList, commandId: "renumber-ordered-list" });
     }
 
     if (!hasSelection && isTableContext) {
-      actions.push({ title: t("Table to List"), commandId: "table-to-list" });
+      actions.push({ title: strings.tableList, commandId: "table-to-list" });
     }
 
     if (!actions.length) {
-      actions.push({ title: t("Select text to see more tools"), disabled: true });
+      actions.push({ title: strings.selectTextSeeMoreTools, disabled: true });
     }
 
     return actions;
@@ -285,7 +285,7 @@ export default class editingToolbarPlugin extends Plugin {
     editor: Editor,
     _view: MarkdownView,
   ): void => {
-    this.addEditorContextSubmenu(menu, t("Text Tools"), "whole-word", this.buildTextContextActions(editor));
+    this.addEditorContextSubmenu(menu, strings.textTools, "whole-word", this.buildTextContextActions(editor));
   };
 
   async onload(): Promise<void> {
@@ -1148,9 +1148,7 @@ updateCurrentCommands(commands: any[], style?: string): void {
     }
     if (!detectedFormat && !this.lastExecutedCommand) {
       new Notice(
-        t(
-          "Please execute a format command or select format text first, then enable the format brush"
-        )
+        strings.pleaseExecuteFormatCommandSelect
       );
       return;
     }
@@ -1166,9 +1164,9 @@ updateCurrentCommands(commands: any[], style?: string): void {
       this.lastCalloutType = calloutType;
       if (this.formatBrushNotice) this.formatBrushNotice.hide();
       this.formatBrushNotice = new Notice(
-        t("Format brush ON! Select text to apply【") +
+        strings.formatBrushSelectTextApply +
           this.lastExecutedCommandName +
-          t("】format"),
+          strings.format,
         0
       );
     } else {
@@ -1535,28 +1533,28 @@ updateCurrentCommands(commands: any[], style?: string): void {
           if (!this.settings.followingCommands || this.settings.followingCommands.length === 0) {
             this.settings.followingCommands = [...this.settings.menuCommands];
             this.saveSettings();
-            new Notice(t("Following style commands successfully initialized"));
+            new Notice(strings.followingStyleCommandsSuccessfullyInitialize);
           }
           break;
         case "top":
           if (!this.settings.topCommands || this.settings.topCommands.length === 0) {
             this.settings.topCommands = [...this.settings.menuCommands];
             this.saveSettings();
-            new Notice(t("Top style commands successfully initialized"));
+            new Notice(strings.topStyleCommandsSuccessfullyInitialized);
           }
           break;
         case "fixed":
           if (!this.settings.fixedCommands || this.settings.fixedCommands.length === 0) {
             this.settings.fixedCommands = [...this.settings.menuCommands];
             this.saveSettings();
-            new Notice(t("Fixed style commands successfully initialized"));
+            new Notice(strings.fixedStyleCommandsSuccessfullyInitialized);
           }
           break;
         case "mobile":
           if (!this.settings.mobileCommands || this.settings.mobileCommands.length === 0) {
             this.settings.mobileCommands = [...this.settings.menuCommands];
             this.saveSettings();
-            new Notice(t("Mobile style commands successfully initialized"));
+            new Notice(strings.mobileStyleCommandsSuccessfullyInitialized);
           }
           break;
       }
