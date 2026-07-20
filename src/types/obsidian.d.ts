@@ -14,11 +14,6 @@ declare module "obsidian" {
 		setSecret(key: string, value: string): void;
 	}
 
-	interface Plugin {
-		registerEditorExtension?(extension: any): void;
-		registerObsidianProtocolHandler?(action: string, callback: (params: Record<string, string>) => any): void;
-	}
-
 	interface SettingsManager {
 		activeTab: SettingTab | null;
 		openTabById(id: string): SettingTab | null;
@@ -36,7 +31,7 @@ declare module "obsidian" {
 
 	interface Plugins {
 		manifests: Record<string, PluginManifest>;
-		plugins: Record<string, Plugin_2>;
+		plugins: Record<string, Plugin>;
 		enabledPlugins: any;
 		enablePlugin(pluginId: string): Promise<boolean>;
 		disablePlugin(pluginId: string): Promise<void>;
@@ -60,13 +55,8 @@ declare module "obsidian" {
 		on(name: 'canvas:node-menu', callback: (menu: Menu, node: unknown) => any, ctx?: any): EventRef;
 	}
 
-	interface MarkdownSubView {
-		applyFoldInfo(foldInfo: FoldInfo): void;
-		getFoldInfo(): FoldInfo | null;
-	}
-
 	interface Editor {
-		cm: CodeMirror.Editor;
+		cm: any;
 		getScrollerElement: () => HTMLElement;
 		containerEl: HTMLElement;
 	}
@@ -242,11 +232,6 @@ declare module "obsidian" {
 	}
 
 	interface Menu extends Component {
-
-		/**
-		 * @public
-		 */
-		constructor();
 
 		/**
 		 * @public
