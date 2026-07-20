@@ -1,6 +1,6 @@
 import { App, Editor, EditorPosition, MarkdownView, Modal, Notice, Platform, requestUrl, setIcon, Setting, TextComponent, ToggleComponent } from "obsidian";
 import editingToolbarPlugin from "src/plugin/main";
-import { text } from "src/translations/helper";
+import { t } from "src/translations/helper";
 
 interface ClipboardItems {
     [key: string]: string;
@@ -623,7 +623,7 @@ private matchLinkInLine(line: string, startPos: number, endPos: number, lineNumb
 
         .addButton((btn) => {
             btn.setIcon("lucide-globe")
-                .setTooltip(text("Fetch Remote Title"))
+                .setTooltip(t("Fetch Remote Title"))
                 .onClick(async () => {
                     if (this.linkUrl) {
                         btn.setDisabled(true);
@@ -635,14 +635,14 @@ private matchLinkInLine(line: string, startPos: number, endPos: number, lineNumb
                         this.linkTextInput.setValue(title);
                         this.updateHeader();
                     } else {
-                        new Notice(text("Please enter a URL first"));
+                        new Notice(t("Please enter a URL first"));
                     }
                 });
         });
-        linkTextSetting.setName(text("Link Text"))
+        linkTextSetting.setName(t("Link Text"))
             .addText((text) => {
                 this.linkTextInput = text;
-                text.setPlaceholder(text("Link Text"))
+                text.setPlaceholder(t("Link Text"))
                     .setValue(this.linkText)
                     .onChange((value) => {
                         this.linkText = value;
@@ -652,10 +652,10 @@ private matchLinkInLine(line: string, startPos: number, endPos: number, lineNumb
        
     
         const aliasSetting = new Setting(contentEl)
-            .setName(text("Title"))
+            .setName(t("Title"))
             .addText((text) => {
                 this.linkAliasInput = text;
-                text.setPlaceholder(text("Link Title (optional)"))
+                text.setPlaceholder(t("Link Title (optional)"))
                     .setValue(this.linkAlias)
                     .onChange((value) => {
                         this.linkAlias = value;
@@ -664,11 +664,11 @@ private matchLinkInLine(line: string, startPos: number, endPos: number, lineNumb
             });
     
         const urlSetting = new Setting(contentEl)
-            .setName(text("Link URL"))
+            .setName(t("Link URL"))
             .setClass("link-url-setting")
             .addText((text) => {
                 this.linkUrlInput = text;
-                text.setPlaceholder(text("Link URL"))
+                text.setPlaceholder(t("Link URL"))
                     .setValue(this.linkUrl)
                     .onChange((value) => {
                         this.linkUrl = value.trim();
@@ -679,7 +679,7 @@ private matchLinkInLine(line: string, startPos: number, endPos: number, lineNumb
             .addButton((btn) => {
                 btn
                     .setIcon("lucide-clipboard")
-                    .setTooltip(text("Paste and Parse"))
+                    .setTooltip(t("Paste and Parse"))
                     .onClick(async () => {
                         await this.parseClipboard();
                         this.updateHeader();
@@ -691,8 +691,8 @@ private matchLinkInLine(line: string, startPos: number, endPos: number, lineNumb
         this.urlErrorMsg.style.display = "none";
     
         const embedSetting = new Setting(contentEl)
-            .setName(text("Embed Content"))
-            .setDesc(text("If it is an image, turn on"));
+            .setName(t("Embed Content"))
+            .setDesc(t("If it is an image, turn on"));
     
         this.embedToggle = new ToggleComponent(embedSetting.controlEl);
         this.embedToggle
@@ -711,7 +711,7 @@ private matchLinkInLine(line: string, startPos: number, endPos: number, lineNumb
         const imageSizeSetting = new Setting(contentEl)
         .addButton((btn) => {
             btn.setIcon("lucide-maximize")
-                .setTooltip(text("Fit Editor Width"))
+                .setTooltip(t("Fit Editor Width"))
                 .onClick(() => {
                     const dimensions = this.getImageDimensions();
                     if (dimensions) {
@@ -726,10 +726,10 @@ private matchLinkInLine(line: string, startPos: number, endPos: number, lineNumb
                 });
         });
         imageSizeSetting.setClass('image-size-setting')
-            .setName(text("Image Size"))
+            .setName(t("Image Size"))
             .addText((text) => {
                 text.inputEl.addClass('image-width-input');
-                text.setPlaceholder(text("Image Width"))
+                text.setPlaceholder(t("Image Width"))
                     .setValue(this.imageWidth)
                     .onChange((value) => {
                         this.imageWidth = value.replace(/[^\d]/g, '');
@@ -744,7 +744,7 @@ private matchLinkInLine(line: string, startPos: number, endPos: number, lineNumb
     
         imageSizeSetting.addText((text) => {
             text.inputEl.addClass('image-height-input');
-            text.setPlaceholder(text("Image Height"))
+            text.setPlaceholder(t("Image Height"))
                 .setValue(this.imageHeight)
                 .onChange((value) => {
                     this.imageHeight = value.replace(/[^\d]/g, '');
@@ -756,8 +756,8 @@ private matchLinkInLine(line: string, startPos: number, endPos: number, lineNumb
         imageSizeSetting.settingEl.style.display = this.isEmbed ? 'block' : 'none';
     
         new Setting(contentEl)
-            .setName(text("Insert New Line"))
-            .setDesc(text("Insert a link on the next line"))
+            .setName(t("Insert New Line"))
+            .setDesc(t("Insert a link on the next line"))
             .addToggle((toggle) => {
                 toggle.setValue(this.insertNewLine)
                     .onChange((value) => {
@@ -775,7 +775,7 @@ private matchLinkInLine(line: string, startPos: number, endPos: number, lineNumb
             });
     
         const shortcutHint = contentEl.createDiv("shortcut-hint");
-        shortcutHint.setText(`${Platform.isMacOS ? "⌘" : "Ctrl"} + Enter ${text("to insert")}`);
+        shortcutHint.setText(`${Platform.isMacOS ? "⌘" : "Ctrl"} + Enter ${t("to insert")}`);
         shortcutHint.style.textAlign = "right";
         shortcutHint.style.fontSize = "0.8em";
         shortcutHint.style.opacity = "0.7";
@@ -784,7 +784,7 @@ private matchLinkInLine(line: string, startPos: number, endPos: number, lineNumb
         const buttonSetting = new Setting(contentEl)
             .addButton((btn) => {
                 btn
-                    .setButtonText(text("Insert"))
+                    .setButtonText(t("Insert"))
                     .setCta()
                     .onClick(() => {
                         this.insertLink();
@@ -794,7 +794,7 @@ private matchLinkInLine(line: string, startPos: number, endPos: number, lineNumb
             })
             .addButton((btn) =>
                 btn
-                    .setButtonText(text("Cancel"))
+                    .setButtonText(t("Cancel"))
                     .onClick(() => {
                         this.close();
                     })
@@ -879,7 +879,7 @@ private async fetchRemoteTitle(url: string): Promise<string> {
         }
 
         if (!this.isValidUrl(url)) {
-            this.urlErrorMsg.textContent = text("URL Format Error");
+            this.urlErrorMsg.textContent = t("URL Format Error");
             this.urlErrorMsg.style.display = "block";
             return false;
         }

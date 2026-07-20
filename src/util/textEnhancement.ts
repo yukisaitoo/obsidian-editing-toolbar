@@ -1,11 +1,11 @@
 import { Editor, Notice } from "obsidian";
-import { text } from "src/translations/helper";
+import { t } from "src/translations/helper";
 
 export class TextEnhancement {
   static getPlainText(editor: Editor): void {
     const selection = editor.getSelection();
     if (!selection) {
-      new Notice(text("Please select text first"));
+      new Notice(t("Please select text first"));
       return;
     }
 
@@ -18,7 +18,7 @@ export class TextEnhancement {
       .replace(/(\r\n|\n)+/gm, "\n");
 
     navigator.clipboard.writeText(plainText);
-    new Notice(text("Plain text copied to clipboard"));
+    new Notice(t("Plain text copied to clipboard"));
   }
 
   static insertBlankLines(editor: Editor): void {
@@ -43,7 +43,7 @@ export class TextEnhancement {
   ): void {
     const selection = editor.getSelection();
     if (!selection) {
-      new Notice(text("Please select text first"));
+      new Notice(t("Please select text first"));
       return;
     }
 
@@ -82,12 +82,12 @@ export class TextEnhancement {
     }
 
     editor.replaceSelection(result);
-    new Notice(text("Whitespace cleaning completed"));
+    new Notice(t("Whitespace cleaning completed"));
   }
   static splitLines(editor: Editor): void {
     const selection = editor.getSelection();
     if (!selection) {
-      new Notice(text("Please select text first"));
+      new Notice(t("Please select text first"));
       return;
     }
 
@@ -100,15 +100,15 @@ export class TextEnhancement {
         .split(listPattern)
         .map((item) => item.trim())
         .filter((item) => item.length > 0);
-      new Notice(text("List pattern detected, auto-split"));
+      new Notice(t("List pattern detected, auto-split"));
     } else {
       const sep = this.detectSeparator(selection);
       if (!sep) {
-        new Notice(text("No obvious separator or list pattern detected"));
+        new Notice(t("No obvious separator or list pattern detected"));
         return;
       }
       result = this.smartSplit(selection, sep);
-      new Notice(`${text("Merged with")} '${sep}' ${text("Merge completed")}`);
+      new Notice(`${t("Merged with")} '${sep}' ${t("Merge completed")}`);
     }
 
     editor.replaceSelection(result.join("\n"));
@@ -192,14 +192,14 @@ export class TextEnhancement {
 
       editor.replaceSelection(processed);
     } catch (err) {
-      new Notice(text("Paste failed"));
+      new Notice(t("Paste failed"));
     }
   }
 
   static smartTypography(editor: Editor): void {
     const selection = editor.getSelection();
     if (!selection || selection.trim().length === 0) {
-      new Notice(text("Please select text first"));
+      new Notice(t("Please select text first"));
       return;
     }
 
@@ -239,7 +239,7 @@ export class TextEnhancement {
         .replace(/([\u4e00-\u9fa5])([a-zA-Z0-9])/g, "$1 $2")
         .replace(/([a-zA-Z0-9])([\u4e00-\u9fa5])/g, "$1 $2");
 
-      new Notice(text("Detected Chinese context: converted to full-width symbols"));
+      new Notice(t("Detected Chinese context: converted to full-width symbols"));
     } else {
       result = result
         .replace(/，/g, ", ")
@@ -253,7 +253,7 @@ export class TextEnhancement {
         .replace(/[""]/g, '"')
         .replace(/ {2,}/g, " ");
 
-      new Notice(text("Detected code/English context: converted to half-width symbols"));
+      new Notice(t("Detected code/English context: converted to half-width symbols"));
     }
 
     placeholders.forEach((val, index) => {
@@ -272,7 +272,7 @@ export class TextEnhancement {
   ): void {
     const selection = editor.getSelection();
     if (!selection) {
-      new Notice(text("Please select text to dedupe first"));
+      new Notice(t("Please select text to dedupe first"));
       return;
     }
 
@@ -306,7 +306,7 @@ export class TextEnhancement {
     }
 
     editor.replaceSelection(result.join("\n"));
-    new Notice(`${text("Deduplication completed, remaining")} ${result.length} ${text("lines")}`);
+    new Notice(`${t("Deduplication completed, remaining")} ${result.length} ${t("lines")}`);
   }
 
   static addWrap(
@@ -336,7 +336,7 @@ export class TextEnhancement {
     } else {
       editor.setValue(result);
     }
-    new Notice(text("Prefix/suffix added"));
+    new Notice(t("Prefix/suffix added"));
   }
 
   static numberList(
@@ -348,7 +348,7 @@ export class TextEnhancement {
   ): void {
     const selection = editor.getSelection();
     if (!selection) {
-      new Notice(text("Please select text to number first"));
+      new Notice(t("Please select text to number first"));
       return;
     }
 
@@ -368,7 +368,7 @@ export class TextEnhancement {
       .join("\n");
 
     editor.replaceSelection(result);
-    new Notice(`${text("Numbering completed: starting from")} ${startNumber}`);
+    new Notice(`${t("Numbering completed: starting from")} ${startNumber}`);
   }
 
   static extractBetween(
@@ -377,7 +377,7 @@ export class TextEnhancement {
     endStr: string
   ): void {
     if (!startStr && !endStr) {
-      new Notice(text("Please specify start or end string"));
+      new Notice(t("Please specify start or end string"));
       return;
     }
 
@@ -402,12 +402,12 @@ export class TextEnhancement {
 
       if (matches.length > 0) {
         editor.setValue(matches.join("\n"));
-        new Notice(`${text("Extracted")} ${matches.length} ${text("matches")}`);
+        new Notice(`${t("Extracted")} ${matches.length} ${t("matches")}`);
       } else {
-        new Notice(text("No matches found"));
+        new Notice(t("No matches found"));
       }
     } catch (e) {
-      new Notice(text("Extraction failed"));
+      new Notice(t("Extraction failed"));
     }
   }
 
@@ -421,7 +421,7 @@ export class TextEnhancement {
   ): void {
     const selection = editor.getSelection();
     if (!selection || selection.trim() === "") {
-      new Notice(text("Please select lines to merge first"));
+      new Notice(t("Please select lines to merge first"));
       return;
     }
 
@@ -459,7 +459,7 @@ export class TextEnhancement {
 
     editor.replaceSelection(result);
     new Notice(
-      hasCustomSep ? `${text("Merged with")} '${options.separator}'` : text("Merge completed")
+      hasCustomSep ? `${t("Merged with")} '${options.separator}'` : t("Merge completed")
     );
   }
 
@@ -567,7 +567,7 @@ export class TextEnhancement {
     const header =
       "| " +
       Array.from({ length: maxCols }, (_, i) =>
-        i === 0 ? text("Item") : `${text("Content")} ${i}`
+        i === 0 ? t("Item") : `${t("Content")} ${i}`
       ).join(" | ") +
       " |\n";
     const sep =
@@ -604,7 +604,7 @@ export class TextEnhancement {
     }
 
     editor.replaceSelection(finalContent);
-    new Notice(text("Super conversion completed: context preserved and layout optimized"));
+    new Notice(t("Super conversion completed: context preserved and layout optimized"));
   }
 
   static convertTableToList(editor: Editor): void {
@@ -654,7 +654,7 @@ export class TextEnhancement {
     }
 
     if (!selection || !selection.includes("|")) {
-      new Notice(text("Please select a valid Markdown table"));
+      new Notice(t("Please select a valid Markdown table"));
       return;
     }
 
@@ -672,7 +672,7 @@ export class TextEnhancement {
         .map((c) => c.trim());
 
       cells.forEach((cell, index) => {
-        if (cell !== "" && cell !== text("Item") && !cell.startsWith(text("Content"))) {
+        if (cell !== "" && cell !== t("Item") && !cell.startsWith(t("Content"))) {
           const indent = "  ".repeat(index);
           result.push(`${indent}- ${cell}`);
         }
@@ -680,6 +680,6 @@ export class TextEnhancement {
     }
 
     editor.replaceSelection(result.join("\n"));
-    new Notice(text("Table converted to multi-level list"));
+    new Notice(t("Table converted to multi-level list"));
   }
 }

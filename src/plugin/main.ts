@@ -21,7 +21,7 @@ import { createFollowingbar, editingToolbarPopover, isExistoolbar, quiteFormatbr
 import { InsertCalloutModal } from "src/modals/insertCalloutModal";
 import { InsertLinkModal } from "src/modals/insertLinkModal";
 import { DEFAULT_SETTINGS, editingToolbarSettings } from "src/settings/settingsData";
-import { text } from 'src/translations/helper';
+import { t } from 'src/translations/helper';
 import { setBackgroundcolor, setFontcolor } from "src/util/util";
 import { ViewUtils } from 'src/util/viewUtils';
 import { editingToolbarSettingTab } from '../settings/settingsTab';
@@ -242,39 +242,39 @@ export default class editingToolbarPlugin extends Plugin {
 
     if (hasSelection) {
       actions.push(
-        { title: text("Split Lines"), commandId: "split-lines" },
-        { title: text("Merge Lines"), commandId: "merge-lines" },
-        { title: text("Full Half Converter"), commandId: "smart-symbols" },
-        { title: text("Dedupe Lines"), commandId: "dedupe-lines" },
-        { title: text("Add Prefix/Suffix"), commandId: "add-wrap" },
-        { title: text("Number Lines (Custom)"), commandId: "number-lines" },
-        { title: text("Trim Line Ends"), commandId: "remove-whitespace-trim" },
-        { title: text("Shrink Extra Spaces"), commandId: "remove-whitespace-compress" },
-        { title: text("Remove All Whitespace"), commandId: "remove-whitespace-all" },
-        { title: text("Extract Between Strings"), commandId: "extract-between" },
-        { title: text("List to Table"), commandId: "list-to-table" },
-        { title: text("Table to List"), commandId: "table-to-list" },
+        { title: t("Split Lines"), commandId: "split-lines" },
+        { title: t("Merge Lines"), commandId: "merge-lines" },
+        { title: t("Full Half Converter"), commandId: "smart-symbols" },
+        { title: t("Dedupe Lines"), commandId: "dedupe-lines" },
+        { title: t("Add Prefix/Suffix"), commandId: "add-wrap" },
+        { title: t("Number Lines (Custom)"), commandId: "number-lines" },
+        { title: t("Trim Line Ends"), commandId: "remove-whitespace-trim" },
+        { title: t("Shrink Extra Spaces"), commandId: "remove-whitespace-compress" },
+        { title: t("Remove All Whitespace"), commandId: "remove-whitespace-all" },
+        { title: t("Extract Between Strings"), commandId: "extract-between" },
+        { title: t("List to Table"), commandId: "list-to-table" },
+        { title: t("Table to List"), commandId: "table-to-list" },
       );
     }
 
     if (!hasSelection) {
       actions.push(
-        { title: text("Add Prefix/Suffix"), commandId: "add-wrap" },
-        { title: text("Insert Blank Lines"), commandId: "insert-blank-lines" },
-        { title: text("Extract Between Strings"), commandId: "extract-between" },
+        { title: t("Add Prefix/Suffix"), commandId: "add-wrap" },
+        { title: t("Insert Blank Lines"), commandId: "insert-blank-lines" },
+        { title: t("Extract Between Strings"), commandId: "extract-between" },
       );
     }
 
     if (isOrderedListLine) {
-      actions.push({ title: text("Renumber List"), commandId: "renumber-ordered-list" });
+      actions.push({ title: t("Renumber List"), commandId: "renumber-ordered-list" });
     }
 
     if (!hasSelection && isTableContext) {
-      actions.push({ title: text("Table to List"), commandId: "table-to-list" });
+      actions.push({ title: t("Table to List"), commandId: "table-to-list" });
     }
 
     if (!actions.length) {
-      actions.push({ title: text("Select text to see more tools"), disabled: true });
+      actions.push({ title: t("Select text to see more tools"), disabled: true });
     }
 
     return actions;
@@ -285,7 +285,7 @@ export default class editingToolbarPlugin extends Plugin {
     editor: Editor,
     _view: MarkdownView,
   ): void => {
-    this.addEditorContextSubmenu(menu, text("Text Tools"), "whole-word", this.buildTextContextActions(editor));
+    this.addEditorContextSubmenu(menu, t("Text Tools"), "whole-word", this.buildTextContextActions(editor));
   };
 
   async onload(): Promise<void> {
@@ -344,11 +344,7 @@ export default class editingToolbarPlugin extends Plugin {
         }, 50);
       }));
     }
-    const isThinoEnabled = this.app.plugins.enabledPlugins.has("obsidian-memos");
-    if (isThinoEnabled) {
-      this.registerEvent( this.app.workspace.on("thino-editor-created", this.handleeditingToolbar)
-      );
-    }
+
     this.registerEvent(
       this.app.workspace.on("active-leaf-change", this.handleeditingToolbar)
     );
@@ -358,9 +354,6 @@ export default class editingToolbarPlugin extends Plugin {
     this.registerEvent(
       this.app.workspace.on("resize", this.handleeditingToolbar_resize)
     );
-    //  this.registerEvent(this.app.workspace.on("editor-change", this.handleeditingToolbar));
-
-    // this.app.workspace.onLayoutReady(this.handleeditingToolbar_editor.bind(this));
     if (this.settings.cMenuVisibility == true) {
       setTimeout(() => {
         dispatchEvent(new Event("editingToolbar-NewCommand"));
@@ -663,7 +656,7 @@ this.app.workspace.onLayoutReady(async () => {
 
       setTimeout(() => {
         resetToolbar(this);
-        editingToolbarPopover(app, this);
+        editingToolbarPopover(this.app, this);
       }, 200);
     }
 
@@ -1155,7 +1148,7 @@ updateCurrentCommands(commands: any[], style?: string): void {
     }
     if (!detectedFormat && !this.lastExecutedCommand) {
       new Notice(
-        text(
+        t(
           "Please execute a format command or select format text first, then enable the format brush"
         )
       );
@@ -1173,9 +1166,9 @@ updateCurrentCommands(commands: any[], style?: string): void {
       this.lastCalloutType = calloutType;
       if (this.formatBrushNotice) this.formatBrushNotice.hide();
       this.formatBrushNotice = new Notice(
-        text("Format brush ON! Select text to apply【") +
+        t("Format brush ON! Select text to apply【") +
           this.lastExecutedCommandName +
-          text("】format"),
+          t("】format"),
         0
       );
     } else {
@@ -1542,28 +1535,28 @@ updateCurrentCommands(commands: any[], style?: string): void {
           if (!this.settings.followingCommands || this.settings.followingCommands.length === 0) {
             this.settings.followingCommands = [...this.settings.menuCommands];
             this.saveSettings();
-            new Notice(text("Following style commands successfully initialized"));
+            new Notice(t("Following style commands successfully initialized"));
           }
           break;
         case "top":
           if (!this.settings.topCommands || this.settings.topCommands.length === 0) {
             this.settings.topCommands = [...this.settings.menuCommands];
             this.saveSettings();
-            new Notice(text("Top style commands successfully initialized"));
+            new Notice(t("Top style commands successfully initialized"));
           }
           break;
         case "fixed":
           if (!this.settings.fixedCommands || this.settings.fixedCommands.length === 0) {
             this.settings.fixedCommands = [...this.settings.menuCommands];
             this.saveSettings();
-            new Notice(text("Fixed style commands successfully initialized"));
+            new Notice(t("Fixed style commands successfully initialized"));
           }
           break;
         case "mobile":
           if (!this.settings.mobileCommands || this.settings.mobileCommands.length === 0) {
             this.settings.mobileCommands = [...this.settings.menuCommands];
             this.saveSettings();
-            new Notice(text("Mobile style commands successfully initialized"));
+            new Notice(t("Mobile style commands successfully initialized"));
           }
           break;
       }

@@ -1,6 +1,6 @@
 import { App, DropdownComponent, Modal, Platform, Setting, setIcon } from "obsidian";
 import editingToolbarPlugin, { AdmonitionDefinition } from "src/plugin/main";
-import { text } from "src/translations/helper";
+import { t } from "src/translations/helper";
 interface BuiltInCalloutType {
     type: string;
     aliases: string[];
@@ -125,7 +125,7 @@ export class InsertCalloutModal extends Modal {
         // Ensure iconContainerEl is created fresh each time display is called
         this.iconContainerEl = typeContainer.createDiv("callout-icon-container");
         new Setting(typeContainer)
-            .setName(text("Callout Type"))
+            .setName(t("Callout Type"))
             .addDropdown((dropdown: DropdownComponent) => {
                 // Populate built-in types first
                 const builtIns = this.allCalloutOptions.filter(opt => !opt.isAdmonition);
@@ -166,10 +166,10 @@ export class InsertCalloutModal extends Modal {
         this.updateIconAndColor(this.iconContainerEl, this.type); // Initial icon update
 
         const titleSetting = new Setting(contentEl)
-            .setName(text("Title"))
-            .setDesc(text("Optional, leave blank for default title"))
+            .setName(t("Title"))
+            .setDesc(t("Optional, leave blank for default title"))
             .addText((text) => {
-                text.setPlaceholder(text("Input title"))
+                text.setPlaceholder(t("Input title"))
                     .setValue(this.title)
                     .onChange((value) => {
                         this.title = value;
@@ -177,12 +177,12 @@ export class InsertCalloutModal extends Modal {
             });
 
         new Setting(contentEl)
-            .setName(text("Collapse State"))
+            .setName(t("Collapse State"))
             .addDropdown((dropdown) => {
                 dropdown
-                    .addOption("none", text("Default"))
-                    .addOption("open", text("Open"))
-                    .addOption("closed", text("Closed"))
+                    .addOption("none", t("Default"))
+                    .addOption("open", t("Open"))
+                    .addOption("closed", t("Closed"))
                     .setValue(this.collapse)
                     .onChange((value: "none" | "open" | "closed") => {
                         this.collapse = value;
@@ -190,9 +190,9 @@ export class InsertCalloutModal extends Modal {
             });
 
         const contentSetting = new Setting(contentEl)
-            .setName(text("Content"))
+            .setName(t("Content"))
             .addTextArea((text) => {
-                text.setPlaceholder(text("Input content"))
+                text.setPlaceholder(t("Input content"))
                     .setValue(this.content)
                     .onChange((value) => {
                         this.content = value;
@@ -203,7 +203,7 @@ export class InsertCalloutModal extends Modal {
             });
 
         const shortcutHint = contentEl.createDiv("shortcut-hint");
-        shortcutHint.setText(`${Platform.isMacOS ? "⌘" : "Ctrl"} + Enter ${text("to insert")}`);
+        shortcutHint.setText(`${Platform.isMacOS ? "⌘" : "Ctrl"} + Enter ${t("to insert")}`);
         shortcutHint.style.textAlign = "right";
         shortcutHint.style.fontSize = "0.8em";
         shortcutHint.style.opacity = "0.7";
@@ -212,7 +212,7 @@ export class InsertCalloutModal extends Modal {
         new Setting(contentEl)
             .addButton((btn) => {
                 btn
-                    .setButtonText(text("Insert"))
+                    .setButtonText(t("Insert"))
                     .setCta()
                     .onClick(() => {
                         this.insertCallout();
@@ -222,8 +222,8 @@ export class InsertCalloutModal extends Modal {
                 return btn;
             })
             .addButton((btn) => {
-                btn.setButtonText(text("Cancel"))
-                    .setTooltip(text("Cancel"))
+                btn.setButtonText(t("Cancel"))
+                    .setTooltip(t("Cancel"))
                     .onClick(() => this.close());
                 return btn;
             });

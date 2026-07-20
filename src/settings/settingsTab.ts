@@ -12,7 +12,7 @@ import { ChangeCmdname, ChooseFromIconList, CommandPicker, openSlider } from "sr
 import type editingToolbarPlugin from "src/plugin/main";
 import type { AppearanceByStyle, StyleAppearanceSettings, ToolbarStyleKey } from "src/settings/settingsData";
 import { AESTHETIC_STYLES, APPEND_METHODS, POSITION_STYLES } from "src/settings/settingsData";
-import { text } from 'src/translations/helper';
+import { t } from 'src/translations/helper';
 import { GenNonDuplicateID } from "src/util/util";
 
 interface SubmenuCommand {
@@ -31,27 +31,27 @@ interface SettingTab {
 const SETTING_TABS: SettingTab[] = [
   {
     id: 'general',
-    name: text('General'),
+    name: t('General'),
     icon: 'gear'
   },
   {
     id: 'appearance',
-    name: text('Appearance'),
+    name: t('Appearance'),
     icon: 'brush'
   },
   {
     id: 'customcommands',
-    name: text('Custom Commands'),
+    name: t('Custom Commands'),
     icon: 'lucide-rectangle-ellipsis'
   },
   {
     id: 'commands',
-    name: text('Toolbar Commands'),
+    name: t('Toolbar Commands'),
     icon: 'lucide-command'
   },
   {
     id: 'importexport',
-    name: text('Import/Export'),
+    name: t('Import/Export'),
     icon: 'lucide-import'
   },
 ];
@@ -104,7 +104,7 @@ export class editingToolbarSettingTab extends PluginSettingTab {
   private currentEditingConfig: string;
 
   private getLocalizedCommandName(name: string): string {
-    return text(name as any);
+    return t(name as any);
   }
   constructor(app: App, plugin: editingToolbarPlugin) {
     super(app, plugin);
@@ -168,7 +168,7 @@ export class editingToolbarSettingTab extends PluginSettingTab {
   private createDeleteButton(
     button: any,
     deleteAction: () => Promise<void>,
-    tooltip: string = text('Delete')
+    tooltip: string = t('Delete')
   ) {
     let isConfirming = false;
     let confirmTimeout: NodeJS.Timeout;
@@ -189,8 +189,8 @@ export class editingToolbarSettingTab extends PluginSettingTab {
         } else {
           isConfirming = true;
           button
-            .setTooltip(text('Confirm Delete?'))
-            .setButtonText(text('Confirm Delete?'));
+            .setTooltip(t('Confirm Delete?'))
+            .setButtonText(t('Confirm Delete?'));
           button.buttonEl.addClass('mod-warning');
 
           confirmTimeout = setTimeout(() => {
@@ -210,11 +210,11 @@ export class editingToolbarSettingTab extends PluginSettingTab {
     generalSettingContainer.style.backgroundColor = 'var(--background-secondary)';
     generalSettingContainer.style.marginBottom = '20px';
     new Setting(generalSettingContainer)
-      .setName(text('Editing Toolbar Append Method'))
-      .setDesc(text('Choose where Editing Toolbar will append upon regeneration.'))
+      .setName(t('Editing Toolbar Append Method'))
+      .setDesc(t('Choose where Editing Toolbar will append upon regeneration.'))
       .addDropdown((dropdown) => {
         let methods: Record<string, string> = {};
-        APPEND_METHODS.map((method) => (methods[method] = text(method)));
+        APPEND_METHODS.map((method) => (methods[method] = t(method)));
         dropdown.addOptions(methods);
         dropdown
           .setValue(this.plugin.settings.appendMethod)
@@ -224,8 +224,8 @@ export class editingToolbarSettingTab extends PluginSettingTab {
           });
       });
     new Setting(generalSettingContainer)
-      .setName(text('Enable Multiple Configurations'))
-      .setDesc(text('Enable different command configurations for each position style (following, top, fixed).'))
+      .setName(t('Enable Multiple Configurations'))
+      .setDesc(t('Enable different command configurations for each position style (following, top, fixed).'))
       .addToggle(toggle => toggle
         .setValue(this.plugin.settings.enableMultipleConfig || false)
         .onChange(async (value) => {
@@ -238,8 +238,8 @@ export class editingToolbarSettingTab extends PluginSettingTab {
       );
     // Top toolbar toggle
     new Setting(generalSettingContainer)
-      .setName(text('Top Toolbar'))
-      .setDesc(text('Enable the toolbar positioned at the top.'))
+      .setName(t('Top Toolbar'))
+      .setDesc(t('Enable the toolbar positioned at the top.'))
       .addToggle(toggle => {
         toggle
           .setValue(this.plugin.settings.enableTopToolbar || false)
@@ -269,8 +269,8 @@ export class editingToolbarSettingTab extends PluginSettingTab {
       });
     // Following toolbar toggle
     new Setting(generalSettingContainer)
-      .setName(text('Following Toolbar'))
-      .setDesc(text('Enable the toolbar that appears upon text selection.'))
+      .setName(t('Following Toolbar'))
+      .setDesc(t('Enable the toolbar that appears upon text selection.'))
       .addToggle(toggle => {
         toggle
           .setValue(this.plugin.settings.enableFollowingToolbar || false)
@@ -299,8 +299,8 @@ export class editingToolbarSettingTab extends PluginSettingTab {
       });
     // Fixed toolbar toggle
     new Setting(generalSettingContainer)
-      .setName(text('Fixed Toolbar'))
-      .setDesc(text('Enable the toolbar whose position may be fixed where you please.'))
+      .setName(t('Fixed Toolbar'))
+      .setDesc(t('Enable the toolbar whose position may be fixed where you please.'))
       .addToggle(toggle => {
         toggle
           .setValue(this.plugin.settings.enableFixedToolbar || false)
@@ -332,8 +332,8 @@ export class editingToolbarSettingTab extends PluginSettingTab {
       });
     // Mobile setting
     new Setting(generalSettingContainer)
-      .setName(text('Mobile Enabled or Not'))
-      .setDesc(text("Whether to enable on mobile devices with device width less than 768px."))
+      .setName(t('Mobile Enabled or Not'))
+      .setDesc(t("Whether to enable on mobile devices with device width less than 768px."))
       .addToggle(toggle => toggle.setValue(this.plugin.settings?.isLoadOnMobile ?? false)
         .onChange((value) => {
           this.plugin.settings.isLoadOnMobile = value;
@@ -348,8 +348,8 @@ export class editingToolbarSettingTab extends PluginSettingTab {
     paintbrushContainer.style.backgroundColor = 'var(--background-secondary)';
     paintbrushContainer.style.marginBottom = '20px';
     new Setting(paintbrushContainer)
-      .setName(text('🎨 Set Custom Background'))
-      .setDesc(text('Click on the picker to adjust the color'))
+      .setName(t('🎨 Set Custom Background'))
+      .setDesc(t('Click on the picker to adjust the color'))
       .setClass('custom_bg')
       .then((setting) => {
         const pickerContainer = setting.controlEl.createDiv({ cls: "pickr-container" });
@@ -378,8 +378,8 @@ export class editingToolbarSettingTab extends PluginSettingTab {
         }
       });
     new Setting(paintbrushContainer)
-      .setName(text('🖌️ Set Custom Font Color'))
-      .setDesc(text('Click on the picker to adjust the color'))
+      .setName(t('🖌️ Set Custom Font Color'))
+      .setDesc(t('Click on the picker to adjust the color'))
       .setClass('custom_font')
       .then((setting) => {
         const pickerContainer = setting.controlEl.createDiv({ cls: "pickr-container" });
@@ -427,11 +427,11 @@ export class editingToolbarSettingTab extends PluginSettingTab {
 
     // Style picker – only controls which style's settings you edit
     new Setting(appearanceSettingContainer)
-      .setName(text('Toolbar Settings'))
-      .setDesc(text("Choose which toolbar style's appearance you want to edit."))
+      .setName(t('Toolbar Settings'))
+      .setDesc(t("Choose which toolbar style's appearance you want to edit."))
       .addDropdown((dropdown) => {
         const positions: Record<string, string> = {};
-        POSITION_STYLES.map((position) => (positions[position] = text(position)));
+        POSITION_STYLES.map((position) => (positions[position] = t(position)));
         dropdown
           .addOptions(positions)
           .setValue(editingStyle)
@@ -447,9 +447,9 @@ export class editingToolbarSettingTab extends PluginSettingTab {
     if (editingStyle === "top") {
 
       new Setting(appearanceSettingContainer)
-        .setName(text('Editing Toolbar Auto-hide'))
+        .setName(t('Editing Toolbar Auto-hide'))
         .setDesc(
-          text('The toolbar is displayed when the mouse moves over it, otherwise it is automatically hidden')
+          t('The toolbar is displayed when the mouse moves over it, otherwise it is automatically hidden')
         )
         .addToggle(toggle => toggle.setValue(this.plugin.settings?.autohide)
           .onChange((value) => {
@@ -459,9 +459,9 @@ export class editingToolbarSettingTab extends PluginSettingTab {
           }));
 
       new Setting(appearanceSettingContainer)
-        .setName(text('Editing Toolbar Centred Display'))
+        .setName(t('Editing Toolbar Centred Display'))
         .setDesc(
-          text('Whether the toolbar is centred or full-width, the default is full-width.')
+          t('Whether the toolbar is centred or full-width, the default is full-width.')
         )
         .addToggle(toggle => toggle.setValue(this.plugin.settings?.Iscentered)
           .onChange((value) => {
@@ -472,9 +472,9 @@ export class editingToolbarSettingTab extends PluginSettingTab {
     }
     if (editingStyle === "fixed") {
       new Setting(appearanceSettingContainer)
-        .setName(text('Editing Toolbar Columns'))
+        .setName(t('Editing Toolbar Columns'))
         .setDesc(
-          text('Choose the number of columns per row to display on Editing Toolbar.')
+          t('Choose the number of columns per row to display on Editing Toolbar.')
         )
         .addSlider((slider) => {
           slider
@@ -494,10 +494,10 @@ export class editingToolbarSettingTab extends PluginSettingTab {
             .setDynamicTooltip();
         });
       new Setting(appearanceSettingContainer)
-        .setName(text('Fixed Position Offset'))
-        .setDesc(text('Choose the offset of the Editing Toolbar in the fixed position.'))
+        .setName(t('Fixed Position Offset'))
+        .setDesc(t('Choose the offset of the Editing Toolbar in the fixed position.'))
         .addButton(button => button
-          .setButtonText(text('Settings'))
+          .setButtonText(t('Settings'))
           .onClick(() => {
             new openSlider(this.app, this.plugin).open();
           }));
@@ -513,15 +513,15 @@ export class editingToolbarSettingTab extends PluginSettingTab {
     commandSettingContainer.style.marginBottom = '20px';
     if (this.plugin.settings.enableMultipleConfig) {
       const configSwitcher = new Setting(commandSettingContainer)
-        .setName(text('Current Configuration'))
-        .setDesc(text('Switch between different command configurations.'))
+        .setName(t('Current Configuration'))
+        .setDesc(t('Switch between different command configurations.'))
         .addDropdown(dropdown => {
-          dropdown.addOption('top', text('Top Style'));
-          dropdown.addOption('fixed', text('Fixed Style'));
-          dropdown.addOption('following', text('Following Style'));
+          dropdown.addOption('top', t('Top Style'));
+          dropdown.addOption('fixed', t('Fixed Style'));
+          dropdown.addOption('following', t('Following Style'));
 
           if (this.plugin.settings.isLoadOnMobile) {
-            dropdown.addOption('mobile', text('Mobile Style'));
+            dropdown.addOption('mobile', t('Mobile Style'));
           }
 
           dropdown.setValue(this.currentEditingConfig);
@@ -547,8 +547,8 @@ export class editingToolbarSettingTab extends PluginSettingTab {
       buttonContainer.style.backgroundColor = 'var(--background-secondary)';
 
       const importSetting = new Setting(buttonContainer)
-        .setName(text('Import From'))
-        .setDesc(text('Copy commands from another style configuration.'));
+        .setName(t('Import From'))
+        .setDesc(t('Copy commands from another style configuration.'));
 
       let selectedSourceStyle = 'Main menu';
       const configSwitcher = new Setting(buttonContainer)
@@ -557,19 +557,19 @@ export class editingToolbarSettingTab extends PluginSettingTab {
         dropdown.addOption('Main menu', 'Main Menu Commands');
 
         if (currentConfigType !== 'following' && this.plugin.settings.followingCommands) {
-          dropdown.addOption('following', text('Following Style'));
+          dropdown.addOption('following', t('Following Style'));
         }
 
         if (currentConfigType !== 'top' && this.plugin.settings.topCommands) {
-          dropdown.addOption('top', text('Top Style'));
+          dropdown.addOption('top', t('Top Style'));
         }
 
         if (currentConfigType !== 'fixed' && this.plugin.settings.fixedCommands) {
-          dropdown.addOption('fixed', text('Fixed Style'));
+          dropdown.addOption('fixed', t('Fixed Style'));
         }
 
         if (currentConfigType !== 'mobile' && this.plugin.settings.mobileCommands) {
-          dropdown.addOption('mobile', text('Mobile Style'));
+          dropdown.addOption('mobile', t('Mobile Style'));
         }
 
         dropdown.setValue(selectedSourceStyle)
@@ -581,8 +581,8 @@ export class editingToolbarSettingTab extends PluginSettingTab {
         .setIcon('arrow-right')
       );
       configSwitcher.addButton(button => button
-        .setButtonText(this.currentEditingConfig + ' ' + text('Import'))
-        .setTooltip(text('Copy commands from selected style.'))
+        .setButtonText(this.currentEditingConfig + ' ' + t('Import'))
+        .setTooltip(t('Copy commands from selected style.'))
         .onClick(async () => {
           const sourceCommands = this.getCommandsArrayByType(selectedSourceStyle);
 
@@ -592,7 +592,7 @@ export class editingToolbarSettingTab extends PluginSettingTab {
           }
 
           const confirmMessage =
-            'Import commands from' + ' ' + `"${selectedSourceStyle}"` + ' to ' + `"${this.currentEditingConfig}" ` + text(`configuration`) + '?'
+            'Import commands from' + ' ' + `"${selectedSourceStyle}"` + ' to ' + `"${this.currentEditingConfig}" ` + t(`configuration`) + '?'
             ;
           ConfirmModal.show(this.app, {
             message: confirmMessage,
@@ -615,19 +615,19 @@ export class editingToolbarSettingTab extends PluginSettingTab {
                   break;
               }
               await this.plugin.saveSettings();
-              new Notice('Commands imported successfully from' + ' ' + `"${selectedSourceStyle}"` + ' to ' + `"${this.currentEditingConfig}" ` + text(`configuration`));
+              new Notice('Commands imported successfully from' + ' ' + `"${selectedSourceStyle}"` + ' to ' + `"${this.currentEditingConfig}" ` + t(`configuration`));
               this.display();
             }
           })
         })
       );
       importSetting.addButton(button => button
-        .setButtonText(text('Clear') + ' ' + `${this.currentEditingConfig}`)
-        .setTooltip(text('Remove all commands from this configuration.'))
+        .setButtonText(t('Clear') + ' ' + `${this.currentEditingConfig}`)
+        .setTooltip(t('Remove all commands from this configuration.'))
         .setWarning()
         .onClick(async () => {
           ConfirmModal.show(this.app, {
-            message: text('Are you sure you want to clear all commands under the current style?'),
+            message: t('Are you sure you want to clear all commands under the current style?'),
             onConfirm: async () => {
               switch (currentConfigType) {
                 case 'following':
@@ -654,16 +654,16 @@ export class editingToolbarSettingTab extends PluginSettingTab {
       const buttonContainer = commandSettingContainer.createDiv('command-buttons-container');
 
       const clearButton = buttonContainer.createEl('button', {
-        text: text('One-click Clear'),
+        text: t('One-click Clear'),
         cls: 'mod-warning'
       });
       clearButton.addEventListener('click', async () => {
         ConfirmModal.show(this.app, {
-          message: text('Are you sure you want to clear all commands under the current style?'),
+          message: t('Are you sure you want to clear all commands under the current style?'),
           onConfirm: async () => {
             this.plugin.settings.menuCommands = [];
             await this.plugin.saveSettings();
-            new Notice(text('All commands have been removed.'));
+            new Notice(t('All commands have been removed.'));
             this.display();
           }
         })
@@ -676,16 +676,16 @@ export class editingToolbarSettingTab extends PluginSettingTab {
     if (this.plugin.settings.enableMultipleConfig) {
       const positionStyleInfo = commandListContainer.createEl('div', {
         cls: `position-style-info ${this.currentEditingConfig}`,
-        text: text(`Currently editing commands for`) + ` "${this.currentEditingConfig} Style" ` + text(`configuration`)
+        text: t(`Currently editing commands for`) + ` "${this.currentEditingConfig} Style" ` + t(`configuration`)
       });
     }
     new Setting(commandListContainer)
-      .setName(text('Editing Toolbar Commands'))
-      .setDesc(text("Add a command onto Editing Toolbar from Obsidian's commands library. To reorder the commands, drag and drop the command items. To delete them, use the delete buttom to the right of the command item. Editing Toolbar will not automaticaly refresh after reordering commands. Use the refresh button above."))
+      .setName(t('Editing Toolbar Commands'))
+      .setDesc(t("Add a command onto Editing Toolbar from Obsidian's commands library. To reorder the commands, drag and drop the command items. To delete them, use the delete buttom to the right of the command item. Editing Toolbar will not automaticaly refresh after reordering commands. Use the refresh button above."))
       .addButton((addButton) => {
         addButton
           .setIcon("plus")
-          .setTooltip(text("Add"))
+          .setTooltip(t("Add"))
           .onClick(() => {
             new CommandPicker(this.plugin, this.currentEditingConfig).open();
             this.triggerRefresh();
@@ -698,12 +698,12 @@ export class editingToolbarSettingTab extends PluginSettingTab {
 
     const customCommandsContainer = containerEl.createDiv('custom-commands-container');
     const descriptionEl = customCommandsContainer.createEl('p', {
-      text: text('Add, edit or delete custom format commands.')
+      text: t('Add, edit or delete custom format commands.')
     });
     // Regex command behavior setting
     new Setting(customCommandsContainer)
-      .setName(text('Use current line for regex commands'))
-      .setDesc(text('When no text is selected, regex commands will use the current line instead of clipboard content'))
+      .setName(t('Use current line for regex commands'))
+      .setDesc(t('When no text is selected, regex commands will use the current line instead of clipboard content'))
       .addToggle(toggle => toggle.setValue(this.plugin.settings?.useCurrentLineForRegex ?? false)
         .onChange(async (value) => {
           this.plugin.settings.useCurrentLineForRegex = value;
@@ -724,14 +724,14 @@ export class editingToolbarSettingTab extends PluginSettingTab {
     addButtonContainer.style.display = 'flex';
     addButtonContainer.style.gap = '10px';
     const addFormatButton = addButtonContainer.createEl('button', {
-      text: text('Add Format Command')
+      text: t('Add Format Command')
     });
     addFormatButton.addClass('mod-cta');
     addFormatButton.addEventListener('click', () => {
       new CustomCommandModal(this.app, this.plugin, null).open();
     });
     const addRegexButton = addButtonContainer.createEl('button', {
-      text: text('Add Regex Command')
+      text: t('Add Regex Command')
     });
     addRegexButton.addClass('mod-cta');
     addRegexButton.addEventListener('click', () => {
@@ -741,26 +741,26 @@ export class editingToolbarSettingTab extends PluginSettingTab {
       const commandSetting = new Setting(commandListContainer)
         .setName(command.name);
       const descEl = createFragment();
-      let desc = `${text('ID')}: ${command.id}`;
+      let desc = `${t('ID')}: ${command.id}`;
       if (command.useRegex) {
-        desc += `, ${text('Pattern')}: ${command.regexPattern}`;
+        desc += `, ${t('Pattern')}: ${command.regexPattern}`;
       } else {
-        desc += `, ${text('Prefix')}: ${command.prefix}, ${text('Suffix')}: ${command.suffix}`;
+        desc += `, ${t('Prefix')}: ${command.prefix}, ${t('Suffix')}: ${command.suffix}`;
       }
       descEl.createSpan({ text: desc });
       const typeBadge = descEl.createSpan({ cls: 'command-type-badge' });
       if (command.useRegex) {
         typeBadge.addClass('regex');
-        typeBadge.setText(text('Regex'));
+        typeBadge.setText(t('Regex'));
       } else {
-        typeBadge.setText(text('Prefix/Suffix'));
+        typeBadge.setText(t('Prefix/Suffix'));
       }
       commandSetting.descEl.appendChild(descEl);
       commandSetting.addButton(button => button
-        .setButtonText(text('Add to Toolbar'))
-        .setTooltip(text('Add this command to the toolbar.'))
-        .setButtonText(text('Add to Toolbar'))
-        .setTooltip(text('Add this command to the toolbar.'))
+        .setButtonText(t('Add to Toolbar'))
+        .setTooltip(t('Add this command to the toolbar.'))
+        .setButtonText(t('Add to Toolbar'))
+        .setTooltip(t('Add this command to the toolbar.'))
         .onClick(() => {
           if (this.plugin.settings.enableMultipleConfig) {
             new DeployCommandModal(this.app, this.plugin, command).open();
@@ -769,7 +769,7 @@ export class editingToolbarSettingTab extends PluginSettingTab {
               cmd => cmd.id === `editing-toolbar:${command.id}`
             );
             if (isInToolbar) {
-              new Notice(text('This command is already in the toolbar.'));
+              new Notice(t('This command is already in the toolbar.'));
               return;
             }
             const toolbarCommand = {
@@ -779,7 +779,7 @@ export class editingToolbarSettingTab extends PluginSettingTab {
             };
             this.plugin.settings.menuCommands.push(toolbarCommand);
             this.plugin.saveSettings().then(() => {
-              new Notice(text('Command added to toolbar'));
+              new Notice(t('Command added to toolbar'));
               dispatchEvent(new Event("editingToolbar-NewCommand"));
               this.plugin.reloadCustomCommands();
             });
@@ -789,7 +789,7 @@ export class editingToolbarSettingTab extends PluginSettingTab {
         .addExtraButton(button => {
           button
             .setIcon("pencil")
-            .setTooltip(text("Edit"))
+            .setTooltip(t("Edit"))
             .onClick(() => {
               if (command.useRegex) {
 
@@ -816,7 +816,7 @@ export class editingToolbarSettingTab extends PluginSettingTab {
           await this.plugin.saveSettings();
           this.plugin.reloadCustomCommands();
           this.display();
-          new Notice(text('Command Deleted'));
+          new Notice(t('Command Deleted'));
         }))
       if (command.icon) {
         try {
@@ -873,21 +873,21 @@ export class editingToolbarSettingTab extends PluginSettingTab {
     toolbarContainer.style.borderRadius = '8px';
     toolbarContainer.style.backgroundColor = 'var(--background-secondary)';
     new Setting(toolbarContainer)
-      .setName(text("Toolbar Theme"))
-      .setDesc(text("Select a preset toolbar theme, automatically setting the background color, icon color, and size for the selected style."))
+      .setName(t("Toolbar Theme"))
+      .setDesc(t("Select a preset toolbar theme, automatically setting the background color, icon color, and size for the selected style."))
       .addDropdown((dropdown) => {
         const aesthetics: Record<string, string> = {};
         AESTHETIC_STYLES.forEach((aesthetic) => {
           aesthetics[aesthetic] =
-            aesthetic === "custom" ? text("Custom Theme") : text(aesthetic);
+            aesthetic === "custom" ? t("Custom Theme") : t(aesthetic);
         });
         dropdown.addOptions(aesthetics);
         dropdown.selectEl.options[3].disabled = true; // disable the raw "custom" option
-        dropdown.addOption("light", text("┌ Light"));
-        dropdown.addOption("dark", text("├ Dark"));
-        dropdown.addOption("vibrant", text("├ Vibrant"));
-        dropdown.addOption("minimal", text("├ Minimal"));
-        dropdown.addOption("elegant", text("└ Elegant"));
+        dropdown.addOption("light", t("┌ Light"));
+        dropdown.addOption("dark", t("├ Dark"));
+        dropdown.addOption("vibrant", t("├ Vibrant"));
+        dropdown.addOption("minimal", t("├ Minimal"));
+        dropdown.addOption("elegant", t("└ Elegant"));
         // Use the bucket for the currently edited style
         dropdown.setValue(
           (appearanceBucket.aestheticStyle as string) ??
@@ -965,8 +965,8 @@ export class editingToolbarSettingTab extends PluginSettingTab {
         });
       });
     new Setting(toolbarContainer)
-      .setName(text("Toolbar Background Color"))
-      .setDesc(text("Set the background color of the toolbar."))
+      .setName(t("Toolbar Background Color"))
+      .setDesc(t("Set the background color of the toolbar."))
       .setClass('toolbar_background')
       .then((setting) => {
         const pickerContainer = setting.controlEl.createDiv({ cls: "pickr-container" });
@@ -987,8 +987,8 @@ export class editingToolbarSettingTab extends PluginSettingTab {
         this.pickrs.push(pickr);
       });
     new Setting(toolbarContainer)
-      .setName(text("Toolbar Icon Color"))
-      .setDesc(text("Set the color of the toolbar icon."))
+      .setName(t("Toolbar Icon Color"))
+      .setDesc(t("Set the color of the toolbar icon."))
       .setClass('toolbar_icon')
       .then((setting) => {
         const pickerContainer = setting.controlEl.createDiv({ cls: "pickr-container" });
@@ -1013,8 +1013,8 @@ export class editingToolbarSettingTab extends PluginSettingTab {
         this.setupPickrEvents(pickr, 'toolbarIconColor', 'icon-color');
       });
     new Setting(toolbarContainer)
-      .setName(text("Toolbar Icon Size"))
-      .setDesc(text("Set the size of the toolbar icon (px); default: 18px"))
+      .setName(t("Toolbar Icon Size"))
+      .setDesc(t("Set the size of the toolbar icon (px); default: 18px"))
       .addSlider((slider) => {
         const initialSize =
           appearanceBucket.toolbarIconSize ??
@@ -1053,7 +1053,7 @@ export class editingToolbarSettingTab extends PluginSettingTab {
     previewContainer.addClass('toolbar-preview-section');
     previewContainer.style.marginTop = '20px';
     const previewLabel = previewContainer.createEl('h3', {
-      text: text(`Toolbar Preview (With a hypothetical command configuration.)`)
+      text: t(`Toolbar Preview (With a hypothetical command configuration.)`)
     });
     previewLabel.style.marginBottom = '10px';
     const wrapper = previewContainer.createDiv();
@@ -1150,7 +1150,7 @@ export class editingToolbarSettingTab extends PluginSettingTab {
       const button = new ButtonComponent(editingToolbar);
       button.setClass("editingToolbarCommandItem");
       button.buttonEl.classList.add("preview-button");
-      button.setTooltip(text(item.name as any));
+      button.setTooltip(t(item.name as any));
 
       if (item.icon) {
         setIcon(button.buttonEl, item.icon);
@@ -1289,7 +1289,7 @@ export class editingToolbarSettingTab extends PluginSettingTab {
           .addButton((changename) => {
             changename
               .setIcon("pencil")
-              .setTooltip(text("Change Submenu Name"))
+              .setTooltip(t("Change Submenu Name"))
               .setClass("editingToolbarSettingsButton")
               .onClick(async () => {
                 new ChangeCmdname(this.app, this.plugin, newCommand, false, this.currentEditingConfig).open();
@@ -1297,15 +1297,15 @@ export class editingToolbarSettingTab extends PluginSettingTab {
           })
           .addDropdown((dropdown) => {
             dropdown
-              .addOption("submenu", text("Button Submenu"))
-              .addOption("dropdown", text("Dropdown Menu"))
+              .addOption("submenu", t("Button Submenu"))
+              .addOption("dropdown", t("Dropdown Menu"))
               .setValue(newCommand.menuType || "submenu")
               .onChange(async (value: "submenu" | "dropdown") => {
                 newCommand.menuType = value;
                 this.plugin.updateCurrentCommands(currentCommands, this.currentEditingConfig);
                 await this.plugin.saveSettings();
                 this.triggerRefresh();
-                new Notice(text("Menu type changed to") + ": " + (value === "dropdown" ? text("Dropdown Menu") : text("Button Submenu")));
+                new Notice(t("Menu type changed to") + ": " + (value === "dropdown" ? t("Dropdown Menu") : t("Button Submenu")));
               });
             dropdown.selectEl.addClass("editingToolbarMenuTypeDropdown");
           })
@@ -1435,7 +1435,7 @@ export class editingToolbarSettingTab extends PluginSettingTab {
             .addButton((changename) => {
               changename
                 .setIcon("pencil")
-                .setTooltip(text("Change Command Name"))
+                .setTooltip(t("Change Command Name"))
                 .setClass("editingToolbarSettingsButton")
                 .onClick(async () => {
                   new ChangeCmdname(this.app, this.plugin, subCommand, true, this.currentEditingConfig).open();
@@ -1468,7 +1468,7 @@ export class editingToolbarSettingTab extends PluginSettingTab {
           .addButton((changename) => {
             changename
               .setIcon("pencil")
-              .setTooltip(text("Change Command Name"))
+              .setTooltip(t("Change Command Name"))
               .setClass("editingToolbarSettingsButton")
               .onClick(async () => {
                 new ChangeCmdname(this.app, this.plugin, newCommand, false, this.currentEditingConfig).open();
@@ -1477,7 +1477,7 @@ export class editingToolbarSettingTab extends PluginSettingTab {
           .addButton((addsubButton) => {
             addsubButton
               .setIcon("editingToolbarSub")
-              .setTooltip(text("Add Submenu"))
+              .setTooltip(t("Add Submenu"))
               .setClass("editingToolbarSettingsButton")
               .setClass("editingToolbarSettingsButtonaddsub")
               .onClick(async () => {
@@ -1499,12 +1499,12 @@ export class editingToolbarSettingTab extends PluginSettingTab {
           .addButton((addsubButton) => {
             addsubButton
               .setIcon("vertical-split")
-              .setTooltip(text("Add Separator"))
+              .setTooltip(t("Add Separator"))
               .setClass("editingToolbarSettingsButton")
               .setClass("editingToolbarSettingsButtonaddsub")
               .onClick(async () => {
                 const dividermenu =
-                  { id: "editingToolbar-Divider-Line", name: text("Vertical Split"), icon: "vertical-split" };
+                  { id: "editingToolbar-Divider-Line", name: t("Vertical Split"), icon: "vertical-split" };
                 const currentCommands = commandsToEdit;
                 currentCommands.splice(index + 1, 0, dividermenu);
                 this.plugin.updateCurrentCommands(currentCommands, this.currentEditingConfig);
@@ -1599,20 +1599,20 @@ export class editingToolbarSettingTab extends PluginSettingTab {
     importExportContainer.style.backgroundColor = 'var(--background-secondary)';
     importExportContainer.style.marginBottom = '20px';
     new Setting(importExportContainer)
-      .setName(text('Export Configuration'))
-      .setDesc(text('Export your toolbar configuration to share with others.'))
+      .setName(t('Export Configuration'))
+      .setDesc(t('Export your toolbar configuration to share with others.'))
       .addButton(button => button
-        .setButtonText(text('Export'))
+        .setButtonText(t('Export'))
         .setCta()
         .onClick(() => {
           new ImportExportModal(this.app, this.plugin, 'export').open();
         })
       );
     new Setting(importExportContainer)
-      .setName(text('Import Configuration'))
-      .setDesc(text('Import toolbar configuration from JSON.'))
+      .setName(t('Import Configuration'))
+      .setDesc(t('Import toolbar configuration from JSON.'))
       .addButton(button => button
-        .setButtonText(text('Import'))
+        .setButtonText(t('Import'))
         .setCta()
         .onClick(() => {
           new ImportExportModal(this.app, this.plugin, 'import').open();
@@ -1624,14 +1624,14 @@ export class editingToolbarSettingTab extends PluginSettingTab {
     infoDiv.style.borderRadius = '8px';
     infoDiv.style.backgroundColor = 'var(--background-secondary)';
     infoDiv.createEl('h3', {
-      text: text('Usage Instructions'),
+      text: t('Usage Instructions'),
       cls: 'import-export-heading'
     }).style.marginTop = '0';
 
     const ul = infoDiv.createEl('ul');
     ul.style.paddingLeft = '20px';
-    ul.createEl('li', { text: text('Export: Generate a JSON configuration that you can save or share.') });
-    ul.createEl('li', { text: text('Import: Paste a previously exported JSON configuration.') });
+    ul.createEl('li', { text: t('Export: Generate a JSON configuration that you can save or share.') });
+    ul.createEl('li', { text: t('Import: Paste a previously exported JSON configuration.') });
     const communityDiv = containerEl.createDiv('community-share-container');
     communityDiv.style.marginTop = '20px';
     communityDiv.style.padding = '16px';
@@ -1639,14 +1639,14 @@ export class editingToolbarSettingTab extends PluginSettingTab {
     communityDiv.style.backgroundColor = 'rgba(var(--color-green-rgb), 0.1)';
     communityDiv.style.border = '1px solid rgba(var(--color-green-rgb), 0.3)';
     communityDiv.createEl('h3', {
-      text: text('Join the Community'),
+      text: t('Join the Community'),
       cls: 'community-heading'
     }).style.marginTop = '0';
 
     const shareLink = communityDiv.createEl('p');
-    shareLink.innerHTML = text('Share your toolbar settings and styles in our') + ' <a href="https://github.com/PKM-er/obsidian-editing-toolbar/discussions/categories/show-and-tell" target="_blank" rel="noopener noreferrer">Show and Tell</a> ';
+    shareLink.innerHTML = t('Share your toolbar settings and styles in our') + ' <a href="https://github.com/PKM-er/obsidian-editing-toolbar/discussions/categories/show-and-tell" target="_blank" rel="noopener noreferrer">Show and Tell</a> ';
     const shareNote = communityDiv.createEl('p', {
-      text: text('Get inspired by what others have created or showcase your own customizations.')
+      text: t('Get inspired by what others have created or showcase your own customizations.')
     });
     const warningDiv = containerEl.createDiv('import-export-warning');
     warningDiv.style.marginTop = '20px';
@@ -1655,7 +1655,7 @@ export class editingToolbarSettingTab extends PluginSettingTab {
     warningDiv.style.backgroundColor = 'rgba(var(--color-red-rgb), 0.1)';
     warningDiv.style.border = '1px solid rgba(var(--color-red-rgb), 0.3)';
     warningDiv.createEl('p', {
-      text: text('Warning: Importing configuration will overwrite your current settings. Consider exporting your current configuration first as a backup.'),
+      text: t('Warning: Importing configuration will overwrite your current settings. Consider exporting your current configuration first as a backup.'),
       cls: 'warning-text'
     }).style.margin = '0';
   }
