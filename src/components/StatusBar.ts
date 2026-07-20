@@ -54,7 +54,7 @@ export class StatusBar {
   private addVisibilityToggle(menu: Menu): void {
     menu.addItem((item) => {
       item.setTitle(strings.hideShow);
-      requireApiVersion("0.15.0") ? item.setSection("settings") : true;
+      if (requireApiVersion("0.15.0")) item.setSection("settings");
       const itemDom = (item as any).dom as HTMLElement;
       const toggleComponent = new ToggleComponent(itemDom)
         .setValue(this.plugin.settings.cMenuVisibility)
@@ -81,7 +81,7 @@ export class StatusBar {
 
     menu.addItem((item) => {
       item.setTitle(strings.toolbarPosition);
-      requireApiVersion("0.15.0") ? item.setSection("settings") : true;
+      if (requireApiVersion("0.15.0")) item.setSection("settings");
       item.setIcon("dock");
 
       const submenu = item.setSubmenu();
@@ -186,7 +186,7 @@ export class StatusBar {
     
     menu.addItem((item) => {
       item.setTitle(strings.currentView + viewType);
-      requireApiVersion("0.15.0") ? item.setSection("settings") : true;
+      if (requireApiVersion("0.15.0")) item.setSection("settings");
       item.setIcon("layout-template");
       
       const submenu = item.setSubmenu();
@@ -306,7 +306,7 @@ export class StatusBar {
   private addAestheticStyleToggle(menu: Menu): void {
     menu.addItem((item) => {
       item.setTitle(strings.appearanceStyle);
-      requireApiVersion("0.15.0") ? item.setSection("settings") : true;
+      if (requireApiVersion("0.15.0")) item.setSection("settings");
       item.setIcon("cherry");
 
       const submenu = item.setSubmenu();

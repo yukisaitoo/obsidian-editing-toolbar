@@ -213,7 +213,7 @@ export class editingToolbarSettingTab extends PluginSettingTab {
       .setName(strings.editingToolbarAppendMethod)
       .setDesc(strings.chooseWhereEditingToolbarAppend)
       .addDropdown((dropdown) => {
-        let methods: Record<string, string> = {};
+        const methods: Record<string, string> = {};
         APPEND_METHODS.map((method) => (methods[method] = t(method)));
         dropdown.addOptions(methods);
         dropdown
@@ -1447,7 +1447,6 @@ export class editingToolbarSettingTab extends PluginSettingTab {
               this.triggerRefresh();
               console.log(`%cCommand '${newCommand.name}' was removed from editingToolbar`, "color: #989cab");
             }))
-          subsetting.nameEl;
         });
       } else {
         setting

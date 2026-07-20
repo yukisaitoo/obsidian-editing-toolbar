@@ -8,7 +8,7 @@ export function GenNonDuplicateID(randomLength: number) {
 export function findmenuID(plugin: { settings: { menuCommands: any; }; }, command: Command, issub: boolean,currentCommands:any[]) {
   let index;
   let res = { "index": -1, "subindex": -1 };
-  let menucmd = currentCommands
+  const menucmd = currentCommands
   if (issub) {
     menucmd.forEach((item: { SubmenuCommands: any[]; }, idx: any) => {
       if ("SubmenuCommands" in item) {
@@ -462,7 +462,7 @@ function processSelectionWithContext(lines: string[], startLine: number, editor:
   }
 
   let isAlreadyNumberedCorrectly = true;
-  let expectedNumbers: number[] = [];
+  const expectedNumbers: number[] = [];
   let prevIndentLevel = -1;
 
   for (const line of lines) {
@@ -485,7 +485,7 @@ function processSelectionWithContext(lines: string[], startLine: number, editor:
     }
   }
 
-  let result: string[] = [];
+  const result: string[] = [];
   const prevLineNum = startLine - 1;
   const prevLine = prevLineNum >= 0 ? editor.getLine(prevLineNum).trim() : '';
   const needsSeparationBefore = prevLine && !/^\s*$/.test(prevLine) && !prevLine.includes('ㅤ');
@@ -498,7 +498,7 @@ function processSelectionWithContext(lines: string[], startLine: number, editor:
   if (isAlreadyNumberedCorrectly) {
     result.push(...lines);
   } else {
-    let numberByIndent: { [level: number]: number } = {};
+    const numberByIndent: { [level: number]: number } = {};
     let prevLevel = -1;
 
     for (const line of lines) {
@@ -530,7 +530,7 @@ function processSelectionWithContext(lines: string[], startLine: number, editor:
 }
 
 function getListRangeForCursor(editor: Editor, currentLine: number): { startLine: number; endLine: number } {
-  let startLine = currentLine;
+  const startLine = currentLine;
   let endLine = currentLine;
 
   const currentIndent = editor.getLine(currentLine).match(/^\s*/)?.[0].length || 0;

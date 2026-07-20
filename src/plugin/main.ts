@@ -225,7 +225,7 @@ export default class editingToolbarPlugin extends Plugin {
 
     menu.addItem((item) => {
       item.setTitle(title).setIcon(icon);
-      requireApiVersion("0.15.0") ? item.setSection("info") : true;
+      if (requireApiVersion("0.15.0")) item.setSection("info");
 
       const submenu = item.setSubmenu();
       actions.forEach((action) => this.addEditorContextAction(submenu, action));
@@ -461,7 +461,7 @@ this.app.workspace.onLayoutReady(async () => {
     };
 
     let registeredTypes: string[] | null = null;
-    let typesSource: string | null = null;
+    const typesSource: string | null = null;
 
     if (
       admonitionPlugin.admonitions &&
@@ -479,8 +479,8 @@ this.app.workspace.onLayoutReady(async () => {
 }
 
   isLoadMobile() {
-    let screenWidth = window.innerWidth > 0 ? window.innerWidth : screen.width;
-    let isLoadOnMobile = this.settings?.isLoadOnMobile
+    const screenWidth = window.innerWidth > 0 ? window.innerWidth : screen.width;
+    const isLoadOnMobile = this.settings?.isLoadOnMobile
       ? this.settings.isLoadOnMobile
       : false;
     if (Platform.isMobileApp && !isLoadOnMobile) {
@@ -709,7 +709,7 @@ this.app.workspace.onLayoutReady(async () => {
     if (!this.settings.enableMultipleConfig) {
       return this.settings.menuCommands;
     }
-    let currentstyle = style || this.positionStyle;
+    const currentstyle = style || this.positionStyle;
     if (this.settings.isLoadOnMobile && Platform.isMobileApp) {
       return this.settings.mobileCommands;
     }

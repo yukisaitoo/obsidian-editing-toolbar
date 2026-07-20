@@ -4,7 +4,7 @@ let activeDocument: Document;
 
 export function workplacefullscreenMode(app: App) {
     requireApiVersion("0.15.0") ? activeDocument = activeWindow.document : activeDocument = window.document;
-    let currentleaf = activeDocument;
+    const currentleaf = activeDocument;
 
 
     if (app.workspace.leftSplit.collapsed && app.workspace.rightSplit.collapsed) {
@@ -48,9 +48,9 @@ export function fullscreenMode(app: App) {
 
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.toggleFull = exports.isFull = exports.exitFull = exports.beFull = void 0;
-    let DOC_EL = document.documentElement;
-    let headEl = DOC_EL.querySelector('head');
-    let styleEl = document.createElement('style');
+    const DOC_EL = document.documentElement;
+    const headEl = DOC_EL.querySelector('head');
+    const styleEl = document.createElement('style');
     let TYPE_REQUEST_FULL_SCREEN = 'requestFullscreen';
     let TYPE_EXIT_FULL_SCREEN = 'exitFullscreen';
     let TYPE_FULL_SCREEN_ELEMENT = 'fullscreenElement';
@@ -80,10 +80,9 @@ export function fullscreenMode(app: App) {
     const leaf = app.workspace.getActiveViewOfType(MarkdownView)
     if (!leaf)
         return;
-    let el = leaf.containerEl;
-    let modroot = document.body?.querySelector(".mod-vertical.mod-root .workspace-tab-container") as HTMLElement
-    let fullscreenMutationObserver: MutationObserver;
-    fullscreenMutationObserver = new MutationObserver(function (mutationRecords) {
+    const el = leaf.containerEl;
+    const modroot = document.body?.querySelector(".mod-vertical.mod-root .workspace-tab-container") as HTMLElement
+    const fullscreenMutationObserver = new MutationObserver(function (mutationRecords) {
         mutationRecords.forEach(function (mutationRecord) {
             mutationRecord.addedNodes.forEach(function (node) {
                 if (isFull(modroot)) {

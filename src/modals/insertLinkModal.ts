@@ -896,7 +896,7 @@ private async fetchRemoteTitle(url: string): Promise<string> {
         const editor = this.plugin.commandsManager.getActiveEditor();
         if (!editor) return;
 
-        let linkText = this.linkText || this.linkUrl;
+        const linkText = this.linkText || this.linkUrl;
         const linkUrl = this.linkUrl;
 
         let markdownLink = this.isEmbed ? "!" : "";

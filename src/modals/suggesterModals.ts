@@ -88,7 +88,7 @@ export class ChooseFromIconList extends FuzzySuggestModal<string> {
     
     const currentCommands = this.plugin.getCurrentCommands(this.currentEditingConfig);
     if (this.command.icon) {
-      let menuID = findmenuID(this.plugin, this.command, this.issub,currentCommands);
+      const menuID = findmenuID(this.plugin, this.command, this.issub,currentCommands);
       if (this.issub) {
         currentCommands[menuID['index']].SubmenuCommands[menuID['subindex']].icon = item;
       } else {
@@ -163,12 +163,12 @@ class CustomIcon extends Modal {
       const menuID = findmenuID(this.plugin, this.item, this.issub,currentCommands);
       
       if (!this.issub) {
-        let index = menuID['index'];
+        const index = menuID['index'];
         index === -1 
           ? this.plugin.settings.menuCommands.push(this.item) 
           : (this.plugin.settings.menuCommands[index].icon = this.item.icon);
       } else {
-        let subindex = menuID['subindex'];
+        const subindex = menuID['subindex'];
         subindex === -1 
           ? this.plugin.settings.menuCommands[menuID["index"]].SubmenuCommands.push(this.item) 
           : this.plugin.settings.menuCommands[menuID['index']].SubmenuCommands[subindex].icon = value;
@@ -202,7 +202,6 @@ export class CommandPicker extends FuzzySuggestModal<Command> {
   currentEditingConfig:string;
   constructor(private plugin: editingToolbarPlugin,currentEditingConfig?:string) {
     super(plugin.app);
-    this.app;
     this.setPlaceholder(strings.chooseCommand);
     this.currentEditingConfig = currentEditingConfig || "";
   }
@@ -220,7 +219,7 @@ export class CommandPicker extends FuzzySuggestModal<Command> {
     
     const currentCommands = this.plugin.getCurrentCommands(this.currentEditingConfig);
 
-    let index = currentCommands.findIndex((v) => v.id == item.id);
+    const index = currentCommands.findIndex((v) => v.id == item.id);
 
     if (index > -1)
     {
@@ -274,11 +273,11 @@ export class ChangeCmdname extends Modal {
       .onChange(debounce(async (value) => {
         const currentCommands = this.plugin.getCurrentCommands(this.currentEditingConfig);
         
-        let menuID = findmenuID(this.plugin, this.item, this.issub,currentCommands)
+        const menuID = findmenuID(this.plugin, this.item, this.issub,currentCommands)
         this.item.name = value;
         if (!this.issub)
         {
-          let index = menuID['index']
+          const index = menuID['index']
           //  console.log(index,"index")
           if (index === -1) {
             currentCommands.push(this.item);
@@ -286,7 +285,7 @@ export class ChangeCmdname extends Modal {
             currentCommands[index].name = this.item.name;
           }
         } else {
-          let subindex = menuID['subindex']
+          const subindex = menuID['subindex']
           if (subindex === -1) {
             currentCommands[menuID["index"]].SubmenuCommands.push(this.item);
           } else {

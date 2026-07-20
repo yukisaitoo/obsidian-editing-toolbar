@@ -1147,7 +1147,7 @@ export class CommandsManager {
           editor &&
             this.executeCommandWithoutBlur(editor, async () => {
               const curserEnd = editor.getCursor("to");
-              let char = this.getCharacterOffset(type["id"]);
+              const char = this.getCharacterOffset(type["id"]);
               await this.plugin.app.commands.executeCommandById(
                 `${type["id"]}`
               );

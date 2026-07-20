@@ -174,14 +174,14 @@ function setHilite(keys: any, how: string) {
 
 function getHotkey(app: App, cmdid: string, highlight = false) {
   // @ts-ignore
-  let arr = app.commands.findCommand(cmdid)
-  let hi = highlight ? '*' : '';
+  const arr = app.commands.findCommand(cmdid)
+  const hi = highlight ? '*' : '';
   if (arr) {
-    let defkeys = arr.hotkeys ? [[getNestedObject(arr.hotkeys, [0, 'modifiers'])],
+    const defkeys = arr.hotkeys ? [[getNestedObject(arr.hotkeys, [0, 'modifiers'])],
     [getNestedObject(arr.hotkeys, [0, 'key'])]] : undefined;
     // @ts-ignore
-    let ck = app.hotkeyManager.customKeys[arr.id];
-    var hotkeys = ck ? [[getNestedObject(ck, [0, 'modifiers'])], [getNestedObject(ck, [0, 'key'])]] : undefined;
+    const ck = app.hotkeyManager.customKeys[arr.id];
+    const hotkeys = ck ? [[getNestedObject(ck, [0, 'modifiers'])], [getNestedObject(ck, [0, 'key'])]] : undefined;
     return hotkeys ? setHilite(hotkeys, hi) : setHilite(defkeys, '');
   } else
     return "–"
@@ -190,7 +190,7 @@ function getHotkey(app: App, cmdid: string, highlight = false) {
 
 
 const getCoords = (editor: any) => {
-  let cursorFrom = editor.getCursor("head");
+  const cursorFrom = editor.getCursor("head");
   if (editor.getCursor("head").ch !== editor.getCursor("from").ch) cursorFrom.ch = Math.max(0, cursorFrom.ch - 1);
 
   let coords;
@@ -207,7 +207,7 @@ const getCoords = (editor: any) => {
 
 
 export function checkHtml(htmlStr: string) {
-  let reg = /<[^>]+>/g;
+  const reg = /<[^>]+>/g;
   return reg.test(htmlStr);
 }
 
@@ -279,7 +279,7 @@ function shouldMoveButtonToMoreMenu(
 }
 
 export function createDiv(selector: string) {
-  let div = createEl("div");
+  const div = createEl("div");
   div.addClass(selector);
   return div;
 }
@@ -289,13 +289,13 @@ function createTablecell(app: App, plugin: editingToolbarPlugin, el: string, roo
   requireApiVersion("0.15.0") ? activeDocument = activeWindow.document : activeDocument = window.document;
 
   const container = root || (isExistoolbar(app, plugin) as HTMLElement | null);
-  let tab = container?.querySelector('#' + el);
+  const tab = container?.querySelector('#' + el);
   if (tab) {
     // @ts-ignore
-    let rows = tab.rows;
-    let rlen = rows.length;
+    const rows = tab.rows;
+    const rlen = rows.length;
     for (let i = 1; i < rlen; i++) {
-      let cells = rows[i].cells;
+      const cells = rows[i].cells;
       for (let j = 0; j < cells.length; j++) {
         cells[j].onclick = function (event: MouseEvent) {
           event.preventDefault();
@@ -307,18 +307,18 @@ function createTablecell(app: App, plugin: editingToolbarPlugin, el: string, roo
             if (el == "x-color-picker-table") {
               plugin.settings.cMenuFontColor = backcolor;
               setFontcolor(backcolor, editor);
-              let font_colour_dom = activeDocument.querySelectorAll("#change-font-color-icon")
+              const font_colour_dom = activeDocument.querySelectorAll("#change-font-color-icon")
               font_colour_dom.forEach(element => {
-                let ele = element as HTMLElement
+                const ele = element as HTMLElement
                 ele.style.fill = backcolor;
               });
 
             } else if (el == "x-backgroundcolor-picker-table") {
               plugin.settings.cMenuBackgroundColor = backcolor;
               setBackgroundcolor(backcolor, editor);
-              let background_colour_dom = activeDocument.querySelectorAll("#change-background-color-icon")
+              const background_colour_dom = activeDocument.querySelectorAll("#change-background-color-icon")
               background_colour_dom.forEach(element => {
-                let ele = element as HTMLElement
+                const ele = element as HTMLElement
                 ele.style.fill = backcolor;
               });
 
@@ -336,11 +336,11 @@ function createTablecell(app: App, plugin: editingToolbarPlugin, el: string, roo
 
 
 const setcolorHex = function (color: string) {
-  let that = color;
+  const that = color;
 
-  let reg = /^#([0-9a-fA-f]{3}|[0-9a-fA-f]{6})$/;
+  const reg = /^#([0-9a-fA-f]{3}|[0-9a-fA-f]{6})$/;
   if (/^(rgb|RGB)/.test(that)) {
-    let aColor = that.replace(/(?:\(|\)|rgb|RGB)*/g, "").split(",");
+    const aColor = that.replace(/(?:\(|\)|rgb|RGB)*/g, "").split(",");
     let strHex = "#";
     for (let i = 0; i < aColor.length; i++) {
       let hex = Number(aColor[i]).toString(16);
@@ -357,7 +357,7 @@ const setcolorHex = function (color: string) {
     }
     return strHex;
   } else if (reg.test(that)) {
-    let aNum = that.replace(/#/, "").split("");
+    const aNum = that.replace(/#/, "").split("");
     if (aNum.length === 6) {
       return that;
     } else if (aNum.length === 3) {
@@ -432,9 +432,9 @@ function createMoremenu(app: App, plugin: editingToolbarPlugin, selector: HTMLDi
     popoverEl.style.margin = "0";
   };
 
-  let cMoreMenu = selector.createEl("span");
+  const cMoreMenu = selector.createEl("span");
   cMoreMenu.addClass("more-menu");
-  let morebutton = new ButtonComponent(cMoreMenu);
+  const morebutton = new ButtonComponent(cMoreMenu);
   morebutton
     .setClass("editingToolbarCommandItem")
     .setTooltip(strings.more)
@@ -473,16 +473,16 @@ export function setFormateraser(plugin: editingToolbarPlugin, editor: Editor) {
 
   // } else {
   if (selectText.match(/^>\s*\[\![\w\s]*\]/m)) {
-    let lines = selectText.split('\n');
-    let result = [];
+    const lines = selectText.split('\n');
+    const result = [];
     let inCallout = false;
     let calloutLevel = 0;
     let foundFirstCallout = false;
 
     for (let i = 0; i < lines.length; i++) {
-      let line = lines[i];
+      const line = lines[i];
 
-      let calloutMatch = line.match(/^(>+)\s*\[\!([\w\s]*)\]\s*(.*?)$/);
+      const calloutMatch = line.match(/^(>+)\s*\[\!([\w\s]*)\]\s*(.*?)$/);
       if (calloutMatch && !foundFirstCallout) {
         calloutLevel = calloutMatch[1].length;
         foundFirstCallout = true;
@@ -496,9 +496,9 @@ export function setFormateraser(plugin: editingToolbarPlugin, editor: Editor) {
       }
 
       if (inCallout) {
-        let linePrefix = line.match(/^(>+)\s*/);
+        const linePrefix = line.match(/^(>+)\s*/);
         if (linePrefix && linePrefix[1].length >= calloutLevel) {
-          let newLine = line.replace(new RegExp(`^>{${calloutLevel}}\\s*`), '');
+          const newLine = line.replace(new RegExp(`^>{${calloutLevel}}\\s*`), '');
 
           result.push(newLine);
         } else {
@@ -514,7 +514,7 @@ export function setFormateraser(plugin: editingToolbarPlugin, editor: Editor) {
     return;
   }
 
-  let mdText = /(^#+\s|^#(?=\s)|^\>|^\- \[( |x)\]|^\+ |\<[^\<\>]+?\>|^1\. |^\s*\- |^\-+$|^\*+$)/mg;
+  const mdText = /(^#+\s|^#(?=\s)|^\>|^\- \[( |x)\]|^\+ |\<[^\<\>]+?\>|^1\. |^\s*\- |^\-+$|^\*+$)/mg;
   selectText = selectText.replace(mdText, "");
   selectText = selectText.replace(/^[ ]+|[ ]+$/mg, "");
   selectText = selectText.replace(/\!?\[\[([^\[\]\|]*\|)*([^\(\)\[\]]+)\]\]/g, "$2");
@@ -782,9 +782,9 @@ export function editingToolbarPopover(
     const generateMenu = () => {
       let btnwidth = 0;
       let leafwidth = 0;
-      let buttonWidth = resolvedIconSize + 8;
+      const buttonWidth = resolvedIconSize + 8;
     
-      let editingToolbar = createEl("div");
+      const editingToolbar = createEl("div");
       if (editingToolbar) {
         editingToolbar.addClass("editingToolbarModalBar");
         editingToolbar.setAttribute("data-toolbar-style", effectiveStyle);
@@ -815,7 +815,7 @@ export function editingToolbarPopover(
       }
       editingToolbar.setAttribute("id", "editingToolbarModalBar");
     
-      let PopoverMenu = createEl("div");
+      const PopoverMenu = createEl("div");
       PopoverMenu.addClass("editingToolbarpopover");
       PopoverMenu.addClass("editingToolbarTinyAesthetic");
     
@@ -864,7 +864,7 @@ export function editingToolbarPopover(
       }
 
       if (effectiveStyle === "top") {
-        let currentleaf = app.workspace.activeLeaf.view.containerEl;
+        const currentleaf = app.workspace.activeLeaf.view.containerEl;
 
         let targetDom: HTMLElement | null = null;
 
@@ -952,7 +952,7 @@ export function editingToolbarPopover(
         leafwidth = widthCandidates.length > 0 ? Math.min(...widthCandidates) : 0;
       }
 
-      let editingToolbarPopoverBar = effectiveStyle === "top"
+      const editingToolbarPopoverBar = effectiveStyle === "top"
         ? app.workspace.activeLeaf.view.containerEl?.querySelector("#editingToolbarPopoverBar") as HTMLElement
         : targetDocument.querySelector(
             `.editingToolbarPopoverBar[data-toolbar-style="${effectiveStyle}"]`
@@ -1008,7 +1008,7 @@ export function editingToolbarPopover(
 
           if (menuType === 'dropdown') {
             _btn.setClass("editingToolbarDropdownButton");
-            let hotkey = getHotkey(app, item.id);
+            const hotkey = getHotkey(app, item.id);
             tip = getLocalizedTooltip(item.name, hotkey);
             _btn.setTooltip(tip);
 
@@ -1054,13 +1054,13 @@ export function editingToolbarPopover(
               menu.showAtMouseEvent(evt);
             });
           } else {
-            let submenu = createDiv("subitem");
+            const submenu = createDiv("subitem");
             if (submenu) {
               item.SubmenuCommands.forEach(
                 (subitem: { name: string; id: any; icon: string }) => {
-                  let hotkey = getHotkey(app, subitem.id);
+                  const hotkey = getHotkey(app, subitem.id);
                   tip = getLocalizedTooltip(subitem.name, hotkey);
-                  let sub_btn = new ButtonComponent(submenu)
+                  const sub_btn = new ButtonComponent(submenu)
                     .setTooltip(tip)
                     .setClass("menu-item")
                     .onClick(() => {
@@ -1089,7 +1089,7 @@ export function editingToolbarPopover(
           }
         } else {
           if (item.id == "editing-toolbar:change-font-color") {
-            let button2 = new ButtonComponent(editingToolbar);
+            const button2 = new ButtonComponent(editingToolbar);
             button2
               .setClass("editingToolbarCommandsubItem-font-color")
               .setTooltip(strings.fontColors)
@@ -1109,7 +1109,7 @@ export function editingToolbarPopover(
 
             btnwidth += buttonWidth;
             //  let Selection = createDiv("triangle-icon");
-            let submenu2 = createEl("div");
+            const submenu2 = createEl("div");
             submenu2.addClass("subitem");
 
             if (submenu2) {
@@ -1119,11 +1119,11 @@ export function editingToolbarPopover(
               //    if (settings.cMenuFontColor)
               //     activeDocument.getElementById("change-font-color-icon").style.fill = settings.cMenuFontColor;
               createTablecell(app, plugin, "x-color-picker-table", submenu2);
-              let el = submenu2.querySelector(
+              const el = submenu2.querySelector(
                 ".x-color-picker-wrapper"
               ) as HTMLElement;
 
-              let button3 = new ButtonComponent(el);
+              const button3 = new ButtonComponent(el);
               button3
                 .setIcon("paintbrush")
                 .setTooltip(strings.formatBrush)
@@ -1137,7 +1137,7 @@ export function editingToolbarPopover(
                   );
 
                 });
-              let button4 = new ButtonComponent(el);
+              const button4 = new ButtonComponent(el);
               button4
                 .setIcon("palette")
                 .setTooltip(strings.customFontColor)
@@ -1151,7 +1151,7 @@ export function editingToolbarPopover(
                       appearanceTab?.click();
 
                       setTimeout(() => {
-                        let settingEI = app.setting.activeTab.containerEl.querySelector(".custom_font");
+                        const settingEI = app.setting.activeTab.containerEl.querySelector(".custom_font");
                         if (settingEI) { settingEI.addClass?.("toolbar-cta"); }
                       }, 100);
                     }
@@ -1160,7 +1160,7 @@ export function editingToolbarPopover(
                 });
             }
           } else if (item.id == "editing-toolbar:change-background-color") {
-            let button2 = new ButtonComponent(editingToolbar);
+            const button2 = new ButtonComponent(editingToolbar);
             button2
               .setClass("editingToolbarCommandsubItem-font-color")
               .setTooltip(strings.backgroundColor)
@@ -1180,7 +1180,7 @@ export function editingToolbarPopover(
 
             btnwidth += buttonWidth;
             //  let Selection = createDiv("triangle-icon");
-            let submenu2 = createEl("div");
+            const submenu2 = createEl("div");
             submenu2.addClass("subitem");
             if (submenu2) {
               submenu2.innerHTML = backcolorpicker(plugin);
@@ -1189,11 +1189,11 @@ export function editingToolbarPopover(
               // if (plugin.settings.cMenuBackgroundColor)
               //  activeDocument.getElementById("change-background-color-icon").style.fill = plugin.settings.cMenuBackgroundColor;
               createTablecell(app, plugin, "x-backgroundcolor-picker-table", submenu2);
-              let el = submenu2.querySelector(
+              const el = submenu2.querySelector(
                 ".x-color-picker-wrapper"
               ) as HTMLElement;
 
-              let button3 = new ButtonComponent(el);
+              const button3 = new ButtonComponent(el);
               button3
                 .setIcon("paintbrush")
                 .setTooltip(strings.formatBrush)
@@ -1207,7 +1207,7 @@ export function editingToolbarPopover(
                   );
 
                 });
-              let button4 = new ButtonComponent(el);
+              const button4 = new ButtonComponent(el);
               button4
                 .setIcon("palette")
                 .setTooltip(strings.customBackgroudColor)
@@ -1221,7 +1221,7 @@ export function editingToolbarPopover(
                       appearanceTab?.click();
 
                       setTimeout(() => {
-                        let settingEI = app.setting.activeTab.containerEl.querySelector(".custom_bg");
+                        const settingEI = app.setting.activeTab.containerEl.querySelector(".custom_bg");
                         if (settingEI) { settingEI.addClass?.("toolbar-cta"); }
                       }, 100);
                     }
@@ -1236,7 +1236,7 @@ export function editingToolbarPopover(
               plugin.setIS_MORE_Button(true);
               button = new ButtonComponent(resolveButtonHost(true));
             } else button = new ButtonComponent(editingToolbar);
-            let hotkey = getHotkey(app, item.id);
+            const hotkey = getHotkey(app, item.id);
  
             tip = getLocalizedTooltip(item.name, hotkey);
             button.setTooltip(tip).onClick(() => {

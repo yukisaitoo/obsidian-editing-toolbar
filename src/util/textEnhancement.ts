@@ -11,7 +11,7 @@ export class TextEnhancement {
 
     const mdPattern =
       /(^#+\s|(?<=^|\s*)#|^>|^\- \[( |x)\]|^\+ |<[^<>]+>|^1\. |^\-+$|^\*+$|==|\*+|~~|```|!*\[\[|\]\])/gm;
-    let plainText = selection
+    const plainText = selection
       .replace(/\[([^\[\]]*)\]\([^\(\)]+\)/gim, "$1")
       .replace(mdPattern, "")
       .replace(/^[ ]+|[ ]+$/gm, "")
@@ -417,7 +417,7 @@ export class TextEnhancement {
     let result = "";
 
     for (let i = 0; i < lines.length; i++) {
-      let currentLine = options.trimLines ? lines[i].trim() : lines[i];
+      const currentLine = options.trimLines ? lines[i].trim() : lines[i];
 
       if (currentLine === "") {
         if (options.preserveParagraphs && !hasCustomSep) {
@@ -477,8 +477,8 @@ export class TextEnhancement {
       }
     });
 
-    let preText: string[] = [];
-    let tableRows: string[][] = [];
+    const preText: string[] = [];
+    const tableRows: string[][] = [];
     let currentRow: string[] = [];
     let isInsideTable = false;
 
@@ -568,7 +568,7 @@ export class TextEnhancement {
       })
       .join("\n");
 
-    let tableMarkdown = header + sep + body;
+    const tableMarkdown = header + sep + body;
 
     let finalContent = "";
 
