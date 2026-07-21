@@ -3,6 +3,8 @@
     "allow": [
       "ReadFile(./**)",
       "Bash(ls *)",
+      "Bash(cd *)",
+      "Bash(echo *)",
       "Bash(pwd)",
       "Bash(cat *)",
       "Bash(head *)",
