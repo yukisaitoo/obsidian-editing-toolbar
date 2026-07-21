@@ -15,6 +15,40 @@ export interface AppearanceByStyle {
   [style: string]: StyleAppearanceSettings;
 }
 
+/**
+ * Read a per-style appearance value: the value stored in `style`'s bucket, falling
+ * back to the legacy global field on `settings`. Explicit replacement for the old
+ * Object.defineProperty getter that transparently redirected `settings.<key>`.
+ */
+export function getAppearanceValue<K extends keyof StyleAppearanceSettings>(
+  settings: editingToolbarSettings,
+  key: K,
+  style: string,
+): StyleAppearanceSettings[K] {
+  const bucketValue = settings.appearanceByStyle?.[style]?.[key];
+  return (bucketValue ?? (settings as unknown as StyleAppearanceSettings)[key]) as StyleAppearanceSettings[K];
+}
+
+/**
+ * Write a per-style appearance value into `style`'s bucket (creating the store and
+ * bucket as needed). Explicit replacement for the old defineProperty setter.
+ */
+export function setAppearanceValue<K extends keyof StyleAppearanceSettings>(
+  settings: editingToolbarSettings,
+  key: K,
+  style: string,
+  value: StyleAppearanceSettings[K],
+): void {
+  if (!settings.appearanceByStyle || typeof settings.appearanceByStyle !== "object") {
+    settings.appearanceByStyle = {};
+  }
+  const store = settings.appearanceByStyle as AppearanceByStyle;
+  if (!store[style] || typeof store[style] !== "object") {
+    store[style] = {};
+  }
+  store[style]![key] = value;
+}
+
 export type PositionToggleStyle = "top" | "following" | "fixed";
 
 /**

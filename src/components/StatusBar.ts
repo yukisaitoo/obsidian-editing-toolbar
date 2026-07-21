@@ -2,7 +2,7 @@ import { ItemView, Menu, requireApiVersion, setIcon, ToggleComponent } from "obs
 import { selfDestruct } from "src/modals/editingToolbarModal";
 import { CommandPicker, openSlider } from "src/modals/suggesterModals";
 import type EditingToolbarPlugin from "src/plugin/main";
-import { AESTHETIC_STYLES, resolveNextPositionStyle } from "src/settings/settingsData";
+import { AESTHETIC_STYLES, getAppearanceValue, resolveNextPositionStyle, setAppearanceValue } from "src/settings/settingsData";
 import { strings } from "src/translations/helper";
 import { setMenuVisibility } from "src/util/statusBarConstants";
 import { ViewUtils } from "src/util/viewUtils";
@@ -293,9 +293,9 @@ export class StatusBar {
       AESTHETIC_STYLES.forEach(style => {
         submenu.addItem(subItem => {
           subItem.setTitle(style);
-          subItem.setIcon(this.plugin.settings.aestheticStyle === style ? "check" : "");
+          subItem.setIcon(getAppearanceValue(this.plugin.settings, "aestheticStyle", this.plugin.resolveActiveStyle()) === style ? "check" : "");
           subItem.onClick(async () => {
-            this.plugin.settings.aestheticStyle = style;
+            setAppearanceValue(this.plugin.settings, "aestheticStyle", this.plugin.resolveActiveStyle(), style);
             await this.plugin.saveSettings();
             selfDestruct(this.plugin);
             setTimeout(() => {

@@ -11,7 +11,7 @@ import { RegexCommandModal } from "src/modals/RegexCommandModal";
 import { ChangeCmdname, ChooseFromIconList, CommandPicker, openSlider } from "src/modals/suggesterModals";
 import type EditingToolbarPlugin from "src/plugin/main";
 import type { AppearanceByStyle, StyleAppearanceSettings, ToolbarStyleKey } from "src/settings/settingsData";
-import { AESTHETIC_STYLES, APPEND_METHODS, POSITION_STYLES, resolveNextPositionStyle } from "src/settings/settingsData";
+import { AESTHETIC_STYLES, APPEND_METHODS, getAppearanceValue, POSITION_STYLES, resolveNextPositionStyle } from "src/settings/settingsData";
 import { strings, t } from 'src/translations/helper';
 import { GenNonDuplicateID } from "src/util/util";
 
@@ -124,6 +124,7 @@ export class EditingToolbarSettingTab extends PluginSettingTab {
     this.destroyPickrs();
     const { containerEl } = this;
     containerEl.empty();
+    containerEl.addClass('editing-toolbar-settings');
     this.createHeader(containerEl);
 
     const tabContainer = containerEl.createEl('div', {
@@ -205,10 +206,6 @@ export class EditingToolbarSettingTab extends PluginSettingTab {
   }
   private displayGeneralSettings(containerEl: HTMLElement): void {
     const generalSettingContainer = containerEl.createDiv('generalSetting-container');
-    generalSettingContainer.style.padding = '16px';
-    generalSettingContainer.style.borderRadius = '8px';
-    generalSettingContainer.style.backgroundColor = 'var(--background-secondary)';
-    generalSettingContainer.style.marginBottom = '20px';
     new Setting(generalSettingContainer)
       .setName(strings.editingToolbarAppendMethod)
       .setDesc(strings.chooseWhereEditingToolbarAppend)
@@ -313,10 +310,6 @@ export class EditingToolbarSettingTab extends PluginSettingTab {
 
     // Custom background and font color settings
     const paintbrushContainer = containerEl.createDiv('custom-paintbrush-container');
-    paintbrushContainer.style.padding = '16px';
-    paintbrushContainer.style.borderRadius = '8px';
-    paintbrushContainer.style.backgroundColor = 'var(--background-secondary)';
-    paintbrushContainer.style.marginBottom = '20px';
     new Setting(paintbrushContainer)
       .setName(strings.setCustomBackground)
       .setDesc(strings.clickPickerAdjustColor)
@@ -382,10 +375,6 @@ export class EditingToolbarSettingTab extends PluginSettingTab {
   private displayAppearanceSettings(containerEl: HTMLElement): void {
 
     const appearanceSettingContainer = containerEl.createDiv('appearanceSetting-container');
-    appearanceSettingContainer.style.padding = '16px';
-    appearanceSettingContainer.style.borderRadius = '8px';
-    appearanceSettingContainer.style.backgroundColor = 'var(--background-secondary)';
-    appearanceSettingContainer.style.marginBottom = '20px';
     // Aesthetic style setting
 
     // Decide which style we are editing in this tab
@@ -474,10 +463,6 @@ export class EditingToolbarSettingTab extends PluginSettingTab {
   }
   private displayCommandSettings(containerEl: HTMLElement): void {
     const commandSettingContainer = containerEl.createDiv('commandSetting-container');
-    commandSettingContainer.style.padding = '16px';
-    commandSettingContainer.style.borderRadius = '8px';
-    commandSettingContainer.style.backgroundColor = 'var(--background-secondary)';
-    commandSettingContainer.style.marginBottom = '20px';
     if (this.plugin.settings.enableMultipleConfig) {
       const configSwitcher = new Setting(commandSettingContainer)
         .setName(strings.currentConfiguration)
@@ -504,14 +489,6 @@ export class EditingToolbarSettingTab extends PluginSettingTab {
 
       const commandsArray = this.getCommandsArrayByType(currentConfigType);
       const buttonContainer = containerEl.createDiv('command-buttons-container');
-
-      buttonContainer.style.display = 'flex';
-      buttonContainer.style.flexDirection = 'column';
-      buttonContainer.style.gap = '10px';
-
-      buttonContainer.style.padding = '16px';
-      buttonContainer.style.borderRadius = '8px';
-      buttonContainer.style.backgroundColor = 'var(--background-secondary)';
 
       const importSetting = new Setting(buttonContainer)
         .setName(strings.import2)
@@ -636,8 +613,6 @@ export class EditingToolbarSettingTab extends PluginSettingTab {
       });
     }
     const commandListContainer = containerEl.createDiv('command-lists-container');
-    commandListContainer.style.padding = '16px';
-    commandListContainer.style.borderRadius = '8px';
     commandListContainer.addClass(`${this.currentEditingConfig}`);
     if (this.plugin.settings.enableMultipleConfig) {
       const positionStyleInfo = commandListContainer.createEl('div', {
@@ -676,19 +651,7 @@ export class EditingToolbarSettingTab extends PluginSettingTab {
           await this.plugin.saveSettings();
         }));
     const commandListContainer = customCommandsContainer.createDiv('command-list-container');
-    commandListContainer.style.padding = '16px';
-    commandListContainer.style.borderRadius = '8px';
-    commandListContainer.style.backgroundColor = 'var(--background-secondary)';
-    commandListContainer.style.marginBottom = '20px';
-    commandListContainer.style.marginTop = '20px';
     const addButtonContainer = customCommandsContainer.createDiv('add-command-button-container');
-    addButtonContainer.style.padding = '16px';
-    addButtonContainer.style.borderRadius = '8px';
-    addButtonContainer.style.backgroundColor = 'var(--background-secondary)';
-    addButtonContainer.style.marginBottom = '20px';
-    addButtonContainer.style.marginTop = '20px';
-    addButtonContainer.style.display = 'flex';
-    addButtonContainer.style.gap = '10px';
     const addFormatButton = addButtonContainer.createEl('button', {
       text: strings.addFormatCommand
     });
@@ -789,7 +752,6 @@ export class EditingToolbarSettingTab extends PluginSettingTab {
           const iconContainer = commandSetting.nameEl.createSpan({
             cls: "editingToolbarSettingsIcon"
           });
-          iconContainer.style.marginRight = "8px";
           checkHtml(command.icon) ? iconContainer.innerHTML = command.icon : setIcon(iconContainer, command.icon)
         } catch (e) {
           console.error("Failed to set icon:", e);
@@ -839,9 +801,6 @@ export class EditingToolbarSettingTab extends PluginSettingTab {
 
 
     const toolbarContainer = containerEl.createDiv('custom-toolbar-container');
-    toolbarContainer.style.padding = '16px';
-    toolbarContainer.style.borderRadius = '8px';
-    toolbarContainer.style.backgroundColor = 'var(--background-secondary)';
     new Setting(toolbarContainer)
       .setName(strings.toolbarTheme)
       .setDesc(strings.selectPresetToolbarThemeAutomatically)
@@ -973,7 +932,7 @@ export class EditingToolbarSettingTab extends PluginSettingTab {
               '#4C2A55',
             ],
             opacity: false,
-            defaultColor: this.plugin.settings.toolbarIconColor
+            defaultColor: getAppearanceValue(this.plugin.settings, "toolbarIconColor", this.plugin.resolveActiveStyle())
           })
         );
         this.pickrs.push(pickr);
@@ -1015,11 +974,10 @@ export class EditingToolbarSettingTab extends PluginSettingTab {
       });
     const previewContainer = toolbarContainer.createDiv('toolbar-preview-container');
     previewContainer.addClass('toolbar-preview-section');
-    previewContainer.style.marginTop = '20px';
-    const previewLabel = previewContainer.createEl('h3', {
-      text: strings.toolbarPreviewHypotheticalCommandConfigurati
+    previewContainer.createEl('h3', {
+      text: strings.toolbarPreviewHypotheticalCommandConfigurati,
+      cls: 'toolbar-preview-label'
     });
-    previewLabel.style.marginBottom = '10px';
     const wrapper = previewContainer.createDiv();
     wrapper.classList.add("preview-toolbar-wrapper");
     wrapper.classList.add(`preview-${editingStyle}`);
@@ -1038,7 +996,7 @@ export class EditingToolbarSettingTab extends PluginSettingTab {
       editingStyle
     );
     if (editingStyle === "fixed") {
-      const icon = this.plugin.settings.toolbarIconSize || 18;
+      const icon = getAppearanceValue(this.plugin.settings, "toolbarIconSize", this.plugin.resolveActiveStyle()) || 18;
       const cols = this.plugin.settings.cMenuNumRows || 6;
       editingToolbar.style.display = "grid";
       editingToolbar.style.gridTemplateColumns = `repeat(${cols}, ${icon + 10}px)`;
@@ -1557,10 +1515,6 @@ export class EditingToolbarSettingTab extends PluginSettingTab {
 
   private displayImportExportSettings(containerEl: HTMLElement): void {
     const importExportContainer = containerEl.createDiv('import-export-container');
-    importExportContainer.style.padding = '16px';
-    importExportContainer.style.borderRadius = '8px';
-    importExportContainer.style.backgroundColor = 'var(--background-secondary)';
-    importExportContainer.style.marginBottom = '20px';
     new Setting(importExportContainer)
       .setName(strings.exportConfiguration)
       .setDesc(strings.exportToolbarConfigurationShareOthers)
@@ -1582,29 +1536,19 @@ export class EditingToolbarSettingTab extends PluginSettingTab {
         })
       );
     const infoDiv = containerEl.createDiv('import-export-info');
-    infoDiv.style.marginTop = '20px';
-    infoDiv.style.padding = '16px';
-    infoDiv.style.borderRadius = '8px';
-    infoDiv.style.backgroundColor = 'var(--background-secondary)';
     infoDiv.createEl('h3', {
       text: strings.usageInstructions,
       cls: 'import-export-heading'
-    }).style.marginTop = '0';
+    });
 
     const ul = infoDiv.createEl('ul');
-    ul.style.paddingLeft = '20px';
     ul.createEl('li', { text: strings.exportGenerateJsonConfigurationCan });
     ul.createEl('li', { text: strings.importPastePreviouslyExportedJson });
     const communityDiv = containerEl.createDiv('community-share-container');
-    communityDiv.style.marginTop = '20px';
-    communityDiv.style.padding = '16px';
-    communityDiv.style.borderRadius = '8px';
-    communityDiv.style.backgroundColor = 'rgba(var(--color-green-rgb), 0.1)';
-    communityDiv.style.border = '1px solid rgba(var(--color-green-rgb), 0.3)';
     communityDiv.createEl('h3', {
       text: strings.joinCommunity,
       cls: 'community-heading'
-    }).style.marginTop = '0';
+    });
 
     const shareLink = communityDiv.createEl('p');
     shareLink.innerHTML = strings.shareToolbarSettingsStylesOur + ' <a href="https://github.com/PKM-er/obsidian-editing-toolbar/discussions/categories/show-and-tell" target="_blank" rel="noopener noreferrer">Show and Tell</a> ';
@@ -1612,15 +1556,10 @@ export class EditingToolbarSettingTab extends PluginSettingTab {
       text: strings.getInspiredWhatOthersHave
     });
     const warningDiv = containerEl.createDiv('import-export-warning');
-    warningDiv.style.marginTop = '20px';
-    warningDiv.style.padding = '16px';
-    warningDiv.style.borderRadius = '8px';
-    warningDiv.style.backgroundColor = 'rgba(var(--color-red-rgb), 0.1)';
-    warningDiv.style.border = '1px solid rgba(var(--color-red-rgb), 0.3)';
     warningDiv.createEl('p', {
       text: strings.warningImportingConfigurationOverwriteCurren,
       cls: 'warning-text'
-    }).style.margin = '0';
+    });
   }
   private aestheticStyleMap: { [key: string]: string } = {
     default: "editingToolbarDefaultAesthetic",

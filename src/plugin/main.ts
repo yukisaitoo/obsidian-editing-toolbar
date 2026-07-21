@@ -20,7 +20,7 @@ import addIcons from "src/icons/customIcons";
 import { createFollowingbar, editingToolbarPopover, isExistoolbar, quiteFormatbrushes, resetToolbar, selfDestruct, setFormateraser } from "src/modals/editingToolbarModal";
 import { InsertCalloutModal } from "src/modals/insertCalloutModal";
 import { InsertLinkModal } from "src/modals/insertLinkModal";
-import { DEFAULT_SETTINGS, editingToolbarSettings } from "src/settings/settingsData";
+import { DEFAULT_SETTINGS, editingToolbarSettings, getAppearanceValue } from "src/settings/settingsData";
 import { strings } from 'src/translations/helper';
 import { setBackgroundcolor, setFontcolor } from "src/util/util";
 import { ViewUtils } from 'src/util/viewUtils';
@@ -132,55 +132,31 @@ export default class EditingToolbarPlugin extends Plugin {
 
 
 
-    // Initialise per-style appearance (patch v3 logic, but limited to this plugin)
-  private initPerStyleAppearance(): void {
+  // Ensure per-style appearance buckets exist, migrating from the legacy global
+  // fields on first run. Reads/writes go through getAppearanceValue/setAppearanceValue
+  // + resolveActiveStyle() (no more Object.defineProperty redirection on settings).
+  private initAppearanceStore(): void {
     const settings = this.settings;
     if (!settings) return;
 
     const migratingFromGlobal = !settings.appearanceByStyle;
     ensureAppearanceStore(settings, migratingFromGlobal);
+  }
 
-    const store = settings.appearanceByStyle as AppearanceByStyle;
-    
-    const getCurrentStyle = (): ToolbarStyleKey => {
-      const raw = (
-        this.appearanceEditStyle ||       // 1. style we are editing in settings
-        this.positionStyle ||             // 2. live toolbar style
-        settings.positionStyle ||         // 3. stored fallback
-        "top"
-      ) as string;
-
-      return STYLE_KEYS.includes(raw as ToolbarStyleKey)
-        ? (raw as ToolbarStyleKey)
-        : "top";
-    };
-
-    APPEARANCE_KEYS.forEach((key) => {
-      // Only patch properties that actually exist on settings
-      if (!(key in settings)) return;
-
-      const initialGlobal = (settings as any)[key];
-
-      Object.defineProperty(settings, key, {
-        configurable: true,
-        enumerable: true,
-        get() {
-          const style = getCurrentStyle();
-          const bucket = store[style];
-          if (bucket && Object.prototype.hasOwnProperty.call(bucket, key)) {
-            return (bucket as any)[key];
-          }
-          // Fallback to the original global value
-          return initialGlobal;
-        },
-        set(value: any) {
-          const style = getCurrentStyle();
-          ensureAppearanceStore(settings, false);
-          const bucket = (settings.appearanceByStyle as AppearanceByStyle)[style]!;
-          (bucket as any)[key] = value;
-        },
-      });
-    });
+  /**
+   * The toolbar style whose appearance is currently in effect: the style being
+   * edited in settings, else the live position style, else the stored fallback.
+   */
+  public resolveActiveStyle(): ToolbarStyleKey {
+    const raw = (
+      this.appearanceEditStyle ||
+      this.positionStyle ||
+      this.settings.positionStyle ||
+      "top"
+    ) as string;
+    return STYLE_KEYS.includes(raw as ToolbarStyleKey)
+      ? (raw as ToolbarStyleKey)
+      : "top";
   }
 
   private getPluginCommandId(commandId: string): string {
@@ -297,7 +273,7 @@ export default class EditingToolbarPlugin extends Plugin {
     await this.loadSettings();
 
     // IMPORTANT: wire up per-style getters/setters before we start using appearance fields
-    this.initPerStyleAppearance();
+    this.initAppearanceStore();
   
     this.settingTab = new EditingToolbarSettingTab(this.app, this);
     this.addSettingTab(this.settingTab);
@@ -430,19 +406,20 @@ this.app.workspace.onLayoutReady(async () => {
       })
     );
     addIcons();
-    this.toolbarIconSize = this.settings.toolbarIconSize;
     this.positionStyle = this.settings.positionStyle;
+    const activeStyle = this.resolveActiveStyle();
+    this.toolbarIconSize = getAppearanceValue(this.settings, "toolbarIconSize", activeStyle);
     activeDocument.documentElement.style.setProperty(
       "--editing-toolbar-background-color",
-      this.settings.toolbarBackgroundColor
+      getAppearanceValue(this.settings, "toolbarBackgroundColor", activeStyle)
     );
     activeDocument.documentElement.style.setProperty(
       "--editing-toolbar-icon-color",
-      this.settings.toolbarIconColor
+      getAppearanceValue(this.settings, "toolbarIconColor", activeStyle)
     );
     activeDocument.documentElement.style.setProperty(
       "--toolbar-icon-size",
-      `${this.settings.toolbarIconSize}px`
+      `${getAppearanceValue(this.settings, "toolbarIconSize", activeStyle)}px`
     );
   }
 
@@ -1345,22 +1322,23 @@ updateCurrentCommands(commands: any[], style?: string): void {
     }
   
     // Keep the in-memory size in sync with the active style
-    this.toolbarIconSize = this.settings.toolbarIconSize;
-  
+    const activeStyle = this.resolveActiveStyle();
+    this.toolbarIconSize = getAppearanceValue(this.settings, "toolbarIconSize", activeStyle);
+
     // Refresh the global CSS variables from the *active* style's appearance
     const doc = activeDocument ?? document;
     if (doc && doc.documentElement) {
       doc.documentElement.style.setProperty(
         "--editing-toolbar-background-color",
-        this.settings.toolbarBackgroundColor
+        getAppearanceValue(this.settings, "toolbarBackgroundColor", activeStyle)
       );
       doc.documentElement.style.setProperty(
         "--editing-toolbar-icon-color",
-        this.settings.toolbarIconColor
+        getAppearanceValue(this.settings, "toolbarIconColor", activeStyle)
       );
       doc.documentElement.style.setProperty(
         "--toolbar-icon-size",
-        `${this.settings.toolbarIconSize}px`
+        `${getAppearanceValue(this.settings, "toolbarIconSize", activeStyle)}px`
       );
     }
   

@@ -3,6 +3,7 @@ import type EditingToolbarPlugin from "src/plugin/main";
 import {
   AppearanceByStyle,
   editingToolbarSettings,
+  getAppearanceValue,
   StyleAppearanceSettings,
   ToolbarStyleKey,
 } from "src/settings/settingsData";
@@ -580,7 +581,7 @@ export function createFollowingbar(
   const isMarkdownView = viewType === "markdown";
 
   let height = 30;
-  if (plugin.settings.aestheticStyle === "tiny") {
+  if (getAppearanceValue(plugin.settings, "aestheticStyle", plugin.resolveActiveStyle()) === "tiny") {
     height = 30;
   } else {
     height = iconSize + 14;

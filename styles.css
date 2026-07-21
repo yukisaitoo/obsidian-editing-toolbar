@@ -1887,3 +1887,87 @@ body.auto-hide-header .workspace-tab-header-container + .workspace-tab-container
 .editing-toolbar-import-export-modal .import-export-warning p {
   margin: 0;
 }
+
+/* Settings tab sections (settingsTab.ts) — moved out of inline styles; scoped to the tab root. */
+.editing-toolbar-settings .generalSetting-container,
+.editing-toolbar-settings .custom-paintbrush-container,
+.editing-toolbar-settings .appearanceSetting-container,
+.editing-toolbar-settings .commandSetting-container,
+.editing-toolbar-settings .import-export-container {
+  padding: 16px;
+  border-radius: 8px;
+  background-color: var(--background-secondary);
+  margin-bottom: 20px;
+}
+.editing-toolbar-settings .command-buttons-container {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 16px;
+  border-radius: 8px;
+  background-color: var(--background-secondary);
+}
+.editing-toolbar-settings .command-lists-container {
+  padding: 16px;
+  border-radius: 8px;
+}
+.editing-toolbar-settings .command-list-container {
+  padding: 16px;
+  border-radius: 8px;
+  background-color: var(--background-secondary);
+  margin-top: 20px;
+  margin-bottom: 20px;
+}
+.editing-toolbar-settings .add-command-button-container {
+  display: flex;
+  gap: 10px;
+  padding: 16px;
+  border-radius: 8px;
+  background-color: var(--background-secondary);
+  margin-top: 20px;
+  margin-bottom: 20px;
+}
+.editing-toolbar-settings .custom-toolbar-container {
+  padding: 16px;
+  border-radius: 8px;
+  background-color: var(--background-secondary);
+}
+.editing-toolbar-settings .setting-item-name .editingToolbarSettingsIcon {
+  margin-right: 8px;
+}
+.editing-toolbar-settings .toolbar-preview-section {
+  margin-top: 20px;
+}
+.editing-toolbar-settings .toolbar-preview-label {
+  margin-bottom: 10px;
+}
+.editing-toolbar-settings .import-export-info {
+  margin-top: 20px;
+  padding: 16px;
+  border-radius: 8px;
+  background-color: var(--background-secondary);
+}
+.editing-toolbar-settings .import-export-info ul {
+  padding-left: 20px;
+}
+.editing-toolbar-settings .import-export-heading,
+.editing-toolbar-settings .community-heading {
+  margin-top: 0;
+}
+.editing-toolbar-settings .community-share-container {
+  margin-top: 20px;
+  padding: 16px;
+  border-radius: 8px;
+  background-color: rgba(var(--color-green-rgb), 0.1);
+  border: 1px solid rgba(var(--color-green-rgb), 0.3);
+}
+.editing-toolbar-settings .import-export-warning {
+  margin-top: 20px;
+  padding: 16px;
+  border-radius: 8px;
+  background-color: rgba(var(--color-red-rgb), 0.1);
+  border: 1px solid rgba(var(--color-red-rgb), 0.3);
+}
+.editing-toolbar-settings .import-export-warning .warning-text {
+  margin: 0;
+}
