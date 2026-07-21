@@ -24,9 +24,12 @@ export function getAppearanceValue<K extends keyof StyleAppearanceSettings>(
   settings: editingToolbarSettings,
   key: K,
   style: string,
-): StyleAppearanceSettings[K] {
+): NonNullable<StyleAppearanceSettings[K]> {
+  // The per-style bucket fields are optional, but the fallback global field on
+  // `settings` is always populated from DEFAULT_SETTINGS, so the result is never
+  // undefined.
   const bucketValue = settings.appearanceByStyle?.[style]?.[key];
-  return (bucketValue ?? (settings as unknown as StyleAppearanceSettings)[key]) as StyleAppearanceSettings[K];
+  return (bucketValue ?? (settings as unknown as StyleAppearanceSettings)[key]) as NonNullable<StyleAppearanceSettings[K]>;
 }
 
 /**

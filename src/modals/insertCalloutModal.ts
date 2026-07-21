@@ -26,10 +26,10 @@ export class InsertCalloutModal extends Modal {
     public title: string = "";
     public content: string = "";
     public collapse: "none" | "open" | "closed" = "none";
-    private insertButton: HTMLElement;
-    private contentTextArea: HTMLTextAreaElement;
+    private insertButton!: HTMLElement;
+    private contentTextArea!: HTMLTextAreaElement;
     private allCalloutOptions: CombinedCalloutTypeInfo[] = [];
-    private iconContainerEl: HTMLElement; 
+    private iconContainerEl!: HTMLElement;
     private readonly builtInCalloutTypes: Array<BuiltInCalloutType> = [
         { type: "note", aliases: [], icon: "lucide-pencil", label: "Note", color: "var(--callout-default)" },
         { type: "abstract", aliases: ["summary", "tldr"], icon: "lucide-clipboard-list", label: "Abstract", color: "var(--callout-summary)" },
@@ -184,8 +184,8 @@ export class InsertCalloutModal extends Modal {
                     .addOption("open", strings.open)
                     .addOption("closed", strings.closed)
                     .setValue(this.collapse)
-                    .onChange((value: "none" | "open" | "closed") => {
-                        this.collapse = value;
+                    .onChange((value: string) => {
+                        this.collapse = value as "none" | "open" | "closed";
                     });
             });
 
@@ -273,18 +273,6 @@ export class InsertCalloutModal extends Modal {
             iconContainer.style.removeProperty("--callout-color");
         }
     }
-
-    // private updateIconAndColor(iconContainer: HTMLElement, type: string) {
-    //     const typeInfo = this.calloutTypes.find(t =>
-    //         t.type === type || t.aliases.includes(type)
-    //     );
-
-    //     if (typeInfo) {
-    //         iconContainer.empty();
-    //         setIcon(iconContainer, typeInfo.icon);
-    //         iconContainer.style.setProperty("--callout-color", typeInfo.color);
-    //     }
-    // }
 
     private insertCallout() {
         const editor = this.plugin.commandsManager.getActiveEditor();

@@ -114,8 +114,8 @@ export class DeployCommandModal extends Modal {
       });
 
       this.plugin.saveSettings().then(() => {
-        let message = '';
-        
+        let message: string;
+
         if (deployedCount > 0) {
           const deployedConfigs = this.deployOptions
             .filter(opt => opt.enabled)

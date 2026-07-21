@@ -71,12 +71,12 @@ export class ChooseFromIconList extends FuzzySuggestModal<string> {
           { id: this.command.id, name: this.command.name, icon: "" }, 
           this.issub, 
           (customIconValue) => {
-            this.customCallback(customIconValue);
+            this.customCallback?.(customIconValue);
           }
         ).open();
         return;
       } else {
-        new CustomIcon(this.app, this.plugin, this.command, this.issub,null,this.currentEditingConfig).open();
+        new CustomIcon(this.app, this.plugin, this.command, this.issub,undefined,this.currentEditingConfig).open();
         return;
       }
     }
@@ -117,7 +117,7 @@ class CustomIcon extends Modal {
   item: Command;
   issub: boolean;
   currentEditingConfig:string;
-  submitEnterCallback: (this: HTMLTextAreaElement, ev: KeyboardEvent) => unknown;
+  submitEnterCallback!: (this: HTMLTextAreaElement, ev: KeyboardEvent) => unknown;
   customCallback: IconSelectCallback | null = null;
 
   constructor(
@@ -169,9 +169,9 @@ class CustomIcon extends Modal {
           : (this.plugin.settings.menuCommands[index].icon = this.item.icon);
       } else {
         const subindex = menuID['subindex'];
-        subindex === -1 
-          ? this.plugin.settings.menuCommands[menuID["index"]].SubmenuCommands.push(this.item) 
-          : this.plugin.settings.menuCommands[menuID['index']].SubmenuCommands[subindex].icon = value;
+        subindex === -1
+          ? this.plugin.settings.menuCommands[menuID["index"]].SubmenuCommands!.push(this.item)
+          : this.plugin.settings.menuCommands[menuID['index']].SubmenuCommands![subindex].icon = value;
       }
       
       await this.plugin.saveSettings();
@@ -198,7 +198,7 @@ class CustomIcon extends Modal {
 
 
 export class CommandPicker extends FuzzySuggestModal<Command> {
-  command: Command;
+  command!: Command;
   currentEditingConfig:string;
   constructor(private plugin: EditingToolbarPlugin,currentEditingConfig?:string) {
     super(plugin.app);
@@ -238,7 +238,7 @@ export class CommandPicker extends FuzzySuggestModal<Command> {
           "color: Violet"
         );
       } else {
-        new ChooseFromIconList(this.plugin, item, false, null, this.currentEditingConfig).open();
+        new ChooseFromIconList(this.plugin, item, false, undefined, this.currentEditingConfig).open();
       }
     }
   }
@@ -252,7 +252,7 @@ export class ChangeCmdname extends Modal {
   item: Command;
   issub: boolean;
   currentEditingConfig:string;
-  submitEnterCallback: (this: HTMLInputElement, ev: KeyboardEvent) => unknown;
+  submitEnterCallback!: (this: HTMLInputElement, ev: KeyboardEvent) => unknown;
   constructor(app: App, plugin: EditingToolbarPlugin, item: Command, issub: boolean,currentEditingConfig?:string) {
     super(plugin.app);
     this.plugin = plugin;
@@ -337,7 +337,6 @@ export class openSlider extends Modal {
     const verticalMin = -Math.floor(bodyHeight);
     const horizontalMax = Math.floor(bodyWidth / 2);
     const horizontalMin = -Math.floor(bodyWidth / 2);
-    // let topem = (this.plugin.settings.cMenuBottomValue - 4.25)*5;
     const verticalSlider = new SliderComponent(verticalContainer)
       .setLimits(verticalMin, verticalMax, 5)
       .setValue(this.plugin.settings.verticalPosition || 0)

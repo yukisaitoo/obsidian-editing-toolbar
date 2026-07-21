@@ -7,9 +7,9 @@ export class ImportExportModal extends Modal {
   mode: 'import' | 'export';
   exportType: 'all' | 'All commands' | 'custom' | 'following' | 'top' | 'fixed' | 'mobile';
   importMode: 'overwrite' | 'update';
-  textArea: TextAreaComponent;
-  importButton: ButtonComponent;
-  warningContent: HTMLElement;
+  textArea!: TextAreaComponent;
+  importButton!: ButtonComponent;
+  warningContent!: HTMLElement;
 
   constructor(app: App, plugin: EditingToolbarPlugin, mode: 'import' | 'export') {
     super(app);
@@ -383,7 +383,7 @@ export class ImportExportModal extends Modal {
 
     } catch (error) {
       console.error('Import error: ', error);
-      new Notice(strings.error + ' ' + error.message);
+      new Notice(strings.error + ' ' + (error instanceof Error ? error.message : String(error)));
     }
 
 

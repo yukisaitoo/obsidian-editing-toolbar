@@ -1,4 +1,4 @@
-import { App, ButtonComponent, Editor, ItemView, Menu, Notice, Platform, requireApiVersion, setIcon, WorkspaceParent, WorkspaceParentExt, WorkspaceWindow } from "obsidian";
+import { App, ButtonComponent, Editor, ItemView, Menu, Notice, Platform, requireApiVersion, setIcon, WorkspaceItemExt, WorkspaceParent, WorkspaceParentExt, WorkspaceWindow } from "obsidian";
 import type EditingToolbarPlugin from "src/plugin/main";
 import {
   AppearanceByStyle,
@@ -33,10 +33,10 @@ function getRootSplits(app: App): WorkspaceParentExt[] {
 
   // @ts-expect-error floatingSplit is undocumented
   const floatingSplit = app.workspace.floatingSplit as WorkspaceParentExt;
-  floatingSplit?.children.forEach((child: WorkspaceParentExt) => {
+  floatingSplit?.children.forEach((child: WorkspaceItemExt) => {
     // if this is a window, push it to the list
     if (child instanceof WorkspaceWindow) {
-      rootSplits.push(child);
+      rootSplits.push(child as unknown as WorkspaceParentExt);
     }
   });
 
@@ -118,7 +118,7 @@ export function isExistoolbar(
   plugin: EditingToolbarPlugin,
   style?: ToolbarStyleKey,
   hostDocument?: Document
-): HTMLElement {
+): HTMLElement | null {
   const targetDocument =
     hostDocument ||
     app.workspace.activeLeaf?.view?.containerEl?.ownerDocument ||
@@ -141,7 +141,7 @@ export function isExistoolbar(
 
   const selector = `.editingToolbarModalBar[data-toolbar-style="${targetStyle}"]`;
 
-  let container: HTMLElement | null = null;
+  let container: HTMLElement | null;
 
   if (targetStyle === "top") {
     container =
@@ -371,11 +371,12 @@ const setcolorHex = function (color: string) {
   } else {
     return that;
   }
+  return that;
 };
 
 function createMoremenu(app: App, plugin: EditingToolbarPlugin, selector: HTMLDivElement) {
   const view = app.workspace.getActiveViewOfType(ItemView);
-  if (!ViewUtils.isAllowedViewType(view)) return;
+  if (!view || !ViewUtils.isAllowedViewType(view)) return;
 
   if (!plugin.isMoreButton) return;
 
@@ -460,19 +461,10 @@ export function quiteFormatbrushes(plugin: EditingToolbarPlugin) {
 
 
 export function setFormateraser(plugin: EditingToolbarPlugin, editor: Editor) {
-  // const editor = app.workspace.activeLeaf.view?.editor;
-
   let selectText = editor.getSelection();
   if (!selectText || selectText.trim() === "") {
     return;
   }
-  //const cursor = editor.getCursor();
-  // if (selectText == null || selectText == "") {
-  //   quiteFormatbrushes(plugin);
-  //   plugin.setEN_Text_Format_Brush(true);
-  //   plugin.tempNotice = new Notice(strings.clearFormattingBrushClickMouse, 0);
-
-  // } else {
   if (selectText.match(/^>\s*\[![\w\s]*\]/m)) {
     const lines = selectText.split('\n');
     const result = [];
@@ -527,14 +519,7 @@ export function setFormateraser(plugin: EditingToolbarPlugin, editor: Editor) {
   selectText = selectText.replace(/\*\*?([^*]+)\*\*?/g, "$1");
   selectText = selectText.replace(/~~([^~]+)~~/g, "$1");
 
-  // selectText = selectText.replace(/(\r*\n)+/mg, "\r\n");
   editor.replaceSelection(selectText);
-
-  //editor.setSelection(cursor);
-
-
-
-  //app.commands.executeCommandById("editor:clear-formatting");
 }
 
 export function createFollowingbar(
@@ -580,12 +565,10 @@ export function createFollowingbar(
   const viewType = view?.getViewType();
   const isMarkdownView = viewType === "markdown";
 
-  let height = 30;
-  if (getAppearanceValue(plugin.settings, "aestheticStyle", plugin.resolveActiveStyle()) === "tiny") {
-    height = 30;
-  } else {
-    height = iconSize + 14;
-  }
+  const height =
+    getAppearanceValue(plugin.settings, "aestheticStyle", plugin.resolveActiveStyle()) === "tiny"
+      ? 30
+      : iconSize + 14;
 
   if (isMarkdownView) {
     if (ViewUtils.isSourceMode(view)) {
@@ -864,11 +847,13 @@ export function editingToolbarPopover(
       }
 
       if (effectiveStyle === "top") {
-        const currentleaf = app.workspace.activeLeaf.view.containerEl;
+        const activeLeaf = app.workspace.activeLeaf;
+        if (!activeLeaf) return;
+        const currentleaf = activeLeaf.view.containerEl;
 
         let targetDom: HTMLElement | null = null;
 
-        const viewType = app.workspace.activeLeaf.view.getViewType();
+        const viewType = activeLeaf.view.getViewType();
 
         const selector = viewTypeToSelectorMap[viewType];
         if (selector) {
@@ -953,7 +938,7 @@ export function editingToolbarPopover(
       }
 
       const editingToolbarPopoverBar = effectiveStyle === "top"
-        ? app.workspace.activeLeaf.view.containerEl?.querySelector("#editingToolbarPopoverBar") as HTMLElement
+        ? app.workspace.activeLeaf?.view?.containerEl?.querySelector("#editingToolbarPopoverBar") as HTMLElement
         : targetDocument.querySelector(
             `.editingToolbarPopoverBar[data-toolbar-style="${effectiveStyle}"]`
           ) as HTMLElement | null;
@@ -1108,7 +1093,6 @@ export function editingToolbarPopover(
               : button2.setIcon(item.icon);
 
             btnwidth += buttonWidth;
-            //  let Selection = createDiv("triangle-icon");
             const submenu2 = createEl("div");
             submenu2.addClass("subitem");
 
@@ -1116,8 +1100,6 @@ export function editingToolbarPopover(
               submenu2.innerHTML = colorpicker(plugin);
 
               button2.buttonEl.insertAdjacentElement("afterbegin", submenu2);
-              //    if (settings.cMenuFontColor)
-              //     activeDocument.getElementById("change-font-color-icon").style.fill = settings.cMenuFontColor;
               createTablecell(app, plugin, "x-color-picker-table", submenu2);
               const el = submenu2.querySelector(
                 ".x-color-picker-wrapper"
@@ -1130,7 +1112,6 @@ export function editingToolbarPopover(
                 .onClick(() => {
                   quiteFormatbrushes(plugin);
                   plugin.setFontColorFormatBrushActive(true);
-                  //  globalThis.fontColorFormatBrushActive = true;
                   plugin.tempNotice = new Notice(
                     strings.fontColorFormattingBrush,
                     0
@@ -1145,13 +1126,13 @@ export function editingToolbarPopover(
                   app.setting.open();
                   app.setting.openTabById("editing-toolbar");
                   setTimeout(() => {
-                    const tabsContainer = app.setting.activeTab.containerEl.querySelector(".editing-toolbar-tabs");
+                    const tabsContainer = app.setting.activeTab?.containerEl.querySelector(".editing-toolbar-tabs");
                     if (tabsContainer) {
                       const appearanceTab = tabsContainer.children[0] as HTMLElement;
                       appearanceTab?.click();
 
                       setTimeout(() => {
-                        const settingEI = app.setting.activeTab.containerEl.querySelector(".custom_font");
+                        const settingEI = app.setting.activeTab?.containerEl.querySelector(".custom_font");
                         if (settingEI) { settingEI.addClass?.("toolbar-cta"); }
                       }, 100);
                     }
@@ -1179,15 +1160,12 @@ export function editingToolbarPopover(
               : button2.setIcon(item.icon);
 
             btnwidth += buttonWidth;
-            //  let Selection = createDiv("triangle-icon");
             const submenu2 = createEl("div");
             submenu2.addClass("subitem");
             if (submenu2) {
               submenu2.innerHTML = backcolorpicker(plugin);
 
               button2.buttonEl.insertAdjacentElement("afterbegin", submenu2);
-              // if (plugin.settings.cMenuBackgroundColor)
-              //  activeDocument.getElementById("change-background-color-icon").style.fill = plugin.settings.cMenuBackgroundColor;
               createTablecell(app, plugin, "x-backgroundcolor-picker-table", submenu2);
               const el = submenu2.querySelector(
                 ".x-color-picker-wrapper"
@@ -1200,7 +1178,6 @@ export function editingToolbarPopover(
                 .onClick(() => {
                   quiteFormatbrushes(plugin);
                   plugin.setBgFormatBrushActive(true);
-                  //  globalplugin.bgFormatBrushActive = true;
                   plugin.tempNotice = new Notice(
                     strings.fontColorFormattingBrush,
                     0
@@ -1215,13 +1192,13 @@ export function editingToolbarPopover(
                   app.setting.open();
                   app.setting.openTabById("editing-toolbar");
                   setTimeout(() => {
-                    const tabsContainer = app.setting.activeTab.containerEl.querySelector(".editing-toolbar-tabs");
+                    const tabsContainer = app.setting.activeTab?.containerEl.querySelector(".editing-toolbar-tabs");
                     if (tabsContainer) {
                       const appearanceTab = tabsContainer.children[0] as HTMLElement;
                       appearanceTab?.click();
 
                       setTimeout(() => {
-                        const settingEI = app.setting.activeTab.containerEl.querySelector(".custom_bg");
+                        const settingEI = app.setting.activeTab?.containerEl.querySelector(".custom_bg");
                         if (settingEI) { settingEI.addClass?.("toolbar-cta"); }
                       }, 100);
                     }
@@ -1260,12 +1237,6 @@ export function editingToolbarPopover(
             checkHtml(item.icon)
               ? (button.buttonEl.innerHTML = item.icon)
               : button.setIcon(item.icon);
-            //let __btnwidth2;
-            // if (button.buttonEl.offsetWidth > 100) __btnwidth2 = 26;
-            // else {
-            //   if (button.buttonEl.offsetWidth < 26) __btnwidth2 = 26;
-            //   else __btnwidth2 = button.buttonEl.offsetWidth;
-            // }
 
             btnwidth += buttonWidth;
           }
@@ -1337,7 +1308,6 @@ export function editingToolbarPopover(
       setsvgColor(settings.cMenuFontColor, settings.cMenuBackgroundColor);
 
     } else {
-      //  selfDestruct();
       return;
     }
   }

@@ -9,7 +9,7 @@ import { ViewUtils } from "src/util/viewUtils";
 
 export class StatusBar {
   private plugin: EditingToolbarPlugin;
-  private statusBarIcon: HTMLElement;
+  private statusBarIcon!: HTMLElement;
 
   constructor(plugin: EditingToolbarPlugin) {
     this.plugin = plugin;
@@ -24,7 +24,9 @@ export class StatusBar {
 
   private registerClickEvent(): void {
     this.plugin.registerDomEvent(this.statusBarIcon, "click", () => {
-      const statusBarRect = this.statusBarIcon.parentElement.getBoundingClientRect();
+      const parent = this.statusBarIcon.parentElement;
+      if (!parent) return;
+      const statusBarRect = parent.getBoundingClientRect();
       const statusBarIconRect = this.statusBarIcon.getBoundingClientRect();
       this.showMenu(statusBarIconRect, statusBarRect);
     });

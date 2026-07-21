@@ -306,7 +306,6 @@ export class CommandsManager {
       }
     }
     editor.replaceSelection(`${prefix}${selectedText}${suffix}`);
-    //  editor.setCursor(curserStart.line + command.line, curserStart.ch + command.char + selectedText.length);
     if (command.char > 0) {
       editor.setCursor(
         curserStart.line + command.line,
@@ -393,6 +392,8 @@ export class CommandsManager {
         }
       }
 
+      if (!command.regexPattern) return;
+
       let flags = "";
       if (command.regexGlobal !== false) flags += "g";
       if (command.regexCaseInsensitive) flags += "i";
@@ -408,7 +409,7 @@ export class CommandsManager {
           {
             from: updatedCurserStart,
             to: updatedCurserEnd,
-            text: selectedText.replace(regex, command.regexReplacement),
+            text: selectedText.replace(regex, command.regexReplacement ?? ""),
           },
         ],
       });
@@ -423,7 +424,7 @@ export class CommandsManager {
       editor.setSelection(newStart, newEnd);
     } catch (error) {
       console.error("Regex command execution error:", error);
-      new Notice(strings.regexCommandExecutionError + error.message);
+      new Notice(strings.regexCommandExecutionError + (error instanceof Error ? error.message : String(error)));
     }
   }
 

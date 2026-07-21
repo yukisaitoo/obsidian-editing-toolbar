@@ -10,7 +10,7 @@ export class RegexCommandModal extends Modal {
   private commandId: string;
   private commandName: string;
   private icon: string;
-  private iconDisplay: HTMLElement;
+  private iconDisplay!: HTMLElement;
 
   private regexPattern: string;
   private regexReplacement: string;
@@ -21,13 +21,13 @@ export class RegexCommandModal extends Modal {
   private useCondition: boolean;
   private conditionPattern: string;
 
-  private previewInput: HTMLTextAreaElement;
-  private previewOutput: HTMLElement;
-  private regexPatternInput: TextComponent;
-  private regexReplacementInput: TextComponent;
-  private useConditionToggle: ToggleComponent;
-  private conditionPatternInput: TextComponent;
-  private regexMultilineToggle: ToggleComponent;
+  private previewInput!: HTMLTextAreaElement;
+  private previewOutput!: HTMLElement;
+  private regexPatternInput!: TextComponent;
+  private regexReplacementInput!: TextComponent;
+  private useConditionToggle!: ToggleComponent;
+  private conditionPatternInput!: TextComponent;
+  private regexMultilineToggle!: ToggleComponent;
 
   constructor(app: App, plugin: EditingToolbarPlugin, commandIndex: number | null) {
     super(app);
@@ -510,7 +510,7 @@ export class RegexCommandModal extends Modal {
       });
       this.previewOutput.removeClass('is-error');
     } catch (error) {
-      this.previewOutput.setText(strings.error + error.message);
+      this.previewOutput.setText(strings.error + (error instanceof Error ? error.message : String(error)));
       this.previewOutput.addClass('is-error');
 
       const codeContainer = this.previewOutput.parentElement?.querySelector('.regex-code-container');

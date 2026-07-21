@@ -34,11 +34,11 @@ export class ConfirmModal extends Modal {
         const buttonContainer = contentEl.createDiv('confirm-modal-buttons');
 
         new ButtonComponent(buttonContainer)
-            .setButtonText(this.options.cancelText)
+            .setButtonText(this.options.cancelText ?? strings.cancel)
             .onClick(() => this.close());
 
         new ButtonComponent(buttonContainer)
-            .setButtonText(this.options.confirmText)
+            .setButtonText(this.options.confirmText ?? strings.confirm)
             .setCta()
             .onClick(async () => {
                 await this.options.onConfirm();

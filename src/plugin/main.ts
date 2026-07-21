@@ -3,6 +3,7 @@ import {
   debounce,
   Editor,
   ItemView,
+  MarkdownFileInfo,
   MarkdownView,
   Menu,
   Notice,
@@ -90,26 +91,25 @@ interface EditorContextMenuAction {
 const ADMONITION_PLUGIN_ID = "obsidian-admonition";
 
 export default class EditingToolbarPlugin extends Plugin {
-  app: App;
-  settings: editingToolbarSettings;
-  statusBarIcon: HTMLElement;
-  statusBar: StatusBar;
-  public toolbarIconSize: number;
-  public positionStyle: string;
-  
-  // NEW: which style's appearance is being edited in the settings UI
+  settings!: editingToolbarSettings;
+  statusBarIcon!: HTMLElement;
+  statusBar!: StatusBar;
+  public toolbarIconSize!: number;
+  public positionStyle!: string;
+
+  // Which style's appearance is being edited in the settings UI
   public appearanceEditStyle: ToolbarStyleKey | null = null;
-  
-  commandsManager: CommandsManager;
+
+  commandsManager!: CommandsManager;
   public admonitionDefinitions: Record<string, AdmonitionDefinition> | null =
     null;
 
-  isMoreButton: boolean;
-  bgFormatBrushActive: boolean;
-  fontColorFormatBrushActive: boolean;
-  EN_Text_Format_Brush: boolean;
-  tempNotice: Notice;
-  leafWidth: number;
+  isMoreButton!: boolean;
+  bgFormatBrushActive!: boolean;
+  fontColorFormatBrushActive!: boolean;
+  EN_Text_Format_Brush!: boolean;
+  tempNotice: Notice | null = null;
+  leafWidth!: number;
 
   lastExecutedCommand: string | null = null;
   formatBrushActive: boolean = false;
@@ -117,7 +117,7 @@ export default class EditingToolbarPlugin extends Plugin {
   lastCalloutType: string | null = null;
   lastExecutedCommandName: string | null = null;
 
-  settingTab: EditingToolbarSettingTab;
+  settingTab!: EditingToolbarSettingTab;
 
   private toolbarCache: Map<ToolbarStyleKey, HTMLElement> = new Map();
   private popoverCache: Map<ToolbarStyleKey, HTMLElement> = new Map();
@@ -251,7 +251,7 @@ export default class EditingToolbarPlugin extends Plugin {
   private handleEditorContextMenu = (
     menu: Menu,
     editor: Editor,
-    _view: MarkdownView,
+    _view: MarkdownView | MarkdownFileInfo,
   ): void => {
     this.addEditorContextSubmenu(menu, strings.textTools, "whole-word", this.buildTextContextActions(editor));
   };
@@ -270,8 +270,6 @@ export default class EditingToolbarPlugin extends Plugin {
     this.settingTab = new EditingToolbarSettingTab(this.app, this);
     this.addSettingTab(this.settingTab);
 
-    //addIcons();
-    // addRemixIcconsole.log();ons(appIcons);
     this.commandsManager = new CommandsManager(this);
     this.commandsManager.registerCommands();
     const editor = this.commandsManager.getActiveEditor();
@@ -347,38 +345,6 @@ this.app.workspace.onLayoutReady(async () => {
   await this.tryGetAdmonitionTypes();
 });
 
-    // this.registerEvent(
-    //   this.app.workspace.on('editor-menu', (menu: Menu, editor: Editor, view: MarkdownView) => {
-    //     const selection = editor.getSelection();
-    //     if (selection) {
-    //       if (/(!)?\[.*(?:\|(?:\d+x\d+|\d+))?\]\([a-zA-Z]+:\/\/[^\s)]+(?:\s+["'][^"']*["'])?\)/.test(selection.trim())) {
-    //         menu.addItem((item) =>
-    //           item
-    //             .setTitle('Edit Link')
-    //             .setIcon('link')
-    //             .onClick(() => new InsertLinkModal(this).open())
-    //         );
-    //       }
-    //     }
-    //     const cursor = editor.getCursor();
-    //     const lineText = editor.getLine(cursor.line);
-    //     const cursorPos = cursor.ch;
-    //     const combinedRegex = /(!)?\[([^\]]+)(?:\|(\d+x\d+|\d+))?\]\(([a-zA-Z]+:\/\/[^\s)]+)(?:\s+["'][^"']*["'])?\)/g;
-    //     let match;
-    //     while ((match = combinedRegex.exec(lineText)) !== null) {
-    //       const linkStart = match.index;
-    //       const linkEnd = match.index + match[0].length;
-    //       if (cursorPos >= linkStart && cursorPos <= linkEnd) {
-    //         menu.addItem((item) =>
-    //           item
-    //             .setTitle('Edit Link(Modal)')
-    //             .setIcon('link')
-    //             .onClick(() => new InsertLinkModal(this).open())
-    //         );
-    //       }
-    //     }
-    //   })
-    // );
     this.registerEvent(
       this.app.workspace.on("editor-menu", this.handleEditorContextMenu)
     );
@@ -605,7 +571,7 @@ this.app.workspace.onLayoutReady(async () => {
       return false;
     }
 
-    const leafwidth = this.app.workspace.activeLeaf.view.leaf.width ?? 0;
+    const leafwidth = this.app.workspace.activeLeaf?.view?.leaf?.width ?? 0;
     if (leafwidth <= 0 || this.leafWidth === leafwidth) {
       return false;
     }
@@ -947,11 +913,9 @@ updateCurrentCommands(commands: any[], style?: string): void {
     if (command && command.callback) {
       command.callback();
     }
-    if (command && command.editorCallback) {
-      command.editorCallback(
-        editor,
-        this.app.workspace.getActiveViewOfType(MarkdownView)
-      );
+    const view = this.app.workspace.getActiveViewOfType(MarkdownView);
+    if (command && command.editorCallback && view) {
+      command.editorCallback(editor, view);
     }
   }
 

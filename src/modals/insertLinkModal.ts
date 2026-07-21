@@ -34,8 +34,8 @@ class UrlTitleFetcher {
             this.htmlTitlePattern,
             /<title [^>]*>(.*?)<\/title>/i,
             /<meta name="title" content="([^<]*)" \/>/im
-        ].filter(Boolean);
-    
+        ].filter((p): p is RegExp => p !== null);
+
         for (const pattern of patterns) {
             const match = body.match(pattern);
             if (match && typeof match[1] === 'string') {
@@ -105,13 +105,13 @@ export class InsertLinkModal extends Modal {
     private prefixText: string = "";
     private suffixText: string = "";
     private selectedText: string = "";
-    private linkTextInput: TextComponent;
-    private linkUrlInput: TextComponent;
-    private linkAliasInput: TextComponent;
-    private embedToggle: ToggleComponent;
-    private urlErrorMsg: HTMLElement;
-    private previewSetting: Setting;
-    private insertButton: HTMLElement;
+    private linkTextInput!: TextComponent;
+    private linkUrlInput!: TextComponent;
+    private linkAliasInput!: TextComponent;
+    private embedToggle!: ToggleComponent;
+    private urlErrorMsg!: HTMLElement;
+    private previewSetting!: Setting;
+    private insertButton!: HTMLElement;
 
     constructor(private plugin: EditingToolbarPlugin) {
         super(plugin.app);
@@ -234,8 +234,9 @@ private matchLinkInLine(line: string, startPos: number, endPos: number, lineNumb
     private parseSelectedText(text: string) {
         const imglinkMatch = text.match(/!\[.*?\]\(.*?\)/);
         if (imglinkMatch) {
-            const prefixText = text.substring(0, imglinkMatch.index);
-            const suffixText = text.substring(imglinkMatch.index + imglinkMatch[0].length);
+            const imglinkIndex = imglinkMatch.index ?? 0;
+            const prefixText = text.substring(0, imglinkIndex);
+            const suffixText = text.substring(imglinkIndex + imglinkMatch[0].length);
             const imageMatch = this.parseMarkdownImageLink(text);
             if (imageMatch) {
                 this.linkText = imageMatch.title;
@@ -253,8 +254,9 @@ private matchLinkInLine(line: string, startPos: number, endPos: number, lineNumb
         const linkMatch = text.match(/\[([^\]]+)\]\(([a-zA-Z]+:\/\/[^\s)]+)(?:\s+["']([^"']*)["'])?\)/);
         if (linkMatch) {
             const linkPart = linkMatch[0];
-            const prefixText = text.substring(0, linkMatch.index);
-            const suffixText = text.substring(linkMatch.index + linkPart.length);
+            const linkIndex = linkMatch.index ?? 0;
+            const prefixText = text.substring(0, linkIndex);
+            const suffixText = text.substring(linkIndex + linkPart.length);
             const parsedLink = this.parseMarkdownLink(linkPart);
 
             if (parsedLink) {
@@ -572,7 +574,8 @@ private matchLinkInLine(line: string, startPos: number, endPos: number, lineNumb
 
         const previewText = this.getPreviewText();
         if (this.previewSetting) {
-            this.previewSetting.controlEl.querySelector('input').value = previewText;
+            const previewInput = this.previewSetting.controlEl.querySelector('input');
+            if (previewInput) previewInput.value = previewText;
         }
     }
     private getPreviewText(): string {
@@ -715,7 +718,7 @@ private matchLinkInLine(line: string, startPos: number, endPos: number, lineNumb
                     const dimensions = this.getImageDimensions();
                     if (dimensions) {
                         this.imageWidth = dimensions.width.toString();
-                        this.imageHeight = dimensions.height?.toString();
+                        this.imageHeight = dimensions.height?.toString() ?? '';
                         (imageSizeSetting.components[1] as TextComponent).setValue(this.imageWidth);
                         if (this.imageHeight) {
                             (imageSizeSetting.components[2] as TextComponent).setValue(this.imageHeight);
@@ -817,7 +820,7 @@ private async fetchRemoteTitle(url: string): Promise<string> {
 }
 
  
-    private getImageDimensions(): { width: number; height: number } | null {
+    private getImageDimensions(): { width: number; height: number | null } | null {
         const view = this.app.workspace.getActiveViewOfType(MarkdownView);
         if (!view) return null;
     
@@ -834,11 +837,13 @@ private async fetchRemoteTitle(url: string): Promise<string> {
         if (imgEls.length > 0) {
             let targetImg: HTMLImageElement | null = null;
             if (this.linkUrl) {
-                imgEls.forEach((img) => {
+                // for...of (not forEach) so TS tracks the assignment and keeps
+                // targetImg typed as HTMLImageElement | null rather than never.
+                for (const img of Array.from(imgEls)) {
                     if (img.src === this.linkUrl && img.complete && img.naturalWidth > 0) {
-                        targetImg = img as HTMLImageElement;
+                        targetImg = img;
                     }
-                });
+                }
             }
            
 

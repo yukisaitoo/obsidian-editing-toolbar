@@ -14,10 +14,10 @@ export class CustomCommandModal extends Modal {
   private line: number;
   private islinehead: boolean;
   private icon: string;
-  private iconDisplay: HTMLElement;
-  private commandNameInput: TextComponent;
-  private commandIdInput: TextComponent;
-  private suffixInput: TextComponent;
+  private iconDisplay!: HTMLElement;
+  private commandNameInput!: TextComponent;
+  private commandIdInput!: TextComponent;
+  private suffixInput!: TextComponent;
 
   constructor(app: App, plugin: EditingToolbarPlugin, commandIndex: number | null) {
     super(app);
@@ -126,24 +126,10 @@ const specialCharButtons = Object.entries(specialCharMap).map(([char, placeholde
   }
   return { placeholder, label };
 });
-// function insertSpecialChar(input:HTMLInputElement, placeholder:string) {
-//   if (input instanceof HTMLInputElement) {
-//     const start = input.selectionStart;
-//     const end = input.selectionEnd;
-//     const currentValue = input.value;
-//     const newValue = currentValue.slice(0, start) + placeholder + currentValue.slice(end);
-//     input.value = newValue;
-//     input.focus();
-//     input.setSelectionRange(start + placeholder.length, start + placeholder.length);
-//     const changeEvent = new Event('change', { bubbles: true });
-//     input.dispatchEvent(changeEvent);
-//     return newValue;
-//   }
-//   return '';
-// }
 
-function addSpecialCharButtons(setting: Setting, input: HTMLInputElement) {
-  
+function addSpecialCharButtons(setting: Setting, input: HTMLInputElement | null) {
+  if (!input) return;
+
   input.setAttribute('title', 'Click to select and copy text');
   
   const buttonContainer = setting.controlEl.createDiv({ cls: 'special-char-buttons' });

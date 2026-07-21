@@ -201,12 +201,12 @@ export function backcolorpicker(plugin: { settings: { custom_bg1: any; custom_bg
 </div>`;
 }
 
-export function setHeader(_str: string, editor?: Editor) {
+export function setHeader(_str: string, editor: Editor) {
   //from https://github.com/obsidian-canzi/Enhanced-editing
 
     const linetext = editor.getLine(editor.getCursor().line);
     let newstr;
-    let linend = "";
+    let linend: string;
     const headingRegex = /^(\s*(?:>\s*)*(?:\[[!\w]+\]\s*)?)#{1,6}\s+/;
     const blockPrefixRegex = /^(?:\s*(?:>\s*)*(?:\[[!\w]+\]\s*)?)?(?:(?:#{1,6}\s+)|(?:[-+*]\s+)|(?:\d+\.\s+)|(?:\[[ xX]\]\s+))+/;
     const match = linetext.match(headingRegex);

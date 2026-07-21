@@ -1,5 +1,4 @@
 import Pickr from "@simonwep/pickr";
-import '@simonwep/pickr/dist/themes/nano.min.css';
 import { App, ButtonComponent, Command, debounce, Notice, PluginSettingTab, setIcon, Setting } from "obsidian";
 import Sortable from "sortablejs";
 import { ConfirmModal } from "src/modals/ConfirmModal";
@@ -98,7 +97,7 @@ function getComandindex(item: any, arr: any[]): number {
 }
 export class EditingToolbarSettingTab extends PluginSettingTab {
   plugin: EditingToolbarPlugin;
-  appendMethod: string;
+  appendMethod!: string;
   pickrs: Pickr[] = [];
   activeTab: string = 'general';
   private currentEditingConfig: string;
@@ -1160,6 +1159,7 @@ export class EditingToolbarSettingTab extends PluginSettingTab {
         item.classList.remove('sortable-chosen-feedback');
       },
       onSort: (command) => {
+        if (command.oldIndex == null || command.newIndex == null) return;
         if (command.from.className === command.to.className) {
           const arrayResult = commandsToEdit;
           const [removed] = arrayResult.splice(command.oldIndex, 1)
@@ -1203,9 +1203,9 @@ export class EditingToolbarSettingTab extends PluginSettingTab {
             addicon
               .setClass("editingToolbarSettingsIcon")
               .onClick(async () => {
-                new ChooseFromIconList(this.plugin, newCommand, false, null, this.currentEditingConfig).open();
+                new ChooseFromIconList(this.plugin, newCommand, false, undefined, this.currentEditingConfig).open();
               });
-            checkHtml(newCommand.icon) ? addicon.buttonEl.innerHTML = newCommand.icon : addicon.setIcon(newCommand.icon)
+            checkHtml(newCommand.icon ?? "") ? addicon.buttonEl.innerHTML = newCommand.icon ?? "" : addicon.setIcon(newCommand.icon ?? "")
           })
           .addButton((changename) => {
             changename
@@ -1221,8 +1221,8 @@ export class EditingToolbarSettingTab extends PluginSettingTab {
               .addOption("submenu", strings.buttonSubmenu)
               .addOption("dropdown", strings.dropdownMenu)
               .setValue(newCommand.menuType || "submenu")
-              .onChange(async (value: "submenu" | "dropdown") => {
-                newCommand.menuType = value;
+              .onChange(async (value: string) => {
+                newCommand.menuType = value as "submenu" | "dropdown";
                 this.plugin.updateCurrentCommands(currentCommands, this.currentEditingConfig);
                 await this.plugin.saveSettings();
                 this.triggerRefresh();
@@ -1271,6 +1271,7 @@ export class EditingToolbarSettingTab extends PluginSettingTab {
           easing: "cubic-bezier(1, 0, 0, 1)",
           onStart: function () { },
           onSort: (command) => {
+            if (command.oldIndex == null || command.newIndex == null) return;
 
             if (command.from.className === command.to.className) {
               const arrayResult = commandsToEdit;
@@ -1340,7 +1341,7 @@ export class EditingToolbarSettingTab extends PluginSettingTab {
             this.triggerRefresh();
           },
         });
-        newCommand.SubmenuCommands.forEach((subCommand: Command) => {
+        newCommand.SubmenuCommands!.forEach((subCommand: Command) => {
           const subsetting = new Setting(editingToolbarCommandsContainer_sub)
           subsetting
             .setClass("editingToolbarCommandItem")
@@ -1348,9 +1349,9 @@ export class EditingToolbarSettingTab extends PluginSettingTab {
               addicon
                 .setClass("editingToolbarSettingsIcon")
                 .onClick(async () => {
-                  new ChooseFromIconList(this.plugin, subCommand, true, null, this.currentEditingConfig).open();
+                  new ChooseFromIconList(this.plugin, subCommand, true, undefined, this.currentEditingConfig).open();
                 });
-              checkHtml(subCommand?.icon) ? addicon.buttonEl.innerHTML = subCommand.icon : addicon.setIcon(subCommand.icon)
+              checkHtml(subCommand?.icon ?? "") ? addicon.buttonEl.innerHTML = subCommand.icon ?? "" : addicon.setIcon(subCommand.icon ?? "")
             })
             .setName(this.getLocalizedCommandName(subCommand.name))
             .addButton((changename) => {
@@ -1363,7 +1364,7 @@ export class EditingToolbarSettingTab extends PluginSettingTab {
                 });
             })
             .addButton((deleteButton) => this.createDeleteButton(deleteButton, async () => {
-              newCommand.SubmenuCommands.remove(subCommand);
+              newCommand.SubmenuCommands!.remove(subCommand);
               await this.plugin.saveSettings();
               this.display();
               this.triggerRefresh();
@@ -1377,9 +1378,9 @@ export class EditingToolbarSettingTab extends PluginSettingTab {
               //    .setIcon(newCommand.icon)
               .setClass("editingToolbarSettingsIcon")
               .onClick(async () => {
-                new ChooseFromIconList(this.plugin, newCommand, false, null, this.currentEditingConfig).open();
+                new ChooseFromIconList(this.plugin, newCommand, false, undefined, this.currentEditingConfig).open();
               });
-            checkHtml(newCommand.icon) ? addicon.buttonEl.innerHTML = newCommand.icon : addicon.setIcon(newCommand.icon)
+            checkHtml(newCommand.icon ?? "") ? addicon.buttonEl.innerHTML = newCommand.icon ?? "" : addicon.setIcon(newCommand.icon ?? "")
           })
         if (newCommand.id == "editingToolbar-Divider-Line") setting.setClass("editingToolbar-Divider-Line")
         setting
