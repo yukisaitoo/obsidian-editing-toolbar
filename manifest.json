@@ -1,9 +1,9 @@
 {
-  "id": "editing-toolbar-unofficial",
+  "id": "editing-toolbar",
   "name": "(unofficial) Editing Toolbar",
   "version": "1.0.0",
   "minAppVersion": "0.14.0",
-  "description": "Unofficial fork of Editing Toolbar with the AI features removed — a MS Word-like editing toolbar for Obsidian. Original plugin by Cuman (https://github.com/cumany/obsidian-editing-toolbar).",
+  "description": "Unofficial fork of Editing Toolbar — a MS Word-like editing toolbar for Obsidian. Original plugin by Cuman (https://github.com/cumany/obsidian-editing-toolbar).",
   "author": "Yuki Saito",
   "authorUrl": "https://github.com/yukisaitoo",
   "isDesktopOnly": false
