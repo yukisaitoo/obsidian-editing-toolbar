@@ -11,7 +11,7 @@ import { RegexCommandModal } from "src/modals/RegexCommandModal";
 import { ChangeCmdname, ChooseFromIconList, CommandPicker, openSlider } from "src/modals/suggesterModals";
 import type EditingToolbarPlugin from "src/plugin/main";
 import type { AppearanceByStyle, StyleAppearanceSettings, ToolbarStyleKey } from "src/settings/settingsData";
-import { AESTHETIC_STYLES, APPEND_METHODS, POSITION_STYLES } from "src/settings/settingsData";
+import { AESTHETIC_STYLES, APPEND_METHODS, POSITION_STYLES, resolveNextPositionStyle } from "src/settings/settingsData";
 import { strings, t } from 'src/translations/helper';
 import { GenNonDuplicateID } from "src/util/util";
 
@@ -248,16 +248,7 @@ export class EditingToolbarSettingTab extends PluginSettingTab {
             const prevStyle = this.plugin.positionStyle;
             // Update only the Top toolbar flag
             s.enableTopToolbar = value;
-            let nextStyle: string | null = null;
-            if (value) {
-              // Turning Top ON: make it the primary style for configuration/appearance.
-              nextStyle = 'top';
-            } else if (prevStyle === 'top') {
-              // Turning Top OFF and it was the primary style → choose another enabled style as primary.
-              if (s.enableFollowingToolbar) nextStyle = 'following';
-              else if (s.enableFixedToolbar) nextStyle = 'fixed';
-              else nextStyle = null; // no other toolbar is enabled
-            }
+            const nextStyle = resolveNextPositionStyle(s, 'top', value, prevStyle);
             if (nextStyle && nextStyle !== prevStyle) {
               this.plugin.onPositionStyleChange(nextStyle);
             }
@@ -279,16 +270,7 @@ export class EditingToolbarSettingTab extends PluginSettingTab {
             const prevStyle = this.plugin.positionStyle;
             // Update only the Following toolbar flag
             s.enableFollowingToolbar = value;
-            let nextStyle: string | null = null;
-            if (value) {
-              // Turning Following ON: make it the primary style for configuration/appearance.
-              nextStyle = 'following';
-            } else if (prevStyle === 'following') {
-              // Turning Following OFF and it was the primary style → choose another enabled style as primary.
-              if (s.enableTopToolbar) nextStyle = 'top';
-              else if (s.enableFixedToolbar) nextStyle = 'fixed';
-              else nextStyle = null;
-            }
+            const nextStyle = resolveNextPositionStyle(s, 'following', value, prevStyle);
             if (nextStyle && nextStyle !== prevStyle) {
               this.plugin.onPositionStyleChange(nextStyle);
             }
@@ -307,21 +289,9 @@ export class EditingToolbarSettingTab extends PluginSettingTab {
           .onChange(async (value) => {
             const s = this.plugin.settings;
             const prevStyle = this.plugin.positionStyle;
-
             // Update only the Fixed toolbar flag
             s.enableFixedToolbar = value;
-
-            let nextStyle: string | null = null;
-
-            if (value) {
-              // Turning Fixed ON: make it the primary style for configuration/appearance.
-              nextStyle = 'fixed';
-            } else if (prevStyle === 'fixed') {
-              // Turning Fixed OFF and it was the primary style → choose another enabled style as primary.
-              if (s.enableTopToolbar) nextStyle = 'top';
-              else if (s.enableFollowingToolbar) nextStyle = 'following';
-              else nextStyle = null;
-            }
+            const nextStyle = resolveNextPositionStyle(s, 'fixed', value, prevStyle);
             if (nextStyle && nextStyle !== prevStyle) {
               this.plugin.onPositionStyleChange(nextStyle);
             }
@@ -419,10 +389,7 @@ export class EditingToolbarSettingTab extends PluginSettingTab {
     // Aesthetic style setting
 
     // Decide which style we are editing in this tab
-    const editingStyle: ToolbarStyleKey =
-      (this.plugin.appearanceEditStyle as ToolbarStyleKey) ||
-      (this.plugin.settings.positionStyle as ToolbarStyleKey) ||
-      "top";
+    const editingStyle = this.resolveEditingStyle();
     this.plugin.appearanceEditStyle = editingStyle;
 
     // Style picker – only controls which style's settings you edit
@@ -859,11 +826,15 @@ export class EditingToolbarSettingTab extends PluginSettingTab {
     }
     return store[style]!;
   }
+
+  /** The toolbar style whose appearance is currently being edited in this tab. */
+  private resolveEditingStyle(): ToolbarStyleKey {
+    return (this.plugin.appearanceEditStyle as ToolbarStyleKey)
+      || (this.plugin.settings.positionStyle as ToolbarStyleKey)
+      || "top";
+  }
   private createColorSettings(containerEl: HTMLElement): void {
-    const editingStyle: ToolbarStyleKey =
-      (this.plugin.appearanceEditStyle as ToolbarStyleKey) ||
-      (this.plugin.settings.positionStyle as ToolbarStyleKey) ||
-      "top";
+    const editingStyle = this.resolveEditingStyle();
     const appearanceBucket = this.getAppearanceBucket(editingStyle);
 
 
@@ -893,10 +864,7 @@ export class EditingToolbarSettingTab extends PluginSettingTab {
           this.plugin.settings.aestheticStyle
         );
         dropdown.onChange(async (value) => {
-          const style =
-            (this.plugin.appearanceEditStyle as ToolbarStyleKey) ||
-            (this.plugin.settings.positionStyle as ToolbarStyleKey) ||
-            "top";
+          const style = this.resolveEditingStyle();
           const bucket = this.getAppearanceBucket(style);
 
           if (value in aesthetics) {
@@ -1025,10 +993,7 @@ export class EditingToolbarSettingTab extends PluginSettingTab {
           .setDynamicTooltip()
           .onChange(async (value) => {
             const activeStyle = this.plugin.positionStyle;
-            const style =
-              (this.plugin.appearanceEditStyle as ToolbarStyleKey) ||
-              (this.plugin.settings.positionStyle as ToolbarStyleKey) ||
-              "top";
+            const style = this.resolveEditingStyle();
             const bucket = this.getAppearanceBucket(style);
             // Per-style value
             bucket.toolbarIconSize = value;

@@ -2,7 +2,7 @@ import { ItemView, Menu, requireApiVersion, setIcon, ToggleComponent } from "obs
 import { selfDestruct } from "src/modals/editingToolbarModal";
 import { CommandPicker, openSlider } from "src/modals/suggesterModals";
 import type EditingToolbarPlugin from "src/plugin/main";
-import { AESTHETIC_STYLES } from "src/settings/settingsData";
+import { AESTHETIC_STYLES, resolveNextPositionStyle } from "src/settings/settingsData";
 import { strings } from "src/translations/helper";
 import { setMenuVisibility } from "src/util/statusBarConstants";
 import { ViewUtils } from "src/util/viewUtils";
@@ -100,14 +100,7 @@ export class StatusBar {
           const prevStyle = this.plugin.positionStyle;
           s.enableTopToolbar = !s.enableTopToolbar;
           toggleComponent.setValue(s.enableTopToolbar);
-          let nextStyle: string | null = null;
-          if (s.enableTopToolbar) {
-            nextStyle = 'top';
-          } else if (prevStyle === 'top') {
-            if (s.enableFollowingToolbar) nextStyle = 'following';
-            else if (s.enableFixedToolbar) nextStyle = 'fixed';
-            else nextStyle = null;
-          }
+          const nextStyle = resolveNextPositionStyle(s, 'top', s.enableTopToolbar, prevStyle);
           if (nextStyle && nextStyle !== prevStyle) {
             this.plugin.onPositionStyleChange(nextStyle);
           }
@@ -130,14 +123,7 @@ export class StatusBar {
           const prevStyle = this.plugin.positionStyle;
           s.enableFollowingToolbar = !s.enableFollowingToolbar;
           toggleComponent.setValue(s.enableFollowingToolbar);
-          let nextStyle: string | null = null;
-          if (s.enableFollowingToolbar) {
-            nextStyle = 'following';
-          } else if (prevStyle === 'following') {
-            if (s.enableTopToolbar) nextStyle = 'top';
-            else if (s.enableFixedToolbar) nextStyle = 'fixed';
-            else nextStyle = null;
-          }
+          const nextStyle = resolveNextPositionStyle(s, 'following', s.enableFollowingToolbar, prevStyle);
           if (nextStyle && nextStyle !== prevStyle) {
             this.plugin.onPositionStyleChange(nextStyle);
           }
@@ -160,14 +146,7 @@ export class StatusBar {
           const prevStyle = this.plugin.positionStyle;
           s.enableFixedToolbar = !s.enableFixedToolbar;
           toggleComponent.setValue(s.enableFixedToolbar);
-          let nextStyle: string | null = null;
-          if (s.enableFixedToolbar) {
-            nextStyle = 'fixed';
-          } else if (prevStyle === 'fixed') {
-            if (s.enableTopToolbar) nextStyle = 'top';
-            else if (s.enableFollowingToolbar) nextStyle = 'following';
-            else nextStyle = null;
-          }
+          const nextStyle = resolveNextPositionStyle(s, 'fixed', s.enableFixedToolbar, prevStyle);
           if (nextStyle && nextStyle !== prevStyle) {
             this.plugin.onPositionStyleChange(nextStyle);
           }

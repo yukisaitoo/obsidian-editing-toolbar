@@ -15,6 +15,37 @@ export interface AppearanceByStyle {
   [style: string]: StyleAppearanceSettings;
 }
 
+export type PositionToggleStyle = "top" | "following" | "fixed";
+
+/**
+ * After a position-toolbar toggle, decide which style should become the primary
+ * (configured/appearance) style. Returns the style to switch to, or null if the
+ * primary style should stay as-is.
+ *
+ * `enabled` is the toggled style's new on/off state; `prevStyle` is the current
+ * primary style. When a style is turned on it becomes primary; when the current
+ * primary is turned off, the next enabled style (top → following → fixed) takes over.
+ */
+export function resolveNextPositionStyle(
+  settings: editingToolbarSettings,
+  toggledStyle: PositionToggleStyle,
+  enabled: boolean,
+  prevStyle: string | null,
+): PositionToggleStyle | null {
+  if (enabled) return toggledStyle;
+  if (prevStyle !== toggledStyle) return null;
+
+  const enabledFlags: Record<PositionToggleStyle, boolean> = {
+    top: settings.enableTopToolbar,
+    following: settings.enableFollowingToolbar,
+    fixed: settings.enableFixedToolbar,
+  };
+  for (const style of ["top", "following", "fixed"] as PositionToggleStyle[]) {
+    if (style !== toggledStyle && enabledFlags[style]) return style;
+  }
+  return null;
+}
+
 
 declare module 'obsidian' {
   export interface Command {
