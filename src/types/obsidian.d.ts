@@ -52,7 +52,7 @@ declare module "obsidian" {
 	}
 
 	interface Workspace {
-		on(name: 'canvas:node-menu', callback: (menu: Menu, node: unknown) => any, ctx?: any): EventRef;
+		on(name: 'canvas:node-menu', callback: (menu: Menu, node: unknown) => unknown, ctx?: unknown): EventRef;
 	}
 
 	interface Editor {
@@ -240,7 +240,7 @@ declare module "obsidian" {
 		/**
 		 * @public
 		 */
-		addItem(cb: (item: MenuItem) => any): this;
+		addItem(cb: (item: MenuItem) => unknown): this;
 		/**
 		 * @public
 		 */
@@ -261,7 +261,7 @@ declare module "obsidian" {
 		/**
 		 * @public
 		 */
-		onHide(callback: () => any): void;
+		onHide(callback: () => unknown): void;
 
 	}
 

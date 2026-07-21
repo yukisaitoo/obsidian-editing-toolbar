@@ -1,4 +1,4 @@
-import { App, Modal, Notice, setIcon, Setting, ToggleComponent } from "obsidian";
+import { App, Modal, Notice, Setting, ToggleComponent } from "obsidian";
 import EditingToolbarPlugin from "src/plugin/main";
 import { strings } from 'src/translations/helper';
 
@@ -35,7 +35,7 @@ export class DeployCommandModal extends Modal {
       
       contentEl.createEl('h3', { text: strings.deployCommandConfigurations });
       
-      const allContainer = contentEl.createDiv('deploy-option');
+      contentEl.createDiv('deploy-option');
   
   
       const optionsContainer = contentEl.createDiv('deploy-options');

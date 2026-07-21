@@ -1,6 +1,5 @@
 import {
   App,
-  Command,
   debounce,
   Editor,
   ItemView,
@@ -10,15 +9,11 @@ import {
   Platform,
   Plugin,
   requireApiVersion,
-  setIcon,
-  ToggleComponent,
-  View,
 } from "obsidian";
 import { CommandsManager } from "src/commands/commands";
 import { StatusBar } from "src/components/StatusBar";
 import addIcons from "src/icons/customIcons";
 import { createFollowingbar, editingToolbarPopover, isExistoolbar, quiteFormatbrushes, resetToolbar, selfDestruct, setFormateraser } from "src/toolbar/editingToolbar";
-import { InsertCalloutModal } from "src/modals/insertCalloutModal";
 import { InsertLinkModal } from "src/modals/insertLinkModal";
 import { DEFAULT_SETTINGS, editingToolbarSettings, getAppearanceValue } from "src/settings/settingsData";
 import { strings } from 'src/translations/helper';
@@ -28,8 +23,9 @@ import { EditingToolbarSettingTab } from '../settings/settingsTab';
 
 let activeDocument: Document;
 
-// ---- Per-style appearance support (patch v3, integrated) ----
 import type { AppearanceByStyle, StyleAppearanceSettings, ToolbarStyleKey } from "src/settings/settingsData";
+
+// ---- Per-style appearance helpers ----
 
 const STYLE_KEYS: ToolbarStyleKey[] = ["top", "following", "fixed", "mobile"];
 
@@ -84,10 +80,6 @@ export interface AdmonitionDefinition  {
   copy?: boolean;
 }
 
-interface AdmonitionPluginPublic {
-  admonitions: Map<string, AdmonitionDefinition>;
-  postprocessors: Map<string, any>;
-}
 interface EditorContextMenuAction {
   title: string;
   commandId?: string;
@@ -291,7 +283,7 @@ export default class EditingToolbarPlugin extends Plugin {
       // Use a small delay to ensure Settings Search has finished scanning settings tabs
       setTimeout(() => {
         if (!this.settings.cMenuVisibility) {
-          this.handleeditingToolbar();
+          this.handleEditingToolbar();
         }
       }, 100);
     });
@@ -322,13 +314,13 @@ export default class EditingToolbarPlugin extends Plugin {
     }
 
     this.registerEvent(
-      this.app.workspace.on("active-leaf-change", this.handleeditingToolbar)
+      this.app.workspace.on("active-leaf-change", this.handleEditingToolbar)
     );
     this.registerEvent(
-      this.app.workspace.on("layout-change", this.handleeditingToolbar_layout)
+      this.app.workspace.on("layout-change", this.handleEditingToolbar_layout)
     );
     this.registerEvent(
-      this.app.workspace.on("resize", this.handleeditingToolbar_resize)
+      this.app.workspace.on("resize", this.handleEditingToolbar_resize)
     );
     if (this.settings.cMenuVisibility == true) {
       setTimeout(() => {
@@ -391,8 +383,8 @@ this.app.workspace.onLayoutReady(async () => {
       this.app.workspace.on("editor-menu", this.handleEditorContextMenu)
     );
     this.registerEvent(
-      // @ts-ignore
-      this.app.workspace.on('url-menu', (menu: Menu, url: string, view: MarkdownView) => {
+      // @ts-expect-error untyped API access
+      this.app.workspace.on('url-menu', (menu: Menu, _url: string, _view: MarkdownView) => {
         menu.addItem((item) =>
           item
             .setTitle('Edit Link(Modal)')
@@ -423,8 +415,8 @@ this.app.workspace.onLayoutReady(async () => {
     );
   }
 
-  async tryGetAdmonitionTypes(retries = 0): Promise<void> {
-    // @ts-ignore
+  async tryGetAdmonitionTypes(_retries = 0): Promise<void> {
+    // @ts-expect-error untyped API access
     const admonitionPluginInstance = this.app.plugins?.getPlugin(ADMONITION_PLUGIN_ID);
     if (admonitionPluginInstance) {
        
@@ -437,8 +429,6 @@ this.app.workspace.onLayoutReady(async () => {
       admonitions?: Record<string, AdmonitionDefinition>;
     };
 
-    let registeredTypes: string[] | null = null;
-    const typesSource: string | null = null;
 
     if (
       admonitionPlugin.admonitions &&
@@ -446,7 +436,6 @@ this.app.workspace.onLayoutReady(async () => {
       !Array.isArray(admonitionPlugin.admonitions) &&
       Object.keys(admonitionPlugin.admonitions).length > 0
     ) {
-      registeredTypes = Object.keys(admonitionPlugin.admonitions);
       this.admonitionDefinitions = admonitionPlugin.admonitions;
    
   }  else {
@@ -470,9 +459,9 @@ this.app.workspace.onLayoutReady(async () => {
   }
 
   onunload(): void {
-    this.app.workspace.off("active-leaf-change", this.handleeditingToolbar);
-    this.app.workspace.off("layout-change", this.handleeditingToolbar_layout);
-    this.app.workspace.off("resize", this.handleeditingToolbar_resize);
+    this.app.workspace.off("active-leaf-change", this.handleEditingToolbar);
+    this.app.workspace.off("layout-change", this.handleEditingToolbar_layout);
+    this.app.workspace.off("resize", this.handleEditingToolbar_resize);
 
     if (this.formatBrushNotice) {
       this.formatBrushNotice.hide();
@@ -491,7 +480,7 @@ this.app.workspace.onLayoutReady(async () => {
     return ViewUtils.isAllowedViewType(view);
   }
 
-  handleeditingToolbar = () => {
+  handleEditingToolbar = () => {
     // Keep format-brush cursor state in sync with the toolbar state
     if (!this.formatBrushActive) {
       activeDocument.body.classList.remove("format-brush-cursor");
@@ -599,13 +588,13 @@ this.app.workspace.onLayoutReady(async () => {
     }
   };
 
-  handleeditingToolbar_layout = () => {
+  handleEditingToolbar_layout = () => {
     // When the workspace layout changes (splits, panes, etc.),
     // just recompute toolbar creation/visibility using the main handler.
-    this.handleeditingToolbar();
+    this.handleEditingToolbar();
   };
   
-  handleeditingToolbar_resize = () => {
+  handleEditingToolbar_resize = () => {
     // Only care about resizing when the toolbar is visible and top-style is active
     if (!this.settings.cMenuVisibility || !this.isTopToolbarActive()) {
       return false;
@@ -944,7 +933,7 @@ updateCurrentCommands(commands: any[], style?: string): void {
     const cleanedText = text.replace(calloutPrefixRegex, "").trim();
 
     const lines = cleanedText.split("\n");
-    const processedLines = lines.map((line, index) =>
+    const processedLines = lines.map((line) =>
       line.replace(/^\s*>\s*/, "")
     );
 
@@ -993,7 +982,7 @@ updateCurrentCommands(commands: any[], style?: string): void {
     this.commandsManager.reloadCustomCommands();
   }
 
-  init_evt(container: Document, editor: Editor) {
+  init_evt(container: Document, _editor: Editor) {
     this.resetFormatBrushStates();
 
     const debouncedHandleTextSelection = debounce(() => {
@@ -1128,7 +1117,7 @@ updateCurrentCommands(commands: any[], style?: string): void {
     return false;
   }
 
-  private handleMiddleClickToolbar(e: MouseEvent) {
+  private handleMiddleClickToolbar(_e: MouseEvent) {
     const cmEditor = this.commandsManager.getActiveEditor();
     if (this.isFollowingToolbarActive() && cmEditor?.hasFocus()) {
       this.showFollowingToolbar(cmEditor);
@@ -1171,8 +1160,6 @@ updateCurrentCommands(commands: any[], style?: string): void {
       "ShiftLeft",
       "ShiftRight",
     ];
-
-    const cmEditor = this.commandsManager.getActiveEditor();
 
     if (selectionKeys.includes(e.code) || e.shiftKey) {
       this.handleTextSelection();
@@ -1248,12 +1235,11 @@ updateCurrentCommands(commands: any[], style?: string): void {
     }
   }
 
-  private throttle(func: Function, limit: number = 100) {
-    let inThrottle: boolean;
-    return function (this: any, ...args: any[]) {
-      const context = this;
+  private throttle(func: () => void, limit: number = 100): () => void {
+    let inThrottle = false;
+    return () => {
       if (!inThrottle) {
-        func.apply(context, args);
+        func();
         inThrottle = true;
         setTimeout(() => (inThrottle = false), limit);
       }

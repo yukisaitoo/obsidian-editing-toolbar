@@ -1,4 +1,4 @@
-import { Editor,Command,MarkdownView } from "obsidian";
+import { Editor,Command } from "obsidian";
 import { syntaxTree } from '@codemirror/language';
 export function GenNonDuplicateID(randomLength: number) {
   let idStr = Date.now().toString(36)

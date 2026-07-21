@@ -105,7 +105,7 @@ export class StatusBar {
             this.plugin.onPositionStyleChange(nextStyle);
           }
           await this.plugin.saveSettings();
-          this.plugin.handleeditingToolbar();
+          this.plugin.handleEditingToolbar();
         });
       });
 
@@ -128,7 +128,7 @@ export class StatusBar {
             this.plugin.onPositionStyleChange(nextStyle);
           }
           await this.plugin.saveSettings();
-          this.plugin.handleeditingToolbar();
+          this.plugin.handleEditingToolbar();
         });
       });
 
@@ -151,7 +151,7 @@ export class StatusBar {
             this.plugin.onPositionStyleChange(nextStyle);
           }
           await this.plugin.saveSettings();
-          this.plugin.handleeditingToolbar();
+          this.plugin.handleEditingToolbar();
         });
       });
     });

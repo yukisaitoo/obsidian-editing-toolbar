@@ -72,7 +72,7 @@ export class RegexCommandModal extends Modal {
 
     const basicSettingsContainer = contentEl.createDiv('basic-settings-container');
 
-    const commandIdSetting = new Setting(basicSettingsContainer)
+    new Setting(basicSettingsContainer)
       .setName(strings.commandId)
       .setDesc(strings.uniqueIdentifierSpacesEG)
       .addText(text => {
@@ -93,7 +93,7 @@ export class RegexCommandModal extends Modal {
         return text;
       });
 
-    const commandNameSetting = new Setting(basicSettingsContainer)
+    new Setting(basicSettingsContainer)
       .setName(strings.commandName)
       .setDesc(strings.displayedNameToolbarMenu)
       .addText(text => text
@@ -228,7 +228,7 @@ export class RegexCommandModal extends Modal {
     if (this.icon) {
       try {
         setIcon(this.iconDisplay, this.icon);
-      } catch (e) {
+      } catch {
         this.iconDisplay.setText(this.icon);
       }
     }
@@ -252,7 +252,7 @@ export class RegexCommandModal extends Modal {
             if (this.icon) {
               try {
                 setIcon(this.iconDisplay, this.icon);
-              } catch (e) {
+              } catch {
                 this.iconDisplay.setText(this.icon);
               }
             }
@@ -264,7 +264,7 @@ export class RegexCommandModal extends Modal {
         ).open();
       })
     );
-    const regexHelpContainer = regexContainer.createSpan('regex-help');
+    regexContainer.createSpan('regex-help');
     const regexExamplesContainer = regexContainer.createEl('details', { cls: 'regex-examples-container' });
 
     const examplesSummary = regexExamplesContainer.createEl('summary', { text: strings.regularExpressionExamples });
@@ -380,7 +380,7 @@ export class RegexCommandModal extends Modal {
     });
     const previewContainer = contentEl.createDiv('preview-container');
 
-    const previewLabel = previewContainer.createEl('label', { text: strings.preview });
+    previewContainer.createEl('label', { text: strings.preview });
 
 
     const previewInputContainer = previewContainer.createDiv('preview-input-container');

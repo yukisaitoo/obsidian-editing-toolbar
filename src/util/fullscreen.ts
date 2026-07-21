@@ -8,9 +8,7 @@ export function workplacefullscreenMode(app: App) {
 
 
     if (app.workspace.leftSplit.collapsed && app.workspace.rightSplit.collapsed) {
-        //@ts-ignore
         app.commands.executeCommandById("app:toggle-right-sidebar");
-        //@ts-ignore
         app.commands.executeCommandById("app:toggle-left-sidebar");
         app.workspace.leftRibbon.show()
 
@@ -28,12 +26,10 @@ export function workplacefullscreenMode(app: App) {
         }
         app.workspace.leftRibbon.hide()
         if (!app.workspace.leftSplit.collapsed) {
-            //@ts-ignore
             app.commands.executeCommandById("app:toggle-left-sidebar");
 
         }
         if (!app.workspace.rightSplit.collapsed) {
-            //@ts-ignore
             app.commands.executeCommandById("app:toggle-right-sidebar");
         }
     }
@@ -54,24 +50,20 @@ export function fullscreenMode(app: App) {
     let TYPE_REQUEST_FULL_SCREEN = 'requestFullscreen';
     let TYPE_EXIT_FULL_SCREEN = 'exitFullscreen';
     let TYPE_FULL_SCREEN_ELEMENT = 'fullscreenElement';
-    let TYPE_ON_FULL_SCREEN_CHANGE = 'onfullscreenchange';
     if ("webkitRequestFullScreen" in DOC_EL) {
         TYPE_REQUEST_FULL_SCREEN = 'webkitRequestFullScreen';
         TYPE_EXIT_FULL_SCREEN = 'webkitExitFullscreen';
         TYPE_FULL_SCREEN_ELEMENT = 'webkitFullscreenElement';
-        TYPE_ON_FULL_SCREEN_CHANGE = 'onwebkitfullscreenchange';
     }
     else if ("msRequestFullscreen" in DOC_EL) {
         TYPE_REQUEST_FULL_SCREEN = 'msRequestFullscreen';
         TYPE_EXIT_FULL_SCREEN = 'msExitFullscreen';
         TYPE_FULL_SCREEN_ELEMENT = 'msFullscreenElement';
-        TYPE_ON_FULL_SCREEN_CHANGE = 'MSFullscreenChange';
     }
     else if ("mozRequestFullScreen" in DOC_EL) {
         TYPE_REQUEST_FULL_SCREEN = 'mozRequestFullScreen';
         TYPE_EXIT_FULL_SCREEN = 'mozCancelFullScreen';
         TYPE_FULL_SCREEN_ELEMENT = 'mozFullScreenElement';
-        TYPE_ON_FULL_SCREEN_CHANGE = 'onmozfullscreenchange';
     }
     else if (!("requestFullscreen" in DOC_EL)) {
         // throw "\u5F53\u524D\u6D4F\u89C8\u5668\u4E0D\u652F\u6301Fullscreen API !";

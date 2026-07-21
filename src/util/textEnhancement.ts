@@ -10,9 +10,9 @@ export class TextEnhancement {
     }
 
     const mdPattern =
-      /(^#+\s|(?<=^|\s*)#|^>|^\- \[( |x)\]|^\+ |<[^<>]+>|^1\. |^\-+$|^\*+$|==|\*+|~~|```|!*\[\[|\]\])/gm;
+      /(^#+\s|(?<=^|\s*)#|^>|^- \[( |x)\]|^\+ |<[^<>]+>|^1\. |^-+$|^\*+$|==|\*+|~~|```|!*\[\[|\]\])/gm;
     const plainText = selection
-      .replace(/\[([^\[\]]*)\]\([^\(\)]+\)/gim, "$1")
+      .replace(/\[([^[\]]*)\]\([^()]+\)/gim, "$1")
       .replace(mdPattern, "")
       .replace(/^[ ]+|[ ]+$/gm, "")
       .replace(/(\r\n|\n)+/gm, "\n");
@@ -115,7 +115,7 @@ export class TextEnhancement {
   }
 
   private static detectPattern(text: string): RegExp | null {
-    const numberedList = /\s?\d+[\.、]\s?/g;
+    const numberedList = /\s?\d+[.、]\s?/g;
 
     const arrowSymbol = /\s?[→=>]\s?/g;
 
@@ -346,7 +346,7 @@ export class TextEnhancement {
       .map((line) => {
         if (line.trim() === "") return line;
 
-        const cleanLine = line.replace(/^\s*\d+[\.\)）、]?\s*/, "");
+        const cleanLine = line.replace(/^\s*\d+[.)）、]?\s*/, "");
 
         const numberedLine = `${prefix}${currentNum}${separator}${cleanLine}`;
         currentNum += stepNumber;
@@ -393,7 +393,7 @@ export class TextEnhancement {
       } else {
         new Notice(strings.matchesFound);
       }
-    } catch (e) {
+    } catch {
       new Notice(strings.extractionFailed);
     }
   }

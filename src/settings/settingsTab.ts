@@ -1,6 +1,6 @@
 import Pickr from "@simonwep/pickr";
 import '@simonwep/pickr/dist/themes/nano.min.css';
-import { App, ButtonComponent, Command, debounce, Modal, Notice, PluginSettingTab, setIcon, Setting } from "obsidian";
+import { App, ButtonComponent, Command, debounce, Notice, PluginSettingTab, setIcon, Setting } from "obsidian";
 import Sortable from "sortablejs";
 import { ConfirmModal } from "src/modals/ConfirmModal";
 import { CustomCommandModal } from "src/modals/CustomCommandModal";
@@ -251,7 +251,7 @@ export class EditingToolbarSettingTab extends PluginSettingTab {
             }
             await this.plugin.saveSettings();
             // Immediately refresh toolbars to reflect this toggle
-            this.plugin.handleeditingToolbar();
+            this.plugin.handleEditingToolbar();
             this.display();
           });
       });
@@ -272,7 +272,7 @@ export class EditingToolbarSettingTab extends PluginSettingTab {
               this.plugin.onPositionStyleChange(nextStyle);
             }
             await this.plugin.saveSettings();
-            this.plugin.handleeditingToolbar();
+            this.plugin.handleEditingToolbar();
             this.display();
           });
       });
@@ -293,7 +293,7 @@ export class EditingToolbarSettingTab extends PluginSettingTab {
               this.plugin.onPositionStyleChange(nextStyle);
             }
             await this.plugin.saveSettings();
-            this.plugin.handleeditingToolbar();
+            this.plugin.handleEditingToolbar();
             this.display();
           });
       });
@@ -464,7 +464,7 @@ export class EditingToolbarSettingTab extends PluginSettingTab {
   private displayCommandSettings(containerEl: HTMLElement): void {
     const commandSettingContainer = containerEl.createDiv('commandSetting-container');
     if (this.plugin.settings.enableMultipleConfig) {
-      const configSwitcher = new Setting(commandSettingContainer)
+      new Setting(commandSettingContainer)
         .setName(strings.currentConfiguration)
         .setDesc(strings.switchBetweenDifferentCommandConfigurations)
         .addDropdown(dropdown => {
@@ -487,7 +487,6 @@ export class EditingToolbarSettingTab extends PluginSettingTab {
     if (this.plugin.settings.enableMultipleConfig) {
       const currentConfigType = this.currentEditingConfig;
 
-      const commandsArray = this.getCommandsArrayByType(currentConfigType);
       const buttonContainer = containerEl.createDiv('command-buttons-container');
 
       const importSetting = new Setting(buttonContainer)
@@ -615,7 +614,7 @@ export class EditingToolbarSettingTab extends PluginSettingTab {
     const commandListContainer = containerEl.createDiv('command-lists-container');
     commandListContainer.addClass(`${this.currentEditingConfig}`);
     if (this.plugin.settings.enableMultipleConfig) {
-      const positionStyleInfo = commandListContainer.createEl('div', {
+      commandListContainer.createEl('div', {
         cls: `position-style-info ${this.currentEditingConfig}`,
         text: strings.currentlyEditingCommands + ` "${this.currentEditingConfig} Style" ` + strings.configuration
       });
@@ -638,7 +637,7 @@ export class EditingToolbarSettingTab extends PluginSettingTab {
     containerEl.empty();
 
     const customCommandsContainer = containerEl.createDiv('custom-commands-container');
-    const descriptionEl = customCommandsContainer.createEl('p', {
+    customCommandsContainer.createEl('p', {
       text: strings.addEditDeleteCustomFormat
     });
     // Regex command behavior setting
@@ -1552,7 +1551,7 @@ export class EditingToolbarSettingTab extends PluginSettingTab {
 
     const shareLink = communityDiv.createEl('p');
     shareLink.innerHTML = strings.shareToolbarSettingsStylesOur + ' <a href="https://github.com/PKM-er/obsidian-editing-toolbar/discussions/categories/show-and-tell" target="_blank" rel="noopener noreferrer">Show and Tell</a> ';
-    const shareNote = communityDiv.createEl('p', {
+    communityDiv.createEl('p', {
       text: strings.getInspiredWhatOthersHave
     });
     const warningDiv = containerEl.createDiv('import-export-warning');

@@ -1,4 +1,4 @@
-import { App, ButtonComponent, Editor, ItemView, MarkdownView, Menu, Notice, Platform, requireApiVersion, setIcon, WorkspaceParent, WorkspaceParentExt, WorkspaceWindow } from "obsidian";
+import { App, ButtonComponent, Editor, ItemView, Menu, Notice, Platform, requireApiVersion, setIcon, WorkspaceParent, WorkspaceParentExt, WorkspaceWindow } from "obsidian";
 import type EditingToolbarPlugin from "src/plugin/main";
 import {
   AppearanceByStyle,
@@ -31,7 +31,7 @@ function getRootSplits(app: App): WorkspaceParentExt[] {
   // push the main window's root split to the list
   rootSplits.push(app.workspace.rootSplit as WorkspaceParent as WorkspaceParentExt)
 
-  // @ts-ignore floatingSplit is undocumented
+  // @ts-expect-error floatingSplit is undocumented
   const floatingSplit = app.workspace.floatingSplit as WorkspaceParentExt;
   floatingSplit?.children.forEach((child: WorkspaceParentExt) => {
     // if this is a window, push it to the list
@@ -174,13 +174,13 @@ function setHilite(keys: any, how: string) {
 }
 
 function getHotkey(app: App, cmdid: string, highlight = false) {
-  // @ts-ignore
+  // @ts-expect-error untyped API access
   const arr = app.commands.findCommand(cmdid)
   const hi = highlight ? '*' : '';
   if (arr) {
     const defkeys = arr.hotkeys ? [[getNestedObject(arr.hotkeys, [0, 'modifiers'])],
     [getNestedObject(arr.hotkeys, [0, 'key'])]] : undefined;
-    // @ts-ignore
+    // @ts-expect-error untyped API access
     const ck = app.hotkeyManager.customKeys[arr.id];
     const hotkeys = ck ? [[getNestedObject(ck, [0, 'modifiers'])], [getNestedObject(ck, [0, 'key'])]] : undefined;
     return hotkeys ? setHilite(hotkeys, hi) : setHilite(defkeys, '');
@@ -292,7 +292,7 @@ function createTablecell(app: App, plugin: EditingToolbarPlugin, el: string, roo
   const container = root || (isExistoolbar(app, plugin) as HTMLElement | null);
   const tab = container?.querySelector('#' + el);
   if (tab) {
-    // @ts-ignore
+    // @ts-expect-error untyped API access
     const rows = tab.rows;
     const rlen = rows.length;
     for (let i = 1; i < rlen; i++) {
@@ -473,7 +473,7 @@ export function setFormateraser(plugin: EditingToolbarPlugin, editor: Editor) {
   //   plugin.tempNotice = new Notice(strings.clearFormattingBrushClickMouse, 0);
 
   // } else {
-  if (selectText.match(/^>\s*\[\![\w\s]*\]/m)) {
+  if (selectText.match(/^>\s*\[![\w\s]*\]/m)) {
     const lines = selectText.split('\n');
     const result = [];
     let inCallout = false;
@@ -483,7 +483,7 @@ export function setFormateraser(plugin: EditingToolbarPlugin, editor: Editor) {
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i];
 
-      const calloutMatch = line.match(/^(>+)\s*\[\!([\w\s]*)\]\s*(.*?)$/);
+      const calloutMatch = line.match(/^(>+)\s*\[!([\w\s]*)\]\s*(.*?)$/);
       if (calloutMatch && !foundFirstCallout) {
         calloutLevel = calloutMatch[1].length;
         foundFirstCallout = true;
@@ -515,16 +515,16 @@ export function setFormateraser(plugin: EditingToolbarPlugin, editor: Editor) {
     return;
   }
 
-  const mdText = /(^#+\s|^#(?=\s)|^\>|^\- \[( |x)\]|^\+ |\<[^\<\>]+?\>|^1\. |^\s*\- |^\-+$|^\*+$)/mg;
+  const mdText = /(^#+\s|^#(?=\s)|^>|^- \[( |x)\]|^\+ |<[^<>]+?>|^1\. |^\s*- |^-+$|^\*+$)/mg;
   selectText = selectText.replace(mdText, "");
   selectText = selectText.replace(/^[ ]+|[ ]+$/mg, "");
-  selectText = selectText.replace(/\!?\[\[([^\[\]\|]*\|)*([^\(\)\[\]]+)\]\]/g, "$2");
-  selectText = selectText.replace(/\!?\[+([^\[\]\(\)]+)\]+\(([^\(\)]+)\)/g, "$1");
+  selectText = selectText.replace(/!?\[\[([^[\]|]*\|)*([^()[\]]+)\]\]/g, "$2");
+  selectText = selectText.replace(/!?\[+([^[\]()]+)\]+\(([^()]+)\)/g, "$1");
   selectText = selectText.replace(/`([^`]+)`/g, "$1");
   selectText = selectText.replace(/_([^_]+)_/g, "$1");
   selectText = selectText.replace(/==([^=]+)==/g, "$1");
-  selectText = selectText.replace(/\*\*\*([^\*]+)\*\*\*/g, "$1");
-  selectText = selectText.replace(/\*\*?([^\*]+)\*\*?/g, "$1");
+  selectText = selectText.replace(/\*\*\*([^*]+)\*\*\*/g, "$1");
+  selectText = selectText.replace(/\*\*?([^*]+)\*\*?/g, "$1");
   selectText = selectText.replace(/~~([^~]+)~~/g, "$1");
 
   // selectText = selectText.replace(/(\r*\n)+/mg, "\r\n");
@@ -625,8 +625,7 @@ function positionToolbar(toolbar: HTMLElement, editor: Editor) {
   const windowWidth = toolbar.ownerDocument.defaultView?.innerWidth ?? window.innerWidth;
 
   const from = editor.getCursor("from");
-  const to = editor.getCursor("to");
-  //@ts-ignore
+  //@ts-expect-error untyped API access
   const coords = editor.coordsAtPos(from);
 
   const sideDockWidth = activeDocument.getElementsByClassName("mod-left-split")[0]?.clientWidth ?? 0;
@@ -661,7 +660,7 @@ function calculateTopPosition(
 ) {
   const from = editor.getCursor("from");
   const to = editor.getCursor("to");
-  //@ts-ignore
+  //@ts-expect-error untyped API access
   const coordsTO = editor.coordsAtPos(to);
 
   const isSingleLineSelection = from.line === to.line;

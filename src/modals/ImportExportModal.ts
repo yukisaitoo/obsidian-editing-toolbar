@@ -85,7 +85,7 @@ export class ImportExportModal extends Modal {
       });
     } else {
 
-      const importModeSetting = new Setting(contentEl)
+      new Setting(contentEl)
         .setName(strings.importMode)
         .setDesc(strings.chooseHowImportConfiguration)
         .addDropdown(dropdown => {

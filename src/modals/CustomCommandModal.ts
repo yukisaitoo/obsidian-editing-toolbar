@@ -63,7 +63,7 @@ export class CustomCommandModal extends Modal {
       new RegexCommandModal(this.app, this.plugin, null).open();
     });
 
-    const commandIdSetting = new Setting(contentEl)
+    new Setting(contentEl)
       .setName(strings.commandId)
       .setDesc(strings.uniqueIdentifierSpacesEG)
       .addText(text => {
@@ -85,7 +85,7 @@ export class CustomCommandModal extends Modal {
         return text;
       });
 
-    const commandNameSetting = new Setting(contentEl)
+    new Setting(contentEl)
       .setName(strings.commandName)
       .setDesc(strings.displayedNameToolbarMenu)
       .addText(text => this.commandNameInput = text
@@ -205,7 +205,7 @@ const suffixSetting = new Setting(contentEl)
 addSpecialCharButtons(suffixSetting, suffixSetting.controlEl.querySelector('input'));
 
 
-    const charSetting = new Setting(contentEl)
+    new Setting(contentEl)
       .setName(strings.cursorPositionOffset)
       .setDesc(strings.default0FormatKeepText)
       .addText(text => text
@@ -213,7 +213,7 @@ addSpecialCharButtons(suffixSetting, suffixSetting.controlEl.querySelector('inpu
         .onChange(value => this.char = parseInt(value) || 0)
       );
 
-    const lineSetting = new Setting(contentEl)
+    new Setting(contentEl)
       .setName(strings.lineOffset)
       .setDesc(strings.lineOffsetCursorAfterFormatting)
       .addText(text => text
@@ -237,7 +237,7 @@ addSpecialCharButtons(suffixSetting, suffixSetting.controlEl.querySelector('inpu
     if (this.icon) {
       try {
         setIcon(this.iconDisplay, this.icon);
-      } catch (e) {
+      } catch {
         this.iconDisplay.setText(this.icon);
       }
     }
@@ -263,7 +263,7 @@ addSpecialCharButtons(suffixSetting, suffixSetting.controlEl.querySelector('inpu
             if (this.icon) {
               try {
                 setIcon(this.iconDisplay, this.icon);
-              } catch (e) {
+              } catch {
                 this.iconDisplay.setText(this.icon);
               }
             }

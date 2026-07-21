@@ -1,13 +1,11 @@
 import {
   Command,
   Editor,
-  MarkdownView,
   Notice,
   htmlToMarkdown,
 } from "obsidian";
 
 import {
-  quiteFormatbrushes,
   selfDestruct,
   setFormateraser,
 } from "src/toolbar/editingToolbar";
@@ -15,7 +13,6 @@ import { InsertCalloutModal } from "src/modals/insertCalloutModal";
 import { InsertLinkModal } from "src/modals/insertLinkModal";
 import {
   IExtractBetweenResult,
-  IExtractColumnResult,
   IWrapInputResult,
   TextInputModal,
 } from "src/modals/TextInputModal";
@@ -41,7 +38,7 @@ export class CommandsManager {
 
   private executeCommandWithoutBlur = async (
     editor: Editor,
-    callback: () => any
+    callback: () => unknown
   ) => {
     if (editor) {
       await callback();
@@ -450,7 +447,7 @@ export class CommandsManager {
           }
         }
       }
-    } catch (e) {
+    } catch {
       try {
         const text = await navigator.clipboard.readText();
         items["text/plain"] = text;
@@ -463,7 +460,6 @@ export class CommandsManager {
   }
 
   public getActiveEditor(): any {
-    // @ts-ignore
     const activeEditor = this.plugin.app.workspace?.activeEditor;
     if (activeEditor && activeEditor.editor) {
       return activeEditor.editor;
@@ -493,7 +489,7 @@ export class CommandsManager {
       id: "toggle-format-brush",
       name: "Toggle Format Brush",
       icon: "paintbrush",
-      editorCallback: (editor: Editor) => {
+      editorCallback: (_editor: Editor) => {
         this.plugin.toggleFormatBrush();
       },
     });
@@ -548,7 +544,7 @@ export class CommandsManager {
           this.plugin.onPositionStyleChange(nextStyle);
         }
         await this.plugin.saveSettings();
-        this.plugin.handleeditingToolbar();
+        this.plugin.handleEditingToolbar();
       },
     });
 
@@ -564,7 +560,7 @@ export class CommandsManager {
           this.plugin.onPositionStyleChange(nextStyle);
         }
         await this.plugin.saveSettings();
-        this.plugin.handleeditingToolbar();
+        this.plugin.handleEditingToolbar();
       },
     });
 
@@ -580,7 +576,7 @@ export class CommandsManager {
           this.plugin.onPositionStyleChange(nextStyle);
         }
         await this.plugin.saveSettings();
-        this.plugin.handleeditingToolbar();
+        this.plugin.handleEditingToolbar();
       },
     });
 

@@ -1,5 +1,5 @@
-import { App, DropdownComponent, Modal, Platform, Setting, setIcon } from "obsidian";
-import EditingToolbarPlugin, { AdmonitionDefinition } from "src/plugin/main";
+import { DropdownComponent, Modal, Platform, Setting, setIcon } from "obsidian";
+import EditingToolbarPlugin from "src/plugin/main";
 import { strings } from "src/translations/helper";
 interface BuiltInCalloutType {
     type: string;
@@ -165,7 +165,7 @@ export class InsertCalloutModal extends Modal {
             });
         this.updateIconAndColor(this.iconContainerEl, this.type); // Initial icon update
 
-        const titleSetting = new Setting(contentEl)
+        new Setting(contentEl)
             .setName(strings.title)
             .setDesc(strings.optionalLeaveBlankDefaultTitle)
             .addText((text) => {
@@ -189,7 +189,7 @@ export class InsertCalloutModal extends Modal {
                     });
             });
 
-        const contentSetting = new Setting(contentEl)
+        new Setting(contentEl)
             .setName(strings.content)
             .addTextArea((text) => {
                 text.setPlaceholder(strings.inputContent)

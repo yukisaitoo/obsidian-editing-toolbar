@@ -1,4 +1,4 @@
-import { App, Editor, EditorPosition, MarkdownView, Modal, Notice, Platform, requestUrl, setIcon, Setting, TextComponent, ToggleComponent } from "obsidian";
+import { Editor, EditorPosition, MarkdownView, Modal, Notice, Platform, requestUrl, setIcon, Setting, TextComponent, ToggleComponent } from "obsidian";
 import EditingToolbarPlugin from "src/plugin/main";
 import { strings } from "src/translations/helper";
 
@@ -23,7 +23,7 @@ class UrlTitleFetcher {
         try {
             new URL(url);
             return true;
-        } catch (err) {
+        } catch {
             return false;
         }
     }
@@ -157,7 +157,7 @@ export class InsertLinkModal extends Modal {
         }
     }
     
-    private tryExpandSelection(editor: Editor, selectedText: string): LinkTarget | null {
+    private tryExpandSelection(editor: Editor, _selectedText: string): LinkTarget | null {
         const cursorFrom = editor.getCursor('from');
         const line = editor.getLine(cursorFrom.line);
         const selectionStart = cursorFrom.ch;
@@ -392,7 +392,7 @@ private matchLinkInLine(line: string, startPos: number, endPos: number, lineNumb
 
             new URL(url);
             return true;
-        } catch (e) {
+        } catch {
             return false;
         }
     }
@@ -522,7 +522,7 @@ private matchLinkInLine(line: string, startPos: number, endPos: number, lineNumb
                     }
                 }
             }
-        } catch (e) {
+        } catch {
             try {
                 const text = await navigator.clipboard.readText();
                 items['text/plain'] = text;
@@ -651,7 +651,7 @@ private matchLinkInLine(line: string, startPos: number, endPos: number, lineNumb
             })
        
     
-        const aliasSetting = new Setting(contentEl)
+        new Setting(contentEl)
             .setName(strings.title)
             .addText((text) => {
                 this.linkAliasInput = text;
@@ -700,7 +700,6 @@ private matchLinkInLine(line: string, startPos: number, endPos: number, lineNumb
             .onChange((value) => {
                 this.isEmbed = value;
                 const imageSizeEl = contentEl.querySelector('.image-size-setting');
-                const aliasSettingEl = aliasSetting.settingEl;
                 if (imageSizeEl) {
                     (imageSizeEl as HTMLElement).style.display = value ? 'flex' : 'none';
                 }
@@ -781,7 +780,7 @@ private matchLinkInLine(line: string, startPos: number, endPos: number, lineNumb
         shortcutHint.style.opacity = "0.7";
         shortcutHint.style.marginTop = "5px";
     
-        const buttonSetting = new Setting(contentEl)
+        new Setting(contentEl)
             .addButton((btn) => {
                 btn
                     .setButtonText(strings.insert)
