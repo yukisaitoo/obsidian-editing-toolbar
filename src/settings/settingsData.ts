@@ -1,5 +1,4 @@
 import type { Command } from "obsidian";
-import { DEFAULT_AI_SETTINGS, type AIPluginSettings } from "src/ai/types";
 export const APPEND_METHODS = ["body", "workspace"];
 export const AESTHETIC_STYLES = ["default", "tiny", "glass", "custom"];
 export const POSITION_STYLES = ["following", "top", "fixed"];
@@ -16,11 +15,79 @@ export interface AppearanceByStyle {
   [style: string]: StyleAppearanceSettings;
 }
 
+/**
+ * Read a per-style appearance value: the value stored in `style`'s bucket, falling
+ * back to the legacy global field on `settings`. Explicit replacement for the old
+ * Object.defineProperty getter that transparently redirected `settings.<key>`.
+ */
+export function getAppearanceValue<K extends keyof StyleAppearanceSettings>(
+  settings: editingToolbarSettings,
+  key: K,
+  style: string,
+): NonNullable<StyleAppearanceSettings[K]> {
+  // The per-style bucket fields are optional, but the fallback global field on
+  // `settings` is always populated from DEFAULT_SETTINGS, so the result is never
+  // undefined.
+  const bucketValue = settings.appearanceByStyle?.[style]?.[key];
+  return (bucketValue ?? (settings as unknown as StyleAppearanceSettings)[key]) as NonNullable<StyleAppearanceSettings[K]>;
+}
+
+/**
+ * Write a per-style appearance value into `style`'s bucket (creating the store and
+ * bucket as needed). Explicit replacement for the old defineProperty setter.
+ */
+export function setAppearanceValue<K extends keyof StyleAppearanceSettings>(
+  settings: editingToolbarSettings,
+  key: K,
+  style: string,
+  value: StyleAppearanceSettings[K],
+): void {
+  if (!settings.appearanceByStyle || typeof settings.appearanceByStyle !== "object") {
+    settings.appearanceByStyle = {};
+  }
+  const store = settings.appearanceByStyle as AppearanceByStyle;
+  if (!store[style] || typeof store[style] !== "object") {
+    store[style] = {};
+  }
+  store[style]![key] = value;
+}
+
+export type PositionToggleStyle = "top" | "following" | "fixed";
+
+/**
+ * After a position-toolbar toggle, decide which style should become the primary
+ * (configured/appearance) style. Returns the style to switch to, or null if the
+ * primary style should stay as-is.
+ *
+ * `enabled` is the toggled style's new on/off state; `prevStyle` is the current
+ * primary style. When a style is turned on it becomes primary; when the current
+ * primary is turned off, the next enabled style (top → following → fixed) takes over.
+ */
+export function resolveNextPositionStyle(
+  settings: editingToolbarSettings,
+  toggledStyle: PositionToggleStyle,
+  enabled: boolean,
+  prevStyle: string | null,
+): PositionToggleStyle | null {
+  if (enabled) return toggledStyle;
+  if (prevStyle !== toggledStyle) return null;
+
+  const enabledFlags: Record<PositionToggleStyle, boolean> = {
+    top: settings.enableTopToolbar,
+    following: settings.enableFollowingToolbar,
+    fixed: settings.enableFixedToolbar,
+  };
+  for (const style of ["top", "following", "fixed"] as PositionToggleStyle[]) {
+    if (style !== toggledStyle && enabledFlags[style]) return style;
+  }
+  return null;
+}
+
 
 declare module 'obsidian' {
   export interface Command {
     SubmenuCommands?: Command[];
-    menuType?: 'submenu' | 'dropdown'; // 'submenu' 为子按钮展开，'dropdown' 为下拉菜单
+    menuType?: 'submenu' | 'dropdown';
   }
 }
 export interface CustomCommand {
@@ -43,8 +110,6 @@ export interface CustomCommand {
 }
 
 export interface editingToolbarSettings {
-  lastVersion: string;
-  commandIdsFixed?: boolean;
   cMenuWidth: number;
   cMenuFontColor: string;
   cMenuBackgroundColor: string;
@@ -95,12 +160,10 @@ export interface editingToolbarSettings {
   toolbarIconColor: string;
   toolbarIconSize: number;
   useCurrentLineForRegex: boolean;
-  ai: AIPluginSettings;
   
 }
 
 export const DEFAULT_SETTINGS: editingToolbarSettings = {
-    "lastVersion": "0.0.0",
     "aestheticStyle": "default",
     "positionStyle": "top",
     "menuCommands": [
@@ -559,6 +622,5 @@ export const DEFAULT_SETTINGS: editingToolbarSettings = {
     "toolbarBackgroundColor": "rgba(var(--background-secondary-rgb), 0.7)",
     "toolbarIconColor": "var(--text-normal)",
     "toolbarIconSize": 18,
-    "useCurrentLineForRegex": false,
-    "ai": DEFAULT_AI_SETTINGS
+    "useCurrentLineForRegex": false
   }

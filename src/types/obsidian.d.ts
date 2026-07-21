@@ -1,7 +1,5 @@
 import "obsidian";
 
-
-
 declare module "obsidian" {
 	export interface App {
 		foldManager: FoldManager
@@ -14,11 +12,6 @@ declare module "obsidian" {
 	interface SecretStorage {
 		getSecret(key: string): string | null;
 		setSecret(key: string, value: string): void;
-	}
-
-	interface Plugin {
-		registerEditorExtension?(extension: any): void;
-		registerObsidianProtocolHandler?(action: string, callback: (params: Record<string, string>) => any): void;
 	}
 
 	interface SettingsManager {
@@ -38,7 +31,7 @@ declare module "obsidian" {
 
 	interface Plugins {
 		manifests: Record<string, PluginManifest>;
-		plugins: Record<string, Plugin_2>;
+		plugins: Record<string, Plugin>;
 		enabledPlugins: any;
 		enablePlugin(pluginId: string): Promise<boolean>;
 		disablePlugin(pluginId: string): Promise<void>;
@@ -59,16 +52,11 @@ declare module "obsidian" {
 	}
 
 	interface Workspace {
-		on(name: 'canvas:node-menu', callback: (menu: Menu, node: unknown) => any, ctx?: any): EventRef;
-	}
-
-	interface MarkdownSubView {
-		applyFoldInfo(foldInfo: FoldInfo): void;
-		getFoldInfo(): FoldInfo | null;
+		on(name: 'canvas:node-menu', callback: (menu: Menu, node: unknown) => unknown, ctx?: unknown): EventRef;
 	}
 
 	interface Editor {
-		cm: CodeMirror.Editor;
+		cm: any;
 		getScrollerElement: () => HTMLElement;
 		containerEl: HTMLElement;
 	}
@@ -248,16 +236,11 @@ declare module "obsidian" {
 		/**
 		 * @public
 		 */
-		constructor();
-
-		/**
-		 * @public
-		 */
 		setNoIcon(): this;
 		/**
 		 * @public
 		 */
-		addItem(cb: (item: MenuItem) => any): this;
+		addItem(cb: (item: MenuItem) => unknown): this;
 		/**
 		 * @public
 		 */
@@ -278,7 +261,7 @@ declare module "obsidian" {
 		/**
 		 * @public
 		 */
-		onHide(callback: () => any): void;
+		onHide(callback: () => unknown): void;
 
 	}
 

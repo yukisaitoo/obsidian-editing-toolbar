@@ -1,17 +1,17 @@
-import { Menu, setIcon, ToggleComponent, requireApiVersion, ItemView } from "obsidian";
-import { t } from "src/translations/helper";
-import type editingToolbarPlugin from "src/plugin/main";
+import { ItemView, Menu, requireApiVersion, setIcon, ToggleComponent } from "obsidian";
+import { selfDestruct } from "src/toolbar/editingToolbar";
 import { CommandPicker, openSlider } from "src/modals/suggesterModals";
-import { selfDestruct } from "src/modals/editingToolbarModal";
+import type EditingToolbarPlugin from "src/plugin/main";
+import { AESTHETIC_STYLES, getAppearanceValue, resolveNextPositionStyle, setAppearanceValue } from "src/settings/settingsData";
+import { strings } from "src/translations/helper";
 import { setMenuVisibility } from "src/util/statusBarConstants";
 import { ViewUtils } from "src/util/viewUtils";
-import { AESTHETIC_STYLES } from "src/settings/settingsData";
 
 export class StatusBar {
-  private plugin: editingToolbarPlugin;
-  private statusBarIcon: HTMLElement;
+  private plugin: EditingToolbarPlugin;
+  private statusBarIcon!: HTMLElement;
 
-  constructor(plugin: editingToolbarPlugin) {
+  constructor(plugin: EditingToolbarPlugin) {
     this.plugin = plugin;
   }
 
@@ -24,7 +24,9 @@ export class StatusBar {
 
   private registerClickEvent(): void {
     this.plugin.registerDomEvent(this.statusBarIcon, "click", () => {
-      const statusBarRect = this.statusBarIcon.parentElement.getBoundingClientRect();
+      const parent = this.statusBarIcon.parentElement;
+      if (!parent) return;
+      const statusBarRect = parent.getBoundingClientRect();
       const statusBarIconRect = this.statusBarIcon.getBoundingClientRect();
       this.showMenu(statusBarIconRect, statusBarRect);
     });
@@ -33,15 +35,13 @@ export class StatusBar {
   private showMenu(iconRect: DOMRect, barRect: DOMRect): void {
     const menu = new Menu();
     
-    // 添加第一个部分
-    menu.addSections(["settings"]); // 使用 addSections 添加部分
+    menu.addSections(["settings"]);
     this.addVisibilityToggle(menu);
 
     this.addAestheticStyleToggle(menu);
     menu.addSections(["viewType"]);
     this.addViewTypeToggle(menu);
-    // 添加第二个部分
-    menu.addSections(["controls"]); // 使用 addSections 添加部分
+    menu.addSections(["controls"]);
     this.addToolbarControls(menu);
 
     const menuDom = (menu as any).dom as HTMLElement;
@@ -55,9 +55,8 @@ export class StatusBar {
 
   private addVisibilityToggle(menu: Menu): void {
     menu.addItem((item) => {
-      // 先设置所有属性
-      item.setTitle(t("Hide & Show"));
-      requireApiVersion("0.15.0") ? item.setSection("settings") : true;
+      item.setTitle(strings.hideShow);
+      if (requireApiVersion("0.15.0")) item.setSection("settings");
       const itemDom = (item as any).dom as HTMLElement;
       const toggleComponent = new ToggleComponent(itemDom)
         .setValue(this.plugin.settings.cMenuVisibility)
@@ -82,17 +81,15 @@ export class StatusBar {
       });
     });
 
-    // 工具栏开关子菜单
     menu.addItem((item) => {
-      item.setTitle(t("Toolbar Position"));
-      requireApiVersion("0.15.0") ? item.setSection("settings") : true;
+      item.setTitle(strings.toolbarPosition);
+      if (requireApiVersion("0.15.0")) item.setSection("settings");
       item.setIcon("dock");
 
       const submenu = item.setSubmenu();
 
-      // Top 工具栏开关
       submenu.addItem((subItem) => {
-        subItem.setTitle(t("Top Toolbar"));
+        subItem.setTitle(strings.topToolbar);
         const itemDom = (subItem as any).dom as HTMLElement;
         const toggleComponent = new ToggleComponent(itemDom)
           .setValue(this.plugin.settings.enableTopToolbar || false)
@@ -105,25 +102,17 @@ export class StatusBar {
           const prevStyle = this.plugin.positionStyle;
           s.enableTopToolbar = !s.enableTopToolbar;
           toggleComponent.setValue(s.enableTopToolbar);
-          let nextStyle: string | null = null;
-          if (s.enableTopToolbar) {
-            nextStyle = 'top';
-          } else if (prevStyle === 'top') {
-            if (s.enableFollowingToolbar) nextStyle = 'following';
-            else if (s.enableFixedToolbar) nextStyle = 'fixed';
-            else nextStyle = null;
-          }
+          const nextStyle = resolveNextPositionStyle(s, 'top', s.enableTopToolbar, prevStyle);
           if (nextStyle && nextStyle !== prevStyle) {
             this.plugin.onPositionStyleChange(nextStyle);
           }
           await this.plugin.saveSettings();
-          this.plugin.handleeditingToolbar();
+          this.plugin.handleEditingToolbar();
         });
       });
 
-      // Following 工具栏开关
       submenu.addItem((subItem) => {
-        subItem.setTitle(t("Following Toolbar"));
+        subItem.setTitle(strings.followingToolbar);
         const itemDom = (subItem as any).dom as HTMLElement;
         const toggleComponent = new ToggleComponent(itemDom)
           .setValue(this.plugin.settings.enableFollowingToolbar || false)
@@ -136,25 +125,17 @@ export class StatusBar {
           const prevStyle = this.plugin.positionStyle;
           s.enableFollowingToolbar = !s.enableFollowingToolbar;
           toggleComponent.setValue(s.enableFollowingToolbar);
-          let nextStyle: string | null = null;
-          if (s.enableFollowingToolbar) {
-            nextStyle = 'following';
-          } else if (prevStyle === 'following') {
-            if (s.enableTopToolbar) nextStyle = 'top';
-            else if (s.enableFixedToolbar) nextStyle = 'fixed';
-            else nextStyle = null;
-          }
+          const nextStyle = resolveNextPositionStyle(s, 'following', s.enableFollowingToolbar, prevStyle);
           if (nextStyle && nextStyle !== prevStyle) {
             this.plugin.onPositionStyleChange(nextStyle);
           }
           await this.plugin.saveSettings();
-          this.plugin.handleeditingToolbar();
+          this.plugin.handleEditingToolbar();
         });
       });
 
-      // Fixed 工具栏开关
       submenu.addItem((subItem) => {
-        subItem.setTitle(t("Fixed Toolbar"));
+        subItem.setTitle(strings.fixedToolbar);
         const itemDom = (subItem as any).dom as HTMLElement;
         const toggleComponent = new ToggleComponent(itemDom)
           .setValue(this.plugin.settings.enableFixedToolbar || false)
@@ -167,61 +148,44 @@ export class StatusBar {
           const prevStyle = this.plugin.positionStyle;
           s.enableFixedToolbar = !s.enableFixedToolbar;
           toggleComponent.setValue(s.enableFixedToolbar);
-          let nextStyle: string | null = null;
-          if (s.enableFixedToolbar) {
-            nextStyle = 'fixed';
-          } else if (prevStyle === 'fixed') {
-            if (s.enableTopToolbar) nextStyle = 'top';
-            else if (s.enableFollowingToolbar) nextStyle = 'following';
-            else nextStyle = null;
-          }
+          const nextStyle = resolveNextPositionStyle(s, 'fixed', s.enableFixedToolbar, prevStyle);
           if (nextStyle && nextStyle !== prevStyle) {
             this.plugin.onPositionStyleChange(nextStyle);
           }
           await this.plugin.saveSettings();
-          this.plugin.handleeditingToolbar();
+          this.plugin.handleEditingToolbar();
         });
       });
     });
   }
 
-  // 添加视图类型显示控制
   private addViewTypeToggle(menu: Menu): void {
-    // 获取当前视图类型
     const view = this.plugin.app.workspace.getActiveViewOfType(ItemView);
     if (!view) return;
     
     const viewType = view.getViewType();
     
-    // 主菜单项：当前视图类型状态
     menu.addItem((item) => {
-      item.setTitle(t("Current View: ") + viewType);
-      requireApiVersion("0.15.0") ? item.setSection("settings") : true;
+      item.setTitle(strings.currentView + viewType);
+      if (requireApiVersion("0.15.0")) item.setSection("settings");
       item.setIcon("layout-template");
       
-      // 使用子菜单来显示当前视图类型的显示/隐藏控制
       const submenu = item.setSubmenu();
       
-      // 检查当前视图类型是否在允许列表中
       const isAllowed = ViewUtils.isAllowedViewType(view);
       
-      // 为当前视图类型添加显示/隐藏控制
       submenu.addItem(subItem => {
-        subItem.setTitle(isAllowed ? t("Disable toolbar for this view") : t("Enable toolbar for this view"));
+        subItem.setTitle(isAllowed ? strings.disableToolbarView : strings.enableToolbarView);
         subItem.setIcon(isAllowed ? "eye-off" : "eye");
         subItem.onClick(async () => {
-          // 更新设置
           if (!this.plugin.settings.viewTypeSettings) {
             this.plugin.settings.viewTypeSettings = {};
           }
           
-          // 切换当前视图类型的状态
           this.plugin.settings.viewTypeSettings[viewType] = !isAllowed;
           
-          // 保存设置
           await this.plugin.saveSettings();
 
-          // 刷新工具栏
           selfDestruct(this.plugin);
           setTimeout(() => {
             dispatchEvent(new Event("editingToolbar-NewCommand"));
@@ -229,15 +193,12 @@ export class StatusBar {
         });
       });
       
-      // 添加管理所有视图类型的子菜单
       submenu.addItem(subItem => {
-        subItem.setTitle(t("Manage all view types"));
+        subItem.setTitle(strings.manageAllViewTypes);
         subItem.setIcon("settings-2");
         
-        // 进一步的子菜单用于管理所有视图类型
         const allViewsSubmenu = subItem.setSubmenu();
         
-        // 获取默认允许的视图类型
         const defaultViewTypes = [
           'markdown',
           'canvas',
@@ -245,30 +206,24 @@ export class StatusBar {
           'meld-encrypted-view',
         ];
         
-        // 添加所有当前已知的视图类型
         const knownViewTypes = new Set([
           ...defaultViewTypes,
           ...Object.keys(this.plugin.settings.viewTypeSettings || {})
         ]);
         
-        // 为每个视图类型添加一个菜单项
         Array.from(knownViewTypes).sort().forEach(vType => {
-          // 检查该视图类型的当前状态
           const isViewAllowed = this.isViewTypeAllowed(vType);
           
           allViewsSubmenu.addItem(viewItem => {
             viewItem.setTitle(vType);
             viewItem.setIcon(isViewAllowed ? "check" : "");
             viewItem.onClick(async () => {
-              // 更新设置
               if (!this.plugin.settings.viewTypeSettings) {
                 this.plugin.settings.viewTypeSettings = {};
               }
               
-              // 切换状态
               this.plugin.settings.viewTypeSettings[vType] = !isViewAllowed;
 
-              // 如果当前视图就是这个类型，则刷新工具栏
               if (viewType === vType) {
                 selfDestruct(this.plugin);
                 setTimeout(() => {
@@ -276,7 +231,6 @@ export class StatusBar {
                 }, 100);
               }
               
-              // 保存设置
               await this.plugin.saveSettings();
             });
           });
@@ -285,12 +239,9 @@ export class StatusBar {
     });
   }
 
-  // 检查视图类型是否允许显示工具栏
   private isViewTypeAllowed(viewType: string): boolean {
-    // 如果没有专门的设置，使用默认值
     if (!this.plugin.settings.viewTypeSettings || 
         this.plugin.settings.viewTypeSettings[viewType] === undefined) {
-      // 默认允许的视图类型
       const defaultViewTypes = [
         'markdown',
         'canvas',
@@ -300,7 +251,6 @@ export class StatusBar {
       return defaultViewTypes.includes(viewType);
     }
     
-    // 使用用户设置的值
     return this.plugin.settings.viewTypeSettings[viewType];
   }
 
@@ -308,23 +258,21 @@ export class StatusBar {
     const controls = [
       {
         icon: "plus",
-        title: t("Add Command"),
+        title: strings.addCommand,
         click: () => new CommandPicker(this.plugin).open()
       }
     ];
 
-    // 只在 positionStyle 为 "fixed" 时添加 sliders 选项
     if (this.plugin.positionStyle === "fixed") {
       controls.push({
         icon: "file-sliders",
-        title: t("Position Settings"),
+        title: strings.positionSettings,
         click: () => new openSlider(this.plugin.app, this.plugin).open()
       });
     }
 
     controls.forEach(control => {
       menu.addItem((item) => {
-        // 分别设置每个属性
         item.setIcon(control.icon);
         item.setTitle(control.title);
         item.onClick(control.click);
@@ -338,8 +286,8 @@ export class StatusBar {
 
   private addAestheticStyleToggle(menu: Menu): void {
     menu.addItem((item) => {
-      item.setTitle(t("Appearance Style"));
-      requireApiVersion("0.15.0") ? item.setSection("settings") : true;
+      item.setTitle(strings.appearanceStyle);
+      if (requireApiVersion("0.15.0")) item.setSection("settings");
       item.setIcon("cherry");
 
       const submenu = item.setSubmenu();
@@ -347,9 +295,9 @@ export class StatusBar {
       AESTHETIC_STYLES.forEach(style => {
         submenu.addItem(subItem => {
           subItem.setTitle(style);
-          subItem.setIcon(this.plugin.settings.aestheticStyle === style ? "check" : "");
+          subItem.setIcon(getAppearanceValue(this.plugin.settings, "aestheticStyle", this.plugin.resolveActiveStyle()) === style ? "check" : "");
           subItem.onClick(async () => {
-            this.plugin.settings.aestheticStyle = style;
+            setAppearanceValue(this.plugin.settings, "aestheticStyle", this.plugin.resolveActiveStyle(), style);
             await this.plugin.saveSettings();
             selfDestruct(this.plugin);
             setTimeout(() => {

@@ -1,0 +1,17 @@
+# Normalize line endings to LF across the repo.
+* text=auto eol=lf
+
+*.ts   text eol=lf
+*.js   text eol=lf
+*.json text eol=lf
+*.css  text eol=lf
+*.md   text eol=lf
+
+# Binary assets — leave untouched.
+*.png binary
+*.jpg binary
+*.gif binary
+*.svg binary
+*.woff  binary
+*.woff2 binary
+*.ttf   binary

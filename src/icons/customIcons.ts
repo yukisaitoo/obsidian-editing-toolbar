@@ -1,12 +1,4 @@
-// import * as remixicons from "react-icons/ri/";
-// //import * as boxicons from "react-icons/bi/";
-// import { renderToString } from "react-dom/server";
 import { addIcon } from "obsidian";
-
-export interface Icon {
-  id: string;
-  name: string;
-}
 
 const icons: Record<string, string> = {
   editingToolbar: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="0" stroke-linecap="round" stroke-linejoin="round"><path d="M19 10H5c-1.103 0-2 .897-2 2v8c0 1.103.897 2 2 2h14c1.103 0 2-.897 2-2v-8c0-1.103-.897-2-2-2zM5 20v-8h14l.002 8H5zM5 6h14v2H5zm2-4h10v2H7z" fill="currentColor"/></svg>`,
@@ -36,41 +28,3 @@ export default function addIcons() {
     addIcon(key, icons[key]);
   });
   }
-
-
-/* export function addRemixIcons(appIcons: string[]) {
-  const iconKeys: Icon[] = [];
-  for (const icon in remixicons) {
-    iconKeys.push({
-      id: icon,
-      name: icon.substring(2),
-    });
-    const svg = renderToString(
-      // @ts-ignore
-      remixicons[icon]({
-        size: "100",
-      })
-    );
-    addIcon("remix-" + icon.substring(2), svg);
-    appIcons.push("remix-" + icon.substring(2));
-  }
-} */
-
-/* export function addBoxIcons(appIcons: string[]) {
-  const iconKeys: Icon[] = [];
-  for (const icon in boxicons) {
-    iconKeys.push({
-      id: icon,
-      name: icon.substring(2),
-    });
-    const svg = renderToString(
-      // @ts-ignore
-      boxicons[icon]({
-        size: "100",
-      })
-    );
-    addIcon("bx-" + icon.substring(2), svg);
-    appIcons.push("bx-" + icon.substring(2));
-  }
-}
- */
