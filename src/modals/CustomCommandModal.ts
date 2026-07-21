@@ -53,8 +53,6 @@ export class CustomCommandModal extends Modal {
     contentEl.createEl('h2', { text: this.commandIndex !== null ? strings.editCustomCommand : strings.addCustomCommand });
 
     const switchButtonContainer = contentEl.createDiv('switch-to-regex-container');
-    switchButtonContainer.style.marginBottom = '20px';
-    switchButtonContainer.style.textAlign = 'center';
 
     const switchButton = switchButtonContainer.createEl('button', {
       text: strings.switchRegexCommandWindow
@@ -149,22 +147,11 @@ function addSpecialCharButtons(setting: Setting, input: HTMLInputElement) {
   input.setAttribute('title', 'Click to select and copy text');
   
   const buttonContainer = setting.controlEl.createDiv({ cls: 'special-char-buttons' });
-  buttonContainer.style.display = 'flex';
-  buttonContainer.style.flexWrap = 'wrap';
-  buttonContainer.style.gap = '5px';
-  buttonContainer.style.marginTop = '5px';
-  
+
   specialCharButtons.forEach(({ placeholder, label }) => {
     const charContainer = buttonContainer.createDiv({ cls: 'char-copy-container' });
-    charContainer.style.position = 'relative';
-    charContainer.style.display = 'inline-block';
-    
-    const button = charContainer.createEl('button', { text: label });
-    button.style.padding = '2px 6px';
-    button.style.fontSize = '12px';
-    button.style.minWidth = 'auto';
-    button.style.border = '1px solid var(--background-modifier-border)';
-    button.style.cursor = 'pointer';
+
+    const button = charContainer.createEl('button', { text: label, cls: 'special-char-button' });
     button.setAttribute('data-char', placeholder);
     
     button.addEventListener('click', (e) => {
@@ -172,18 +159,6 @@ function addSpecialCharButtons(setting: Setting, input: HTMLInputElement) {
       navigator.clipboard.writeText(placeholder)
         .then(() => {
           const tooltip = charContainer.createDiv({ cls: 'copy-tooltip' });
-          tooltip.style.position = 'absolute';
-          tooltip.style.bottom = '100%';
-          tooltip.style.left = '50%';
-          tooltip.style.transform = 'translateX(-50%)';
-          tooltip.style.backgroundColor = 'var(--background-modifier-success)';
-          tooltip.style.color = 'white';
-          tooltip.style.padding = '2px 6px';
-          tooltip.style.borderRadius = '4px';
-          tooltip.style.fontSize = '12px';
-          tooltip.style.pointerEvents = 'none';
-          tooltip.style.whiteSpace = 'nowrap';
-          tooltip.style.zIndex = '100';
           tooltip.textContent = 'Copied!';
           
           setTimeout(() => {
@@ -193,16 +168,6 @@ function addSpecialCharButtons(setting: Setting, input: HTMLInputElement) {
         .catch(err => {
           console.error('Failed to copy text: ', err);
         });
-    });
-    
-    button.addEventListener('mouseenter', () => {
-      button.style.backgroundColor = 'var(--interactive-accent)';
-      button.style.color = 'var(--text-on-accent)';
-    });
-    
-    button.addEventListener('mouseleave', () => {
-      button.style.backgroundColor = '';
-      button.style.color = '';
     });
   });
    

@@ -102,33 +102,14 @@ export class RegexCommandModal extends Modal {
       );
 
     const regexContainer = contentEl.createDiv('regex-settings');
-    regexContainer.style.border = '1px solid var(--background-modifier-border)';
-    regexContainer.style.padding = '10px';
-    regexContainer.style.borderRadius = '5px';
-    regexContainer.style.marginBottom = '10px';
 
     const aiHelpContainer = regexContainer.createEl('details', { cls: 'ai-help-container' });
-    aiHelpContainer.style.marginBottom = '10px';
-    aiHelpContainer.style.borderRadius = '5px';
-    aiHelpContainer.style.overflow = 'hidden';
 
     const aiHelpSummary = aiHelpContainer.createEl('summary', { text: strings.howUseAiGetRegular });
-    aiHelpSummary.style.padding = '8px 12px';
-    aiHelpSummary.style.backgroundColor = 'var(--background-secondary)';
-    aiHelpSummary.style.cursor = 'pointer';
-    aiHelpSummary.style.fontWeight = 'bold';
-    aiHelpSummary.style.borderRadius = '4px';
-    aiHelpSummary.style.userSelect = 'none';
+    aiHelpSummary.addClass('regex-collapsible-summary');
 
     const aiHelpContent = aiHelpContainer.createDiv('ai-help-content');
-    aiHelpContent.style.padding = '6px';
-    aiHelpContent.style.backgroundColor = 'var(--background-secondary-alt)';
-    aiHelpContent.style.borderBottomLeftRadius = '5px';
-    aiHelpContent.style.borderBottomRightRadius = '5px';
-    aiHelpContent.style.marginTop = '1px';
-
     aiHelpContent.setAttribute('contenteditable', 'false');
-    aiHelpContent.style.userSelect = 'text';
 
     aiHelpContent.innerHTML = `
       <p><strong>${strings.aiQuestionTemplate}</strong><br>
@@ -175,8 +156,6 @@ export class RegexCommandModal extends Modal {
       );
 
     const regexOptionsContainer = regexContainer.createDiv('regex-options');
-    regexOptionsContainer.style.display = 'flex';
-    regexOptionsContainer.style.gap = '8px';
 
     new Setting(regexOptionsContainer)
       .setName(strings.ignoreCase)
@@ -229,10 +208,6 @@ export class RegexCommandModal extends Modal {
 
     const conditionSettingsContainer = conditionContainer.createDiv('condition-settings');
     conditionSettingsContainer.style.display = this.useCondition ? 'block' : 'none';
-    conditionSettingsContainer.style.border = '1px solid var(--background-modifier-border)';
-    conditionSettingsContainer.style.padding = '10px';
-    conditionSettingsContainer.style.borderRadius = '5px';
-    conditionSettingsContainer.style.marginBottom = '15px';
 
     new Setting(conditionSettingsContainer)
       .setName(strings.conditionPattern)
@@ -291,28 +266,13 @@ export class RegexCommandModal extends Modal {
     );
     const regexHelpContainer = regexContainer.createSpan('regex-help');
     const regexExamplesContainer = regexContainer.createEl('details', { cls: 'regex-examples-container' });
-    regexExamplesContainer.style.marginTop = '15px';
-    regexExamplesContainer.style.borderRadius = '5px';
-    regexExamplesContainer.style.overflow = 'hidden';
 
     const examplesSummary = regexExamplesContainer.createEl('summary', { text: strings.regularExpressionExamples });
-    examplesSummary.style.padding = '8px 12px';
-    examplesSummary.style.backgroundColor = 'var(--background-secondary)';
-    examplesSummary.style.cursor = 'pointer';
-    examplesSummary.style.fontWeight = 'bold';
-    examplesSummary.style.borderRadius = '4px';
-    examplesSummary.style.userSelect = 'none';
+    examplesSummary.addClass('regex-collapsible-summary');
 
     const examplesContent = regexExamplesContainer.createDiv('examples-content');
-    examplesContent.style.padding = '10px';
-    examplesContent.style.backgroundColor = 'var(--background-secondary-alt)';
-    examplesContent.style.borderBottomLeftRadius = '5px';
-    examplesContent.style.borderBottomRightRadius = '5px';
-    examplesContent.style.marginTop = '1px';
 
-    const examplesList = examplesContent.createEl('ul');
-    examplesList.style.paddingLeft = '20px';
-    examplesList.style.margin = '0';
+    const examplesList = examplesContent.createEl('ul', { cls: 'regex-examples-list' });
 
     const examples = [
       {
@@ -379,19 +339,11 @@ export class RegexCommandModal extends Modal {
 
     examples.forEach(example => {
       const item = examplesList.createEl('li');
-      item.style.marginBottom = '8px';
 
       const link = item.createEl('a', {
         text: example.name,
-        href: '#'
-      });
-      link.style.color = 'var(--text-accent)';
-      link.style.textDecoration = 'none';
-      link.addEventListener('mouseenter', () => {
-        link.style.textDecoration = 'underline';
-      });
-      link.addEventListener('mouseleave', () => {
-        link.style.textDecoration = 'none';
+        href: '#',
+        cls: 'regex-example-link'
       });
 
       link.addEventListener('click', (e) => {
@@ -427,32 +379,20 @@ export class RegexCommandModal extends Modal {
       });
     });
     const previewContainer = contentEl.createDiv('preview-container');
-    previewContainer.style.marginTop = '20px';
-    previewContainer.style.marginBottom = '20px';
-    previewContainer.style.border = '1px solid var(--background-modifier-border)';
-    previewContainer.style.padding = '10px';
-    previewContainer.style.borderRadius = '5px';
 
     const previewLabel = previewContainer.createEl('label', { text: strings.preview });
 
 
     const previewInputContainer = previewContainer.createDiv('preview-input-container');
-    previewInputContainer.style.marginBottom = '10px';
 
-    const previewInputLabel = previewInputContainer.createEl('label', { text: strings.exampleText });
-    previewInputLabel.style.display = 'block';
-    previewInputLabel.style.marginBottom = '5px';
+    previewInputContainer.createEl('label', { text: strings.exampleText, cls: 'preview-field-label' });
 
     this.previewInput = previewInputContainer.createEl('textarea', {
+      cls: 'regex-preview-input',
       attr: {
         placeholder: strings.inputExampleTextViewFormatting
       }
     });
-    this.previewInput.style.height = 'auto';
-    this.previewInput.style.width = '100%';
-    this.previewInput.style.padding = '8px';
-    this.previewInput.style.borderRadius = '4px';
-    this.previewInput.style.border = '1px solid var(--background-modifier-border)';
     this.previewInput.value = "Sample text https://example.com important text    1234567890";
 
     this.previewInput.addEventListener('input', () => {
@@ -461,16 +401,9 @@ export class RegexCommandModal extends Modal {
 
     const previewOutputContainer = previewContainer.createDiv('preview-output-container');
 
-    const previewOutputLabel = previewOutputContainer.createEl('label', { text: strings.result });
-    previewOutputLabel.style.display = 'block';
-    previewOutputLabel.style.marginBottom = '5px';
+    previewOutputContainer.createEl('label', { text: strings.result, cls: 'preview-field-label' });
 
     this.previewOutput = previewOutputContainer.createDiv('preview-output');
-    this.previewOutput.style.padding = '8px';
-    this.previewOutput.style.borderRadius = '4px';
-    this.previewOutput.style.border = '1px solid var(--background-modifier-border)';
-    this.previewOutput.style.backgroundColor = 'var(--background-secondary)';
-    this.previewOutput.style.minHeight = '3em';
 
     this.updatePreview();
 
@@ -575,10 +508,10 @@ export class RegexCommandModal extends Modal {
           this.previewOutput.createEl('br');
         }
       });
-      this.previewOutput.style.color = 'var(--text-normal)';
+      this.previewOutput.removeClass('is-error');
     } catch (error) {
       this.previewOutput.setText(strings.error + error.message);
-      this.previewOutput.style.color = 'var(--text-error)';
+      this.previewOutput.addClass('is-error');
 
       const codeContainer = this.previewOutput.parentElement?.querySelector('.regex-code-container');
       if (codeContainer) {
@@ -594,27 +527,13 @@ export class RegexCommandModal extends Modal {
     let codeContainer = previewContainer.querySelector('.regex-code-container');
     if (!codeContainer) {
       codeContainer = previewContainer.createDiv('regex-code-container') as HTMLDivElement;
-      (codeContainer as HTMLDivElement).style.marginTop = '15px';
-      (codeContainer as HTMLDivElement).style.borderTop = '1px solid var(--background-modifier-border)';
-      (codeContainer as HTMLDivElement).style.paddingTop = '10px';
-
-      const codeTitle = codeContainer.createEl('div', { text: strings.completeRegularExpressionCodeCopy });
-      codeTitle.style.marginBottom = '5px';
-      codeTitle.style.fontWeight = 'bold';
+      codeContainer.createEl('div', { text: strings.completeRegularExpressionCodeCopy, cls: 'regex-code-title' });
     } else {
       codeContainer.empty();
-      const codeTitle = codeContainer.createEl('div', { text: strings.completeRegularExpressionCodeCopy });
-      codeTitle.style.marginBottom = '5px';
-      codeTitle.style.fontWeight = 'bold';
+      codeContainer.createEl('div', { text: strings.completeRegularExpressionCodeCopy, cls: 'regex-code-title' });
     }
 
-    const codeBlock = codeContainer.createEl('pre');
-    codeBlock.style.backgroundColor = 'var(--background-code)';
-    codeBlock.style.padding = '8px';
-    codeBlock.style.borderRadius = '4px';
-    codeBlock.style.overflowX = 'auto';
-    codeBlock.style.fontFamily = 'monospace';
-    codeBlock.style.fontSize = 'var(--font-smaller)';
+    const codeBlock = codeContainer.createEl('pre', { cls: 'regex-code-block' });
 
     let codeText = `//${strings.explainSyntaxJavascriptRegularExpressions}\n`;
     codeText += `const regex = /${this.escapeRegexForDisplay(this.regexPattern)}/${flags};\n`;
@@ -631,11 +550,7 @@ export class RegexCommandModal extends Modal {
 
     codeBlock.textContent = codeText;
 
-    const copyButton = codeContainer.createEl('button', { text: strings.copyCode });
-    copyButton.style.marginTop = '5px';
-    copyButton.style.padding = '4px 8px';
-    copyButton.style.borderRadius = '4px';
-    copyButton.style.cursor = 'pointer';
+    const copyButton = codeContainer.createEl('button', { text: strings.copyCode, cls: 'regex-copy-button' });
 
     copyButton.addEventListener('click', () => {
       navigator.clipboard.writeText(codeText).then(() => {

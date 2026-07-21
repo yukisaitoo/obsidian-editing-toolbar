@@ -55,31 +55,18 @@ export class ImportExportModal extends Modal {
 
       const exportContainer = contentEl.createDiv('export-container');
 
-      exportContainer.style.border = '1px solid var(--background-modifier-border)';
-      exportContainer.style.padding = '10px';
-      exportContainer.style.borderRadius = '5px';
-
       this.textArea = new TextAreaComponent(exportContainer);
       this.textArea
         .setValue('')
         .setPlaceholder(strings.loading)
         .then(textArea => {
-          textArea.inputEl.style.width = '100%';
-          textArea.inputEl.style.height = '200px';
-          textArea.inputEl.style.fontFamily = 'monospace';
-          textArea.inputEl.style.fontSize = '12px';
-          textArea.inputEl.style.padding = '8px';
-          textArea.inputEl.style.border = '1px solid var(--background-modifier-border)';
-          textArea.inputEl.style.borderRadius = '4px';
+          textArea.inputEl.addClass('import-export-textarea');
         });
 
       this.updateExportContent();
       ;
 
       const buttonContainer = contentEl.createDiv('import-export-button-container');
-      buttonContainer.style.display = 'flex';
-      buttonContainer.style.justifyContent = 'flex-end';
-      buttonContainer.style.marginTop = '16px';
 
       const copyButton = buttonContainer.createEl('button', {
         text: strings.copyClipboard,
@@ -114,31 +101,18 @@ export class ImportExportModal extends Modal {
         });
       const importContainer = contentEl.createDiv('import-container');
 
-      importContainer.style.border = '1px solid var(--background-modifier-border)';
-      importContainer.style.padding = '10px';
-      importContainer.style.borderRadius = '5px';
-
       this.textArea = new TextAreaComponent(importContainer);
       this.textArea
         .setValue('')
         .setPlaceholder(strings.pasteConfigurationHere)
         .then(textArea => {
-          textArea.inputEl.style.width = '100%';
-          textArea.inputEl.style.height = '200px';
-          textArea.inputEl.style.fontFamily = 'monospace';
-          textArea.inputEl.style.fontSize = '12px';
-          textArea.inputEl.style.padding = '8px';
-          textArea.inputEl.style.border = '1px solid var(--background-modifier-border)';
-          textArea.inputEl.style.borderRadius = '4px';
+          textArea.inputEl.addClass('import-export-textarea');
         });
 
 
 
 
       const buttonContainer = contentEl.createDiv('import-export-button-container');
-      buttonContainer.style.display = 'flex';
-      buttonContainer.style.justifyContent = 'flex-end';
-      buttonContainer.style.marginTop = '16px';
 
       new Setting(buttonContainer)
         .addButton(button => {
@@ -152,17 +126,11 @@ export class ImportExportModal extends Modal {
 
 
       const warningDiv = contentEl.createDiv('import-export-warning');
-      warningDiv.style.marginTop = '16px';
-      warningDiv.style.padding = '8px 12px';
-      warningDiv.style.backgroundColor = 'rgba(var(--color-red-rgb), 0.1)';
-      warningDiv.style.borderRadius = '4px';
-      warningDiv.style.border = '1px solid rgba(var(--color-red-rgb), 0.3)';
 
       const warningParagraph = warningDiv.createEl('p', {
         text: strings.warningUpdateModeAddNew,
         cls: 'warning-text'
       });
-      warningParagraph.style.margin = '0';
       this.warningContent = warningParagraph;
     }
   }
