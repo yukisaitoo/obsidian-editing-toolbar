@@ -17,7 +17,7 @@ import {
 import { CommandsManager } from "src/commands/commands";
 import { StatusBar } from "src/components/StatusBar";
 import addIcons from "src/icons/customIcons";
-import { createFollowingbar, editingToolbarPopover, isExistoolbar, quiteFormatbrushes, resetToolbar, selfDestruct, setFormateraser } from "src/modals/editingToolbarModal";
+import { createFollowingbar, editingToolbarPopover, isExistoolbar, quiteFormatbrushes, resetToolbar, selfDestruct, setFormateraser } from "src/toolbar/editingToolbar";
 import { InsertCalloutModal } from "src/modals/insertCalloutModal";
 import { InsertLinkModal } from "src/modals/insertLinkModal";
 import { DEFAULT_SETTINGS, editingToolbarSettings, getAppearanceValue } from "src/settings/settingsData";

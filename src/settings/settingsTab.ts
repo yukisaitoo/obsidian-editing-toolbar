@@ -5,7 +5,7 @@ import Sortable from "sortablejs";
 import { ConfirmModal } from "src/modals/ConfirmModal";
 import { CustomCommandModal } from "src/modals/CustomCommandModal";
 import { DeployCommandModal } from "src/modals/DeployCommand";
-import { checkHtml, editingToolbarPopover, selfDestruct } from "src/modals/editingToolbarModal";
+import { checkHtml, editingToolbarPopover, selfDestruct } from "src/toolbar/editingToolbar";
 import { ImportExportModal } from "src/modals/ImportExportModal";
 import { RegexCommandModal } from "src/modals/RegexCommandModal";
 import { ChangeCmdname, ChooseFromIconList, CommandPicker, openSlider } from "src/modals/suggesterModals";

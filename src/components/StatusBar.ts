@@ -1,5 +1,5 @@
 import { ItemView, Menu, requireApiVersion, setIcon, ToggleComponent } from "obsidian";
-import { selfDestruct } from "src/modals/editingToolbarModal";
+import { selfDestruct } from "src/toolbar/editingToolbar";
 import { CommandPicker, openSlider } from "src/modals/suggesterModals";
 import type EditingToolbarPlugin from "src/plugin/main";
 import { AESTHETIC_STYLES, getAppearanceValue, resolveNextPositionStyle, setAppearanceValue } from "src/settings/settingsData";

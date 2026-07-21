@@ -10,7 +10,7 @@ import {
   quiteFormatbrushes,
   selfDestruct,
   setFormateraser,
-} from "src/modals/editingToolbarModal";
+} from "src/toolbar/editingToolbar";
 import { InsertCalloutModal } from "src/modals/insertCalloutModal";
 import { InsertLinkModal } from "src/modals/insertLinkModal";
 import {
