@@ -379,7 +379,7 @@ export class CommandsManager {
             );
             editor.setSelection(curserStart, newEnd);
           } catch (error) {
-            console.error("读取剪贴板失败:", error);
+            console.error("Failed to read clipboard:", error);
             new Notice(strings.pleaseSelectTextFirst);
             return;
           }
@@ -425,7 +425,7 @@ export class CommandsManager {
       );
       editor.setSelection(newStart, newEnd);
     } catch (error) {
-      console.error("正则表达式命令执行错误:", error);
+      console.error("Regex command execution error:", error);
       new Notice(strings.regexCommandExecutionError + error.message);
     }
   }
@@ -455,7 +455,7 @@ export class CommandsManager {
         const text = await navigator.clipboard.readText();
         items["text/plain"] = text;
       } catch (e) {
-        console.error("读取剪贴板失败:", e);
+        console.error("Failed to read clipboard:", e);
       }
     }
 

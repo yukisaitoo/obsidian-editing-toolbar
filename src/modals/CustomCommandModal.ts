@@ -146,7 +146,7 @@ const specialCharButtons = Object.entries(specialCharMap).map(([char, placeholde
 
 function addSpecialCharButtons(setting: Setting, input: HTMLInputElement) {
   
-  input.setAttribute('title', '点击可选择并复制文本');
+  input.setAttribute('title', 'Click to select and copy text');
   
   const buttonContainer = setting.controlEl.createDiv({ cls: 'special-char-buttons' });
   buttonContainer.style.display = 'flex';
@@ -184,14 +184,14 @@ function addSpecialCharButtons(setting: Setting, input: HTMLInputElement) {
           tooltip.style.pointerEvents = 'none';
           tooltip.style.whiteSpace = 'nowrap';
           tooltip.style.zIndex = '100';
-          tooltip.textContent = '已复制!';
+          tooltip.textContent = 'Copied!';
           
           setTimeout(() => {
             tooltip.remove();
           }, 2000);
         })
         .catch(err => {
-          console.error('无法复制文本: ', err);
+          console.error('Failed to copy text: ', err);
         });
     });
     

@@ -106,7 +106,7 @@ export class ChooseFromIconList extends FuzzySuggestModal<string> {
       dispatchEvent(new Event("editingToolbar-NewCommand"));
     }, 100);
     console.log(
-      `%c命令 '${this.command.name}' 已添加到编辑工具栏`,
+      `%cCommand '${this.command.name}' was added to editingToolbar`,
       "color: Violet"
     );
   }
@@ -234,7 +234,7 @@ export class CommandPicker extends FuzzySuggestModal<Command> {
           dispatchEvent(new Event("editingToolbar-NewCommand"));
         }, 100);
         console.log(
-          `%c命令 '${item.name}' 已添加到编辑工具栏`,
+          `%cCommand '${item.name}' was added to editingToolbar`,
           "color: Violet"
         );
       } else {

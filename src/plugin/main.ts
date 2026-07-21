@@ -473,7 +473,7 @@ this.app.workspace.onLayoutReady(async () => {
       this.admonitionDefinitions = admonitionPlugin.admonitions;
    
   }  else {
-    console.warn('未能从 admonitionPlugin.admonitions (作为对象) 获取类型。');
+    console.warn('Could not read types from admonitionPlugin.admonitions (as object).');
     this.admonitionDefinitions = null; 
   }
 }
