@@ -9,7 +9,7 @@ import { checkHtml, editingToolbarPopover, selfDestruct } from "src/modals/editi
 import { ImportExportModal } from "src/modals/ImportExportModal";
 import { RegexCommandModal } from "src/modals/RegexCommandModal";
 import { ChangeCmdname, ChooseFromIconList, CommandPicker, openSlider } from "src/modals/suggesterModals";
-import type editingToolbarPlugin from "src/plugin/main";
+import type EditingToolbarPlugin from "src/plugin/main";
 import type { AppearanceByStyle, StyleAppearanceSettings, ToolbarStyleKey } from "src/settings/settingsData";
 import { AESTHETIC_STYLES, APPEND_METHODS, POSITION_STYLES } from "src/settings/settingsData";
 import { strings, t } from 'src/translations/helper';
@@ -96,8 +96,8 @@ function getComandindex(item: any, arr: any[]): number {
   const idx = arr.findIndex((el) => el?.id === item);
   return idx;
 }
-export class editingToolbarSettingTab extends PluginSettingTab {
-  plugin: editingToolbarPlugin;
+export class EditingToolbarSettingTab extends PluginSettingTab {
+  plugin: EditingToolbarPlugin;
   appendMethod: string;
   pickrs: Pickr[] = [];
   activeTab: string = 'general';
@@ -106,7 +106,7 @@ export class editingToolbarSettingTab extends PluginSettingTab {
   private getLocalizedCommandName(name: string): string {
     return t(name as any);
   }
-  constructor(app: App, plugin: editingToolbarPlugin) {
+  constructor(app: App, plugin: EditingToolbarPlugin) {
     super(app, plugin);
     this.plugin = plugin;
     this.currentEditingConfig = this.plugin.settings.positionStyle;

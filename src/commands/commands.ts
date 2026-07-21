@@ -19,7 +19,7 @@ import {
   IWrapInputResult,
   TextInputModal,
 } from "src/modals/TextInputModal";
-import editingToolbarPlugin from "src/plugin/main";
+import EditingToolbarPlugin from "src/plugin/main";
 import { CustomCommand } from "src/settings/settingsData";
 import { strings } from "src/translations/helper";
 import { fullscreenMode, workplacefullscreenMode } from "src/util/fullscreen";
@@ -33,9 +33,9 @@ import {
 } from "src/util/util";
 
 export class CommandsManager {
-  private plugin: editingToolbarPlugin;
+  private plugin: EditingToolbarPlugin;
 
-  constructor(plugin: editingToolbarPlugin) {
+  constructor(plugin: EditingToolbarPlugin) {
     this.plugin = plugin;
   }
 

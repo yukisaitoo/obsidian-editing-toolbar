@@ -1,10 +1,10 @@
 import { App, Modal, Notice, setIcon, Setting, TextComponent } from "obsidian";
 import { RegexCommandModal } from "src/modals/RegexCommandModal";
 import { ChooseFromIconList } from "src/modals/suggesterModals";
-import editingToolbarPlugin from "src/plugin/main";
+import EditingToolbarPlugin from "src/plugin/main";
 import { strings } from 'src/translations/helper';
 export class CustomCommandModal extends Modal {
-  private plugin: editingToolbarPlugin;
+  private plugin: EditingToolbarPlugin;
   private commandIndex: number | null;
   private commandId: string;
   private commandName: string;
@@ -19,7 +19,7 @@ export class CustomCommandModal extends Modal {
   private commandIdInput: TextComponent;
   private suffixInput: TextComponent;
 
-  constructor(app: App, plugin: editingToolbarPlugin, commandIndex: number | null) {
+  constructor(app: App, plugin: EditingToolbarPlugin, commandIndex: number | null) {
     super(app);
     this.plugin = plugin;
     this.commandIndex = commandIndex;

@@ -1,5 +1,5 @@
 import { App, ButtonComponent, Editor, ItemView, MarkdownView, Menu, Notice, Platform, requireApiVersion, setIcon, WorkspaceParent, WorkspaceParentExt, WorkspaceWindow } from "obsidian";
-import type editingToolbarPlugin from "src/plugin/main";
+import type EditingToolbarPlugin from "src/plugin/main";
 import {
   AppearanceByStyle,
   editingToolbarSettings,
@@ -42,7 +42,7 @@ function getRootSplits(app: App): WorkspaceParentExt[] {
   return rootSplits;
 }
 
-export function resetToolbar(plugin?: editingToolbarPlugin) {
+export function resetToolbar(plugin?: EditingToolbarPlugin) {
   requireApiVersion("0.15.0")
     ? (activeDocument = activeWindow.document)
     : (activeDocument = window.document);
@@ -71,7 +71,7 @@ export function resetToolbar(plugin?: editingToolbarPlugin) {
   }
 }
 
-export function selfDestruct(plugin: editingToolbarPlugin) {
+export function selfDestruct(plugin: EditingToolbarPlugin) {
   requireApiVersion("0.15.0")
     ? (activeDocument = activeWindow.document)
     : (activeDocument = window.document);
@@ -114,7 +114,7 @@ export function selfDestruct(plugin: editingToolbarPlugin) {
 
 export function isExistoolbar(
   app: App,
-  plugin: editingToolbarPlugin,
+  plugin: EditingToolbarPlugin,
   style?: ToolbarStyleKey,
   hostDocument?: Document
 ): HTMLElement {
@@ -240,7 +240,7 @@ function syncToolbarVisibilityAfterAction(
   editingToolbar: HTMLElement,
   settings: editingToolbarSettings,
   effectiveStyle: ToolbarStyleKey | string,
-  plugin: editingToolbarPlugin
+  plugin: EditingToolbarPlugin
 ) {
   const editor = plugin.commandsManager.getActiveEditor();
   const hasSelection = editor && editor.somethingSelected();
@@ -285,7 +285,7 @@ export function createDiv(selector: string) {
 }
 
 
-function createTablecell(app: App, plugin: editingToolbarPlugin, el: string, root?: ParentNode) {
+function createTablecell(app: App, plugin: EditingToolbarPlugin, el: string, root?: ParentNode) {
   requireApiVersion("0.15.0") ? activeDocument = activeWindow.document : activeDocument = window.document;
 
   const container = root || (isExistoolbar(app, plugin) as HTMLElement | null);
@@ -372,11 +372,11 @@ const setcolorHex = function (color: string) {
   }
 };
 
-function createMoremenu(app: App, plugin: editingToolbarPlugin, selector: HTMLDivElement) {
+function createMoremenu(app: App, plugin: EditingToolbarPlugin, selector: HTMLDivElement) {
   const view = app.workspace.getActiveViewOfType(ItemView);
   if (!ViewUtils.isAllowedViewType(view)) return;
 
-  if (!plugin.IS_MORE_Button) return;
+  if (!plugin.isMoreButton) return;
 
   const toolbarStyle = selector.getAttribute("data-toolbar-style");
   const Morecontainer = (toolbarStyle
@@ -384,7 +384,7 @@ function createMoremenu(app: App, plugin: editingToolbarPlugin, selector: HTMLDi
     : view.containerEl.querySelector("#editingToolbarPopoverBar")) as HTMLElement | null;
 
   if (!Morecontainer) {
-    plugin.setIS_MORE_Button(false);
+    plugin.setIsMoreButton(false);
     return;
   }
 
@@ -449,16 +449,16 @@ function createMoremenu(app: App, plugin: editingToolbarPlugin, selector: HTMLDi
       }
     });
   morebutton.buttonEl.innerHTML = `<svg  width="14" height="14"  version="1.1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" enable-background="new 0 0 1024 1024" xml:space="preserve"><path fill="#666" d="M510.29 14.13 q17.09 -15.07 40.2 -14.07 q23.12 1 39.2 18.08 l334.66 385.92 q25.12 30.15 34.16 66.83 q9.04 36.68 0.5 73.87 q-8.54 37.19 -32.66 67.34 l-335.67 390.94 q-15.07 18.09 -38.69 20.1 q-23.62 2.01 -41.71 -13.07 q-18.08 -15.08 -20.09 -38.19 q-2.01 -23.12 13.06 -41.21 l334.66 -390.94 q11.06 -13.06 11.56 -29.65 q0.5 -16.58 -10.55 -29.64 l-334.67 -386.92 q-15.07 -17.09 -13.56 -40.7 q1.51 -23.62 19.59 -38.7 ZM81.17 14.13 q17.08 -15.07 40.19 -14.07 q23.11 1 39.2 18.08 l334.66 385.92 q25.12 30.15 34.16 66.83 q9.04 36.68 0.5 73.87 q-8.54 37.19 -32.66 67.34 l-335.67 390.94 q-15.07 18.09 -38.69 20.6 q-23.61 2.51 -41.7 -12.57 q-18.09 -15.08 -20.1 -38.69 q-2.01 -23.62 13.06 -41.71 l334.66 -390.94 q11.06 -13.06 11.56 -29.65 q0.5 -16.58 -10.55 -29.64 l-334.66 -386.92 q-15.08 -17.09 -13.57 -40.7 q1.51 -23.62 19.6 -38.7 Z"/></svg>`;
-  plugin.setIS_MORE_Button(false);
+  plugin.setIsMoreButton(false);
   return cMoreMenu;
 }
 
-export function quiteFormatbrushes(plugin: editingToolbarPlugin) {
+export function quiteFormatbrushes(plugin: EditingToolbarPlugin) {
   plugin.quiteAllFormatBrushes();
 }
 
 
-export function setFormateraser(plugin: editingToolbarPlugin, editor: Editor) {
+export function setFormateraser(plugin: EditingToolbarPlugin, editor: Editor) {
   // const editor = app.workspace.activeLeaf.view?.editor;
 
   let selectText = editor.getSelection();
@@ -469,7 +469,7 @@ export function setFormateraser(plugin: editingToolbarPlugin, editor: Editor) {
   // if (selectText == null || selectText == "") {
   //   quiteFormatbrushes(plugin);
   //   plugin.setEN_Text_Format_Brush(true);
-  //   plugin.Temp_Notice = new Notice(strings.clearFormattingBrushClickMouse, 0);
+  //   plugin.tempNotice = new Notice(strings.clearFormattingBrushClickMouse, 0);
 
   // } else {
   if (selectText.match(/^>\s*\[\![\w\s]*\]/m)) {
@@ -539,7 +539,7 @@ export function setFormateraser(plugin: editingToolbarPlugin, editor: Editor) {
 export function createFollowingbar(
   app: App,
   iconSize: number,
-  plugin: editingToolbarPlugin,
+  plugin: EditingToolbarPlugin,
   editor: Editor,
   forceShow: boolean = false,
   hostDocument?: Document
@@ -687,7 +687,7 @@ function calculateTopPosition(
 
 export function editingToolbarPopover(
   app: App,
-  plugin: editingToolbarPlugin,
+  plugin: EditingToolbarPlugin,
   style?: ToolbarStyleKey,
   hostDocument?: Document
 ): void {
@@ -985,7 +985,7 @@ export function editingToolbarPopover(
           let _btn: any;
 
           if (shouldMoveButtonToMoreMenu(btnwidth, buttonWidth, leafwidth, buttonWidth, effectiveStyle)) {
-            plugin.setIS_MORE_Button(true);
+            plugin.setIsMoreButton(true);
             _btn = new ButtonComponent(resolveButtonHost(true));
           } else _btn = new ButtonComponent(editingToolbar);
 
@@ -1129,9 +1129,9 @@ export function editingToolbarPopover(
                 .setTooltip(strings.formatBrush)
                 .onClick(() => {
                   quiteFormatbrushes(plugin);
-                  plugin.setEN_FontColor_Format_Brush(true);
-                  //  globalThis.EN_FontColor_Format_Brush = true;
-                  plugin.Temp_Notice = new Notice(
+                  plugin.setFontColorFormatBrushActive(true);
+                  //  globalThis.fontColorFormatBrushActive = true;
+                  plugin.tempNotice = new Notice(
                     strings.fontColorFormattingBrush,
                     0
                   );
@@ -1199,9 +1199,9 @@ export function editingToolbarPopover(
                 .setTooltip(strings.formatBrush)
                 .onClick(() => {
                   quiteFormatbrushes(plugin);
-                  plugin.setEN_BG_Format_Brush(true);
-                  //  globalplugin.EN_BG_Format_Brush = true;
-                  plugin.Temp_Notice = new Notice(
+                  plugin.setBgFormatBrushActive(true);
+                  //  globalplugin.bgFormatBrushActive = true;
+                  plugin.tempNotice = new Notice(
                     strings.fontColorFormattingBrush,
                     0
                   );
@@ -1233,7 +1233,7 @@ export function editingToolbarPopover(
           } else {
             let button;
             if (shouldMoveButtonToMoreMenu(btnwidth, buttonWidth, leafwidth, buttonWidth, effectiveStyle)) {
-              plugin.setIS_MORE_Button(true);
+              plugin.setIsMoreButton(true);
               button = new ButtonComponent(resolveButtonHost(true));
             } else button = new ButtonComponent(editingToolbar);
             const hotkey = getHotkey(app, item.id);

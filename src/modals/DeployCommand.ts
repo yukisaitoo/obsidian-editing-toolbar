@@ -1,5 +1,5 @@
 import { App, Modal, Notice, setIcon, Setting, ToggleComponent } from "obsidian";
-import editingToolbarPlugin from "src/plugin/main";
+import EditingToolbarPlugin from "src/plugin/main";
 import { strings } from 'src/translations/helper';
 
 interface DeployOption {
@@ -12,10 +12,10 @@ interface DeployOption {
 export class DeployCommandModal extends Modal {
     private deployOptions: DeployOption[] = [];
     private command: any;
-    private plugin: editingToolbarPlugin;
+    private plugin: EditingToolbarPlugin;
   
 
-    constructor(app: App, plugin: editingToolbarPlugin, command: any) {
+    constructor(app: App, plugin: EditingToolbarPlugin, command: any) {
       super(app);
       this.plugin = plugin;
       this.command = command;

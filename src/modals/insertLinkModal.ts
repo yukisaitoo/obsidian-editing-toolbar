@@ -1,5 +1,5 @@
 import { App, Editor, EditorPosition, MarkdownView, Modal, Notice, Platform, requestUrl, setIcon, Setting, TextComponent, ToggleComponent } from "obsidian";
-import editingToolbarPlugin from "src/plugin/main";
+import EditingToolbarPlugin from "src/plugin/main";
 import { strings } from "src/translations/helper";
 
 interface ClipboardItems {
@@ -113,7 +113,7 @@ export class InsertLinkModal extends Modal {
     private previewSetting: Setting;
     private insertButton: HTMLElement;
 
-    constructor(private plugin: editingToolbarPlugin) {
+    constructor(private plugin: EditingToolbarPlugin) {
         super(plugin.app);
     
         const editor = this.plugin.commandsManager.getActiveEditor();

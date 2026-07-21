@@ -1,17 +1,17 @@
 import { ItemView, Menu, requireApiVersion, setIcon, ToggleComponent } from "obsidian";
 import { selfDestruct } from "src/modals/editingToolbarModal";
 import { CommandPicker, openSlider } from "src/modals/suggesterModals";
-import type editingToolbarPlugin from "src/plugin/main";
+import type EditingToolbarPlugin from "src/plugin/main";
 import { AESTHETIC_STYLES } from "src/settings/settingsData";
 import { strings } from "src/translations/helper";
 import { setMenuVisibility } from "src/util/statusBarConstants";
 import { ViewUtils } from "src/util/viewUtils";
 
 export class StatusBar {
-  private plugin: editingToolbarPlugin;
+  private plugin: EditingToolbarPlugin;
   private statusBarIcon: HTMLElement;
 
-  constructor(plugin: editingToolbarPlugin) {
+  constructor(plugin: EditingToolbarPlugin) {
     this.plugin = plugin;
   }
 

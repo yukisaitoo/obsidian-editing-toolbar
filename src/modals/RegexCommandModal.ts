@@ -1,11 +1,11 @@
 import { App, Modal, Notice, setIcon, Setting, TextComponent, ToggleComponent } from "obsidian";
 import { ChooseFromIconList } from "src/modals/suggesterModals";
-import editingToolbarPlugin from "src/plugin/main";
+import EditingToolbarPlugin from "src/plugin/main";
 import { CustomCommand } from "src/settings/settingsData";
 import { strings } from 'src/translations/helper';
 
 export class RegexCommandModal extends Modal {
-  private plugin: editingToolbarPlugin;
+  private plugin: EditingToolbarPlugin;
   private commandIndex: number | null;
   private commandId: string;
   private commandName: string;
@@ -29,7 +29,7 @@ export class RegexCommandModal extends Modal {
   private conditionPatternInput: TextComponent;
   private regexMultilineToggle: ToggleComponent;
 
-  constructor(app: App, plugin: editingToolbarPlugin, commandIndex: number | null) {
+  constructor(app: App, plugin: EditingToolbarPlugin, commandIndex: number | null) {
     super(app);
     this.plugin = plugin;
     this.commandIndex = commandIndex;

@@ -1,6 +1,6 @@
 import { App, Command, FuzzyMatch, FuzzySuggestModal, Modal, Notice, SliderComponent, TextAreaComponent, TextComponent, debounce, setIcon } from "obsidian";
 import { appIcons } from "src/icons/appIcons";
-import type editingToolbarPlugin from "src/plugin/main";
+import type EditingToolbarPlugin from "src/plugin/main";
 import { strings, t } from "src/translations/helper";
 import { setBottomValue, setHorizontalValue } from "src/util/statusBarConstants";
 import { findmenuID } from "src/util/util";
@@ -8,13 +8,13 @@ import { findmenuID } from "src/util/util";
 type IconSelectCallback = (iconId: string) => void;
 
 export class ChooseFromIconList extends FuzzySuggestModal<string> {
-  plugin: editingToolbarPlugin;
+  plugin: EditingToolbarPlugin;
   command: any;
   issub: boolean;
   currentEditingConfig:string;
   customCallback: IconSelectCallback | null = null;
   constructor(
-    plugin: editingToolbarPlugin, 
+    plugin: EditingToolbarPlugin, 
     command: any, 
     issub: boolean = false,
     callback?: IconSelectCallback,
@@ -113,7 +113,7 @@ export class ChooseFromIconList extends FuzzySuggestModal<string> {
 }
 
 class CustomIcon extends Modal {
-  plugin: editingToolbarPlugin;
+  plugin: EditingToolbarPlugin;
   item: Command;
   issub: boolean;
   currentEditingConfig:string;
@@ -122,7 +122,7 @@ class CustomIcon extends Modal {
 
   constructor(
     app: App, 
-    plugin: editingToolbarPlugin, 
+    plugin: EditingToolbarPlugin, 
     item: Command, 
     issub: boolean,
     callback?: IconSelectCallback,
@@ -200,7 +200,7 @@ class CustomIcon extends Modal {
 export class CommandPicker extends FuzzySuggestModal<Command> {
   command: Command;
   currentEditingConfig:string;
-  constructor(private plugin: editingToolbarPlugin,currentEditingConfig?:string) {
+  constructor(private plugin: EditingToolbarPlugin,currentEditingConfig?:string) {
     super(plugin.app);
     this.setPlaceholder(strings.chooseCommand);
     this.currentEditingConfig = currentEditingConfig || "";
@@ -248,12 +248,12 @@ export class CommandPicker extends FuzzySuggestModal<Command> {
 
 
 export class ChangeCmdname extends Modal {
-  plugin: editingToolbarPlugin;
+  plugin: EditingToolbarPlugin;
   item: Command;
   issub: boolean;
   currentEditingConfig:string;
   submitEnterCallback: (this: HTMLInputElement, ev: KeyboardEvent) => any;
-  constructor(app: App, plugin: editingToolbarPlugin, item: Command, issub: boolean,currentEditingConfig?:string) {
+  constructor(app: App, plugin: EditingToolbarPlugin, item: Command, issub: boolean,currentEditingConfig?:string) {
     super(plugin.app);
     this.plugin = plugin;
     this.item = item;
@@ -308,10 +308,10 @@ export class ChangeCmdname extends Modal {
 };
 
 export class openSlider extends Modal {
-  plugin: editingToolbarPlugin;
+  plugin: EditingToolbarPlugin;
   private needSave: boolean = false;
 
-  constructor(app: App, plugin: editingToolbarPlugin) {
+  constructor(app: App, plugin: EditingToolbarPlugin) {
     super(plugin.app);
     this.plugin = plugin;
     this.containerEl.addClass("editingToolbar-Modal");

@@ -1,9 +1,9 @@
 import { App, ButtonComponent, Modal, Notice, Setting, TextAreaComponent } from "obsidian";
 import { ConfirmModal } from "src/modals/ConfirmModal";
-import type editingToolbarPlugin from "src/plugin/main";
+import type EditingToolbarPlugin from "src/plugin/main";
 import { strings } from 'src/translations/helper';
 export class ImportExportModal extends Modal {
-  plugin: editingToolbarPlugin;
+  plugin: EditingToolbarPlugin;
   mode: 'import' | 'export';
   exportType: 'all' | 'All commands' | 'custom' | 'following' | 'top' | 'fixed' | 'mobile';
   importMode: 'overwrite' | 'update';
@@ -11,7 +11,7 @@ export class ImportExportModal extends Modal {
   importButton: ButtonComponent;
   warningContent: HTMLElement;
 
-  constructor(app: App, plugin: editingToolbarPlugin, mode: 'import' | 'export') {
+  constructor(app: App, plugin: EditingToolbarPlugin, mode: 'import' | 'export') {
     super(app);
     this.plugin = plugin;
     this.mode = mode;

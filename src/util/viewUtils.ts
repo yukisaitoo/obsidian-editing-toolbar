@@ -1,5 +1,5 @@
 import { View } from 'obsidian';
-import type editingToolbarPlugin from 'src/plugin/main';
+import type EditingToolbarPlugin from 'src/plugin/main';
 
 export class ViewUtils {
   static isAllowedViewType(view: View | null, allowedTypes?: string[]): boolean {
@@ -7,7 +7,7 @@ export class ViewUtils {
 
     const viewType = view.getViewType();
 
-    const plugin = (window as any).app?.plugins?.plugins?.['editing-toolbar'] as editingToolbarPlugin | undefined;
+    const plugin = (window as any).app?.plugins?.plugins?.['editing-toolbar'] as EditingToolbarPlugin | undefined;
     
     if (plugin?.settings?.viewTypeSettings && plugin.settings.viewTypeSettings[viewType] !== undefined) {
       return plugin.settings.viewTypeSettings[viewType];

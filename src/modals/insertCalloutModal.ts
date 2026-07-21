@@ -1,5 +1,5 @@
 import { App, DropdownComponent, Modal, Platform, Setting, setIcon } from "obsidian";
-import editingToolbarPlugin, { AdmonitionDefinition } from "src/plugin/main";
+import EditingToolbarPlugin, { AdmonitionDefinition } from "src/plugin/main";
 import { strings } from "src/translations/helper";
 interface BuiltInCalloutType {
     type: string;
@@ -46,7 +46,7 @@ export class InsertCalloutModal extends Modal {
         { type: "example", aliases: [], icon: "lucide-list", label: "Example", color: "var(--callout-example)" },
         { type: "quote", aliases: ["cite"], icon: "lucide-quote", label: "Quote", color: "var(--callout-quote)" }
     ];
-    constructor(private plugin: editingToolbarPlugin) {
+    constructor(private plugin: EditingToolbarPlugin) {
         super(plugin.app);
         this.containerEl.addClass("insert-callout-modal");
         this.prepareCalloutOptions();

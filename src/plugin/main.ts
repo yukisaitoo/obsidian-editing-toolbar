@@ -24,7 +24,7 @@ import { DEFAULT_SETTINGS, editingToolbarSettings } from "src/settings/settingsD
 import { strings } from 'src/translations/helper';
 import { setBackgroundcolor, setFontcolor } from "src/util/util";
 import { ViewUtils } from 'src/util/viewUtils';
-import { editingToolbarSettingTab } from '../settings/settingsTab';
+import { EditingToolbarSettingTab } from '../settings/settingsTab';
 
 let activeDocument: Document;
 
@@ -97,7 +97,7 @@ interface EditorContextMenuAction {
 
 const ADMONITION_PLUGIN_ID = "obsidian-admonition";
 
-export default class editingToolbarPlugin extends Plugin {
+export default class EditingToolbarPlugin extends Plugin {
   app: App;
   settings: editingToolbarSettings;
   statusBarIcon: HTMLElement;
@@ -112,12 +112,12 @@ export default class editingToolbarPlugin extends Plugin {
   public admonitionDefinitions: Record<string, AdmonitionDefinition> | null =
     null;
 
-  IS_MORE_Button: boolean;
-  EN_BG_Format_Brush: boolean;
-  EN_FontColor_Format_Brush: boolean;
+  isMoreButton: boolean;
+  bgFormatBrushActive: boolean;
+  fontColorFormatBrushActive: boolean;
   EN_Text_Format_Brush: boolean;
-  Temp_Notice: Notice;
-  Leaf_Width: number;
+  tempNotice: Notice;
+  leafWidth: number;
 
   lastExecutedCommand: string | null = null;
   formatBrushActive: boolean = false;
@@ -125,7 +125,7 @@ export default class editingToolbarPlugin extends Plugin {
   lastCalloutType: string | null = null;
   lastExecutedCommandName: string | null = null;
 
-  settingTab: editingToolbarSettingTab;
+  settingTab: EditingToolbarSettingTab;
 
   private toolbarCache: Map<ToolbarStyleKey, HTMLElement> = new Map();
   private popoverCache: Map<ToolbarStyleKey, HTMLElement> = new Map();
@@ -299,7 +299,7 @@ export default class editingToolbarPlugin extends Plugin {
     // IMPORTANT: wire up per-style getters/setters before we start using appearance fields
     this.initPerStyleAppearance();
   
-    this.settingTab = new editingToolbarSettingTab(this.app, this);
+    this.settingTab = new EditingToolbarSettingTab(this.app, this);
     this.addSettingTab(this.settingTab);
 
     //addIcons();
@@ -640,11 +640,11 @@ this.app.workspace.onLayoutReady(async () => {
     }
 
     const leafwidth = this.app.workspace.activeLeaf.view.leaf.width ?? 0;
-    if (leafwidth <= 0 || this.Leaf_Width === leafwidth) {
+    if (leafwidth <= 0 || this.leafWidth === leafwidth) {
       return false;
     }
 
-    this.Leaf_Width = leafwidth;
+    this.leafWidth = leafwidth;
 
     if (this.settings.cMenuWidth && leafwidth) {
       const diff = leafwidth - this.settings.cMenuWidth;
@@ -663,20 +663,20 @@ this.app.workspace.onLayoutReady(async () => {
     return true;
   };
 
-  setIS_MORE_Button(status: boolean): void {
-    this.IS_MORE_Button = status;
+  setIsMoreButton(status: boolean): void {
+    this.isMoreButton = status;
   }
-  setEN_BG_Format_Brush(status: boolean): void {
-    this.EN_BG_Format_Brush = status;
+  setBgFormatBrushActive(status: boolean): void {
+    this.bgFormatBrushActive = status;
   }
-  setEN_FontColor_Format_Brush(status: boolean): void {
-    this.EN_FontColor_Format_Brush = status;
+  setFontColorFormatBrushActive(status: boolean): void {
+    this.fontColorFormatBrushActive = status;
   }
   setEN_Text_Format_Brush(status: boolean): void {
     this.EN_Text_Format_Brush = status;
   }
-  setTemp_Notice(content: Notice): void {
-    this.Temp_Notice = content;
+  setTempNotice(content: Notice): void {
+    this.tempNotice = content;
   }
 
   async loadSettings() {
@@ -835,7 +835,7 @@ updateCurrentCommands(commands: any[], style?: string): void {
   private detectSelectionFormat(
     selectedText: string
   ): { command: string; name: string; calloutType: string } | null {
-    for (const { re, command, name } of editingToolbarPlugin.SELECTION_WRAP_FORMATS) {
+    for (const { re, command, name } of EditingToolbarPlugin.SELECTION_WRAP_FORMATS) {
       if (re.test(selectedText)) {
         return { command, name, calloutType: "" };
       }
@@ -871,7 +871,7 @@ updateCurrentCommands(commands: any[], style?: string): void {
   ): { command: string; name: string } | null {
     const foundFormats: Array<{ command: string; name: string; distance: number }> = [];
 
-    for (const { re, command, name } of editingToolbarPlugin.CURSOR_INLINE_FORMATS) {
+    for (const { re, command, name } of EditingToolbarPlugin.CURSOR_INLINE_FORMATS) {
       let match: RegExpExecArray | null;
       while ((match = re.exec(lineText)) !== null) {
         const formatStart = match.index;
@@ -942,8 +942,8 @@ updateCurrentCommands(commands: any[], style?: string): void {
 
     if (this.formatBrushActive) {
       activeDocument.body.classList.add('format-brush-cursor');
-      this.EN_FontColor_Format_Brush = false;
-      this.EN_BG_Format_Brush = false;
+      this.fontColorFormatBrushActive = false;
+      this.bgFormatBrushActive = false;
       this.EN_Text_Format_Brush = false;
       this.lastCalloutType = calloutType;
       if (this.formatBrushNotice) this.formatBrushNotice.hide();
@@ -990,8 +990,8 @@ updateCurrentCommands(commands: any[], style?: string): void {
   }
 
   quiteAllFormatBrushes(): void {
-    this.EN_FontColor_Format_Brush = false;
-    this.EN_BG_Format_Brush = false;
+    this.fontColorFormatBrushActive = false;
+    this.bgFormatBrushActive = false;
     this.EN_Text_Format_Brush = false;
     activeDocument.body.classList.remove("format-brush-cursor");
     if (this.formatBrushActive) {
@@ -1002,9 +1002,9 @@ updateCurrentCommands(commands: any[], style?: string): void {
       }
     }
 
-    if (this.Temp_Notice) {
-      this.Temp_Notice.hide();
-      this.Temp_Notice = null;
+    if (this.tempNotice) {
+      this.tempNotice.hide();
+      this.tempNotice = null;
     }
   }
 
@@ -1057,8 +1057,8 @@ updateCurrentCommands(commands: any[], style?: string): void {
   }
 
   private resetFormatBrushStates() {
-    this.EN_FontColor_Format_Brush = false;
-    this.EN_BG_Format_Brush = false;
+    this.fontColorFormatBrushActive = false;
+    this.bgFormatBrushActive = false;
     this.EN_Text_Format_Brush = false;
     this.formatBrushActive = false;
   }
@@ -1174,8 +1174,8 @@ updateCurrentCommands(commands: any[], style?: string): void {
 
   private isFormatBrushActive(): boolean {
     return (
-      this.EN_FontColor_Format_Brush ||
-      this.EN_BG_Format_Brush ||
+      this.fontColorFormatBrushActive ||
+      this.bgFormatBrushActive ||
       this.EN_Text_Format_Brush ||
       this.formatBrushActive
     );
@@ -1251,9 +1251,9 @@ updateCurrentCommands(commands: any[], style?: string): void {
   }
 
   private handleSelectedText(cmEditor: Editor) {
-    if (this.EN_FontColor_Format_Brush) {
+    if (this.fontColorFormatBrushActive) {
       setFontcolor(this.settings.cMenuFontColor, cmEditor);
-    } else if (this.EN_BG_Format_Brush) {
+    } else if (this.bgFormatBrushActive) {
       setBackgroundcolor(this.settings.cMenuBackgroundColor, cmEditor);
     } else if (this.EN_Text_Format_Brush) {
       setFormateraser(this, cmEditor);
