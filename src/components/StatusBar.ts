@@ -1,10 +1,8 @@
-import { ItemView, Menu, setIcon } from "obsidian";
-import { selfDestruct } from "src/toolbar/editingToolbar";
+import { Menu, setIcon } from "obsidian";
 import { CommandPicker, openSlider } from "src/modals/suggesterModals";
 import type EditingToolbarPlugin from "src/plugin/main";
 import { resolveNextPositionStyle } from "src/settings/settingsData";
 import { strings } from "src/translations/helper";
-import { ViewUtils } from "src/util/viewUtils";
 
 export class StatusBar {
   private plugin: EditingToolbarPlugin;
@@ -37,8 +35,6 @@ export class StatusBar {
     menu.addSections(["settings"]);
     this.addToolbarPositionToggle(menu);
 
-    menu.addSections(["viewType"]);
-    this.addViewTypeToggle(menu);
     menu.addSections(["controls"]);
     this.addToolbarControls(menu);
 
@@ -119,101 +115,6 @@ export class StatusBar {
         });
       });
     });
-  }
-
-  private addViewTypeToggle(menu: Menu): void {
-    const view = this.plugin.app.workspace.getActiveViewOfType(ItemView);
-    if (!view) return;
-    
-    const viewType = view.getViewType();
-    
-    menu.addItem((item) => {
-      item.setTitle(strings.currentView + viewType);
-      item.setSection("settings");
-      item.setIcon("layout-template");
-      
-      const submenu = item.setSubmenu();
-      
-      const isAllowed = ViewUtils.isAllowedViewType(view);
-      
-      submenu.addItem(subItem => {
-        subItem.setTitle(isAllowed ? strings.disableToolbarView : strings.enableToolbarView);
-        subItem.setIcon(isAllowed ? "eye-off" : "eye");
-        subItem.onClick(async () => {
-          if (!this.plugin.settings.viewTypeSettings) {
-            this.plugin.settings.viewTypeSettings = {};
-          }
-          
-          this.plugin.settings.viewTypeSettings[viewType] = !isAllowed;
-          
-          await this.plugin.saveSettings();
-
-          selfDestruct(this.plugin);
-          setTimeout(() => {
-            dispatchEvent(new Event("editingToolbar-NewCommand"));
-          }, 100);
-        });
-      });
-      
-      submenu.addItem(subItem => {
-        subItem.setTitle(strings.manageAllViewTypes);
-        subItem.setIcon("settings-2");
-        
-        const allViewsSubmenu = subItem.setSubmenu();
-        
-        const defaultViewTypes = [
-          'markdown',
-          'canvas',
-          'thino_view',
-          'meld-encrypted-view',
-        ];
-        
-        const knownViewTypes = new Set([
-          ...defaultViewTypes,
-          ...Object.keys(this.plugin.settings.viewTypeSettings || {})
-        ]);
-        
-        Array.from(knownViewTypes).sort().forEach(vType => {
-          const isViewAllowed = this.isViewTypeAllowed(vType);
-          
-          allViewsSubmenu.addItem(viewItem => {
-            viewItem.setTitle(vType);
-            viewItem.setIcon(isViewAllowed ? "check" : "");
-            viewItem.onClick(async () => {
-              if (!this.plugin.settings.viewTypeSettings) {
-                this.plugin.settings.viewTypeSettings = {};
-              }
-              
-              this.plugin.settings.viewTypeSettings[vType] = !isViewAllowed;
-
-              if (viewType === vType) {
-                selfDestruct(this.plugin);
-                setTimeout(() => {
-                  dispatchEvent(new Event("editingToolbar-NewCommand"));
-                }, 100);
-              }
-              
-              await this.plugin.saveSettings();
-            });
-          });
-        });
-      });
-    });
-  }
-
-  private isViewTypeAllowed(viewType: string): boolean {
-    if (!this.plugin.settings.viewTypeSettings || 
-        this.plugin.settings.viewTypeSettings[viewType] === undefined) {
-      const defaultViewTypes = [
-        'markdown',
-        'canvas',
-        'thino_view',
-        'meld-encrypted-view',
-      ];
-      return defaultViewTypes.includes(viewType);
-    }
-    
-    return this.plugin.settings.viewTypeSettings[viewType];
   }
 
   private addToolbarControls(menu: Menu): void {

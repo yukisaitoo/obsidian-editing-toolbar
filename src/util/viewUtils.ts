@@ -1,5 +1,4 @@
 import { View } from 'obsidian';
-import type EditingToolbarPlugin from 'src/plugin/main';
 
 export class ViewUtils {
   static isAllowedViewType(view: View | null, allowedTypes?: string[]): boolean {
@@ -7,18 +6,10 @@ export class ViewUtils {
 
     const viewType = view.getViewType();
 
-    const plugin = (window as any).app?.plugins?.plugins?.['editing-toolbar'] as EditingToolbarPlugin | undefined;
-    
-    if (plugin?.settings?.viewTypeSettings && plugin.settings.viewTypeSettings[viewType] !== undefined) {
-      return plugin.settings.viewTypeSettings[viewType];
-    }
-
     const defaultAllowedTypes =
       [
         'markdown',
         'canvas',
-        'thino_view',
-        'meld-encrypted-view',
       ];
     const types = allowedTypes || defaultAllowedTypes;
 

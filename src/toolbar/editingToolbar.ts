@@ -16,12 +16,10 @@ let activeDocument: Document;
 
 const viewTypeToSelectorMap: { [key: string]: string } = {
   markdown: ".markdown-source-view",
-  thino_view: ".markdown-source-view",
   canvas: ".canvas-wrapper",
   excalidraw: ".view-header",
   image: ".image-container",
   pdf: ".view-content",
-  meld_encrypted_view: ".markdown-source-view",
 };
 
 function getRootSplits(app: App): WorkspaceParentExt[] {

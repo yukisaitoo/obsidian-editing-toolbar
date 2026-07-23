@@ -147,9 +147,6 @@ export interface editingToolbarSettings {
     [key: string]: boolean;
   };
   customCommands: CustomCommand[];
-  viewTypeSettings?: {
-    [viewType: string]: boolean;
-  };
 
   // Per-style appearance buckets (top/following/fixed/mobile)
   appearanceByStyle?: AppearanceByStyle;
@@ -587,7 +584,6 @@ export const DEFAULT_SETTINGS: editingToolbarSettings = {
     "verticalPosition": 0,
     "formatBrushes": {},
     "customCommands": [],
-    "viewTypeSettings": {},
 
     // Per-style appearance buckets
     "appearanceByStyle": {
