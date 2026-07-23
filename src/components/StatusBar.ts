@@ -38,7 +38,7 @@ export class StatusBar {
     menu.addSections(["controls"]);
     this.addToolbarControls(menu);
 
-    const menuDom = (menu as any).dom as HTMLElement;
+    const menuDom = menu.dom;
     menuDom.addClass("editingToolbar-statusbar-menu");
 
     menu.showAtPosition({

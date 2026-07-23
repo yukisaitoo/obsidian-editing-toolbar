@@ -19,7 +19,8 @@
       "Bash(npm run build)",
       "Bash(pnpm run build)",
       "Bash(npx tsc *)",
-      "WebFetch(domain:docs.obsidian.md)"
+      "WebFetch(domain:docs.obsidian.md)",
+      "Bash(npx eslint *)"
     ],
     "ask": [
       "Bash(rm *)",

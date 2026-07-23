@@ -1,4 +1,5 @@
 import {
+  Command,
   debounce,
   Editor,
   ItemView,
@@ -377,7 +378,7 @@ export default class EditingToolbarPlugin extends Plugin {
     }
   }
 
-  processAdmonitionTypes(pluginInstance: any) {
+  processAdmonitionTypes(pluginInstance: unknown) {
     const admonitionPlugin = pluginInstance as {
       admonitions?: Record<string, AdmonitionDefinition>;
     };
@@ -584,7 +585,7 @@ export default class EditingToolbarPlugin extends Plugin {
     this.tempNotice = content;
   }
 
-  getCurrentCommands(style?: string): any[] {
+  getCurrentCommands(style?: string): Command[] {
     if (!this.settings.enableMultipleConfig) {
       return this.settings.menuCommands;
     }
@@ -605,7 +606,7 @@ export default class EditingToolbarPlugin extends Plugin {
     }
   }
 
-  updateCurrentCommands(commands: any[], style?: string): void {
+  updateCurrentCommands(commands: Command[], style?: string): void {
     if (!this.settings.enableMultipleConfig) {
       this.settings.menuCommands = commands;
       return;
@@ -1139,8 +1140,8 @@ export default class EditingToolbarPlugin extends Plugin {
 
   private getToolbarHostDocument(editor?: Editor | null): Document {
     return (
-      (editor as any)?.cm?.dom?.ownerDocument ||
-      (editor as any)?.cm?.contentDOM?.ownerDocument ||
+      editor?.cm?.dom?.ownerDocument ||
+      editor?.cm?.contentDOM?.ownerDocument ||
       this.app.workspace.activeLeaf?.view?.containerEl?.ownerDocument ||
       activeWindow.document
     );

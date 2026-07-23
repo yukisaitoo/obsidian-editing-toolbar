@@ -1,4 +1,4 @@
-import { App, Modal, Notice, setIcon, Setting, TextComponent } from "obsidian";
+import { App, Command, Modal, Notice, setIcon, Setting, TextComponent } from "obsidian";
 import { RegexCommandModal } from "src/modals/RegexCommandModal";
 import { ChooseFromIconList } from "src/modals/suggesterModals";
 import EditingToolbarPlugin from "src/plugin/main";
@@ -348,7 +348,7 @@ addSpecialCharButtons(suffixSetting, suffixSetting.controlEl.querySelector('inpu
     }, 10);
   }
 
-  private updateCommandIcon(commands: any[], commandId: string) {
+  private updateCommandIcon(commands: Command[], commandId: string) {
     if (!commands) return;
 
     commands.forEach(cmd => {

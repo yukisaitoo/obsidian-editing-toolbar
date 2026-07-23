@@ -1,7 +1,4 @@
-// English source of truth for all static UI strings, keyed by string id.
-// This IS the English locale: `strings.someId` resolves here, and each
-// locale/*.ts overrides individual ids. Edit English text here.
-export const KEYS = {
+export const en = {
   aiQuestionTemplate: "AI question template:",
   add: "Add",
   addCommand: "Add Command",
@@ -11,7 +8,8 @@ export const KEYS = {
   addRegexCommand: "Add Regex Command",
   addSeparator: "Add Separator",
   addSubmenu: "Add Submenu",
-  addCommandOntoEditingToolbar: "Add a command onto Editing Toolbar from Obsidian's commands library. To reorder the commands, drag and drop the command items. To delete them, use the delete buttom to the right of the command item. Editing Toolbar will not automaticaly refresh after reordering commands. Use the refresh button above.",
+  addCommandOntoEditingToolbar:
+    "Add a command onto Editing Toolbar from Obsidian's commands library. To reorder the commands, drag and drop the command items. To delete them, use the delete buttom to the right of the command item. Editing Toolbar will not automaticaly refresh after reordering commands. Use the refresh button above.",
   addBoldKeywords: "Add bold to keywords",
   addContentAfterSelectedText: "Add content after selected text",
   addContentBeforeSelectedText: "Add content before selected text",
@@ -26,8 +24,10 @@ export const KEYS = {
   allCommandsHaveBeenRemoved: "All commands have been removed.",
   appearance: "Appearance",
   applyRegularExpressionReplacement: "Apply regular expression replacement",
-  sureWantClearAllCommands: "Are you sure you want to clear all commands under the current style?",
+  sureWantClearAllCommands:
+    "Are you sure you want to clear all commands under the current style?",
   backgroundColor: "Background color",
+  body: "Note area",
   buttonSubmenu: "Button Submenu",
   calloutType: "Callout Type",
   cancel: "Cancel",
@@ -38,14 +38,19 @@ export const KEYS = {
   chooseIcon2: "Choose an icon",
   chooseHowImportConfiguration: "Choose how to import the configuration",
   chooseIcon3: "Choose icon",
-  chooseNumberColumnsPerRow: "Choose the number of columns per row to display on Editing Toolbar.",
-  chooseOffsetEditingToolbarFixed: "Choose the offset of the Editing Toolbar in the fixed position.",
+  chooseNumberColumnsPerRow:
+    "Choose the number of columns per row to display on Editing Toolbar.",
+  chooseOffsetEditingToolbarFixed:
+    "Choose the offset of the Editing Toolbar in the fixed position.",
   chooseWhatExport: "Choose what to export",
-  chooseWhereEditingToolbarAppend: "Choose where Editing Toolbar will append upon regeneration.",
-  chooseWhichToolbarStyleS: "Choose which toolbar style's appearance you want to edit.",
+  chooseWhereEditingToolbarAppend:
+    "Choose where Editing Toolbar will append upon regeneration.",
+  chooseWhichToolbarStyleS:
+    "Choose which toolbar style's appearance you want to edit.",
   clear: "Clear",
   toLabel: "to",
-  selectedStyleNoCommandsImport: "The selected style has no commands to import.",
+  selectedStyleNoCommandsImport:
+    "The selected style has no commands to import.",
   importCommandsFrom: "Import commands from",
   commandsImportedFrom: "Commands imported successfully from",
   clearAllCustomCommands: "Clear all Custom Commands",
@@ -54,7 +59,8 @@ export const KEYS = {
   clearAllMainMenuCommands: "Clear all Main Menu Commands",
   clearAllMobileStyleCommands: "Clear all Mobile Style Commands",
   clearAllTopStyleCommands: "Clear all Top Style Commands",
-  clearFormattingBrushClickMouse: "Clear formatting brush ON!\nClick the  mouse middle or right key to close the formatting-brush",
+  clearFormattingBrushClickMouse:
+    "Clear formatting brush ON!\nClick the  mouse middle or right key to close the formatting-brush",
   clickPickerAdjustColor: "Click on the picker to adjust the color",
   closed: "Closed",
   collapseState: "Collapse State",
@@ -65,10 +71,12 @@ export const KEYS = {
   commandIdCannotContainSpaces: "Command ID cannot contain spaces",
   commandName: "Command Name",
   commandAddedToolbar: "Command added to toolbar",
-  commandAlreadyExistsSelectedConfigurations: "Command already exists in selected configurations",
+  commandAlreadyExistsSelectedConfigurations:
+    "Command already exists in selected configurations",
   commandDeployed: "Command deployed to: ",
   commandIconClickSelect: "Command icon (click to select)",
-  completeRegularExpressionCodeCopy: "Complete regular expression code (copy to AI for explanation)",
+  completeRegularExpressionCodeCopy:
+    "Complete regular expression code (copy to AI for explanation)",
   conditionPattern: "Condition pattern",
   conditionalMatching: "Conditional matching",
   configurationCopiedClipboard: "Configuration copied to clipboard",
@@ -81,11 +89,13 @@ export const KEYS = {
   convertQuotedTextQuoteBlock: "Convert quoted text to quote block",
   copied: "Copied!",
   copyCode: "Copy code",
-  copyCommandsAnotherStyleConfiguration: "Copy commands from another style configuration.",
+  copyCommandsAnotherStyleConfiguration:
+    "Copy commands from another style configuration.",
   copyCommandsSelectedStyle: "Copy commands from selected style.",
   copyClipboard: "Copy",
   currentConfiguration: "Current Configuration",
-  currentLineEmptyPleaseSelect: "Current line is empty, please select text or move to a non-empty line",
+  currentLineEmptyPleaseSelect:
+    "Current line is empty, please select text or move to a non-empty line",
   currentlyEditingCommands: "Currently editing commands for",
   cursorPositionOffset: "Cursor Position Offset",
   customBackgroudColor: "Custom Backgroud Color",
@@ -101,8 +111,10 @@ export const KEYS = {
   deleteEmptyLinesMultilineMode: "Delete empty lines (multiline mode)",
   deploy: "Deploy",
   deployCommandConfigurations: "Deploy command to configurations",
-  detectedChineseContextConvertedFull: "Detected Chinese context: converted to full-width symbols",
-  detectedCodeEnglishContextConverted: "Detected code/English context: converted to half-width symbols",
+  detectedChineseContextConvertedFull:
+    "Detected Chinese context: converted to full-width symbols",
+  detectedCodeEnglishContextConverted:
+    "Detected code/English context: converted to half-width symbols",
   disable: "Disable",
   displayedNameToolbarMenu: "Displayed name in toolbar and menu",
   doWantContinue: "Do you want to continue?",
@@ -119,10 +131,13 @@ export const KEYS = {
   embedContent: "Embed Content",
   enable: "Enable",
   enableMultipleConfigurations: "Enable Multiple Configurations",
-  enableDifferentCommandConfigurationsEach: "Enable different command configurations for each position style (following, top, fixed).",
+  enableDifferentCommandConfigurationsEach:
+    "Enable different command configurations for each position style (following, top, fixed).",
   enableToolbarPositionedTop: "Enable the toolbar positioned at the top.",
-  enableToolbarAppearsUponText: "Enable the toolbar that appears upon text selection.",
-  enableToolbarWhosePositionMay: "Enable the toolbar whose position may be fixed where you please.",
+  enableToolbarAppearsUponText:
+    "Enable the toolbar that appears upon text selection.",
+  enableToolbarWhosePositionMay:
+    "Enable the toolbar whose position may be fixed where you please.",
   endString: "End String",
   enterEndString: "Enter end string",
   enterPrefix: "Enter prefix",
@@ -131,12 +146,15 @@ export const KEYS = {
   enterIconCodeFormatSvg: "Enter the icon code, format as <svg>.... </svg>",
   error: "Error: ",
   exampleText: "Example text:",
-  explainSyntaxJavascriptRegularExpressions: "Explain the syntax of JavaScript regular expressions",
+  explainSyntaxJavascriptRegularExpressions:
+    "Explain the syntax of JavaScript regular expressions",
   export: "Export",
   exportConfiguration: "Export Configuration",
   exportType: "Export Type",
-  exportToolbarConfigurationShareOthers: "Export your toolbar configuration to share with others.",
-  exportGenerateJsonConfigurationCan: "Export: Generate a JSON configuration that you can save or share.",
+  exportToolbarConfigurationShareOthers:
+    "Export your toolbar configuration to share with others.",
+  exportGenerateJsonConfigurationCan:
+    "Export: Generate a JSON configuration that you can save or share.",
   extractBetweenStrings: "Extract Between Strings",
   extracted: "Extracted",
   extractionFailed: "Extraction failed",
@@ -147,28 +165,35 @@ export const KEYS = {
   fixedStyle: "Fixed Style",
   fixedStyleOnly: "Fixed Style Only",
   fixedToolbar: "Fixed",
-  fixedStyleCommandsSuccessfullyInitialized: "Fixed style commands successfully initialized",
+  fixedStyleCommandsSuccessfullyInitialized:
+    "Fixed style commands successfully initialized",
   followingStyle: "Following Style",
   followingStyleOnly: "Following Style Only",
   followingToolbar: "Selection",
-  followingStyleCommandsSuccessfullyInitialize: "Following style commands successfully initialized",
+  followingStyleCommandsSuccessfullyInitialize:
+    "Following style commands successfully initialized",
   fontColors: "Font Colors",
   fontColorFormattingBrush: "Font-Color formatting brush ON!",
-  exampleConvertHttpsExampleCom: "For example, convert https://example.com to [https://example.com](https://example.com)",
+  exampleConvertHttpsExampleCom:
+    "For example, convert https://example.com to [https://example.com](https://example.com)",
   formatBrush: "Format Brush",
   formatBrushSelectTextApply: "Format brush ON! Select text to apply【",
   formatPhoneNumber: "Format phone number",
   fullHalfConverter: "Full Half Converter",
   general: "General",
-  getInspiredWhatOthersHave: "Get inspired by what others have created or showcase your own customizations.",
+  glass: "Glass",
+  getInspiredWhatOthersHave:
+    "Get inspired by what others have created or showcase your own customizations.",
   globalReplace: "Global replace",
   horizontalPosition: "Horizontal Position",
   howUseAiGetRegular: "How to use AI to get regular expressions?",
-  iNeedConvertUrlMarkdown: "I need to convert the url to a markdown format link",
+  iNeedConvertUrlMarkdown:
+    "I need to convert the url to a markdown format link",
   id: "ID",
   icon: "Icon",
   ifImageTurn: "If it is an image, turn on",
-  ifTextContainsImportantSet: "If the text contains important, set the text highlight (conditional format)",
+  ifTextContainsImportantSet:
+    "If the text contains important, set the text highlight (conditional format)",
   ignoreCase: "Ignore case",
   imageHeight: "Image Height",
   imageSize: "Image Size",
@@ -179,9 +204,11 @@ export const KEYS = {
   importMode: "Import Mode",
   importToolbarConfigurationJson: "Import toolbar configuration from JSON.",
   importExport: "Import/Export",
-  importPastePreviouslyExportedJson: "Import: Paste a previously exported JSON configuration.",
+  importPastePreviouslyExportedJson:
+    "Import: Paste a previously exported JSON configuration.",
   inputContent: "Input content",
-  inputExampleTextViewFormatting: "Input example text to view the formatting effect of the command...",
+  inputExampleTextViewFormatting:
+    "Input example text to view the formatting effect of the command...",
   inputTitle: "Input title",
   insert: "Insert",
   insertBlankLines: "Insert Blank Lines",
@@ -209,34 +236,41 @@ export const KEYS = {
   mobileEnabledNot: "Mobile Enabled or Not",
   mobileStyle: "Mobile Style",
   mobileStyleOnly: "Mobile Style Only",
-  mobileStyleCommandsSuccessfullyInitialized: "Mobile style commands successfully initialized",
+  mobileStyleCommandsSuccessfullyInitialized:
+    "Mobile style commands successfully initialized",
   more: "More",
   multilineMode: "Multiline mode",
   mustExistRegularExpressionText: "Must exist regular expression or text",
   matchesFound: "No matches found",
-  obviousSeparatorListPatternDetected: "No obvious separator or list pattern detected",
-  validConfigurationFoundImportData: "No valid configuration found in import data",
+  obviousSeparatorListPatternDetected:
+    "No obvious separator or list pattern detected",
+  validConfigurationFoundImportData:
+    "No valid configuration found in import data",
   numberLinesCustom: "Number Lines (Custom)",
   numberLinesConfiguration: "Number Lines Configuration",
   numberingCompletedStarting: "Numbering completed: starting from",
   oneClickClear: "One-click Clear",
-  onlyApplyCustomCommandWhen: "Only apply custom command when text matches the condition",
+  onlyApplyCustomCommandWhen:
+    "Only apply custom command when text matches the condition",
   open: "Open",
   optionalLeaveBlankDefaultTitle: "Optional, leave blank for default title",
   overwriteImport: "Overwrite Import",
-  overwriteModeReplaceSettingsImported: "Overwrite Mode (Replace settings with imported ones)",
+  overwriteModeReplaceSettingsImported:
+    "Overwrite Mode (Replace settings with imported ones)",
   pasteParse: "Paste and Parse",
   pasteConfigurationHere: "Paste configuration here...",
   pattern: "Pattern",
   plainTextCopiedClipboard: "Plain text copied to clipboard",
   pleaseEnterUrlFirst: "Please enter a URL first",
   pleaseEnterNewName: "Please enter a new name: ",
-  pleaseExecuteFormatCommandSelect: "Please execute a format command or select format text first, then enable the format brush",
+  pleaseExecuteFormatCommandSelect:
+    "Please execute a format command or select format text first, then enable the format brush",
   pleasePasteConfigurationDataFirst: "Please paste configuration data first",
   pleaseSelectValidMarkdownTable: "Please select a valid Markdown table",
   pleaseSelectLinesMergeFirst: "Please select lines to merge first",
   pleaseSelectTextFirst: "Please select text first",
-  pleaseSelectTextCopyText: "Please select text or copy text to clipboard first",
+  pleaseSelectTextCopyText:
+    "Please select text or copy text to clipboard first",
   pleaseSelectTextDedupeFirst: "Please select text to dedupe first",
   pleaseSelectTextNumberFirst: "Please select text to number first",
   pleaseSpecifyStartEndString: "Please specify start or end string",
@@ -251,16 +285,19 @@ export const KEYS = {
   regexPatternMatch: "Regex pattern to match",
   regularExpressionExamples: "Regular expression examples",
   removeAllWhitespace: "Remove All Whitespace",
-  removeAllCommandsConfiguration: "Remove all commands from this configuration.",
+  removeAllCommandsConfiguration:
+    "Remove all commands from this configuration.",
   removeExtraSpaces: "Remove extra spaces",
   renumberList: "Renumber List",
   replaceAllMatches: "Replace all matches",
   replacementPattern: "Replacement pattern",
-  replacementPatternUse12: "Replacement pattern (use $1, $2, etc. to reference capture groups)",
+  replacementPatternUse12:
+    "Replacement pattern (use $1, $2, etc. to reference capture groups)",
   reset: "Reset",
   result: "Result: ",
   save: "Save",
-  selectPresetToolbarThemeAutomatically: "Select a preset toolbar theme, automatically setting the background color, icon color, and size for the selected style.",
+  selectPresetToolbarThemeAutomatically:
+    "Select a preset toolbar theme, automatically setting the background color, icon color, and size for the selected style.",
   selectTextSeeMoreTools: "Select text to see more tools",
   separator: "Separator",
   separatorLeaveEmptySmartSpacing: "Separator (leave empty for smart spacing)",
@@ -270,41 +307,50 @@ export const KEYS = {
   setColorToolbarIcon: "Set the color of the toolbar icon.",
   setSizeToolbarIconPx: "Set the size of the toolbar icon (px); default: 18px",
   settings: "Settings",
-  shareToolbarSettingsStylesOur: "Share your toolbar settings and styles in our",
+  shareToolbarSettingsStylesOur:
+    "Share your toolbar settings and styles in our",
   shrinkExtraSpaces: "Shrink Extra Spaces",
   splitLines: "Split Lines",
   startNumber: "Start Number",
   startString: "Start String",
   step: "Step",
   suffix: "Suffix",
-  superConversionCompletedContextPreserved: "Super conversion completed: context preserved and layout optimized",
+  superConversionCompletedContextPreserved:
+    "Super conversion completed: context preserved and layout optimized",
   switchRegexCommandWindow: "Switch Regex Command Window",
-  switchBetweenDifferentCommandConfigurations: "Switch between different command configurations.",
+  switchBetweenDifferentCommandConfigurations:
+    "Switch between different command configurations.",
   tableConvertedMultiLevelList: "Table converted to multi-level list",
   tableList: "Table to List",
   textTools: "Text Tools",
   command2: "The command",
-  selectedTextDoesNotMeet: "The selected text does not meet the condition requirements",
-  toolbarDisplayedWhenMouseMoves: "The toolbar is displayed when the mouse moves over it, otherwise it is automatically hidden",
+  selectedTextDoesNotMeet:
+    "The selected text does not meet the condition requirements",
+  toolbarDisplayedWhenMouseMoves:
+    "The toolbar is displayed when the mouse moves over it, otherwise it is automatically hidden",
   commandAlreadyToolbar: "This command is already in the toolbar.",
   import3: "This import will:",
+  tiny: "Tiny",
   title: "Title",
   toolbarBackgroundColor: "Toolbar Background Color",
   toolbarCommands: "Toolbar Commands",
   toolbarIconColor: "Toolbar Icon Color",
   toolbarIconSize: "Toolbar Icon Size",
   toolbarPosition: "Toolbar Position",
-  toolbarPreviewHypotheticalCommandConfigurati: "Toolbar Preview (With a hypothetical command configuration.)",
+  toolbarPreviewHypotheticalCommandConfigurati:
+    "Toolbar Preview (With a hypothetical command configuration.)",
   toolbarSettings: "Toolbar Settings",
   toolbarTheme: "Toolbar Theme",
   topStyle: "Top Style",
   topStyleOnly: "Top Style Only",
   topToolbar: "Top",
-  topStyleCommandsSuccessfullyInitialized: "Top style commands successfully initialized",
+  topStyleCommandsSuccessfullyInitialized:
+    "Top style commands successfully initialized",
   trimLineEnds: "Trim Line Ends",
   urlFormatError: "URL Format Error",
   urlMarkdownLink: "URL to Markdown link",
-  uniqueIdentifierSpacesEG: "Unique identifier, no spaces, e.g.: \"my-custom-format\"",
+  uniqueIdentifierSpacesEG:
+    'Unique identifier, no spaces, e.g.: "my-custom-format"',
   updateCustomCommands: "Update Custom Commands",
   updateFixedStyleCommands: "Update Fixed Style Commands",
   updateFollowingStyleCommands: "Update Following Style Commands",
@@ -318,18 +364,27 @@ export const KEYS = {
   useNRepresentLineBreaks: "Use \\n to represent line breaks",
   useCondition: "Use condition",
   useCurrentLineRegexCommands: "Use current line for regex commands",
-  useJsRegularExpressionImplement: "Use js regular expression to implement, and output the parameters in the following format (the result does not need to be escaped with json)",
+  useJsRegularExpressionImplement:
+    "Use js regular expression to implement, and output the parameters in the following format (the result does not need to be escaped with json)",
   useRepresentLineBreaks: "Use ↵ to represent line breaks",
   verticalPosition: "Vertical Position",
   verticalSplit: "Vertical Split",
-  warningImportingConfigurationOverwriteCurren: "Warning: Importing configuration will overwrite your current settings. Consider exporting your current configuration first as a backup.",
-  warningOverwriteModeReplaceExisting: "Warning: Overwrite mode will replace existing settings with imported ones.",
-  warningUpdateModeAddNew: "Warning: Update mode will add new items and update existing ones.",
-  whenTextSelectedRegexCommands: "When no text is selected, regex commands will use the current line instead of clipboard content",
-  whetherToolbarCentredFullWidth: "Whether the toolbar is centred or full-width, the default is full-width.",
-  whetherEnableMobileDevicesDevice: "Whether to enable on mobile devices with device width less than 768px, the default is disable.",
-  whetherInsertBeginningNextLine: "Whether to insert at the beginning of the next line",
+  warningImportingConfigurationOverwriteCurren:
+    "Warning: Importing configuration will overwrite your current settings. Consider exporting your current configuration first as a backup.",
+  warningOverwriteModeReplaceExisting:
+    "Warning: Overwrite mode will replace existing settings with imported ones.",
+  warningUpdateModeAddNew:
+    "Warning: Update mode will add new items and update existing ones.",
+  whenTextSelectedRegexCommands:
+    "When no text is selected, regex commands will use the current line instead of clipboard content",
+  whetherToolbarCentredFullWidth:
+    "Whether the toolbar is centred or full-width, the default is full-width.",
+  whetherEnableMobileDevicesDevice:
+    "Whether to enable on mobile devices with device width less than 768px, the default is disable.",
+  whetherInsertBeginningNextLine:
+    "Whether to insert at the beginning of the next line",
   whitespaceCleaningCompleted: "Whitespace cleaning completed",
+  workspace: "Workspace",
   description: "[Description]",
   example: "[Example]",
   output: "[Output]",
@@ -341,13 +396,15 @@ export const KEYS = {
   lines: "lines",
   matches: "matches",
   insert2: "to insert",
-  updateModeMergeImportedSettings: "ℹ️ Update mode will merge imported settings with existing ones.",
+  updateModeMergeImportedSettings:
+    "ℹ️ Update mode will merge imported settings with existing ones.",
   light: "┌ Light",
   elegant: "└ Elegant",
   dark: "├ Dark",
   minimal: "├ Minimal",
   vibrant: "├ Vibrant",
-  overwriteModeReplaceExistingSettings: "⚠️ Overwrite mode will replace existing settings with imported ones.",
+  overwriteModeReplaceExistingSettings:
+    "⚠️ Overwrite mode will replace existing settings with imported ones.",
   format: "】format\nClick the mouse right key to close the formatting-brush",
   setCustomBackground: "🎨 Set Custom Background",
   setCustomFontColor: "🖌️ Set Custom Font Color",

@@ -1,14 +1,8 @@
 // 日本語
-//
-// UI strings are keyed by their string id (see ../keys.ts, which is the English
-// source of truth). commandNames is keyed by the English command/menu label,
-// because those are stored in English in user data and translated on render.
-// Only entries that differ from English are listed; anything omitted falls back
-// to English automatically.
 
-import type { KEYS } from '../keys';
+import type { en } from "../en";
 
-const ui: Partial<Record<keyof typeof KEYS, string>> = {
+const ui: Partial<Record<keyof typeof en, string>> = {
   add: "追加",
   addPrefixSuffix: "接頭辞／接尾辞を追加",
   backgroundColor: "背景色",
@@ -38,30 +32,30 @@ export default ui;
 
 export const commandNames: Record<string, string> = {
   "Align Text Right": "右揃え",
-  "Bold": "太字",
-  "Checklist": "チェックリスト",
+  Bold: "太字",
+  Checklist: "チェックリスト",
   "Clear Text Formatting": "文字書式をクリア",
-  "Copy": "コピー",
-  "Cut": "切り取り",
-  "Embed": "埋め込み",
+  Copy: "コピー",
+  Cut: "切り取り",
+  Embed: "埋め込み",
   "Header 1": "見出し1",
   "Header 2": "見出し2",
   "Header 3": "見出し3",
   "Header 4": "見出し4",
   "Header 5": "見出し5",
   "Header 6": "見出し6",
-  "Highlight": "ハイライト",
+  Highlight: "ハイライト",
   "Horizontal Divider": "水平線",
   "Indent list": "リストのインデントを増やす",
   "Inline Math": "インライン数式",
-  "Italic": "斜体",
-  "Link": "リンク",
-  "MathBlock": "数式ブロック",
+  Italic: "斜体",
+  Link: "リンク",
+  MathBlock: "数式ブロック",
   "Ordered List": "番号付きリスト",
-  "Paste": "貼り付け",
+  Paste: "貼り付け",
   "Redo Edit": "やり直す",
-  "Strikethrough": "取り消し線",
-  "Underline": "下線",
+  Strikethrough: "取り消し線",
+  Underline: "下線",
   "Undo Edit": "元に戻す",
   "Unindent List": "リストのインデントを減らす",
   "Unordered List": "箇条書きリスト",
@@ -70,13 +64,13 @@ export const commandNames: Record<string, string> = {
   "Swap Line Down": "行を下へ移動",
   "Attach File": "ファイルを添付",
   "Cycle List and Checklist": "リスト形式を切り替え",
-  "Blockquote": "引用",
-  "Callout": "コールアウト",
-  "Superscript": "上付き文字",
-  "Subscript": "下付き文字",
+  Blockquote: "引用",
+  Callout: "コールアウト",
+  Superscript: "上付き文字",
+  Subscript: "下付き文字",
   "Inline Code": "インラインコード",
   "Code Block": "コードブロック",
-  "Wikilink": "Wikiリンク",
+  Wikilink: "Wikiリンク",
   "Justify Text": "両端揃え",
   "Align Text Left": "左揃え",
   "Center Text": "中央揃え",
@@ -90,10 +84,14 @@ export const commandNames: Record<string, string> = {
   "Line Operations": "行の操作",
   "Text Processing": "テキスト処理",
   "Advanced Tools": "高度なツール",
-  "Optional. Leave empty unless your server requires authentication.": "任意です。サーバーで認証が必要な場合を除き、空欄のままにしてください。",
+  "Optional. Leave empty unless your server requires authentication.":
+    "任意です。サーバーで認証が必要な場合を除き、空欄のままにしてください。",
   "Get Models": "モデルを取得",
-  "No models found at this endpoint.": "このエンドポイントにモデルが見つかりません。",
+  "No models found at this endpoint.":
+    "このエンドポイントにモデルが見つかりません。",
   "Failed to load models:": "モデルの読み込みに失敗しました:",
-  "Choose a detected model to fill the model field.": "検出されたモデルを選択して、モデル名欄に設定します。",
-  "Fetch available models from your server.": "サーバーから利用可能なモデルを取得します。",
+  "Choose a detected model to fill the model field.":
+    "検出されたモデルを選択して、モデル名欄に設定します。",
+  "Fetch available models from your server.":
+    "サーバーから利用可能なモデルを取得します。",
 };

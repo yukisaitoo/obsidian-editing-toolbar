@@ -91,6 +91,7 @@ export class CommandsManager {
       // noop
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- dynamically-invoked untyped canvas API objects
     const invocationCandidates: Array<{ owner: any; method: string; label: string }> = [
       { owner: activeView.canvas, method: action, label: `canvas.${action}()` },
       {
@@ -111,15 +112,16 @@ export class CommandsManager {
     return false;
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- untyped Obsidian canvas view
   private getActiveCanvasView(): any | null {
-    const activeLeafView = this.plugin.app.workspace.activeLeaf?.view as any;
+    const activeLeafView = this.plugin.app.workspace.activeLeaf?.view;
     if (activeLeafView?.getViewType?.() === "canvas") {
       return activeLeafView;
     }
 
     const canvasLeaves = this.plugin.app.workspace.getLeavesOfType?.("canvas") ?? [];
     for (const leaf of canvasLeaves) {
-      const view = (leaf as any)?.view;
+      const view = leaf?.view;
       if (view?.getViewType?.() === "canvas") {
         return view;
       }

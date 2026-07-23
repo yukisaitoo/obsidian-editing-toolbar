@@ -1,17 +1,18 @@
 import { Editor,Command } from "obsidian";
 import { syntaxTree } from '@codemirror/language';
+import { editingToolbarSettings } from "../settings/settingsData";
 export function GenNonDuplicateID(randomLength: number) {
   let idStr = Date.now().toString(36)
   idStr += Math.random().toString(36).substr(3, randomLength)
   return idStr
 }
-export function findmenuID(plugin: { settings: { menuCommands: any; }; }, command: Command, issub: boolean,currentCommands:any[]) {
+export function findmenuID(plugin: { settings: editingToolbarSettings }, command: Command, issub: boolean,currentCommands:Command[]) {
   let index;
   let res = { "index": -1, "subindex": -1 };
   const menucmd = currentCommands
   if (issub) {
-    menucmd.forEach((item: { SubmenuCommands: any[]; }, idx: any) => {
-      if ("SubmenuCommands" in item) {
+    menucmd.forEach((item, idx) => {
+      if ("SubmenuCommands" in item && item.SubmenuCommands) {
         index = item.SubmenuCommands.findIndex((v) => v.id == command.id);
         if (index >= 0) {
           res = { "index": idx, "subindex": index };
@@ -21,13 +22,13 @@ export function findmenuID(plugin: { settings: { menuCommands: any; }; }, comman
     });
   }
   else {
-    index = menucmd.findIndex((v: { id: any; }) => v.id == command.id);
+    index = menucmd.findIndex((v) => v.id == command.id);
     res = { "index": index, "subindex": -1 };
   }
   return res;
 }
 
-export function colorpicker(plugin: { settings: { custom_fc1: any; custom_fc2: any; custom_fc3: any; custom_fc4: any; custom_fc5: any; }; }) {
+export function colorpicker(plugin: { settings: editingToolbarSettings }) {
   return `<div class='x-color-picker-wrapper'>
 <div class='x-color-picker' >
   <table class="x-color-picker-table" id='x-color-picker-table'>
@@ -144,7 +145,7 @@ export function colorpicker(plugin: { settings: { custom_fc1: any; custom_fc2: a
 </div>`;
 }
 
-export function backcolorpicker(plugin: { settings: { custom_bg1: any; custom_bg2: any; custom_bg3: any; custom_bg4: any; custom_bg5: any; }; }) {
+export function backcolorpicker(plugin: { settings: editingToolbarSettings }) {
   return `<div class='x-color-picker-wrapper'>
 <div class='x-color-picker' >
   <table class="x-color-picker-table" id='x-backgroundcolor-picker-table'>

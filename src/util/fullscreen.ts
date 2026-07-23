@@ -111,10 +111,12 @@ export function fullscreenMode(app: App) {
     }
 
     interface HTMLElementWithFullscreen extends HTMLElement {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any -- vendor-prefixed fullscreen API access
       [key: string]: any;
     }
 
     interface DocumentWithFullscreen extends Document {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any -- vendor-prefixed fullscreen API access
       [key: string]: any;
     }
 
@@ -134,11 +136,11 @@ export function fullscreenMode(app: App) {
         return (document as DocumentWithFullscreen)[TYPE_EXIT_FULL_SCREEN]();
     }
     exports.exitFull = exitFull;
-    function isFull(el: any) {
+    function isFull(el: HTMLElement) {
         return getCurrentElement(el) === (document as DocumentWithFullscreen)[TYPE_FULL_SCREEN_ELEMENT];
     }
     exports.isFull = isFull;
-    function toggleFull(el: any) {
+    function toggleFull(el: HTMLElement) {
         if (isFull(el)) {
             exitFull();
             return false;

@@ -1,4 +1,4 @@
-import { App, Modal, Notice, Setting, ToggleComponent } from "obsidian";
+import { App, Command, Modal, Notice, Setting, ToggleComponent } from "obsidian";
 import EditingToolbarPlugin from "src/plugin/main";
 import { strings } from 'src/translations/helper';
 
@@ -11,11 +11,11 @@ interface DeployOption {
 
 export class DeployCommandModal extends Modal {
     private deployOptions: DeployOption[] = [];
-    private command: any;
+    private command: Command;
     private plugin: EditingToolbarPlugin;
   
 
-    constructor(app: App, plugin: EditingToolbarPlugin, command: any) {
+    constructor(app: App, plugin: EditingToolbarPlugin, command: Command) {
       super(app);
       this.plugin = plugin;
       this.command = command;
@@ -89,7 +89,7 @@ export class DeployCommandModal extends Modal {
       
       this.deployOptions.forEach(option => {
         if (option.enabled) {
-          let targetCommands: any[] | undefined;
+          let targetCommands: Command[] | undefined;
           
           switch (option.id) {
             case 'mobile':

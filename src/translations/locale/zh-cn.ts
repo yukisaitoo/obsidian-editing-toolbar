@@ -1,14 +1,8 @@
 // 简体中文
-//
-// UI strings are keyed by their string id (see ../keys.ts, which is the English
-// source of truth). commandNames is keyed by the English command/menu label,
-// because those are stored in English in user data and translated on render.
-// Only entries that differ from English are listed; anything omitted falls back
-// to English automatically.
 
-import type { KEYS } from '../keys';
+import type { en } from "../en";
 
-const ui: Partial<Record<keyof typeof KEYS, string>> = {
+const ui: Partial<Record<keyof typeof en, string>> = {
   aiQuestionTemplate: "AI问题模板：",
   add: "添加",
   addCommand: "添加命令",
@@ -18,7 +12,8 @@ const ui: Partial<Record<keyof typeof KEYS, string>> = {
   addRegexCommand: "添加正则表达式命令",
   addSeparator: "添加分割线",
   addSubmenu: "添加子菜单",
-  addCommandOntoEditingToolbar: "从Obsidian的命令库中添加一个命令到工具栏。要重新排列命令，可以拖放命令项。要删除它们，请使用命令项右边的删除按钮。图标选择Custom可以自定义图标",
+  addCommandOntoEditingToolbar:
+    "从Obsidian的命令库中添加一个命令到工具栏。要重新排列命令，可以拖放命令项。要删除它们，请使用命令项右边的删除按钮。图标选择Custom可以自定义图标",
   addBoldKeywords: "添加粗体到关键词",
   addContentAfterSelectedText: "在选中的文本后添加内容",
   addContentBeforeSelectedText: "在选中的文本前添加内容",
@@ -119,7 +114,8 @@ const ui: Partial<Record<keyof typeof KEYS, string>> = {
   embedContent: "嵌入内容",
   enable: "启用",
   enableMultipleConfigurations: "启用多配置",
-  enableDifferentCommandConfigurationsEach: "启用每个位置样式的不同命令配置（following，top，fixed）",
+  enableDifferentCommandConfigurationsEach:
+    "启用每个位置样式的不同命令配置（following，top，fixed）",
   enableToolbarPositionedTop: "启用位于顶部的工具栏。",
   enableToolbarAppearsUponText: "启用在选中文本时出现的工具栏。",
   enableToolbarWhosePositionMay: "启用可以固定在任意位置的工具栏。",
@@ -152,8 +148,10 @@ const ui: Partial<Record<keyof typeof KEYS, string>> = {
   followingStyleOnly: "仅Following样式",
   followingStyleCommandsSuccessfullyInitialize: "Following样式初始化成功",
   fontColors: "字体颜色",
-  fontColorFormattingBrush: "字体颜色格式刷开启\n点击鼠标中键或者右键关闭格式刷",
-  exampleConvertHttpsExampleCom: "例如，将https://example.com转换为[https://example.com](https://example.com)",
+  fontColorFormattingBrush:
+    "字体颜色格式刷开启\n点击鼠标中键或者右键关闭格式刷",
+  exampleConvertHttpsExampleCom:
+    "例如，将https://example.com转换为[https://example.com](https://example.com)",
   formatBrush: "格式刷",
   formatBrushSelectTextApply: "格式刷已开启\n选中文本应用【",
   formatPhoneNumber: "格式化电话号码",
@@ -227,7 +225,8 @@ const ui: Partial<Record<keyof typeof KEYS, string>> = {
   plainTextCopiedClipboard: "无语法文本已复制到剪贴板",
   pleaseEnterUrlFirst: "请先输入一个URL",
   pleaseEnterNewName: "请输入新名称：",
-  pleaseExecuteFormatCommandSelect: "请先执行一个格式命令或选中带格式的文本，然后启用格式刷",
+  pleaseExecuteFormatCommandSelect:
+    "请先执行一个格式命令或选中带格式的文本，然后启用格式刷",
   pleasePasteConfigurationDataFirst: "请先粘贴配置数据",
   pleaseSelectValidMarkdownTable: "请先选择有效的 Markdown 表格",
   pleaseSelectLinesMergeFirst: "请先选择要合并的行",
@@ -254,7 +253,8 @@ const ui: Partial<Record<keyof typeof KEYS, string>> = {
   replacementPatternUse12: "替换模式（使用$1, $2等引用捕获组）",
   reset: "重置",
   save: "保存",
-  selectPresetToolbarThemeAutomatically: "选择预设的工具栏主题，自动设置背景颜色、图标颜色和大小",
+  selectPresetToolbarThemeAutomatically:
+    "选择预设的工具栏主题，自动设置背景颜色、图标颜色和大小",
   selectTextSeeMoreTools: "选中文本后显示更多工具",
   separator: "分隔符",
   separatorLeaveEmptySmartSpacing: "分隔符 (留空则开启智能中英间距)",
@@ -271,7 +271,8 @@ const ui: Partial<Record<keyof typeof KEYS, string>> = {
   startString: "起始字符串",
   step: "步长",
   suffix: "后缀",
-  superConversionCompletedContextPreserved: "超级转换完成：已保留上下文并优化排版",
+  superConversionCompletedContextPreserved:
+    "超级转换完成：已保留上下文并优化排版",
   switchRegexCommandWindow: "切换到正则命令窗口",
   switchBetweenDifferentCommandConfigurations: "切换不同的命令配置",
   tableConvertedMultiLevelList: "表格已还原为多级列表",
@@ -279,7 +280,8 @@ const ui: Partial<Record<keyof typeof KEYS, string>> = {
   textTools: "文本工具",
   command2: "命令",
   selectedTextDoesNotMeet: "选中的文本不满足条件要求",
-  toolbarDisplayedWhenMouseMoves: "当鼠标移到工具栏上方时，工具栏显示，否则自动隐藏",
+  toolbarDisplayedWhenMouseMoves:
+    "当鼠标移到工具栏上方时，工具栏显示，否则自动隐藏",
   commandAlreadyToolbar: "该命令已存在于工具栏中",
   import3: "此次导入将：",
   title: "标题",
@@ -310,16 +312,21 @@ const ui: Partial<Record<keyof typeof KEYS, string>> = {
   useNRepresentLineBreaks: "使用\\n表示换行符",
   useCondition: "使用条件",
   useCurrentLineRegexCommands: "正则命令使用当前行",
-  useJsRegularExpressionImplement: "使用js正则表达式实现，并输出以下格式的参数（结果不需要用json转义）",
+  useJsRegularExpressionImplement:
+    "使用js正则表达式实现，并输出以下格式的参数（结果不需要用json转义）",
   useRepresentLineBreaks: "使用↵表示换行符",
   verticalPosition: "垂直位置",
   verticalSplit: "垂直分割",
-  warningImportingConfigurationOverwriteCurren: "警告：导入配置将覆盖您当前的设置。建议先导出当前配置作为备份。",
-  warningOverwriteModeReplaceExisting: "警告：覆盖模式将用导入的配置替换所有设置。",
+  warningImportingConfigurationOverwriteCurren:
+    "警告：导入配置将覆盖您当前的设置。建议先导出当前配置作为备份。",
+  warningOverwriteModeReplaceExisting:
+    "警告：覆盖模式将用导入的配置替换所有设置。",
   warningUpdateModeAddNew: "警告：更新模式将添加新项目并更新现有项目。",
-  whenTextSelectedRegexCommands: "当没有选中文本时，正则命令将使用当前行内容而不是剪贴板内容",
+  whenTextSelectedRegexCommands:
+    "当没有选中文本时，正则命令将使用当前行内容而不是剪贴板内容",
   whetherToolbarCentredFullWidth: "工具栏居中还是全宽显示，默认全宽显示",
-  whetherEnableMobileDevicesDevice: "是否在设备宽度小于768的移动设备启用。默认不启用",
+  whetherEnableMobileDevicesDevice:
+    "是否在设备宽度小于768的移动设备启用。默认不启用",
   whetherInsertBeginningNextLine: "是否在下一行首插入",
   whitespaceCleaningCompleted: "空白字符清洗完成",
   description: "[描述]",
@@ -334,7 +341,8 @@ const ui: Partial<Record<keyof typeof KEYS, string>> = {
   matches: "个匹配项",
   insert2: "插入",
   updateModeMergeImportedSettings: "ℹ️ 更新模式将合并导入的设置与现有的设置。",
-  overwriteModeReplaceExistingSettings: "⚠️ 覆盖模式将用导入的配置替换所有设置。",
+  overwriteModeReplaceExistingSettings:
+    "⚠️ 覆盖模式将用导入的配置替换所有设置。",
   format: "】格式\n点击鼠标右键关闭格式刷",
   setCustomBackground: "🎨 设置自定义背景",
   setCustomFontColor: "🖌️ 设置自定义字体颜色",
@@ -343,7 +351,8 @@ const ui: Partial<Record<keyof typeof KEYS, string>> = {
 export default ui;
 
 export const commandNames: Record<string, string> = {
-  "Choose between a glass morphism, tiny and default style": "选择毛玻璃,简约和默认风格",
+  "Choose between a glass morphism, tiny and default style":
+    "选择毛玻璃,简约和默认风格",
   "Adjust Toolbar Position[Fixed mode]": "调整工具栏位置[固定模式]",
   "Result:": "结果：",
   "All settings": "所有设置",
@@ -356,7 +365,8 @@ export const commandNames: Record<string, string> = {
   "Top Style Commands": "顶部样式命令",
   "Fixed Style Commands": "固定样式命令",
   "Mobile Style Commands": "移动端样式命令",
-  "Warning: Overwrite mode will completely replace your current settings with the imported ones.": "警告：覆盖模式将完全替换您当前的设置与导入的设置。",
+  "Warning: Overwrite mode will completely replace your current settings with the imported ones.":
+    "警告：覆盖模式将完全替换您当前的设置与导入的设置。",
   "All commands": "所有命令",
   "section!": "社区！",
   "Custom theme": "自定义主题",
@@ -368,30 +378,30 @@ export const commandNames: Record<string, string> = {
   "Text Processing": "文本处理",
   "Advanced Tools": "高级工具",
   "Align Text Right": "右对齐",
-  "Bold": "加粗",
-  "Checklist": "清单",
+  Bold: "加粗",
+  Checklist: "清单",
   "Clear Text Formatting": "清除文本格式",
-  "Copy": "复制",
-  "Cut": "剪切",
-  "Embed": "嵌入",
+  Copy: "复制",
+  Cut: "剪切",
+  Embed: "嵌入",
   "Header 1": "标题 1",
   "Header 2": "标题 2",
   "Header 3": "标题 3",
   "Header 4": "标题 4",
   "Header 5": "标题 5",
   "Header 6": "标题 6",
-  "Highlight": "高亮",
+  Highlight: "高亮",
   "Horizontal Divider": "水平分隔线",
   "Indent list": "增加列表缩进",
   "Inline Math": "行内公式",
-  "Italic": "斜体",
-  "Link": "链接",
-  "MathBlock": "数学公式块",
+  Italic: "斜体",
+  Link: "链接",
+  MathBlock: "数学公式块",
   "Ordered List": "有序列表",
-  "Paste": "粘贴",
+  Paste: "粘贴",
   "Redo Edit": "重做编辑",
-  "Strikethrough": "删除线",
-  "Underline": "下划线",
+  Strikethrough: "删除线",
+  Underline: "下划线",
   "Undo Edit": "撤销编辑",
   "Unindent List": "减少列表缩进",
   "Unordered List": "无序列表",
@@ -400,12 +410,12 @@ export const commandNames: Record<string, string> = {
   "Swap Line Down": "下移当前行",
   "Attach File": "附加文件",
   "Cycle List and Checklist": "循环切换列表与清单",
-  "Blockquote": "引用块",
-  "Superscript": "上标",
-  "Subscript": "下标",
+  Blockquote: "引用块",
+  Superscript: "上标",
+  Subscript: "下标",
   "Inline Code": "行内代码",
   "Code Block": "代码块",
-  "Wikilink": "内部链接",
+  Wikilink: "内部链接",
   "Justify Text": "两端对齐",
   "Align Text Left": "左对齐",
   "Center Text": "居中对齐",
@@ -414,8 +424,8 @@ export const commandNames: Record<string, string> = {
   "Fullscreen Focus Mode": "全屏专注模式",
   "Workplace Fullscreen": "工作区全屏",
   "Renumber Ordered List": "重新编号有序列表",
-  "Custom": "自定义",
-  "History": "历史记录",
+  Custom: "自定义",
+  History: "历史记录",
   "No history": "暂无历史记录",
   "Edit Template": "编辑模板",
   "Add Template": "添加模板",
@@ -423,10 +433,12 @@ export const commandNames: Record<string, string> = {
   "Enter template name": "输入模板名称",
   "Template name and content cannot be empty": "模板名称和内容不能为空",
   "Manage Templates": "管理模板",
-  "Optional. Leave empty unless your server requires authentication.": "可选。除非服务器要求身份验证，否则请留空。",
+  "Optional. Leave empty unless your server requires authentication.":
+    "可选。除非服务器要求身份验证，否则请留空。",
   "Get Models": "获取模型",
   "No models found at this endpoint.": "该端点未找到模型。",
   "Failed to load models:": "加载模型失败：",
-  "Choose a detected model to fill the model field.": "选择一个检测到的模型以填入模型名称。",
+  "Choose a detected model to fill the model field.":
+    "选择一个检测到的模型以填入模型名称。",
   "Fetch available models from your server.": "从服务器获取可用模型。",
 };

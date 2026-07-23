@@ -1,9 +1,11 @@
 import {
   App,
   ButtonComponent,
+  Command,
   Editor,
   ItemView,
   Menu,
+  MenuItem,
   Notice,
   Platform,
   setIcon,
@@ -176,13 +178,15 @@ export function isExistoolbar(
   return container ? (container as HTMLElement) : null;
 }
 
-const getNestedObject = (nestedObj: any, pathArr: any[]) => {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- walks arbitrary nested hotkey structures
+const getNestedObject = (nestedObj: any, pathArr: (string | number)[]) => {
   return pathArr.reduce(
     (obj, key) => (obj && obj[key] !== "undefined" ? obj[key] : undefined),
     nestedObj,
   );
 };
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- untyped hotkey key-combo structure
 function setHilite(keys: any, how: string) {
   // need to check if existing key combo is overridden by undefining it
   if (keys && keys[1][0] !== undefined) {
@@ -215,6 +219,7 @@ function getHotkey(app: App, cmdid: string, highlight = false) {
   } else return "–";
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- uses undocumented editor coord methods (cursorCoords/coordsAtPos)
 const getCoords = (editor: any) => {
   const cursorFrom = editor.getCursor("head");
   if (editor.getCursor("head").ch !== editor.getCursor("from").ch)
@@ -235,7 +240,7 @@ export function checkHtml(htmlStr: string) {
   return reg.test(htmlStr);
 }
 
-function applyMenuItemIcon(menuItem: any, icon: string) {
+function applyMenuItemIcon(menuItem: MenuItem, icon: string = "") {
   if (!icon) {
     menuItem.setIcon("");
     if (menuItem.iconEl) {
@@ -257,6 +262,17 @@ function applyMenuItemIcon(menuItem: any, icon: string) {
 
   if (menuItem.iconEl && menuItem.iconEl.childElementCount === 0) {
     setIcon(menuItem.iconEl, icon);
+  }
+}
+
+// Render a command's icon onto a toolbar button: raw HTML icons go into the
+// button element, named icons through setIcon. Missing icons fall back to "".
+function applyButtonIcon(btn: ButtonComponent, icon?: string) {
+  const iconStr = icon ?? "";
+  if (checkHtml(iconStr)) {
+    btn.buttonEl.innerHTML = iconStr;
+  } else {
+    btn.setIcon(iconStr);
   }
 }
 
@@ -601,8 +617,8 @@ export function createFollowingbar(
 ) {
   const targetDocument =
     hostDocument ||
-    (editor as any)?.cm?.dom?.ownerDocument ||
-    (editor as any)?.cm?.contentDOM?.ownerDocument ||
+    editor?.cm?.dom?.ownerDocument ||
+    editor?.cm?.contentDOM?.ownerDocument ||
     app.workspace.activeLeaf?.view?.containerEl?.ownerDocument ||
     activeWindow.document;
 
@@ -1073,7 +1089,7 @@ export function editingToolbarPopover(
 
       // Use per-style commands based on the toolbar we are rendering
       const currentCommands = plugin.getCurrentCommands(effectiveStyle);
-      const getLocalizedLabel = (label: string): string => t(label as any);
+      const getLocalizedLabel = (label: string): string => t(label);
       const getLocalizedTooltip = (label: string, hotkey: string): string => {
         const localizedLabel = getLocalizedLabel(label);
         return hotkey === "–" ? localizedLabel : `${localizedLabel}(${hotkey})`;
@@ -1082,7 +1098,7 @@ export function editingToolbarPopover(
       currentCommands.forEach((item, index) => {
         let tip;
         if ("SubmenuCommands" in item) {
-          let _btn: any;
+          let _btn: ButtonComponent;
 
           if (
             shouldMoveButtonToMoreMenu(
@@ -1105,9 +1121,7 @@ export function editingToolbarPopover(
               _btn.buttonEl.setAttribute("aria-label-position", "top");
           }
 
-          checkHtml(item.icon)
-            ? (_btn.buttonEl.innerHTML = item.icon)
-            : _btn.setIcon(item.icon);
+          applyButtonIcon(_btn, item.icon);
 
           btnwidth += buttonWidth + 2;
 
@@ -1122,13 +1136,13 @@ export function editingToolbarPopover(
             _btn.onClick((evt: MouseEvent) => {
               const menu = new Menu();
 
-              item.SubmenuCommands.forEach(
-                (subitem: { name: string; id: any; icon: string }) => {
+              item.SubmenuCommands?.forEach(
+                (subitem: Command) => {
                   if (subitem.id === "editingToolbar-Divider-Line") {
                     menu.addSeparator();
                     menu.addItem((menuItem) => {
                       menuItem
-                        .setTitle(t(subitem.name as any))
+                        .setTitle(t(subitem.name))
                         .setDisabled(true);
 
                       applyMenuItemIcon(menuItem, "");
@@ -1136,7 +1150,7 @@ export function editingToolbarPopover(
                   } else {
                     menu.addItem((menuItem) => {
                       const hotkey = getHotkey(app, subitem.id, false);
-                      const title = t(subitem.name as any);
+                      const title = t(subitem.name);
 
                       const displayTitle = hotkey !== "–" ? `${title}` : title;
 
@@ -1170,8 +1184,8 @@ export function editingToolbarPopover(
           } else {
             const submenu = createDiv("subitem");
             if (submenu) {
-              item.SubmenuCommands.forEach(
-                (subitem: { name: string; id: any; icon: string }) => {
+              item.SubmenuCommands?.forEach(
+                (subitem: Command) => {
                   const hotkey = getHotkey(app, subitem.id);
                   tip = getLocalizedTooltip(subitem.name, hotkey);
                   const sub_btn = new ButtonComponent(submenu)
@@ -1199,9 +1213,7 @@ export function editingToolbarPopover(
                     // aria-label override is needed here.
                     sub_btn.setClass("editingToolbar-Divider-Line");
                   }
-                  checkHtml(subitem.icon)
-                    ? (sub_btn.buttonEl.innerHTML = subitem.icon)
-                    : sub_btn.setIcon(subitem.icon);
+                  applyButtonIcon(sub_btn, subitem.icon);
 
                   _btn.buttonEl.insertAdjacentElement("afterbegin", submenu);
                 },
@@ -1231,9 +1243,7 @@ export function editingToolbarPopover(
                   plugin,
                 );
               });
-            checkHtml(item.icon)
-              ? (button2.buttonEl.innerHTML = item.icon)
-              : button2.setIcon(item.icon);
+            applyButtonIcon(button2, item.icon);
 
             btnwidth += buttonWidth;
             const submenu2 = createEl("div");
@@ -1312,9 +1322,7 @@ export function editingToolbarPopover(
                   plugin,
                 );
               });
-            checkHtml(item.icon)
-              ? (button2.buttonEl.innerHTML = item.icon)
-              : button2.setIcon(item.icon);
+            applyButtonIcon(button2, item.icon);
 
             btnwidth += buttonWidth;
             const submenu2 = createEl("div");
@@ -1415,9 +1423,7 @@ export function editingToolbarPopover(
             if (item.id == "editingToolbar-Divider-Line")
               button.setClass("editingToolbar-Divider-Line");
 
-            checkHtml(item.icon)
-              ? (button.buttonEl.innerHTML = item.icon)
-              : button.setIcon(item.icon);
+            applyButtonIcon(button, item.icon);
 
             btnwidth += buttonWidth;
           }

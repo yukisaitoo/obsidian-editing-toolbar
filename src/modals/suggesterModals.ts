@@ -9,13 +9,13 @@ type IconSelectCallback = (iconId: string) => void;
 
 export class ChooseFromIconList extends FuzzySuggestModal<string> {
   plugin: EditingToolbarPlugin;
-  command: any;
+  command: Command;
   issub: boolean;
   currentEditingConfig:string;
   customCallback: IconSelectCallback | null = null;
   constructor(
-    plugin: EditingToolbarPlugin, 
-    command: any, 
+    plugin: EditingToolbarPlugin,
+    command: Command,
     issub: boolean = false,
     callback?: IconSelectCallback,
     currentEditingConfig?:string
@@ -90,7 +90,7 @@ export class ChooseFromIconList extends FuzzySuggestModal<string> {
     if (this.command.icon) {
       const menuID = findmenuID(this.plugin, this.command, this.issub,currentCommands);
       if (this.issub) {
-        currentCommands[menuID['index']].SubmenuCommands[menuID['subindex']].icon = item;
+        currentCommands[menuID['index']].SubmenuCommands![menuID['subindex']].icon = item;
       } else {
         currentCommands[menuID['index']].icon = item;
       }
@@ -212,7 +212,7 @@ export class CommandPicker extends FuzzySuggestModal<Command> {
   }
 
   getItemText(item: Command): string {
-    return t(item.name as any);
+    return t(item.name);
   }
 
   async onChooseItem(item: Command): Promise<void> {
@@ -223,7 +223,7 @@ export class CommandPicker extends FuzzySuggestModal<Command> {
 
     if (index > -1)
     {
-      new Notice(strings.command2 + t(item.name as any) + strings.alreadyExists, 3000);
+      new Notice(strings.command2 + t(item.name) + strings.alreadyExists, 3000);
       return;
     } else {
       if (item.icon) {
@@ -287,9 +287,9 @@ export class ChangeCmdname extends Modal {
         } else {
           const subindex = menuID['subindex']
           if (subindex === -1) {
-            currentCommands[menuID["index"]].SubmenuCommands.push(this.item);
+            currentCommands[menuID["index"]].SubmenuCommands!.push(this.item);
           } else {
-            currentCommands[menuID['index']].SubmenuCommands[subindex].name = value;
+            currentCommands[menuID['index']].SubmenuCommands![subindex].name = value;
           }
         }
         

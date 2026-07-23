@@ -24,6 +24,7 @@ import {
 import type EditingToolbarPlugin from "src/plugin/main";
 import type {
   AppearanceByStyle,
+  CustomColorKey,
   StyleAppearanceSettings,
   ToolbarStyleKey,
 } from "src/settings/settingsData";
@@ -41,6 +42,22 @@ import {
 } from "src/toolbar/editingToolbar";
 import { strings, t } from "src/translations/helper";
 import { GenNonDuplicateID } from "src/util/util";
+
+const APPEND_METHOD_LABELS: Record<string, string> = {
+  body: strings.body,
+  workspace: strings.workspace,
+};
+const POSITION_STYLE_LABELS: Record<string, string> = {
+  following: strings.followingToolbar,
+  top: strings.topToolbar,
+  fixed: strings.fixedToolbar,
+};
+const AESTHETIC_STYLE_LABELS: Record<string, string> = {
+  default: strings.default,
+  tiny: strings.tiny,
+  glass: strings.glass,
+  custom: strings.customTheme,
+};
 
 interface SubmenuCommand {
   id: string;
@@ -117,7 +134,7 @@ function getPickrSettings(opts: {
   };
 }
 
-function getComandindex(item: any, arr: any[]): number {
+function getComandindex(item: string, arr: Command[]): number {
   if (!arr || !Array.isArray(arr)) {
     return -1;
   }
@@ -133,7 +150,7 @@ export class EditingToolbarSettingTab extends PluginSettingTab {
   private currentEditingConfig: string;
 
   private getLocalizedCommandName(name: string): string {
-    return t(name as any);
+    return t(name);
   }
 
   constructor(app: App, plugin: EditingToolbarPlugin) {
@@ -200,7 +217,7 @@ export class EditingToolbarSettingTab extends PluginSettingTab {
     }
   }
   private createDeleteButton(
-    button: any,
+    button: ButtonComponent,
     deleteAction: () => Promise<void>,
     tooltip: string = strings.delete,
   ) {
@@ -242,7 +259,9 @@ export class EditingToolbarSettingTab extends PluginSettingTab {
       .setDesc(strings.chooseWhereEditingToolbarAppend)
       .addDropdown((dropdown) => {
         const methods: Record<string, string> = {};
-        APPEND_METHODS.map((method) => (methods[method] = t(method)));
+        APPEND_METHODS.map(
+          (method) => (methods[method] = APPEND_METHOD_LABELS[method]),
+        );
         dropdown.addOptions(methods);
         dropdown
           .setValue(this.plugin.settings.appendMethod)
@@ -388,7 +407,8 @@ export class EditingToolbarSettingTab extends PluginSettingTab {
               ],
               opacity: true,
               defaultColor:
-                (this.plugin.settings as any)[`custom_bg${i + 1}`] || "#000000",
+                this.plugin.settings[`custom_bg${i + 1}` as CustomColorKey] ||
+                "#000000",
             }),
           );
           this.setupPickrEvents(pickr, `custom_bg${i + 1}`, "background-color");
@@ -415,7 +435,8 @@ export class EditingToolbarSettingTab extends PluginSettingTab {
               swatches: ["#D83931", "#DE7802", "#245BDB", "#6425D0", "#646A73"],
               opacity: true,
               defaultColor:
-                (this.plugin.settings as any)[`custom_fc${i + 1}`] || "#000000",
+                this.plugin.settings[`custom_fc${i + 1}` as CustomColorKey] ||
+                "#000000",
             }),
           );
           this.setupPickrEvents(pickr, `custom_fc${i + 1}`, "color");
@@ -439,7 +460,9 @@ export class EditingToolbarSettingTab extends PluginSettingTab {
       .setDesc(strings.chooseWhichToolbarStyleS)
       .addDropdown((dropdown) => {
         const positions: Record<string, string> = {};
-        POSITION_STYLES.map((position) => (positions[position] = t(position)));
+        POSITION_STYLES.map(
+          (position) => (positions[position] = POSITION_STYLE_LABELS[position]),
+        );
         dropdown
           .addOptions(positions)
           .setValue(editingStyle)
@@ -912,8 +935,7 @@ export class EditingToolbarSettingTab extends PluginSettingTab {
       .addDropdown((dropdown) => {
         const aesthetics: Record<string, string> = {};
         AESTHETIC_STYLES.forEach((aesthetic) => {
-          aesthetics[aesthetic] =
-            aesthetic === "custom" ? strings.customTheme : t(aesthetic);
+          aesthetics[aesthetic] = AESTHETIC_STYLE_LABELS[aesthetic];
         });
         dropdown.addOptions(aesthetics);
         dropdown.selectEl.options[3].disabled = true; // disable the raw "custom" option
@@ -1189,7 +1211,7 @@ export class EditingToolbarSettingTab extends PluginSettingTab {
       const button = new ButtonComponent(editingToolbar);
       button.setClass("editingToolbarCommandItem");
       button.buttonEl.classList.add("preview-button");
-      button.setTooltip(t(item.name as any));
+      button.setTooltip(t(item.name));
 
       if (item.icon) {
         setIcon(button.buttonEl, item.icon);
@@ -1676,11 +1698,11 @@ export class EditingToolbarSettingTab extends PluginSettingTab {
     });
   }
   private setupPickrEvents(
-    pickr: any,
+    pickr: Pickr,
     settingKey: string,
     cssProperty: string,
   ) {
-    pickr.on("save", (color: any) => {
+    pickr.on("save", (color: Pickr.HSVaColor) => {
       const hexColor = color.toHEXA().toString();
 
       const activeStyle = this.plugin.positionStyle;
@@ -1697,7 +1719,7 @@ export class EditingToolbarSettingTab extends PluginSettingTab {
         const bucket = this.getAppearanceBucket(
           editingStyle as ToolbarStyleKey,
         );
-        (bucket as any)[settingKey] = hexColor;
+        bucket[settingKey] = hexColor;
         // Only push CSS variables if we're editing the active style
         if (activeStyle === editingStyle) {
           document.documentElement.style.setProperty(
@@ -1715,7 +1737,7 @@ export class EditingToolbarSettingTab extends PluginSettingTab {
         this.triggerRefresh();
       } else {
         // All other keys (custom_bgX/custom_fcX) stay as global settings
-        (this.plugin.settings as any)[settingKey] = hexColor;
+        this.plugin.settings[settingKey as CustomColorKey] = hexColor;
       }
       this.plugin.saveSettings();
     });
@@ -1732,15 +1754,16 @@ export class EditingToolbarSettingTab extends PluginSettingTab {
     this.destroyPickrs();
     this.triggerRefresh();
   }
-  private removeCommandFromConfig(commands: any[], commandId: string) {
+  private removeCommandFromConfig(commands: Command[], commandId: string) {
     if (!commands) return;
     for (let i = commands.length - 1; i >= 0; i--) {
       if (commands[i].id === commandId) {
         commands.splice(i, 1);
         continue;
       }
-      if (commands[i].SubmenuCommands) {
-        this.removeCommandFromConfig(commands[i].SubmenuCommands, commandId);
+      const submenu = commands[i].SubmenuCommands;
+      if (submenu) {
+        this.removeCommandFromConfig(submenu, commandId);
       }
     }
   }

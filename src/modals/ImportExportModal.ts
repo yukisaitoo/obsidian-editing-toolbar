@@ -1,4 +1,4 @@
-import { App, ButtonComponent, Modal, Notice, Setting, TextAreaComponent } from "obsidian";
+import { App, ButtonComponent, Command, Modal, Notice, Setting, TextAreaComponent } from "obsidian";
 import { ConfirmModal } from "src/modals/ConfirmModal";
 import type EditingToolbarPlugin from "src/plugin/main";
 import { strings } from 'src/translations/helper';
@@ -136,6 +136,7 @@ export class ImportExportModal extends Modal {
   }
 
   updateExportContent() {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- heterogeneous export payload assembled dynamically
     let exportContent: any = {
       _exportInfo: {
         version: this.plugin.manifest.version,
@@ -225,6 +226,7 @@ export class ImportExportModal extends Modal {
     this.textArea.setValue(JSON.stringify(exportContent, null, 2));
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- validates untyped parsed JSON
   private validateExportContent(exportContent: any) {
     ['menuCommands', 'followingCommands', 'topCommands', 'fixedCommands', 'mobileCommands', 'customCommands'].forEach(key => {
       if (key in exportContent && !exportContent[key]) {
@@ -390,6 +392,7 @@ export class ImportExportModal extends Modal {
 
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- untyped external import JSON
   performOverwriteImport(importData: any) {
     this.importGeneralSettings(importData);
 
@@ -418,6 +421,7 @@ export class ImportExportModal extends Modal {
     }
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- untyped external import JSON
   performUpdateImport(importData: any) {
     this.importGeneralSettings(importData);
 
@@ -445,12 +449,12 @@ export class ImportExportModal extends Modal {
       this.updateCommandArray(this.plugin.settings.mobileCommands, importData.mobileCommands);
     }
   }
-  private updateCommandArray(targetArray: any[], sourceArray: any[]) {
+  private updateCommandArray(targetArray: Command[], sourceArray: Command[]) {
     if (!targetArray) {
       return sourceArray.slice();
     }
 
-    sourceArray.forEach((importedCommand: any) => {
+    sourceArray.forEach((importedCommand: Command) => {
       const existingCommandIndex = targetArray.findIndex(
         cmd => cmd.id === importedCommand.id
       );
@@ -463,7 +467,7 @@ export class ImportExportModal extends Modal {
 
       if (importedCommand.SubmenuCommands && targetArray[existingCommandIndex]?.SubmenuCommands) {
         this.updateCommandArray(
-          targetArray[existingCommandIndex].SubmenuCommands,
+          targetArray[existingCommandIndex].SubmenuCommands!,
           importedCommand.SubmenuCommands
         );
       }
@@ -471,6 +475,7 @@ export class ImportExportModal extends Modal {
 
     return targetArray;
   }
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- untyped external import JSON
   importGeneralSettings(importData: any) {
     const generalSettings = [
       'positionStyle', 'aestheticStyle', 'appendMethod', 'autohide', 'Iscentered',
@@ -482,6 +487,7 @@ export class ImportExportModal extends Modal {
 
     generalSettings.forEach(key => {
       if (importData[key] !== undefined) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any -- dynamic settings-key write from imported data
         (this.plugin.settings as any)[key] = importData[key];
       }
     });
@@ -502,7 +508,7 @@ export class ImportExportModal extends Modal {
       'cMenuToolbar-Divider-Line': 'editingToolbar-Divider-Line',
     };
 
-    const fixCommandsInArray = (commands: any[]) => {
+    const fixCommandsInArray = (commands: Command[]) => {
       if (!commands || !Array.isArray(commands)) return;
 
       commands.forEach(cmd => {
@@ -524,6 +530,7 @@ export class ImportExportModal extends Modal {
     fixCommandsInArray(this.plugin.settings.mobileCommands);
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- untyped backup JSON snapshot
   restoreBackup(backup: any) {
     this.plugin.settings.positionStyle = backup.positionStyle;
     this.plugin.settings.menuCommands = backup.menuCommands;

@@ -32,6 +32,7 @@ declare module "obsidian" {
 	interface Plugins {
 		manifests: Record<string, PluginManifest>;
 		plugins: Record<string, Plugin>;
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any -- undeclared Obsidian internal
 		enabledPlugins: any;
 		enablePlugin(pluginId: string): Promise<boolean>;
 		disablePlugin(pluginId: string): Promise<void>;
@@ -56,6 +57,7 @@ declare module "obsidian" {
 	}
 
 	interface Editor {
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any -- CodeMirror editor handle, untyped by Obsidian
 		cm: any;
 		getScrollerElement: () => HTMLElement;
 		containerEl: HTMLElement;
@@ -69,6 +71,7 @@ declare module "obsidian" {
 	}
 
 	interface EditorSuggestManager {
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Obsidian's own suggest generic is unconstrained here
 		suggests: EditorSuggest<any>[];
 	}
 

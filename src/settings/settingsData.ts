@@ -108,6 +108,11 @@ export interface CustomCommand {
   conditionPattern?: string;
 }
 
+/** Keys of the user-defined custom color swatches, all of which hold hex strings. */
+export type CustomColorKey =
+  | `custom_bg${1 | 2 | 3 | 4 | 5}`
+  | `custom_fc${1 | 2 | 3 | 4 | 5}`;
+
 export interface editingToolbarSettings {
   cMenuWidth: number;
   cMenuFontColor: string;
