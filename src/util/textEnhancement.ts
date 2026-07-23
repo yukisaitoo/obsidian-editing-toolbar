@@ -2,12 +2,24 @@ import { Editor, Notice } from "obsidian";
 import { strings } from "src/translations/helper";
 
 export class TextEnhancement {
-  static getPlainText(editor: Editor): void {
+  // Single gate for selection-backed tools: returns a non-empty selection or
+  // shows the given prompt and returns null. Callers that get a string can
+  // treat it as guaranteed-present.
+  private static requireSelection(
+    editor: Editor,
+    emptyMessage: string = strings.pleaseSelectTextFirst
+  ): string | null {
     const selection = editor.getSelection();
-    if (!selection) {
-      new Notice(strings.pleaseSelectTextFirst);
-      return;
+    if (!selection || selection.trim() === "") {
+      new Notice(emptyMessage);
+      return null;
     }
+    return selection;
+  }
+
+  static getPlainText(editor: Editor): void {
+    const selection = this.requireSelection(editor);
+    if (selection === null) return;
 
     const mdPattern =
       /(^#+\s|(?<=^|\s*)#|^>|^- \[( |x)\]|^\+ |<[^<>]+>|^1\. |^-+$|^\*+$|==|\*+|~~|```|!*\[\[|\]\])/gm;
@@ -41,11 +53,8 @@ export class TextEnhancement {
       compactEmptyLines?: boolean;
     } = {}
   ): void {
-    const selection = editor.getSelection();
-    if (!selection) {
-      new Notice(strings.pleaseSelectTextFirst);
-      return;
-    }
+    const selection = this.requireSelection(editor);
+    if (selection === null) return;
 
     let result = selection;
 
@@ -85,11 +94,8 @@ export class TextEnhancement {
     new Notice(strings.whitespaceCleaningCompleted);
   }
   static splitLines(editor: Editor): void {
-    const selection = editor.getSelection();
-    if (!selection) {
-      new Notice(strings.pleaseSelectTextFirst);
-      return;
-    }
+    const selection = this.requireSelection(editor);
+    if (selection === null) return;
 
     const listPattern = this.detectPattern(selection);
 
@@ -184,11 +190,8 @@ export class TextEnhancement {
   }
 
   static smartTypography(editor: Editor): void {
-    const selection = editor.getSelection();
-    if (!selection || selection.trim().length === 0) {
-      new Notice(strings.pleaseSelectTextFirst);
-      return;
-    }
+    const selection = this.requireSelection(editor);
+    if (selection === null) return;
 
     const cjkRegex = /[\u4e00-\u9fa5]/g;
     const cjkCount = (selection.match(cjkRegex) || []).length;
@@ -257,11 +260,8 @@ export class TextEnhancement {
       sort?: boolean;
     } = {}
   ): void {
-    const selection = editor.getSelection();
-    if (!selection) {
-      new Notice(strings.pleaseSelectTextDedupeFirst);
-      return;
-    }
+    const selection = this.requireSelection(editor, strings.pleaseSelectTextDedupeFirst);
+    if (selection === null) return;
 
     const lines = selection.split(/\r?\n/);
     const seen = new Set<string>();
@@ -333,11 +333,8 @@ export class TextEnhancement {
     separator: string = ". ",
     prefix: string = ""
   ): void {
-    const selection = editor.getSelection();
-    if (!selection) {
-      new Notice(strings.pleaseSelectTextNumberFirst);
-      return;
-    }
+    const selection = this.requireSelection(editor, strings.pleaseSelectTextNumberFirst);
+    if (selection === null) return;
 
     const lines = selection.split("\n");
     let currentNum = startNumber;
@@ -406,11 +403,8 @@ export class TextEnhancement {
       trimLines?: boolean;
     }
   ): void {
-    const selection = editor.getSelection();
-    if (!selection || selection.trim() === "") {
-      new Notice(strings.pleaseSelectLinesMergeFirst);
-      return;
-    }
+    const selection = this.requireSelection(editor, strings.pleaseSelectLinesMergeFirst);
+    if (selection === null) return;
 
     const lines = selection.split(/\r?\n/);
     const hasCustomSep = options.separator !== "";

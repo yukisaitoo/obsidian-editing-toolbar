@@ -17,8 +17,7 @@ export interface AppearanceByStyle {
 
 /**
  * Read a per-style appearance value: the value stored in `style`'s bucket, falling
- * back to the legacy global field on `settings`. Explicit replacement for the old
- * Object.defineProperty getter that transparently redirected `settings.<key>`.
+ * back to the global default field on `settings`.
  */
 export function getAppearanceValue<K extends keyof StyleAppearanceSettings>(
   settings: editingToolbarSettings,
@@ -155,7 +154,7 @@ export interface editingToolbarSettings {
   // Per-style appearance buckets (top/following/fixed/mobile)
   appearanceByStyle?: AppearanceByStyle;
 
-  // Legacy/global appearance fields, used as defaults and for migration
+  // Global appearance defaults, used as the fallback for empty per-style buckets
   toolbarBackgroundColor: string;
   toolbarIconColor: string;
   toolbarIconSize: number;
@@ -560,7 +559,7 @@ export const DEFAULT_SETTINGS: editingToolbarSettings = {
     "fixedCommands": [],
     "mobileCommands": [],
     "enableMultipleConfig": false,
-    "enableTopToolbar": false,
+    "enableTopToolbar": true,
     "enableFollowingToolbar": false,
     "enableFixedToolbar": false,
     "appendMethod": "workspace",
@@ -590,7 +589,7 @@ export const DEFAULT_SETTINGS: editingToolbarSettings = {
     "customCommands": [],
     "viewTypeSettings": {},
 
-    // New: per-style appearance buckets, initially cloned from the legacy globals
+    // Per-style appearance buckets
     "appearanceByStyle": {
       "top": {
         "toolbarBackgroundColor": "rgba(var(--background-secondary-rgb), 0.7)",
@@ -618,7 +617,7 @@ export const DEFAULT_SETTINGS: editingToolbarSettings = {
       }
     },
 
-    // Legacy/global appearance fields kept for migration + backwards compatibility
+    // Global appearance defaults: used as the fallback for any empty per-style bucket
     "toolbarBackgroundColor": "rgba(var(--background-secondary-rgb), 0.7)",
     "toolbarIconColor": "var(--text-normal)",
     "toolbarIconSize": 18,

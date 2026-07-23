@@ -1,4 +1,4 @@
-import { App, ButtonComponent, Editor, ItemView, Menu, Notice, Platform, requireApiVersion, setIcon, WorkspaceItemExt, WorkspaceParent, WorkspaceParentExt, WorkspaceWindow } from "obsidian";
+import { App, ButtonComponent, Editor, ItemView, Menu, Notice, Platform, setIcon, WorkspaceItemExt, WorkspaceParent, WorkspaceParentExt, WorkspaceWindow } from "obsidian";
 import type EditingToolbarPlugin from "src/plugin/main";
 import {
   AppearanceByStyle,
@@ -44,9 +44,7 @@ function getRootSplits(app: App): WorkspaceParentExt[] {
 }
 
 export function resetToolbar(plugin?: EditingToolbarPlugin) {
-  requireApiVersion("0.15.0")
-    ? (activeDocument = activeWindow.document)
-    : (activeDocument = window.document);
+  activeDocument = activeWindow.document;
 
   const currentDoc = activeDocument;
 
@@ -73,9 +71,7 @@ export function resetToolbar(plugin?: EditingToolbarPlugin) {
 }
 
 export function selfDestruct(plugin: EditingToolbarPlugin) {
-  requireApiVersion("0.15.0")
-    ? (activeDocument = activeWindow.document)
-    : (activeDocument = window.document);
+  activeDocument = activeWindow.document;
 
   const rootSplits = getRootSplits(plugin.app);
 
@@ -122,7 +118,7 @@ export function isExistoolbar(
   const targetDocument =
     hostDocument ||
     app.workspace.activeLeaf?.view?.containerEl?.ownerDocument ||
-    (requireApiVersion("0.15.0") ? activeWindow.document : window.document);
+    activeWindow.document;
 
   activeDocument = targetDocument;
 
@@ -287,7 +283,7 @@ export function createDiv(selector: string) {
 
 
 function createTablecell(app: App, plugin: EditingToolbarPlugin, el: string, root?: ParentNode) {
-  requireApiVersion("0.15.0") ? activeDocument = activeWindow.document : activeDocument = window.document;
+  activeDocument = activeWindow.document;
 
   const container = root || (isExistoolbar(app, plugin) as HTMLElement | null);
   const tab = container?.querySelector('#' + el);
@@ -302,6 +298,7 @@ function createTablecell(app: App, plugin: EditingToolbarPlugin, el: string, roo
           event.preventDefault();
           event.stopPropagation();
           const editor = plugin.commandsManager.getActiveEditor();
+          if (!editor) return;
           let backcolor = (event.currentTarget as HTMLElement).style.backgroundColor;
           if (backcolor != "") {
             backcolor = setcolorHex(backcolor);
@@ -535,7 +532,7 @@ export function createFollowingbar(
     (editor as any)?.cm?.dom?.ownerDocument ||
     (editor as any)?.cm?.contentDOM?.ownerDocument ||
     app.workspace.activeLeaf?.view?.containerEl?.ownerDocument ||
-    (requireApiVersion("0.15.0") ? activeWindow.document : window.document);
+    activeWindow.document;
 
   let editingToolbarModalBar = isExistoolbar(app, plugin, "following", targetDocument);
 
@@ -547,15 +544,9 @@ export function createFollowingbar(
     return;
   }
 
-  const followingEnabled =
-    // New multi-toolbar toggle
-    plugin.settings.enableFollowingToolbar ||
-    // Legacy single-style behaviour: no other style is explicitly enabled
-    (!plugin.settings.enableTopToolbar &&
-      !plugin.settings.enableFixedToolbar &&
-      plugin.positionStyle === "following");
-
-  if (!followingEnabled) return;
+  // The explicit enable flag is the source of truth; legacy positionStyle-only
+  // configs are migrated into it in loadSettings().
+  if (!plugin.settings.enableFollowingToolbar) return;
 
   if (!editingToolbarModalBar) {
     editingToolbarPopover(app, plugin, "following", targetDocument);
@@ -678,26 +669,17 @@ export function editingToolbarPopover(
   const targetDocument =
     hostDocument ||
     app.workspace.activeLeaf?.view?.containerEl?.ownerDocument ||
-    (requireApiVersion("0.15.0") ? activeWindow.document : window.document);
+    activeWindow.document;
 
   activeDocument = targetDocument;
 
-  // NEW: if no explicit style is provided, render toolbars for all enabled styles.
+  // If no explicit style is provided, render toolbars for all enabled styles.
   if (!style) {
     const stylesToRender: ToolbarStyleKey[] = [];
 
     if (settings.enableTopToolbar) stylesToRender.push("top");
     if (settings.enableFollowingToolbar) stylesToRender.push("following");
     if (settings.enableFixedToolbar) stylesToRender.push("fixed");
-
-    // Fallback to legacy single-style behaviour if nothing is explicitly enabled
-    if (stylesToRender.length === 0) {
-      const legacyStyle =
-        (plugin.positionStyle as ToolbarStyleKey) ||
-        (plugin.settings.positionStyle as ToolbarStyleKey) ||
-        "top";
-      stylesToRender.push(legacyStyle);
-    }
 
     stylesToRender.forEach((styleKey) => {
       // Each call below runs the rest of this function with an explicit style.
@@ -1315,7 +1297,7 @@ export function editingToolbarPopover(
 }
 
 function setsvgColor(fontcolor: string, bgcolor: string) {
-  requireApiVersion("0.15.0") ? activeDocument = activeWindow.document : activeDocument = window.document;
+  activeDocument = activeWindow.document;
 
   const fontColorIcons = activeDocument.querySelectorAll("#change-font-color-icon");
   const bgColorIcons = activeDocument.querySelectorAll("#change-background-color-icon");

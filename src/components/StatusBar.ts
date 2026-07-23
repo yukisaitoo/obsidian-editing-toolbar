@@ -1,4 +1,4 @@
-import { ItemView, Menu, requireApiVersion, setIcon, ToggleComponent } from "obsidian";
+import { ItemView, Menu, setIcon, ToggleComponent } from "obsidian";
 import { selfDestruct } from "src/toolbar/editingToolbar";
 import { CommandPicker, openSlider } from "src/modals/suggesterModals";
 import type EditingToolbarPlugin from "src/plugin/main";
@@ -56,7 +56,7 @@ export class StatusBar {
   private addVisibilityToggle(menu: Menu): void {
     menu.addItem((item) => {
       item.setTitle(strings.hideShow);
-      if (requireApiVersion("0.15.0")) item.setSection("settings");
+      item.setSection("settings");
       const itemDom = (item as any).dom as HTMLElement;
       const toggleComponent = new ToggleComponent(itemDom)
         .setValue(this.plugin.settings.cMenuVisibility)
@@ -83,17 +83,14 @@ export class StatusBar {
 
     menu.addItem((item) => {
       item.setTitle(strings.toolbarPosition);
-      if (requireApiVersion("0.15.0")) item.setSection("settings");
+      item.setSection("settings");
       item.setIcon("dock");
 
       const submenu = item.setSubmenu();
 
       submenu.addItem((subItem) => {
         subItem.setTitle(strings.topToolbar);
-        const itemDom = (subItem as any).dom as HTMLElement;
-        const toggleComponent = new ToggleComponent(itemDom)
-          .setValue(this.plugin.settings.enableTopToolbar || false)
-          .setDisabled(true);
+        subItem.setChecked(this.plugin.settings.enableTopToolbar || false);
 
         subItem.onClick(async (e) => {
           e.preventDefault();
@@ -101,7 +98,7 @@ export class StatusBar {
           const s = this.plugin.settings;
           const prevStyle = this.plugin.positionStyle;
           s.enableTopToolbar = !s.enableTopToolbar;
-          toggleComponent.setValue(s.enableTopToolbar);
+          subItem.setChecked(s.enableTopToolbar);
           const nextStyle = resolveNextPositionStyle(s, 'top', s.enableTopToolbar, prevStyle);
           if (nextStyle && nextStyle !== prevStyle) {
             this.plugin.onPositionStyleChange(nextStyle);
@@ -113,10 +110,7 @@ export class StatusBar {
 
       submenu.addItem((subItem) => {
         subItem.setTitle(strings.followingToolbar);
-        const itemDom = (subItem as any).dom as HTMLElement;
-        const toggleComponent = new ToggleComponent(itemDom)
-          .setValue(this.plugin.settings.enableFollowingToolbar || false)
-          .setDisabled(true);
+        subItem.setChecked(this.plugin.settings.enableFollowingToolbar || false);
 
         subItem.onClick(async (e) => {
           e.preventDefault();
@@ -124,7 +118,7 @@ export class StatusBar {
           const s = this.plugin.settings;
           const prevStyle = this.plugin.positionStyle;
           s.enableFollowingToolbar = !s.enableFollowingToolbar;
-          toggleComponent.setValue(s.enableFollowingToolbar);
+          subItem.setChecked(s.enableFollowingToolbar);
           const nextStyle = resolveNextPositionStyle(s, 'following', s.enableFollowingToolbar, prevStyle);
           if (nextStyle && nextStyle !== prevStyle) {
             this.plugin.onPositionStyleChange(nextStyle);
@@ -136,10 +130,7 @@ export class StatusBar {
 
       submenu.addItem((subItem) => {
         subItem.setTitle(strings.fixedToolbar);
-        const itemDom = (subItem as any).dom as HTMLElement;
-        const toggleComponent = new ToggleComponent(itemDom)
-          .setValue(this.plugin.settings.enableFixedToolbar || false)
-          .setDisabled(true);
+        subItem.setChecked(this.plugin.settings.enableFixedToolbar || false);
 
         subItem.onClick(async (e) => {
           e.preventDefault();
@@ -147,7 +138,7 @@ export class StatusBar {
           const s = this.plugin.settings;
           const prevStyle = this.plugin.positionStyle;
           s.enableFixedToolbar = !s.enableFixedToolbar;
-          toggleComponent.setValue(s.enableFixedToolbar);
+          subItem.setChecked(s.enableFixedToolbar);
           const nextStyle = resolveNextPositionStyle(s, 'fixed', s.enableFixedToolbar, prevStyle);
           if (nextStyle && nextStyle !== prevStyle) {
             this.plugin.onPositionStyleChange(nextStyle);
@@ -167,7 +158,7 @@ export class StatusBar {
     
     menu.addItem((item) => {
       item.setTitle(strings.currentView + viewType);
-      if (requireApiVersion("0.15.0")) item.setSection("settings");
+      item.setSection("settings");
       item.setIcon("layout-template");
       
       const submenu = item.setSubmenu();
@@ -276,10 +267,7 @@ export class StatusBar {
         item.setIcon(control.icon);
         item.setTitle(control.title);
         item.onClick(control.click);
-
-        if (requireApiVersion("0.15.0")) {
-          item.setSection("controls");
-        }
+        item.setSection("controls");
       });
     });
   }
@@ -287,7 +275,7 @@ export class StatusBar {
   private addAestheticStyleToggle(menu: Menu): void {
     menu.addItem((item) => {
       item.setTitle(strings.appearanceStyle);
-      if (requireApiVersion("0.15.0")) item.setSection("settings");
+      item.setSection("settings");
       item.setIcon("cherry");
 
       const submenu = item.setSubmenu();

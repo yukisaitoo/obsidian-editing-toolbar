@@ -1,5 +1,4 @@
 import {
-  App,
   debounce,
   Editor,
   ItemView,
@@ -9,68 +8,36 @@ import {
   Notice,
   Platform,
   Plugin,
-  requireApiVersion,
 } from "obsidian";
 import { CommandsManager } from "src/commands/commands";
 import { StatusBar } from "src/components/StatusBar";
 import addIcons from "src/icons/customIcons";
-import { createFollowingbar, editingToolbarPopover, isExistoolbar, quiteFormatbrushes, resetToolbar, selfDestruct, setFormateraser } from "src/toolbar/editingToolbar";
 import { InsertLinkModal } from "src/modals/insertLinkModal";
-import { DEFAULT_SETTINGS, editingToolbarSettings, getAppearanceValue } from "src/settings/settingsData";
-import { strings } from 'src/translations/helper';
+import type { ToolbarStyleKey } from "src/settings/settingsData";
+import {
+  DEFAULT_SETTINGS,
+  editingToolbarSettings,
+  getAppearanceValue,
+} from "src/settings/settingsData";
+import {
+  createFollowingbar,
+  editingToolbarPopover,
+  isExistoolbar,
+  quiteFormatbrushes,
+  resetToolbar,
+  selfDestruct,
+  setFormateraser,
+} from "src/toolbar/editingToolbar";
+import { strings } from "src/translations/helper";
 import { setBackgroundcolor, setFontcolor } from "src/util/util";
-import { ViewUtils } from 'src/util/viewUtils';
-import { EditingToolbarSettingTab } from '../settings/settingsTab';
+import { ViewUtils } from "src/util/viewUtils";
+import { EditingToolbarSettingTab } from "../settings/settingsTab";
 
 let activeDocument: Document;
 
-import type { AppearanceByStyle, StyleAppearanceSettings, ToolbarStyleKey } from "src/settings/settingsData";
-
-// ---- Per-style appearance helpers ----
-
 const STYLE_KEYS: ToolbarStyleKey[] = ["top", "following", "fixed", "mobile"];
 
-const APPEARANCE_KEYS: Array<keyof StyleAppearanceSettings> = [
-  "toolbarBackgroundColor",
-  "toolbarIconColor",
-  "toolbarIconSize",
-  "aestheticStyle",
-];
-
-function ensureAppearanceStore(
-  settings: editingToolbarSettings,
-  migratingFromGlobal: boolean
-): void {
-  if (!settings.appearanceByStyle || typeof settings.appearanceByStyle !== "object") {
-    settings.appearanceByStyle = {};
-  }
-
-  const store = settings.appearanceByStyle as AppearanceByStyle;
-
-  // Ensure bucket objects exist for each style
-  STYLE_KEYS.forEach((style) => {
-    if (!store[style] || typeof store[style] !== "object") {
-      store[style] = {};
-    }
-  });
-
-  // On first migration: seed all style buckets from the legacy/global fields
-  if (migratingFromGlobal) {
-    APPEARANCE_KEYS.forEach((key) => {
-      const legacyValue = (settings as any)[key];
-      if (legacyValue === undefined) return;
-
-      STYLE_KEYS.forEach((style) => {
-        const bucket = store[style]!;
-        if (!(key in bucket)) {
-          (bucket as any)[key] = legacyValue;
-        }
-      });
-    });
-  }
-}
-// ---- end per-style appearance helpers ----
-export interface AdmonitionDefinition  {
+export interface AdmonitionDefinition {
   type: string;
   title?: string;
   icon: string;
@@ -122,17 +89,147 @@ export default class EditingToolbarPlugin extends Plugin {
   private toolbarCache: Map<ToolbarStyleKey, HTMLElement> = new Map();
   private popoverCache: Map<ToolbarStyleKey, HTMLElement> = new Map();
 
+  async onload(): Promise<void> {
+    activeDocument = activeWindow.document;
 
+    await this.loadSettings();
 
-  // Ensure per-style appearance buckets exist, migrating from the legacy global
-  // fields on first run. Reads/writes go through getAppearanceValue/setAppearanceValue
-  // + resolveActiveStyle() (no more Object.defineProperty redirection on settings).
+    this.initAppearanceStore();
+
+    this.settingTab = new EditingToolbarSettingTab(this.app, this);
+    this.addSettingTab(this.settingTab);
+
+    this.commandsManager = new CommandsManager(this);
+    this.commandsManager.registerCommands();
+    this.app.workspace.onLayoutReady(() => {
+      this.statusBar = new StatusBar(this);
+      this.statusBar.init();
+
+      // Ensure toolbar respects initial visibility state after Settings Search completes
+      // Use a small delay to ensure Settings Search has finished scanning settings tabs
+      setTimeout(() => {
+        if (!this.settings.cMenuVisibility) {
+          this.handleEditingToolbar();
+        }
+      }, 100);
+    });
+    this.init_evt(activeDocument);
+    this.registerEvent(
+      this.app.workspace.on("window-open", (leaf) => {
+        this.init_evt(leaf.doc);
+        setTimeout(() => {
+          if (!this.settings.cMenuVisibility) {
+            return;
+          }
+
+          if (this.isFollowingToolbarActive()) {
+            editingToolbarPopover(this.app, this, "following", leaf.doc);
+          }
+
+          if (this.settings.enableFixedToolbar) {
+            editingToolbarPopover(this.app, this, "fixed", leaf.doc);
+          }
+        }, 50);
+      }),
+    );
+
+    this.registerEvent(
+      this.app.workspace.on("active-leaf-change", this.handleEditingToolbar),
+    );
+    this.registerEvent(
+      this.app.workspace.on("layout-change", this.handleEditingToolbar_layout),
+    );
+    this.registerEvent(
+      this.app.workspace.on("resize", this.handleEditingToolbar_resize),
+    );
+    if (this.settings.cMenuVisibility == true) {
+      setTimeout(() => {
+        dispatchEvent(new Event("editingToolbar-NewCommand"));
+      }, 100);
+    }
+    this.registerDomEvent(activeDocument, "contextmenu", (e) => {
+      if (
+        this.settings.isLoadOnMobile &&
+        Platform.isMobile &&
+        this.isFollowingToolbarActive()
+      ) {
+        const { target } = e;
+        if (target instanceof HTMLElement) {
+          const iseditor = target.closest(".cm-editor") !== null;
+          if (iseditor) {
+            e.preventDefault();
+          }
+        }
+      }
+    });
+
+    this.app.workspace.onLayoutReady(async () => {
+      await this.tryGetAdmonitionTypes();
+    });
+
+    this.registerEvent(
+      this.app.workspace.on("editor-menu", this.handleEditorContextMenu),
+    );
+    this.registerEvent(
+      this.app.workspace.on(
+        // @ts-expect-error untyped API access
+        "url-menu",
+        (menu: Menu, _url: string, _view: MarkdownView) => {
+          menu.addItem((item) =>
+            item
+              .setTitle("Edit Link(Modal)")
+              .setSection("info")
+              .setIcon("link")
+              .onClick(() => {
+                new InsertLinkModal(this).open();
+              }),
+          );
+        },
+      ),
+    );
+    addIcons();
+    this.positionStyle = this.settings.positionStyle;
+    const activeStyle = this.resolveActiveStyle();
+    this.toolbarIconSize = getAppearanceValue(
+      this.settings,
+      "toolbarIconSize",
+      activeStyle,
+    );
+    activeDocument.documentElement.style.setProperty(
+      "--editing-toolbar-background-color",
+      getAppearanceValue(this.settings, "toolbarBackgroundColor", activeStyle),
+    );
+    activeDocument.documentElement.style.setProperty(
+      "--editing-toolbar-icon-color",
+      getAppearanceValue(this.settings, "toolbarIconColor", activeStyle),
+    );
+    activeDocument.documentElement.style.setProperty(
+      "--toolbar-icon-size",
+      `${getAppearanceValue(this.settings, "toolbarIconSize", activeStyle)}px`,
+    );
+  }
+
+  async loadSettings() {
+    const loadedData = await this.loadData();
+    this.settings = Object.assign({}, DEFAULT_SETTINGS, loadedData);
+
+    // normalize settings
+    for (const key of Object.keys(
+      DEFAULT_SETTINGS,
+    ) as (keyof editingToolbarSettings)[]) {
+      if (this.settings[key] === undefined || this.settings[key] === null) {
+        (this.settings[key] as unknown) = DEFAULT_SETTINGS[key];
+      }
+    }
+  }
+
+  // Ensure per-style appearance buckets exist. Empty buckets fall back to the
+  // global appearance fields via getAppearanceValue().
   private initAppearanceStore(): void {
-    const settings = this.settings;
-    if (!settings) return;
-
-    const migratingFromGlobal = !settings.appearanceByStyle;
-    ensureAppearanceStore(settings, migratingFromGlobal);
+    const store = (this.settings.appearanceByStyle ??= {});
+    for (const style of STYLE_KEYS) {
+      store[style] ??= {};
+    }
   }
 
   /**
@@ -140,12 +237,10 @@ export default class EditingToolbarPlugin extends Plugin {
    * edited in settings, else the live position style, else the stored fallback.
    */
   public resolveActiveStyle(): ToolbarStyleKey {
-    const raw = (
-      this.appearanceEditStyle ||
+    const raw = (this.appearanceEditStyle ||
       this.positionStyle ||
       this.settings.positionStyle ||
-      "top"
-    ) as string;
+      "top") as string;
     return STYLE_KEYS.includes(raw as ToolbarStyleKey)
       ? (raw as ToolbarStyleKey)
       : "top";
@@ -159,7 +254,10 @@ export default class EditingToolbarPlugin extends Plugin {
     this.app.commands.executeCommandById(this.getPluginCommandId(commandId));
   }
 
-  private addEditorContextAction(menu: Menu, action: EditorContextMenuAction): void {
+  private addEditorContextAction(
+    menu: Menu,
+    action: EditorContextMenuAction,
+  ): void {
     menu.addItem((item) => {
       item.setTitle(action.title);
 
@@ -193,7 +291,7 @@ export default class EditingToolbarPlugin extends Plugin {
 
     menu.addItem((item) => {
       item.setTitle(title).setIcon(icon);
-      if (requireApiVersion("0.15.0")) item.setSection("info");
+      item.setSection("info");
 
       const submenu = item.setSubmenu();
       actions.forEach((action) => this.addEditorContextAction(submenu, action));
@@ -217,8 +315,14 @@ export default class EditingToolbarPlugin extends Plugin {
         { title: strings.addPrefixSuffix, commandId: "add-wrap" },
         { title: strings.numberLinesCustom, commandId: "number-lines" },
         { title: strings.trimLineEnds, commandId: "remove-whitespace-trim" },
-        { title: strings.shrinkExtraSpaces, commandId: "remove-whitespace-compress" },
-        { title: strings.removeAllWhitespace, commandId: "remove-whitespace-all" },
+        {
+          title: strings.shrinkExtraSpaces,
+          commandId: "remove-whitespace-compress",
+        },
+        {
+          title: strings.removeAllWhitespace,
+          commandId: "remove-whitespace-all",
+        },
         { title: strings.extractBetweenStrings, commandId: "extract-between" },
         { title: strings.listTable, commandId: "list-to-table" },
         { title: strings.tableList, commandId: "table-to-list" },
@@ -234,7 +338,10 @@ export default class EditingToolbarPlugin extends Plugin {
     }
 
     if (isOrderedListLine) {
-      actions.push({ title: strings.renumberList, commandId: "renumber-ordered-list" });
+      actions.push({
+        title: strings.renumberList,
+        commandId: "renumber-ordered-list",
+      });
     }
 
     if (!hasSelection && isTableContext) {
@@ -253,148 +360,27 @@ export default class EditingToolbarPlugin extends Plugin {
     editor: Editor,
     _view: MarkdownView | MarkdownFileInfo,
   ): void => {
-    this.addEditorContextSubmenu(menu, strings.textTools, "whole-word", this.buildTextContextActions(editor));
+    this.addEditorContextSubmenu(
+      menu,
+      strings.textTools,
+      "whole-word",
+      this.buildTextContextActions(editor),
+    );
   };
 
-  async onload(): Promise<void> {
-    const currentVersion = this.manifest.version;
-    console.log("editingToolbar v" + currentVersion + " loaded");
-  
-    requireApiVersion("0.15.0") ? activeDocument = activeWindow.document : activeDocument = window.document;
-  
-    await this.loadSettings();
-
-    // IMPORTANT: wire up per-style getters/setters before we start using appearance fields
-    this.initAppearanceStore();
-  
-    this.settingTab = new EditingToolbarSettingTab(this.app, this);
-    this.addSettingTab(this.settingTab);
-
-    this.commandsManager = new CommandsManager(this);
-    this.commandsManager.registerCommands();
-    const editor = this.commandsManager.getActiveEditor();
-    this.app.workspace.onLayoutReady(() => {
-      this.statusBar = new StatusBar(this);
-      this.statusBar.init();
-      
-      // Ensure toolbar respects initial visibility state after Settings Search completes
-      // Use a small delay to ensure Settings Search has finished scanning settings tabs
-      setTimeout(() => {
-        if (!this.settings.cMenuVisibility) {
-          this.handleEditingToolbar();
-        }
-      }, 100);
-    });
-    this.init_evt(activeDocument, editor);
-    if (requireApiVersion("0.15.0")) {
-      this.registerEvent(this.app.workspace.on("window-open", (leaf) => {
-        this.init_evt(leaf.doc, editor);
-        setTimeout(() => {
-          if (!this.settings.cMenuVisibility) {
-            return;
-          }
-
-          if (this.isFollowingToolbarActive()) {
-            editingToolbarPopover(this.app, this, "following", leaf.doc);
-          }
-
-          const fixedEnabled =
-            this.settings.enableFixedToolbar ||
-            (!this.settings.enableTopToolbar &&
-              !this.settings.enableFollowingToolbar &&
-              this.positionStyle === "fixed");
-
-          if (fixedEnabled) {
-            editingToolbarPopover(this.app, this, "fixed", leaf.doc);
-          }
-        }, 50);
-      }));
-    }
-
-    this.registerEvent(
-      this.app.workspace.on("active-leaf-change", this.handleEditingToolbar)
-    );
-    this.registerEvent(
-      this.app.workspace.on("layout-change", this.handleEditingToolbar_layout)
-    );
-    this.registerEvent(
-      this.app.workspace.on("resize", this.handleEditingToolbar_resize)
-    );
-    if (this.settings.cMenuVisibility == true) {
-      setTimeout(() => {
-        dispatchEvent(new Event("editingToolbar-NewCommand"));
-      }, 100);
-    }
-    this.registerDomEvent(
-      activeDocument,
-      'contextmenu',
-      e => {
-        if (this.settings.isLoadOnMobile && Platform.isMobile && this.isFollowingToolbarActive()) {
-          const { target } = e;
-          if (target instanceof HTMLElement) {
-            const iseditor = target.closest('.cm-editor') !== null;
-            if (iseditor) {
-              e.preventDefault();
-            }
-          }
-        }
-      },
-    );
-
-this.app.workspace.onLayoutReady(async () => {
-  await this.tryGetAdmonitionTypes();
-});
-
-    this.registerEvent(
-      this.app.workspace.on("editor-menu", this.handleEditorContextMenu)
-    );
-    this.registerEvent(
-      // @ts-expect-error untyped API access
-      this.app.workspace.on('url-menu', (menu: Menu, _url: string, _view: MarkdownView) => {
-        menu.addItem((item) =>
-          item
-            .setTitle('Edit Link(Modal)')
-            .setSection("info")
-            .setIcon('link')
-            .onClick(() => {
-
-              new InsertLinkModal(this).open()
-            })
-        );
-      })
-    );
-    addIcons();
-    this.positionStyle = this.settings.positionStyle;
-    const activeStyle = this.resolveActiveStyle();
-    this.toolbarIconSize = getAppearanceValue(this.settings, "toolbarIconSize", activeStyle);
-    activeDocument.documentElement.style.setProperty(
-      "--editing-toolbar-background-color",
-      getAppearanceValue(this.settings, "toolbarBackgroundColor", activeStyle)
-    );
-    activeDocument.documentElement.style.setProperty(
-      "--editing-toolbar-icon-color",
-      getAppearanceValue(this.settings, "toolbarIconColor", activeStyle)
-    );
-    activeDocument.documentElement.style.setProperty(
-      "--toolbar-icon-size",
-      `${getAppearanceValue(this.settings, "toolbarIconSize", activeStyle)}px`
-    );
-  }
-
   async tryGetAdmonitionTypes(_retries = 0): Promise<void> {
-    // @ts-expect-error untyped API access
-    const admonitionPluginInstance = this.app.plugins?.getPlugin(ADMONITION_PLUGIN_ID);
+    const admonitionPluginInstance =
+      // @ts-expect-error untyped API access
+      this.app.plugins?.getPlugin(ADMONITION_PLUGIN_ID);
     if (admonitionPluginInstance) {
-       
-        this.processAdmonitionTypes(admonitionPluginInstance);
-      }  
+      this.processAdmonitionTypes(admonitionPluginInstance);
     }
+  }
 
   processAdmonitionTypes(pluginInstance: any) {
     const admonitionPlugin = pluginInstance as {
       admonitions?: Record<string, AdmonitionDefinition>;
     };
-
 
     if (
       admonitionPlugin.admonitions &&
@@ -403,15 +389,17 @@ this.app.workspace.onLayoutReady(async () => {
       Object.keys(admonitionPlugin.admonitions).length > 0
     ) {
       this.admonitionDefinitions = admonitionPlugin.admonitions;
-   
-  }  else {
-    console.warn('Could not read types from admonitionPlugin.admonitions (as object).');
-    this.admonitionDefinitions = null; 
+    } else {
+      console.warn(
+        "Could not read types from admonitionPlugin.admonitions (as object).",
+      );
+      this.admonitionDefinitions = null;
+    }
   }
-}
 
   isLoadMobile() {
-    const screenWidth = window.innerWidth > 0 ? window.innerWidth : screen.width;
+    const screenWidth =
+      window.innerWidth > 0 ? window.innerWidth : screen.width;
     const isLoadOnMobile = this.settings?.isLoadOnMobile
       ? this.settings.isLoadOnMobile
       : false;
@@ -488,34 +476,19 @@ this.app.workspace.onLayoutReady(async () => {
 
     // ---- Determine which styles SHOULD be active ----
 
-    // If you already added `isTopToolbarActive` earlier, this will call it.
-    // If not, it falls back to a legacy-compatible check.
-    const topEnabled =
-      typeof (this as any).isTopToolbarActive === "function"
-        ? (this as any).isTopToolbarActive()
-        : this.settings.enableTopToolbar ||
-          (!this.settings.enableFollowingToolbar &&
-            !this.settings.enableFixedToolbar &&
-            this.positionStyle === "top");
-
-    const followingEnabled =
-      typeof (this as any).isFollowingToolbarActive === "function"
-        ? this.isFollowingToolbarActive()
-        : this.settings.enableFollowingToolbar ||
-          (!this.settings.enableTopToolbar &&
-            !this.settings.enableFixedToolbar &&
-            this.positionStyle === "following");
-
-    const fixedEnabled =
-      this.settings.enableFixedToolbar ||
-      (!this.settings.enableTopToolbar &&
-        !this.settings.enableFollowingToolbar &&
-        this.positionStyle === "fixed");
+    // The explicit enable flags are the single source of truth. Legacy
+    // positionStyle-only configs are migrated into these flags in
+    // loadSettings(), so we must NOT fall back to positionStyle here:
+    // doing so re-enables a toolbar the user just toggled off (positionStyle
+    // still points at it), which is the "toggle won't turn it off" bug.
+    const topEnabled = this.isTopToolbarActive();
+    const followingEnabled = this.isFollowingToolbarActive();
+    const fixedEnabled = this.settings.enableFixedToolbar;
 
     const styles: { key: "top" | "following" | "fixed"; enabled: boolean }[] = [
-      { key: "top",       enabled: topEnabled },
+      { key: "top", enabled: topEnabled },
       { key: "following", enabled: followingEnabled },
-      { key: "fixed",     enabled: fixedEnabled },
+      { key: "fixed", enabled: fixedEnabled },
     ];
 
     // ---- Per-style handling: create / show / hide independently ----
@@ -559,7 +532,7 @@ this.app.workspace.onLayoutReady(async () => {
     // just recompute toolbar creation/visibility using the main handler.
     this.handleEditingToolbar();
   };
-  
+
   handleEditingToolbar_resize = () => {
     // Only care about resizing when the toolbar is visible and top-style is active
     if (!this.settings.cMenuVisibility || !this.isTopToolbarActive()) {
@@ -611,32 +584,6 @@ this.app.workspace.onLayoutReady(async () => {
     this.tempNotice = content;
   }
 
-  async loadSettings() {
-    const loadedData = await this.loadData();
-    this.settings = Object.assign({}, DEFAULT_SETTINGS, loadedData);
-
-    const isLegacyConfig =
-      !this.settings.enableTopToolbar &&
-      !this.settings.enableFollowingToolbar &&
-      !this.settings.enableFixedToolbar;
-
-    if (isLegacyConfig && this.settings.positionStyle) {
-      switch (this.settings.positionStyle) {
-        case "top":
-          this.settings.enableTopToolbar = true;
-          break;
-        case "following":
-          this.settings.enableFollowingToolbar = true;
-          break;
-        case "fixed":
-          this.settings.enableFixedToolbar = true;
-          break;
-      }
-
-      await this.saveSettings();
-    }
-  }
-
   getCurrentCommands(style?: string): any[] {
     if (!this.settings.enableMultipleConfig) {
       return this.settings.menuCommands;
@@ -658,39 +605,39 @@ this.app.workspace.onLayoutReady(async () => {
     }
   }
 
-updateCurrentCommands(commands: any[], style?: string): void {
-  if (!this.settings.enableMultipleConfig) {
-    this.settings.menuCommands = commands;
-    return;
-  }
+  updateCurrentCommands(commands: any[], style?: string): void {
+    if (!this.settings.enableMultipleConfig) {
+      this.settings.menuCommands = commands;
+      return;
+    }
 
-  let targetStyle = style;
+    let targetStyle = style;
 
-  if (!targetStyle) {
-    if (this.settings.isLoadOnMobile && Platform.isMobileApp) {
-      targetStyle = 'mobile';
-    } else {
-      targetStyle = this.positionStyle;
+    if (!targetStyle) {
+      if (this.settings.isLoadOnMobile && Platform.isMobileApp) {
+        targetStyle = "mobile";
+      } else {
+        targetStyle = this.positionStyle;
+      }
+    }
+
+    switch (targetStyle) {
+      case "following":
+        this.settings.followingCommands = commands;
+        break;
+      case "top":
+        this.settings.topCommands = commands;
+        break;
+      case "fixed":
+        this.settings.fixedCommands = commands;
+        break;
+      case "mobile":
+        this.settings.mobileCommands = commands;
+        break;
+      default:
+        this.settings.menuCommands = commands;
     }
   }
-
-  switch (targetStyle) {
-    case 'following':
-      this.settings.followingCommands = commands;
-      break;
-    case 'top':
-      this.settings.topCommands = commands;
-      break;
-    case 'fixed':
-      this.settings.fixedCommands = commands;
-      break;
-    case 'mobile':
-      this.settings.mobileCommands = commands;
-      break;
-    default:
-      this.settings.menuCommands = commands;
-  }
-}
 
   async saveSettings() {
     await this.saveData(this.settings);
@@ -718,18 +665,58 @@ updateCurrentCommands(commands: any[], style?: string): void {
     { re: /^\*\*.*\*\*$/, command: "editor:toggle-bold", name: "Bold" },
     { re: /^\*.*\*$/, command: "editor:toggle-italics", name: "Italic" },
     { re: /^_.*_$/, command: "editor:toggle-italics", name: "Italic" },
-    { re: /^~~.*~~$/, command: "editor:toggle-strikethrough", name: "Strikethrough" },
+    {
+      re: /^~~.*~~$/,
+      command: "editor:toggle-strikethrough",
+      name: "Strikethrough",
+    },
     { re: /^==.*==$/, command: "editor:toggle-highlight", name: "Highlight" },
     { re: /^`.*`$/, command: "editor:toggle-code", name: "Code" },
-    { re: /^<font color=".*">.*<\/font>$/, command: "editing-toolbar:change-font-color", name: "Font Color" },
-    { re: /^<mark style="background:.*">.*<\/mark>$/, command: "editing-toolbar:change-background-color", name: "Background Color" },
-    { re: /^<u>([^<]+)<\/u>$/, command: "editor:toggle-underline", name: "Underline" },
-    { re: /^<center>([^<]+)<\/center>$/, command: "editing-toolbar:center", name: "Center" },
-    { re: /^<p align="left">(.*?)<\/p>$/, command: "editing-toolbar:left", name: "Left Align" },
-    { re: /^<p align="right">(.*?)<\/p>$/, command: "editing-toolbar:right", name: "Right Align" },
-    { re: /^<p align="justify">(.*?)<\/p>$/, command: "editing-toolbar:justify", name: "Justify" },
-    { re: /^<sup>(.*?)<\/sup>$/, command: "editing-toolbar:superscript", name: "Superscript" },
-    { re: /^<sub>(.*?)<\/sub>$/, command: "editing-toolbar:subscript", name: "Subscript" },
+    {
+      re: /^<font color=".*">.*<\/font>$/,
+      command: "editing-toolbar:change-font-color",
+      name: "Font Color",
+    },
+    {
+      re: /^<mark style="background:.*">.*<\/mark>$/,
+      command: "editing-toolbar:change-background-color",
+      name: "Background Color",
+    },
+    {
+      re: /^<u>([^<]+)<\/u>$/,
+      command: "editor:toggle-underline",
+      name: "Underline",
+    },
+    {
+      re: /^<center>([^<]+)<\/center>$/,
+      command: "editing-toolbar:center",
+      name: "Center",
+    },
+    {
+      re: /^<p align="left">(.*?)<\/p>$/,
+      command: "editing-toolbar:left",
+      name: "Left Align",
+    },
+    {
+      re: /^<p align="right">(.*?)<\/p>$/,
+      command: "editing-toolbar:right",
+      name: "Right Align",
+    },
+    {
+      re: /^<p align="justify">(.*?)<\/p>$/,
+      command: "editing-toolbar:justify",
+      name: "Justify",
+    },
+    {
+      re: /^<sup>(.*?)<\/sup>$/,
+      command: "editing-toolbar:superscript",
+      name: "Superscript",
+    },
+    {
+      re: /^<sub>(.*?)<\/sub>$/,
+      command: "editing-toolbar:subscript",
+      name: "Subscript",
+    },
   ];
 
   // Inline formats scanned around the cursor when nothing is selected.
@@ -739,19 +726,63 @@ updateCurrentCommands(commands: any[], style?: string): void {
     command: string;
     name: string;
   }> = [
-    { re: /<u>([^<]+)<\/u>/g, command: "editing-toolbar:toggle-underline", name: "Underline" },
-    { re: /<center>([^<]+)<\/center>/g, command: "editing-toolbar:center", name: "Center" },
-    { re: /<p align="left">([^<]+)<\/p>/g, command: "editing-toolbar:left", name: "Left Align" },
-    { re: /<p align="right">([^<]+)<\/p>/g, command: "editing-toolbar:right", name: "Right Align" },
-    { re: /<p align="justify">([^<]+)<\/p>/g, command: "editing-toolbar:justify", name: "Justify" },
-    { re: /<sup>([^<]+)<\/sup>/g, command: "editing-toolbar:superscript", name: "Superscript" },
-    { re: /<sub>([^<]+)<\/sub>/g, command: "editing-toolbar:subscript", name: "Subscript" },
+    {
+      re: /<u>([^<]+)<\/u>/g,
+      command: "editing-toolbar:toggle-underline",
+      name: "Underline",
+    },
+    {
+      re: /<center>([^<]+)<\/center>/g,
+      command: "editing-toolbar:center",
+      name: "Center",
+    },
+    {
+      re: /<p align="left">([^<]+)<\/p>/g,
+      command: "editing-toolbar:left",
+      name: "Left Align",
+    },
+    {
+      re: /<p align="right">([^<]+)<\/p>/g,
+      command: "editing-toolbar:right",
+      name: "Right Align",
+    },
+    {
+      re: /<p align="justify">([^<]+)<\/p>/g,
+      command: "editing-toolbar:justify",
+      name: "Justify",
+    },
+    {
+      re: /<sup>([^<]+)<\/sup>/g,
+      command: "editing-toolbar:superscript",
+      name: "Superscript",
+    },
+    {
+      re: /<sub>([^<]+)<\/sub>/g,
+      command: "editing-toolbar:subscript",
+      name: "Subscript",
+    },
     { re: /\*\*([^*]+)\*\*/g, command: "editor:toggle-bold", name: "Bold" },
-    { re: /~~([^~]+)~~/g, command: "editor:toggle-strikethrough", name: "Strikethrough" },
-    { re: /==([^=]+)==/g, command: "editor:toggle-highlight", name: "Highlight" },
+    {
+      re: /~~([^~]+)~~/g,
+      command: "editor:toggle-strikethrough",
+      name: "Strikethrough",
+    },
+    {
+      re: /==([^=]+)==/g,
+      command: "editor:toggle-highlight",
+      name: "Highlight",
+    },
     { re: /`([^`]+)`/g, command: "editor:toggle-code", name: "Code" },
-    { re: /<font color="([^"]+)">([^<]+)<\/font>/g, command: "editing-toolbar:change-font-color", name: "Font Color" },
-    { re: /<span style="background:([^"]+)">([^<]+)<\/span>/g, command: "editing-toolbar:change-background-color", name: "Background Color" },
+    {
+      re: /<font color="([^"]+)">([^<]+)<\/font>/g,
+      command: "editing-toolbar:change-font-color",
+      name: "Font Color",
+    },
+    {
+      re: /<span style="background:([^"]+)">([^<]+)<\/span>/g,
+      command: "editing-toolbar:change-background-color",
+      name: "Background Color",
+    },
   ];
 
   // Returns the heading level (1-6) if the text starts with that many '#'
@@ -765,16 +796,20 @@ updateCurrentCommands(commands: any[], style?: string): void {
   }
 
   private detectSelectionFormat(
-    selectedText: string
+    selectedText: string,
   ): { command: string; name: string; calloutType: string } | null {
-    for (const { re, command, name } of EditingToolbarPlugin.SELECTION_WRAP_FORMATS) {
+    for (const {
+      re,
+      command,
+      name,
+    } of EditingToolbarPlugin.SELECTION_WRAP_FORMATS) {
       if (re.test(selectedText)) {
         return { command, name, calloutType: "" };
       }
     }
 
     const calloutMatch = selectedText.match(
-      /^> \[!(note|tip|warning|danger|info|success|question|quote)\]/i
+      /^> \[!(note|tip|warning|danger|info|success|question|quote)\]/i,
     );
     if (calloutMatch) {
       const calloutType = calloutMatch[1].toLowerCase();
@@ -799,11 +834,19 @@ updateCurrentCommands(commands: any[], style?: string): void {
 
   private detectCursorFormat(
     lineText: string,
-    cursorPos: number
+    cursorPos: number,
   ): { command: string; name: string } | null {
-    const foundFormats: Array<{ command: string; name: string; distance: number }> = [];
+    const foundFormats: Array<{
+      command: string;
+      name: string;
+      distance: number;
+    }> = [];
 
-    for (const { re, command, name } of EditingToolbarPlugin.CURSOR_INLINE_FORMATS) {
+    for (const {
+      re,
+      command,
+      name,
+    } of EditingToolbarPlugin.CURSOR_INLINE_FORMATS) {
       let match: RegExpExecArray | null;
       while ((match = re.exec(lineText)) !== null) {
         const formatStart = match.index;
@@ -873,7 +916,7 @@ updateCurrentCommands(commands: any[], style?: string): void {
     this.formatBrushActive = !this.formatBrushActive;
 
     if (this.formatBrushActive) {
-      activeDocument.body.classList.add('format-brush-cursor');
+      activeDocument.body.classList.add("format-brush-cursor");
       this.fontColorFormatBrushActive = false;
       this.bgFormatBrushActive = false;
       this.EN_Text_Format_Brush = false;
@@ -883,7 +926,7 @@ updateCurrentCommands(commands: any[], style?: string): void {
         strings.formatBrushSelectTextApply +
           this.lastExecutedCommandName +
           strings.format,
-        0
+        0,
       );
     } else {
       activeDocument.body.classList.remove("format-brush-cursor");
@@ -899,9 +942,7 @@ updateCurrentCommands(commands: any[], style?: string): void {
     const cleanedText = text.replace(calloutPrefixRegex, "").trim();
 
     const lines = cleanedText.split("\n");
-    const processedLines = lines.map((line) =>
-      line.replace(/^\s*>\s*/, "")
-    );
+    const processedLines = lines.map((line) => line.replace(/^\s*>\s*/, ""));
 
     const newText = `> [!${calloutType}]\n> ${processedLines.join("\n> ")}`;
 
@@ -946,7 +987,7 @@ updateCurrentCommands(commands: any[], style?: string): void {
     this.commandsManager.reloadCustomCommands();
   }
 
-  init_evt(container: Document, _editor: Editor) {
+  init_evt(container: Document) {
     this.resetFormatBrushStates();
 
     const debouncedHandleTextSelection = debounce(() => {
@@ -996,7 +1037,6 @@ updateCurrentCommands(commands: any[], style?: string): void {
   public getCachedToolbar(style: ToolbarStyleKey): HTMLElement | null {
     const cached = this.toolbarCache.get(style);
     if (cached && cached.isConnected) {
-    
       return cached;
     }
     if (cached) {
@@ -1035,50 +1075,15 @@ updateCurrentCommands(commands: any[], style?: string): void {
     }
   }
 
-
-
-
-
-  // Top toolbar is considered active if:
-  // - explicit multi-toolbar toggle is on, or
-  // - no explicit toggles are used and positionStyle is "top" (legacy behaviour)
+  // A toolbar style is active iff its explicit enable flag is on. Legacy
+  // positionStyle-only configs are migrated into these flags in loadSettings(),
+  // so positionStyle must not be consulted here (see handleEditingToolbar).
   private isTopToolbarActive(): boolean {
-    if (this.settings.enableTopToolbar) {
-      return true;
-    }
-  
-    // Backwards compatibility fallback:
-    // if neither following nor fixed have been explicitly enabled,
-    // and the old global positionStyle is "top", behave like old single-mode.
-    if (
-      !this.settings.enableFollowingToolbar &&
-      !this.settings.enableFixedToolbar &&
-      this.positionStyle === "top"
-    ) {
-      return true;
-    }
-  
-    return false;
+    return this.settings.enableTopToolbar;
   }
 
   private isFollowingToolbarActive(): boolean {
-    // New multi-toolbar setting: explicitly enable the following toolbar
-    if (this.settings.enableFollowingToolbar) {
-      return true;
-    }
-
-    // Backwards compatibility:
-    // if neither top nor fixed have been explicitly enabled, and the
-    // global positionStyle is "following", behave as the old single-mode
-    if (
-      !this.settings.enableTopToolbar &&
-      !this.settings.enableFixedToolbar &&
-      this.positionStyle === "following"
-    ) {
-      return true;
-    }
-
-    return false;
+    return this.settings.enableFollowingToolbar;
   }
 
   private handleMiddleClickToolbar(_e: MouseEvent) {
@@ -1132,12 +1137,12 @@ updateCurrentCommands(commands: any[], style?: string): void {
     }
   };
 
-  private getToolbarHostDocument(editor?: Editor): Document {
+  private getToolbarHostDocument(editor?: Editor | null): Document {
     return (
       (editor as any)?.cm?.dom?.ownerDocument ||
       (editor as any)?.cm?.contentDOM?.ownerDocument ||
       this.app.workspace.activeLeaf?.view?.containerEl?.ownerDocument ||
-      (requireApiVersion("0.15.0") ? activeWindow.document : window.document)
+      activeWindow.document
     );
   }
 
@@ -1158,7 +1163,8 @@ updateCurrentCommands(commands: any[], style?: string): void {
       this.app,
       this,
       "following",
-      hostDocument || this.getToolbarHostDocument(this.commandsManager.getActiveEditor())
+      hostDocument ||
+        this.getToolbarHostDocument(this.commandsManager.getActiveEditor()),
     );
     if (followingToolbar && this.isFollowingToolbarActive()) {
       followingToolbar.style.visibility = "hidden";
@@ -1189,12 +1195,11 @@ updateCurrentCommands(commands: any[], style?: string): void {
       this.applyCalloutFormat(
         cmEditor,
         cmEditor.getSelection(),
-        this.lastCalloutType
+        this.lastCalloutType,
       );
     } else if (this.formatBrushActive && this.lastExecutedCommand) {
       this.applyFormatBrush(cmEditor);
-    }
-    else if (this.isFollowingToolbarActive()) {
+    } else if (this.isFollowingToolbarActive()) {
       this.showFollowingToolbar(cmEditor);
     }
   }
@@ -1215,16 +1220,35 @@ updateCurrentCommands(commands: any[], style?: string): void {
 
     const targetDocument = this.getToolbarHostDocument(editor);
 
-    const followingToolbar = isExistoolbar(this.app, this, "following", targetDocument);
+    const followingToolbar = isExistoolbar(
+      this.app,
+      this,
+      "following",
+      targetDocument,
+    );
 
     if (followingToolbar) {
       followingToolbar.style.visibility = "visible";
       followingToolbar.classList.add("editingToolbarFlex");
       followingToolbar.classList.remove("editingToolbarGrid");
 
-      createFollowingbar(this.app, this.toolbarIconSize, this, editor, true, targetDocument);
+      createFollowingbar(
+        this.app,
+        this.toolbarIconSize,
+        this,
+        editor,
+        true,
+        targetDocument,
+      );
     } else {
-      createFollowingbar(this.app, this.toolbarIconSize, this, editor, true, targetDocument);
+      createFollowingbar(
+        this.app,
+        this.toolbarIconSize,
+        this,
+        editor,
+        true,
+        targetDocument,
+      );
     }
   }
 
@@ -1232,37 +1256,49 @@ updateCurrentCommands(commands: any[], style?: string): void {
     // Temporarily ignore any "editing style" override while we update the live toolbar
     const previousEditStyle = this.appearanceEditStyle;
     this.appearanceEditStyle = null;
-  
+
     // Track the new style both in-memory and in settings
     this.positionStyle = newStyle;
     this.settings.positionStyle = newStyle;
-  
+
     // If multi-config is enabled, ensure the command arrays for this style exist
     if (this.settings.enableMultipleConfig) {
       switch (newStyle) {
         case "following":
-          if (!this.settings.followingCommands || this.settings.followingCommands.length === 0) {
+          if (
+            !this.settings.followingCommands ||
+            this.settings.followingCommands.length === 0
+          ) {
             this.settings.followingCommands = [...this.settings.menuCommands];
             this.saveSettings();
             new Notice(strings.followingStyleCommandsSuccessfullyInitialize);
           }
           break;
         case "top":
-          if (!this.settings.topCommands || this.settings.topCommands.length === 0) {
+          if (
+            !this.settings.topCommands ||
+            this.settings.topCommands.length === 0
+          ) {
             this.settings.topCommands = [...this.settings.menuCommands];
             this.saveSettings();
             new Notice(strings.topStyleCommandsSuccessfullyInitialized);
           }
           break;
         case "fixed":
-          if (!this.settings.fixedCommands || this.settings.fixedCommands.length === 0) {
+          if (
+            !this.settings.fixedCommands ||
+            this.settings.fixedCommands.length === 0
+          ) {
             this.settings.fixedCommands = [...this.settings.menuCommands];
             this.saveSettings();
             new Notice(strings.fixedStyleCommandsSuccessfullyInitialized);
           }
           break;
         case "mobile":
-          if (!this.settings.mobileCommands || this.settings.mobileCommands.length === 0) {
+          if (
+            !this.settings.mobileCommands ||
+            this.settings.mobileCommands.length === 0
+          ) {
             this.settings.mobileCommands = [...this.settings.menuCommands];
             this.saveSettings();
             new Notice(strings.mobileStyleCommandsSuccessfullyInitialized);
@@ -1270,30 +1306,38 @@ updateCurrentCommands(commands: any[], style?: string): void {
           break;
       }
     }
-  
+
     // Keep the in-memory size in sync with the active style
     const activeStyle = this.resolveActiveStyle();
-    this.toolbarIconSize = getAppearanceValue(this.settings, "toolbarIconSize", activeStyle);
+    this.toolbarIconSize = getAppearanceValue(
+      this.settings,
+      "toolbarIconSize",
+      activeStyle,
+    );
 
     // Refresh the global CSS variables from the *active* style's appearance
     const doc = activeDocument ?? document;
     if (doc && doc.documentElement) {
       doc.documentElement.style.setProperty(
         "--editing-toolbar-background-color",
-        getAppearanceValue(this.settings, "toolbarBackgroundColor", activeStyle)
+        getAppearanceValue(
+          this.settings,
+          "toolbarBackgroundColor",
+          activeStyle,
+        ),
       );
       doc.documentElement.style.setProperty(
         "--editing-toolbar-icon-color",
-        getAppearanceValue(this.settings, "toolbarIconColor", activeStyle)
+        getAppearanceValue(this.settings, "toolbarIconColor", activeStyle),
       );
       doc.documentElement.style.setProperty(
         "--toolbar-icon-size",
-        `${getAppearanceValue(this.settings, "toolbarIconSize", activeStyle)}px`
+        `${getAppearanceValue(this.settings, "toolbarIconSize", activeStyle)}px`,
       );
     }
-  
+
     dispatchEvent(new Event("editingToolbar-NewCommand"));
-  
+
     // Restore whatever the settings UI was editing
     this.appearanceEditStyle = previousEditStyle;
   }

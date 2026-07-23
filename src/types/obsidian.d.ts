@@ -59,6 +59,13 @@ declare module "obsidian" {
 		cm: any;
 		getScrollerElement: () => HTMLElement;
 		containerEl: HTMLElement;
+		// Undocumented internal editing commands exposed by Obsidian's editor
+		indentList(): void;
+		unindentList(): void;
+		toggleNumberList(): void;
+		toggleBulletList(): void;
+		toggleCheckList(state?: boolean): void;
+		toggleMarkdownFormatting(format: string): void;
 	}
 
 	interface EditorSuggestManager {

@@ -233,9 +233,7 @@ export function setHeader(_str: string, editor: Editor) {
 }
 
 
-export function setFontcolor(color: string, editor?: Editor) {
-  if (!editor) return;
-
+export function setFontcolor(color: string, editor: Editor) {
   const selectText = editor.getSelection();
 
   if (!selectText || selectText.trim() === "") {
@@ -312,9 +310,7 @@ export function setFontcolor(color: string, editor?: Editor) {
   editor.setSelections(adjustedSelections);
 }
 
-export function setBackgroundcolor(color: string, editor?: Editor) {
-  if (!editor) return;
-
+export function setBackgroundcolor(color: string, editor: Editor) {
   const selectText = editor.getSelection();
 
   if (!selectText || selectText.trim() === "") {
