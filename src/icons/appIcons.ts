@@ -1,25 +1,16 @@
+import { pickerIconNames } from "src/icons/customIcons";
+
+// Obsidian-native icons, used to populate the icon picker.
+// Three groups, in order:
+//   1. "Custom" sentinel + this plugin's own custom icons.
+//   2. Lucide icons.
+//      Obsidian bundles Lucide icons up to v0.446.0
+//        - https://docs.obsidian.md/Plugins/User+interface/Icons
+//        - https://lucide.dev
+//   3. Obsidian's other legacy internal icons ("vault", "sidebar-left"...).
 export const appIcons: string[] = [
-  // from obsidian app.js file
-  "Custom",
-  "editingToolbar",
-  "editingToolbarSub",
-  "editingToolbarAdd",
-  "editingToolbarDelete",
-  "editingToolbarReload",
-  "codeblock-glyph",
-  "underline-glyph",
-  "superscript-glyph",
-  "subscript-glyph",
-  "bot-glyph",
-  "header-1",
-  "header-2",
-  "header-3",
-  "header-4",
-  "header-5",
-  "header-6",
-  "header-n",
-  "obsidian",
-  "obsidian-new",
+  "Custom", // sentinel → opens the custom-SVG modal; not a registered icon
+  ...pickerIconNames,
   "accessibility",
   "activity",
   "air-vent",
@@ -1029,5 +1020,5 @@ export const appIcons: string[] = [
   "stretch-horizontal",
   "stretch-vertical",
   "distribute-space-horizontal",
-  "distribute-space-vertical"
+  "distribute-space-vertical",
 ];
