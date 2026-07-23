@@ -1,10 +1,9 @@
-import { ItemView, Menu, setIcon, ToggleComponent } from "obsidian";
+import { ItemView, Menu, setIcon } from "obsidian";
 import { selfDestruct } from "src/toolbar/editingToolbar";
 import { CommandPicker, openSlider } from "src/modals/suggesterModals";
 import type EditingToolbarPlugin from "src/plugin/main";
-import { AESTHETIC_STYLES, getAppearanceValue, resolveNextPositionStyle, setAppearanceValue } from "src/settings/settingsData";
+import { resolveNextPositionStyle } from "src/settings/settingsData";
 import { strings } from "src/translations/helper";
-import { setMenuVisibility } from "src/util/statusBarConstants";
 import { ViewUtils } from "src/util/viewUtils";
 
 export class StatusBar {
@@ -36,9 +35,8 @@ export class StatusBar {
     const menu = new Menu();
     
     menu.addSections(["settings"]);
-    this.addVisibilityToggle(menu);
+    this.addToolbarPositionToggle(menu);
 
-    this.addAestheticStyleToggle(menu);
     menu.addSections(["viewType"]);
     this.addViewTypeToggle(menu);
     menu.addSections(["controls"]);
@@ -53,34 +51,7 @@ export class StatusBar {
     });
   }
 
-  private addVisibilityToggle(menu: Menu): void {
-    menu.addItem((item) => {
-      item.setTitle(strings.hideShow);
-      item.setSection("settings");
-      const itemDom = (item as any).dom as HTMLElement;
-      const toggleComponent = new ToggleComponent(itemDom)
-        .setValue(this.plugin.settings.cMenuVisibility)
-        .setDisabled(true);
-
-      const toggle = async () => {
-        this.plugin.settings.cMenuVisibility = !this.plugin.settings.cMenuVisibility;
-        toggleComponent.setValue(this.plugin.settings.cMenuVisibility);
-        this.plugin.settings.cMenuVisibility == true
-          ? setTimeout(() => {
-            dispatchEvent(new Event("editingToolbar-NewCommand"));
-          }, 100)
-          : setMenuVisibility(this.plugin.settings.cMenuVisibility);
-        selfDestruct(this.plugin);
-        await this.plugin.saveSettings();
-      };
-
-      item.onClick((e) => {
-        e.preventDefault();
-        e.stopImmediatePropagation();
-        toggle();
-      });
-    });
-
+  private addToolbarPositionToggle(menu: Menu): void {
     menu.addItem((item) => {
       item.setTitle(strings.toolbarPosition);
       item.setSection("settings");
@@ -268,31 +239,6 @@ export class StatusBar {
         item.setTitle(control.title);
         item.onClick(control.click);
         item.setSection("controls");
-      });
-    });
-  }
-
-  private addAestheticStyleToggle(menu: Menu): void {
-    menu.addItem((item) => {
-      item.setTitle(strings.appearanceStyle);
-      item.setSection("settings");
-      item.setIcon("cherry");
-
-      const submenu = item.setSubmenu();
-      
-      AESTHETIC_STYLES.forEach(style => {
-        submenu.addItem(subItem => {
-          subItem.setTitle(style);
-          subItem.setIcon(getAppearanceValue(this.plugin.settings, "aestheticStyle", this.plugin.resolveActiveStyle()) === style ? "check" : "");
-          subItem.onClick(async () => {
-            setAppearanceValue(this.plugin.settings, "aestheticStyle", this.plugin.resolveActiveStyle(), style);
-            await this.plugin.saveSettings();
-            selfDestruct(this.plugin);
-            setTimeout(() => {
-              dispatchEvent(new Event("editingToolbar-NewCommand"));
-            }, 100);
-          });
-        });
       });
     });
   }
