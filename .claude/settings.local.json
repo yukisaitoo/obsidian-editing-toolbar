@@ -18,7 +18,8 @@
       "Bash(git show *)",
       "Bash(npm run build)",
       "Bash(pnpm run build)",
-      "Bash(npx tsc *)"
+      "Bash(npx tsc *)",
+      "WebFetch(domain:docs.obsidian.md)"
     ],
     "ask": [
       "Bash(rm *)",
