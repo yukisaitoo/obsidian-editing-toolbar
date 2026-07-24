@@ -17,7 +17,6 @@ const ui: Partial<Record<keyof typeof en, string>> = {
   clearAllTopStyleCommands: "Limpar todos os Comandos de Estilo de Topo",
   copyCommandsAnotherStyleConfiguration:
     "Copiar comandos de outra configuração de estilo.",
-  currentConfiguration: "Configuração Atual",
   currentlyEditingCommands: "Atualmente editando comandos para",
   import2: "Importar de",
   removeAllCommandsConfiguration:
@@ -37,6 +36,8 @@ const ui: Partial<Record<keyof typeof en, string>> = {
     "Escolha o deslocamento da Barra de Edição na posição fixa.",
   chooseWhichToolbarStyleS:
     "Escolha qual estilo de barra de ferramentas você deseja editar.",
+  chooseWhichToolbarStyleCommand:
+    "Escolha o comando de qual estilo de barra de ferramentas você deseja editar.",
   clear: "Limpar",
   clearAllMainMenuCommands: "Limpar todos os Comandos do Menu Principal",
   clickPickerAdjustColor: "Clique no seletor para ajustar a cor",
@@ -55,8 +56,6 @@ const ui: Partial<Record<keyof typeof en, string>> = {
   customFontColor: "Cor de Texto Personalizada",
   customFontColors: "Cores de Fonte Personalizadas",
   customColors: "Cores Personalizadas",
-  switchBetweenDifferentCommandConfigurations:
-    "Trocar entre configurações de comando diferentes.",
   themeColors: "Cores do Tema",
   standardColors: "Cores Padrão",
   translucentColors: "Cores Translúcidas",
@@ -88,9 +87,7 @@ const ui: Partial<Record<keyof typeof en, string>> = {
   fetchRemoteTitle: "Obter Título Remoto",
   fitEditorWidth: "Ajustar Largura do Editor",
   fixedPositionOffset: "Deslocamento Fixo",
-  fixedStyle: "Estilo Fixo",
   fixedToolbar: "Barra de Ferramentas Fixa",
-  followingStyle: "Estilo Contextual",
   fontColors: "Cores de Texto",
   fontColorFormattingBrush: "Pincel de cor da fonte ativado!",
   backgroundColorFormattingBrush: "Pincel de cor de fundo ativado!",
@@ -169,7 +166,6 @@ const ui: Partial<Record<keyof typeof en, string>> = {
     "Visualização da barra de ferramentas (com uma configuração de comandos hipotética).",
   toolbarSettings: "Configurações da Barra de Ferramentas",
   toolbarTheme: "Estilo da Barra de Ferramentas",
-  topStyle: "Estilo de Topo",
   topToolbar: "Barra de Ferramentas de Topo",
   urlFormatError: "Erro de Formato de URL",
   updateImport: "Atualizar Importação",

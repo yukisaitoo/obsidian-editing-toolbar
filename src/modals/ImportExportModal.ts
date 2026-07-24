@@ -414,11 +414,11 @@ export class ImportExportModal extends Modal {
   getPositionStyleName(style: string): string {
     switch (style) {
       case 'following':
-        return strings.followingStyle;
+        return strings.followingToolbar;
       case 'top':
-        return strings.topStyle;
+        return strings.topToolbar;
       case 'fixed':
-        return strings.fixedStyle;
+        return strings.fixedToolbar;
       default:
         return style;
     }

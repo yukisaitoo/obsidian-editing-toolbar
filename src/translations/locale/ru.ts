@@ -18,7 +18,6 @@ const ui: Partial<Record<keyof typeof en, string>> = {
   copyCommandsAnotherStyleConfiguration:
     "Копировать команды из другой конфигурации стиля.",
   copyCommandsSelectedStyle: "Скопировать команды из выбранного стиля.",
-  currentConfiguration: "Текущая конфигурация",
   currentlyEditingCommands: "Сейчас редактируются команды для",
   import2: "Импортировать из",
   removeAllCommandsConfiguration: "Удалить все команды из этой конфигурации.",
@@ -39,6 +38,8 @@ const ui: Partial<Record<keyof typeof en, string>> = {
     "Выберите смещение панели инструментов в фиксированном режиме.",
   chooseWhichToolbarStyleS:
     "Выберите стиль панели инструментов для редактирования.",
+  chooseWhichToolbarStyleCommand:
+    "Выберите команду стиля панели инструментов для редактирования.",
   clear: "Очистить",
   clearAllMainMenuCommands: "Очистить все команды главного меню",
   clickPickerAdjustColor: "Нажмите на палитру для выбора цвета",
@@ -56,8 +57,6 @@ const ui: Partial<Record<keyof typeof en, string>> = {
   customFontColor: "Пользовательский цвет текста",
   customFontColors: "Пользовательские цвета шрифта",
   customColors: "Пользовательские цвета",
-  switchBetweenDifferentCommandConfigurations:
-    "Переключение между разными конфигурациями команд.",
   themeColors: "Цвета темы",
   standardColors: "Стандартные цвета",
   translucentColors: "Полупрозрачные цвета",
@@ -103,9 +102,7 @@ const ui: Partial<Record<keyof typeof en, string>> = {
   fetchRemoteTitle: "Получить заголовок URL",
   fitEditorWidth: "Подогнать под ширину редактора",
   fixedPositionOffset: "Смещение фиксированной позиции",
-  fixedStyle: "Закреплённая панель",
   fixedToolbar: "Фиксированная панель инструментов",
-  followingStyle: "Плавающая панель",
   fontColors: "Цвета шрифта",
   fontColorFormattingBrush:
     "Кисть форматирования цвета шрифта включена\nНажмите среднюю кнопку мыши или правую кнопку для отключения кисти",
@@ -227,7 +224,6 @@ const ui: Partial<Record<keyof typeof en, string>> = {
     "Предпросмотр панели инструментов (с примерной конфигурацией команд)",
   toolbarSettings: "Настройки панели инструментов",
   toolbarTheme: "Тема панели инструментов",
-  topStyle: "Панель сверху",
   topToolbar: "Верхняя панель инструментов",
   trimLineEnds: "Удалить пробелы в начале и конце строк",
   urlFormatError: "Неверный формат URL",

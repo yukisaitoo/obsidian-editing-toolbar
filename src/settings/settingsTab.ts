@@ -452,12 +452,14 @@ export class EditingToolbarSettingTab extends PluginSettingTab {
       "commandSetting-container",
     );
     new Setting(commandSettingContainer)
-      .setName(strings.currentConfiguration)
-      .setDesc(strings.switchBetweenDifferentCommandConfigurations)
+      .setName(strings.toolbarSettings)
+      .setDesc(strings.chooseWhichToolbarStyleCommand)
       .addDropdown((dropdown) => {
-        dropdown.addOption("top", strings.topStyle);
-        dropdown.addOption("fixed", strings.fixedStyle);
-        dropdown.addOption("following", strings.followingStyle);
+        const positions: Record<string, string> = {};
+        POSITION_STYLES.map(
+          (position) => (positions[position] = POSITION_STYLE_LABELS[position]),
+        );
+        dropdown.addOptions(positions);
 
         dropdown.setValue(this.currentEditingConfig);
 
@@ -481,13 +483,13 @@ export class EditingToolbarSettingTab extends PluginSettingTab {
       dropdown.addOption("Main menu", "Main Menu Commands");
 
       if (currentConfigType !== "following") {
-        dropdown.addOption("following", strings.followingStyle);
+        dropdown.addOption("following", POSITION_STYLE_LABELS.following);
       }
       if (currentConfigType !== "top") {
-        dropdown.addOption("top", strings.topStyle);
+        dropdown.addOption("top", POSITION_STYLE_LABELS.top);
       }
       if (currentConfigType !== "fixed") {
-        dropdown.addOption("fixed", strings.fixedStyle);
+        dropdown.addOption("fixed", POSITION_STYLE_LABELS.fixed);
       }
 
       dropdown.setValue(selectedSourceStyle).onChange((value) => {
@@ -497,7 +499,9 @@ export class EditingToolbarSettingTab extends PluginSettingTab {
     configSwitcher.addExtraButton((button) => button.setIcon("arrow-right"));
     configSwitcher.addButton((button) =>
       button
-        .setButtonText(this.currentEditingConfig + " " + strings.import)
+        .setButtonText(
+          this.getStyleLabel(this.currentEditingConfig) + " " + strings.import,
+        )
         .setTooltip(strings.copyCommandsSelectedStyle)
         .onClick(async () => {
           const sourceCommands =
@@ -508,7 +512,7 @@ export class EditingToolbarSettingTab extends PluginSettingTab {
             return;
           }
 
-          const confirmMessage = `${strings.importCommandsFrom} "${selectedSourceStyle}" ${strings.toLabel} "${this.currentEditingConfig}" ${strings.configuration}?`;
+          const confirmMessage = `${strings.importCommandsFrom} "${this.getStyleLabel(selectedSourceStyle)}" ${strings.toLabel} "${this.getStyleLabel(this.currentEditingConfig)}" ${strings.configuration}?`;
           ConfirmModal.show(this.app, {
             message: confirmMessage,
             onConfirm: async () => {
@@ -517,7 +521,7 @@ export class EditingToolbarSettingTab extends PluginSettingTab {
               ]);
               await this.plugin.saveSettings();
               new Notice(
-                `${strings.commandsImportedFrom} "${selectedSourceStyle}" ${strings.toLabel} "${this.currentEditingConfig}" ${strings.configuration}`,
+                `${strings.commandsImportedFrom} "${this.getStyleLabel(selectedSourceStyle)}" ${strings.toLabel} "${this.getStyleLabel(this.currentEditingConfig)}" ${strings.configuration}`,
               );
               this.display();
             },
@@ -526,7 +530,9 @@ export class EditingToolbarSettingTab extends PluginSettingTab {
     );
     importSetting.addButton((button) =>
       button
-        .setButtonText(strings.clear + " " + `${this.currentEditingConfig}`)
+        .setButtonText(
+          strings.clear + " " + this.getStyleLabel(this.currentEditingConfig),
+        )
         .setTooltip(strings.removeAllCommandsConfiguration)
         .setWarning()
         .onClick(async () => {
@@ -549,7 +555,7 @@ export class EditingToolbarSettingTab extends PluginSettingTab {
       cls: `position-style-info ${this.currentEditingConfig}`,
       text:
         strings.currentlyEditingCommands +
-        ` "${this.currentEditingConfig} Style" ` +
+        ` "${this.getStyleLabel(this.currentEditingConfig)}" ` +
         strings.configuration,
     });
     new Setting(commandListContainer)
@@ -1456,6 +1462,11 @@ export class EditingToolbarSettingTab extends PluginSettingTab {
       text: strings.warningImportingConfigurationOverwriteCurren,
       cls: "warning-text",
     });
+  }
+  // User-facing label for a style key; matches the Appearance tab labels.
+  private getStyleLabel(key: string): string {
+    if (key === "Main menu") return "Main Menu Commands";
+    return POSITION_STYLE_LABELS[key] ?? key;
   }
   private aestheticStyleMap: { [key: string]: string } = {
     default: "editingToolbarDefaultAesthetic",
