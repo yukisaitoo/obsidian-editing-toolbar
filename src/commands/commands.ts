@@ -1,4 +1,4 @@
-import { Command, Editor, Notice, htmlToMarkdown } from "obsidian";
+import { Command, Editor } from "obsidian";
 
 import { InsertCalloutModal } from "src/modals/insertCalloutModal";
 import { InsertLinkModal } from "src/modals/insertLinkModal";
@@ -8,10 +8,7 @@ import {
   TextInputModal,
 } from "src/modals/TextInputModal";
 import EditingToolbarPlugin from "src/plugin/main";
-import {
-  CustomCommand,
-  resolveNextPositionStyle,
-} from "src/settings/settingsData";
+import { resolveNextPositionStyle } from "src/settings/settingsData";
 import { selfDestruct, setFormatEraser } from "src/toolbar/editingToolbar";
 import { strings } from "src/translations/helper";
 import { fullscreenMode, workplacefullscreenMode } from "src/util/fullscreen";
@@ -338,136 +335,6 @@ export class CommandsManager {
     }
   };
 
-  public async applyRegexCommand(editor: Editor, command: CustomCommand) {
-    try {
-      let selectedText = editor.getSelection();
-      let curserStart = editor.getCursor("from");
-      let curserEnd = editor.getCursor("to");
-
-      if (!selectedText) {
-        if (this.plugin.settings.useCurrentLineForRegex) {
-          const currentLine = curserStart.line;
-          const lineText = editor.getLine(currentLine);
-
-          if (!lineText || lineText.trim() === "") {
-            new Notice(strings.currentLineEmptyPleaseSelect);
-            return;
-          }
-
-          selectedText = lineText;
-
-          curserStart = { line: currentLine, ch: 0 };
-          curserEnd = { line: currentLine, ch: lineText.length };
-
-          editor.setSelection(curserStart, curserEnd);
-        } else {
-          try {
-            const clipboardItems = await this.readClipboard();
-
-            if (clipboardItems["text/html"]) {
-              selectedText = htmlToMarkdown(clipboardItems["text/html"]);
-            } else {
-              selectedText =
-                clipboardItems["text/markdown"] || clipboardItems["text/plain"];
-            }
-
-            if (!selectedText) {
-              new Notice(strings.pleaseSelectTextCopyText);
-              return;
-            }
-
-            editor.replaceRange(selectedText, curserStart, curserStart);
-            const newEnd = editor.offsetToPos(
-              editor.posToOffset(curserStart) + selectedText.length,
-            );
-            editor.setSelection(curserStart, newEnd);
-          } catch (error) {
-            console.error("Failed to read clipboard:", error);
-            new Notice(strings.pleaseSelectTextFirst);
-            return;
-          }
-        }
-      }
-
-      if (command.useCondition && command.conditionPattern) {
-        const conditionRegex = new RegExp(command.conditionPattern);
-        if (!conditionRegex.test(selectedText)) {
-          new Notice(strings.selectedTextDoesNotMeet);
-          return;
-        }
-      }
-
-      if (!command.regexPattern) return;
-
-      let flags = "";
-      if (command.regexGlobal !== false) flags += "g";
-      if (command.regexCaseInsensitive) flags += "i";
-      if (command.regexMultiline) flags += "m";
-
-      const regex = new RegExp(command.regexPattern, flags);
-
-      const updatedCurserStart = editor.getCursor("from");
-      const updatedCurserEnd = editor.getCursor("to");
-
-      editor.transaction({
-        changes: [
-          {
-            from: updatedCurserStart,
-            to: updatedCurserEnd,
-            text: selectedText.replace(regex, command.regexReplacement ?? ""),
-          },
-        ],
-      });
-
-      const replacedText = editor.getSelection();
-      const newStart = editor.offsetToPos(
-        editor.posToOffset(updatedCurserStart),
-      );
-      const newEnd = editor.offsetToPos(
-        editor.posToOffset(updatedCurserStart) + replacedText.length,
-      );
-      editor.setSelection(newStart, newEnd);
-    } catch (error) {
-      console.error("Regex command execution error:", error);
-      new Notice(
-        strings.regexCommandExecutionError +
-          (error instanceof Error ? error.message : String(error)),
-      );
-    }
-  }
-
-  private async readClipboard(): Promise<Record<string, string>> {
-    const items: Record<string, string> = {};
-
-    try {
-      const clipboardItems = await navigator.clipboard.read();
-
-      for (const clipboardItem of clipboardItems) {
-        const types = clipboardItem.types;
-
-        for (const type of types) {
-          if (
-            type === "text/html" ||
-            type === "text/plain" ||
-            type === "text/markdown"
-          ) {
-            const blob = await clipboardItem.getType(type);
-            items[type] = await blob.text();
-          }
-        }
-      }
-    } catch {
-      try {
-        const text = await navigator.clipboard.readText();
-        items["text/plain"] = text;
-      } catch (e) {
-        console.error("Failed to read clipboard:", e);
-      }
-    }
-
-    return items;
-  }
-
   public getActiveEditor(): Editor | null {
     const activeEditor = this.plugin.app.workspace?.activeEditor;
     if (activeEditor && activeEditor.editor) {
@@ -502,8 +369,6 @@ export class CommandsManager {
         this.plugin.toggleFormatBrush();
       },
     });
-
-    this.registerCustomCommands();
 
     this.trackFormatCommandExecution();
   }
@@ -1085,7 +950,6 @@ export class CommandsManager {
       "undent-list",
       "change-font-color",
       "change-background-color",
-      ...this.plugin.settings.customCommands.map((cmd) => `${cmd.id}`),
       ...Object.keys(this._commandsMap),
     ];
 
@@ -1112,57 +976,6 @@ export class CommandsManager {
       default:
         return 0;
     }
-  }
-
-  public reloadCustomCommands() {
-    this.plugin.settings.customCommands.forEach((command) => {
-      const commandId = `${command.id}`;
-      if (this.plugin.app.commands.commands[`editing-toolbar:${commandId}`]) {
-        delete this.plugin.app.commands.commands[
-          `editing-toolbar:${commandId}`
-        ];
-      }
-    });
-
-    this.registerCustomCommands();
-  }
-
-  private registerCustomCommands() {
-    this.plugin.settings.customCommands.forEach((command) => {
-      const commandId = `${command.id}`;
-
-      this.plugin.addCommand({
-        id: commandId,
-        name: command.name,
-        icon: command.icon,
-        editorCallback: (editor) => {
-          if (command.useRegex && command.regexPattern) {
-            void this.executeCommandWithoutBlur(editor, () => {
-              this.applyRegexCommand(editor, command);
-              this.plugin.setLastExecutedCommand(
-                `editing-toolbar:${commandId}`,
-              );
-            });
-          } else {
-            const commandConfig: CommandPlot = {
-              prefix: command.prefix,
-              suffix: command.suffix,
-              char: command.char,
-              line: command.line,
-              islinehead: command.islinehead,
-            };
-            this._commandsMap[command.id] = commandConfig;
-
-            void this.executeCommandWithoutBlur(editor, () => {
-              this.applyCommand(commandConfig, editor);
-              this.plugin.setLastExecutedCommand(
-                `editing-toolbar:${commandId}`,
-              );
-            });
-          }
-        },
-      });
-    });
   }
 
   public get commandsMap(): Record<string, CommandPlot> {

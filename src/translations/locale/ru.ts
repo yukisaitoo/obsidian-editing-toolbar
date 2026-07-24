@@ -3,47 +3,25 @@
 import type { en } from "../en";
 
 const ui: Partial<Record<keyof typeof en, string>> = {
-  aiQuestionTemplate: "Шаблон запроса для ИИ:",
   add: "Добавить",
   addCommand: "Добавить команду",
-  addCustomCommand: "Добавить пользовательскую команду",
-  addFormatCommand: "Добавить команду форматирования",
   addPrefixSuffix: "Добавить префикс/суффикс",
-  addRegexCommand: "Добавить команду регулярного выражения",
   addSeparator: "Добавить разделитель",
   addSubmenu: "Добавить подменю",
   addCommandOntoEditingToolbar:
     "Добавьте команду на панель инструментов из библиотеки команд Obsidian. Для изменения порядка перетаскивайте элементы команд. Для удаления используйте кнопку удаления справа от команды. После изменения порядка панель не обновляется автоматически — используйте кнопку обновления выше. Для значка можно выбрать Custom и указать собственный значок.",
-  addBoldKeywords: "Добавить жирное выделение ключевым словам",
-  addContentAfterSelectedText: "Добавить содержимое после выделенного текста",
-  addContentBeforeSelectedText: "Добавить содержимое перед выделенным текстом",
-  addListSymbolEachLine:
-    "Добавить символ списка к каждой строке (многострочный режим)",
-  addRegularExpressionCommand: "Добавить команду регулярного выражения",
-  addCommandToolbar: "Добавить эту команду на панель инструментов",
-  addToolbar: "Добавить на панель инструментов",
-  addUniformAliasMarkdownLinks: "Добавить единый псевдоним к Markdown-ссылкам",
-  addEditDeleteCustomFormat:
-    "Добавляйте, редактируйте или удаляйте пользовательские команды форматирования.",
   allSettings: "Все настройки",
   allToolbarCommands: "Все команды панели инструментов",
   allCommandsHaveBeenRemoved: "Все команды были удалены。",
   appearance: "Внешний вид",
-  applyRegularExpressionReplacement:
-    "Применить замену по регулярному выражению",
   clearAllFixedStyleCommands: "Очистить все команды фиксированного стиля",
   clearAllFollowingStyleCommands: "Очистить все команды стиля следования",
   clearAllTopStyleCommands: "Очистить все команды верхнего стиля",
-  commandAlreadyExistsSelectedConfigurations:
-    "Команда уже существует в выбранных конфигурациях",
-  commandDeployed: "Команда развернута в: ",
   copyCommandsAnotherStyleConfiguration:
     "Копировать команды из другой конфигурации стиля.",
   copyCommandsSelectedStyle: "Скопировать команды из выбранного стиля.",
   currentConfiguration: "Текущая конфигурация",
   currentlyEditingCommands: "Сейчас редактируются команды для",
-  deploy: "Развернуть",
-  deployCommandConfigurations: "Развернуть команду в конфигурации",
   fixedStyleOnly: "Только стиль Fixed",
   followingStyleOnly: "Только стиль Following",
   import2: "Импортировать из",
@@ -56,11 +34,9 @@ const ui: Partial<Record<keyof typeof en, string>> = {
   cancel: "Отмена",
   changeCommandName: "Изменить название команды",
   changeSubmenuName: "Изменить название подменю",
-  chooseIcon: "Выбрать значок",
   chooseCommand: "Выберите команду",
   chooseIcon2: "Выберите значок",
   chooseHowImportConfiguration: "Выберите способ импорта конфигурации",
-  chooseIcon3: "Выберите значок",
   chooseNumberColumnsPerRow:
     "Выберите количество колонок в каждой строке панели инструментов.",
   chooseOffsetEditingToolbarFixed:
@@ -69,41 +45,19 @@ const ui: Partial<Record<keyof typeof en, string>> = {
   chooseWhichToolbarStyleS:
     "Выберите стиль панели инструментов для редактирования.",
   clear: "Очистить",
-  clearAllCustomCommands: "Очистить все пользовательские команды",
   clearAllMainMenuCommands: "Очистить все команды главного меню",
   clickPickerAdjustColor: "Нажмите на палитру для выбора цвета",
   closed: "Свернуто",
   collapseState: "Состояние сворачивания",
   command: "Команда",
-  commandDeleted: "Команда удалена",
   commandId: "ID команды",
-  commandIdCommandNameCannot:
-    "ID команды и название команды не могут быть пустыми",
-  commandIdCannotContainSpaces: "ID команды не может содержать пробелы",
-  commandName: "Название команды",
-  commandIconClickSelect: "Значок команды (нажмите для выбора)",
-  completeRegularExpressionCodeCopy:
-    "Полный код регулярного выражения (скопируйте в ИИ для объяснения)",
-  conditionPattern: "Шаблон условия",
-  conditionalMatching: "Условное совпадение",
   configurationCopiedClipboard: "Конфигурация скопирована в буфер обмена",
   configurationImportedSuccessfully: "Конфигурация успешно импортирована",
   confirm: "Подтвердить",
   confirmDelete: "Подтвердить удаление?",
   content: "Содержимое",
-  convertHtmlBoldTagsMarkdown:
-    "Преобразовать HTML-теги жирного текста в формат Markdown",
-  convertMmDdYyyyYyyy: "Преобразовать MM/DD/YYYY в YYYY-MM-DD",
-  convertQuotedTextQuoteBlock: "Преобразовать цитируемый текст в блок цитаты",
-  copied: "Скопировано!",
-  copyCode: "Копировать код",
   copyClipboard: "Копировать",
-  currentLineEmptyPleaseSelect:
-    "Текущая строка пуста, выделите текст или перейдите на непустую строку",
-  cursorPositionOffset: "Смещение позиции курсора",
   customBackgroundColor: "Пользовательский цвет фона",
-  customCommands: "Пользовательские команды",
-  customCommandsOnly: "Только пользовательские команды",
   customFontColor: "Пользовательский цвет текста",
   customFontColors: "Пользовательские цвета шрифта",
   customColors: "Пользовательские цвета",
@@ -118,26 +72,17 @@ const ui: Partial<Record<keyof typeof en, string>> = {
   dedupeLines: "Удалить дубликаты строк",
   deduplicationCompletedRemaining: "Удаление дубликатов завершено, осталось",
   default: "По умолчанию",
-  default0FormatKeepText:
-    "По умолчанию 0, после форматирования текст останется выделенным",
   delete: "Удалить",
-  deleteEmptyLinesMultilineMode: "Удалить пустые строки (многострочный режим)",
   detectedChineseContextConvertedFull:
     "Обнаружен китайский контекст: символы преобразованы в полноширинные",
   detectedCodeEnglishContextConverted:
     "Обнаружен код/английский текст: символы преобразованы в полуширинные",
-  displayedNameToolbarMenu:
-    "Отображаемое название в панели инструментов и меню",
   doWantContinue: "Вы хотите продолжить?",
   dragSliderMovePosition: "Перетащите ползунок для изменения позиции",
   dropdownMenu: "Выпадающее меню",
-  edit: "Редактировать",
-  editCustomCommand: "Редактировать пользовательскую команду",
-  editRegularExpressionCommand: "Редактировать команду регулярного выражения",
   editingToolbarColumns: "Количество колонок панели инструментов",
   editingToolbarCommands: "Команды панели инструментов",
   embedContent: "Встроенное содержимое",
-  enable: "Включить",
   enableToolbarPositionedTop:
     "Включить панель инструментов в верхней части окна.",
   enableToolbarAppearsUponText:
@@ -151,9 +96,6 @@ const ui: Partial<Record<keyof typeof en, string>> = {
   enterSuffix: "Введите суффикс",
   enterIconCodeFormatSvg: "Введите код значка в формате <svg>.... </svg>",
   error: "Ошибка: ",
-  exampleText: "Пример текста:",
-  explainSyntaxJavascriptRegularExpressions:
-    "Объяснить синтаксис регулярных выражений JavaScript",
   export: "Экспорт",
   exportConfiguration: "Экспорт конфигурации",
   exportType: "Тип экспорта",
@@ -176,26 +118,16 @@ const ui: Partial<Record<keyof typeof en, string>> = {
     "Кисть форматирования цвета шрифта включена\nНажмите среднюю кнопку мыши или правую кнопку для отключения кисти",
   backgroundColorFormattingBrush:
     "Кисть форматирования цвета фона включена\nНажмите среднюю кнопку мыши или правую кнопку для отключения кисти",
-  exampleConvertHttpsExampleCom:
-    "Например, преобразовать https://example.com в [https://example.com](https://example.com)",
   formatBrush: "Кисть форматирования",
   formatBrushSelectTextApply:
     "Кисть форматирования включена!\nВыделите текст, чтобы применить【",
-  formatPhoneNumber: "Форматировать номер телефона",
   fullHalfConverter: "Преобразование полуширинных/полноширинных символов",
   general: "Основные",
   getInspiredWhatOthersHave:
     "Вдохновляйтесь работами других пользователей или демонстрируйте свои настройки.",
-  globalReplace: "Глобальная замена",
   horizontalPosition: "Горизонтальная позиция",
-  howUseAiGetRegular: "Как использовать ИИ для получения регулярных выражений?",
-  iNeedConvertUrlMarkdown:
-    "Мне нужно преобразовать URL в ссылку формата Markdown",
   icon: "Значок",
   ifImageTurn: "Если это изображение, включите опцию",
-  ifTextContainsImportantSet:
-    "Если текст содержит важную информацию, выделить его (условное форматирование)",
-  ignoreCase: "Игнорировать регистр",
   imageHeight: "Высота изображения",
   imageSize: "Размер изображения",
   imageWidth: "Ширина изображения",
@@ -208,8 +140,6 @@ const ui: Partial<Record<keyof typeof en, string>> = {
   importPastePreviouslyExportedJson:
     "Импорт: вставьте ранее экспортированную JSON-конфигурацию.",
   inputContent: "Введите содержимое",
-  inputExampleTextViewFormatting:
-    "Введите пример текста, чтобы увидеть результат форматирования команды...",
   inputTitle: "Введите заголовок",
   insert: "Вставить",
   insertBlankLines: "Вставить пустые строки",
@@ -218,10 +148,6 @@ const ui: Partial<Record<keyof typeof en, string>> = {
   invalidImportDataFormat: "Неверный формат импортируемых данных",
   item: "Элемент",
   joinCommunity: "Присоединиться к сообществу",
-  lineHeadFormat: "Формат начала строки",
-  lineOffset: "Смещение строки",
-  lineOffsetCursorAfterFormatting:
-    "Смещение курсора по строкам после форматирования",
   linkText: "Текст ссылки",
   linkTitleOptional: "Заголовок ссылки (необязательно)",
   linkUrl: "URL ссылки",
@@ -229,17 +155,12 @@ const ui: Partial<Record<keyof typeof en, string>> = {
     "Обнаружен шаблон списка, выполнено автоматическое разделение",
   listTable: "Список в таблицу",
   loading: "Загрузка...",
-  matchCaseInsensitive: "Игнорировать регистр",
-  matchingPattern: "Шаблон совпадения",
   menuTypeChanged: "Тип меню изменён на",
   mergeLines: "Объединить строки",
   mergeLinesSettings: "Настройки объединения строк",
   mergeCompleted: "Объединение завершено",
   merged: "Объединено с",
   more: "Ещё",
-  multilineMode: "Многострочный режим",
-  mustExistRegularExpressionText:
-    "Должно присутствовать регулярное выражение или текст",
   matchesFound: "Совпадений не найдено",
   obviousSeparatorListPatternDetected:
     "Не обнаружено явных разделителей или шаблонов списка",
@@ -251,8 +172,6 @@ const ui: Partial<Record<keyof typeof en, string>> = {
   numberLinesCustom: "Пронумеровать строки (настраиваемо)",
   numberLinesConfiguration: "Настройка нумерации строк",
   numberingCompletedStarting: "Нумерация завершена: начиная с",
-  onlyApplyCustomCommandWhen:
-    "Применять пользовательскую команду только если текст соответствует условию",
   open: "Развернуто",
   optionalLeaveBlankDefaultTitle:
     "Необязательно, оставьте пустым для заголовка по умолчанию",
@@ -261,7 +180,6 @@ const ui: Partial<Record<keyof typeof en, string>> = {
     "Режим перезаписи (заменить настройки импортированными)",
   pasteParse: "Вставить и обработать",
   pasteConfigurationHere: "Вставьте конфигурацию сюда...",
-  pattern: "Шаблон",
   plainTextCopiedClipboard:
     "Текст без форматирования скопирован в буфер обмена",
   pleaseEnterUrlFirst: "Сначала введите URL",
@@ -273,32 +191,16 @@ const ui: Partial<Record<keyof typeof en, string>> = {
     "Сначала выберите корректную таблицу Markdown",
   pleaseSelectLinesMergeFirst: "Сначала выделите строки для объединения",
   pleaseSelectTextFirst: "Сначала выделите текст",
-  pleaseSelectTextCopyText:
-    "Сначала выделите текст или скопируйте текст в буфер обмена",
   pleaseSelectTextDedupeFirst: "Сначала выделите текст для удаления дубликатов",
   pleaseSelectTextNumberFirst: "Сначала выделите текст для нумерации",
   pleaseSpecifyStartEndString: "Укажите начальную или конечную строку",
   positionSettings: "Настройки положения",
   prefix: "Префикс",
-  prefixSuffix: "Префикс/Суффикс",
   prefixSuffixAdded: "Префикс/суффикс успешно добавлены",
-  preview: "Предпросмотр",
-  regex: "Регулярное выражение",
-  regexCommandExecutionError:
-    "Ошибка выполнения команды регулярного выражения: ",
-  regexPatternCannotEmpty: "Шаблон регулярного выражения не может быть пустым",
-  regexPatternMatch: "Шаблон регулярного выражения для поиска",
-  regularExpressionExamples: "Примеры регулярных выражений",
   removeAllWhitespace: "Удалить все пробельные символы",
-  removeExtraSpaces: "Удалить лишние пробелы",
   renumberList: "Перенумеровать список",
-  replaceAllMatches: "Заменить все совпадения",
-  replacementPattern: "Шаблон замены",
-  replacementPatternUse12:
-    "Шаблон замены (используйте $1, $2 и т.д. для ссылок на группы захвата)",
   reset: "Сбросить",
   result: "Результат: ",
-  save: "Сохранить",
   selectPresetToolbarThemeAutomatically:
     "Выберите готовую тему панели инструментов, чтобы автоматически настроить цвет фона, цвет значков и размер для выбранного стиля.",
   selectTextSeeMoreTools:
@@ -322,12 +224,10 @@ const ui: Partial<Record<keyof typeof en, string>> = {
   suffix: "Суффикс",
   superConversionCompletedContextPreserved:
     "Суперконвертация завершена: контекст сохранён, макет оптимизирован",
-  switchRegexCommandWindow: "Переключиться на окно команд регулярных выражений",
   tableConvertedMultiLevelList: "Таблица преобразована в многоуровневый список",
   tableList: "Таблицу в список",
   textTools: "Текстовые инструменты",
   command2: "Команда",
-  selectedTextDoesNotMeet: "Выделенный текст не соответствует условиям",
   import3: "Этот импорт выполнит:",
   title: "Заголовок",
   toolbarBackgroundColor: "Цвет фона панели инструментов",
@@ -343,23 +243,12 @@ const ui: Partial<Record<keyof typeof en, string>> = {
   topToolbar: "Верхняя панель инструментов",
   trimLineEnds: "Удалить пробелы в начале и конце строк",
   urlFormatError: "Неверный формат URL",
-  urlMarkdownLink: "URL в Markdown-ссылку",
-  uniqueIdentifierSpacesEG:
-    'Уникальный идентификатор без пробелов, например: "my-custom-format"',
-  updateCustomCommands: "Обновить пользовательские команды",
   updateImport: "Импорт с обновлением",
   updateMainMenuCommands: "Обновить команды главного меню",
   updateModeAddNewItems:
     "Режим обновления (добавить новые элементы и обновить существующие)",
   updateGeneralSettings: "Обновить основные настройки",
   usageInstructions: "Инструкция по использованию",
-  useNRepresentLineBreaks: "Используйте \\n для обозначения переноса строки",
-  useCondition: "Использовать условие",
-  useCurrentLineRegexCommands:
-    "Использовать текущую строку для команд регулярных выражений",
-  useJsRegularExpressionImplement:
-    "Используйте регулярное выражение JavaScript и выведите параметры в следующем формате (результат не нужно экранировать как JSON)",
-  useRepresentLineBreaks: "Используйте ↵ для обозначения переноса строки",
   verticalPosition: "Вертикальная позиция",
   verticalSplit: "Вертикальное разделение",
   warningImportingConfigurationOverwriteCurren:
@@ -368,15 +257,7 @@ const ui: Partial<Record<keyof typeof en, string>> = {
     "Предупреждение: режим перезаписи заменит существующие настройки импортированными.",
   warningUpdateModeAddNew:
     "Предупреждение: режим обновления добавит новые элементы и обновит существующие.",
-  whenTextSelectedRegexCommands:
-    "Если текст не выделен, команды регулярных выражений будут использовать текущую строку вместо содержимого буфера обмена",
-  whetherInsertBeginningNextLine: "Вставлять в начало следующей строки",
   whitespaceCleaningCompleted: "Очистка пробельных символов завершена",
-  description: "[Описание]",
-  example: "[Пример]",
-  output: "[Результат]",
-  requirements: "[Требования]",
-  matchStartEndEachLine: "^ и $ соответствуют началу и концу каждой строки",
   alreadyExists: "уже существует",
   configuration: "конфигурация",
   eGCommaPipeArrow: "например: , или | или →",

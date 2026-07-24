@@ -11,10 +11,7 @@ import {
 } from "obsidian";
 import Sortable from "sortablejs";
 import { ConfirmModal } from "src/modals/ConfirmModal";
-import { CustomCommandModal } from "src/modals/CustomCommandModal";
-import { DeployCommandModal } from "src/modals/DeployCommand";
 import { ImportExportModal } from "src/modals/ImportExportModal";
-import { RegexCommandModal } from "src/modals/RegexCommandModal";
 import {
   ChangeCmdname,
   ChooseFromIconList,
@@ -77,11 +74,6 @@ const SETTING_TABS: SettingTab[] = [
     id: "appearance",
     name: strings.appearance,
     icon: "brush",
-  },
-  {
-    id: "customcommands",
-    name: strings.customCommands,
-    icon: "lucide-rectangle-ellipsis",
   },
   {
     id: "commands",
@@ -198,9 +190,6 @@ export class EditingToolbarSettingTab extends PluginSettingTab {
         break;
       case "appearance":
         this.displayAppearanceSettings(contentContainer);
-        break;
-      case "customcommands":
-        this.displayCustomCommandSettings(contentContainer);
         break;
       case "commands":
         this.displayCommandSettings(contentContainer);
@@ -576,130 +565,6 @@ export class EditingToolbarSettingTab extends PluginSettingTab {
           });
       });
     this.createCommandList(commandListContainer);
-  }
-  private displayCustomCommandSettings(containerEl: HTMLElement): void {
-    containerEl.empty();
-
-    const customCommandsContainer = containerEl.createDiv(
-      "custom-commands-container",
-    );
-    customCommandsContainer.createEl("p", {
-      text: strings.addEditDeleteCustomFormat,
-    });
-    // Regex command behavior setting
-    new Setting(customCommandsContainer)
-      .setName(strings.useCurrentLineRegexCommands)
-      .setDesc(strings.whenTextSelectedRegexCommands)
-      .addToggle((toggle) =>
-        toggle
-          .setValue(this.plugin.settings.useCurrentLineForRegex)
-          .onChange(async (value) => {
-            this.plugin.settings.useCurrentLineForRegex = value;
-            await this.plugin.saveSettings();
-          }),
-      );
-    const commandListContainer = customCommandsContainer.createDiv(
-      "command-list-container",
-    );
-    const addButtonContainer = customCommandsContainer.createDiv(
-      "add-command-button-container",
-    );
-    const addFormatButton = addButtonContainer.createEl("button", {
-      text: strings.addFormatCommand,
-    });
-    addFormatButton.addClass("mod-cta");
-    addFormatButton.addEventListener("click", () => {
-      new CustomCommandModal(this.app, this.plugin, null).open();
-    });
-    const addRegexButton = addButtonContainer.createEl("button", {
-      text: strings.addRegexCommand,
-    });
-    addRegexButton.addClass("mod-cta");
-    addRegexButton.addEventListener("click", () => {
-      new RegexCommandModal(this.app, this.plugin, null).open();
-    });
-    this.plugin.settings.customCommands.forEach((command, index) => {
-      const commandSetting = new Setting(commandListContainer).setName(
-        command.name,
-      );
-      const descEl = createFragment();
-      let desc = `${strings.id}: ${command.id}`;
-      if (command.useRegex) {
-        desc += `, ${strings.pattern}: ${command.regexPattern}`;
-      } else {
-        desc += `, ${strings.prefix}: ${command.prefix}, ${strings.suffix}: ${command.suffix}`;
-      }
-      descEl.createSpan({ text: desc });
-      const typeBadge = descEl.createSpan({ cls: "command-type-badge" });
-      if (command.useRegex) {
-        typeBadge.addClass("regex");
-        typeBadge.setText(strings.regex);
-      } else {
-        typeBadge.setText(strings.prefixSuffix);
-      }
-      commandSetting.descEl.appendChild(descEl);
-      commandSetting
-        .addButton((button) =>
-          button
-            .setButtonText(strings.addToolbar)
-            .setTooltip(strings.addCommandToolbar)
-            .setButtonText(strings.addToolbar)
-            .setTooltip(strings.addCommandToolbar)
-            .onClick(() => {
-              new DeployCommandModal(this.app, this.plugin, command).open();
-            }),
-        )
-        .addExtraButton((button) => {
-          button
-            .setIcon("pencil")
-            .setTooltip(strings.edit)
-            .onClick(() => {
-              if (command.useRegex) {
-                new RegexCommandModal(this.app, this.plugin, index).open();
-              } else {
-                new CustomCommandModal(this.app, this.plugin, index).open();
-              }
-            });
-        })
-        .addButton((button) =>
-          this.createDeleteButton(button, async () => {
-            const customCommandId = `editing-toolbar:${this.plugin.settings.customCommands[index].id}`;
-            this.removeCommandFromConfig(
-              this.plugin.settings.menuCommands,
-              customCommandId,
-            );
-            this.removeCommandFromConfig(
-              this.plugin.settings.followingCommands,
-              customCommandId,
-            );
-            this.removeCommandFromConfig(
-              this.plugin.settings.topCommands,
-              customCommandId,
-            );
-            this.removeCommandFromConfig(
-              this.plugin.settings.fixedCommands,
-              customCommandId,
-            );
-            this.plugin.settings.customCommands.splice(index, 1);
-            await this.plugin.saveSettings();
-            this.plugin.reloadCustomCommands();
-            this.display();
-            new Notice(strings.commandDeleted);
-          }),
-        );
-      if (command.icon) {
-        try {
-          const iconContainer = commandSetting.nameEl.createSpan({
-            cls: "editingToolbarSettingsIcon",
-          });
-          checkHtml(command.icon)
-            ? (iconContainer.innerHTML = command.icon)
-            : setIcon(iconContainer, command.icon);
-        } catch (e) {
-          console.error("Failed to set icon:", e);
-        }
-      }
-    });
   }
   private triggerRefresh(): void {
     setTimeout(() => {

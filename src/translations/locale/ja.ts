@@ -16,7 +16,6 @@ const ui: Partial<Record<keyof typeof en, string>> = {
   translucentColors: "半透明の色",
   highlighterColors: "蛍光ペンの色",
   dedupeLines: "重複行を削除",
-  edit: "編集",
   extractBetweenStrings: "指定文字列の間を抽出",
   fontColors: "文字色",
   formatBrush: "書式のコピー／貼り付け",

@@ -88,25 +88,6 @@ declare module 'obsidian' {
     menuType?: 'submenu' | 'dropdown';
   }
 }
-export interface CustomCommand {
-  id: string;
-  name: string;
-  prefix: string;
-  suffix: string;
-  char: number;
-  line: number;
-  islinehead: boolean;
-  icon?: string;
-  useRegex?: boolean;
-  regexPattern?: string;
-  regexReplacement?: string;
-  regexCaseInsensitive?: boolean;
-  regexGlobal?: boolean;
-  regexMultiline?: boolean;
-  useCondition?: boolean;
-  conditionPattern?: string;
-}
-
 /** Keys of the user-defined custom color swatches, all of which hold hex strings. */
 export type CustomColorKey =
   | `custom_bg${1 | 2 | 3 | 4 | 5}`
@@ -144,7 +125,6 @@ export interface editingToolbarSettings {
   formatBrushes: {
     [key: string]: boolean;
   };
-  customCommands: CustomCommand[];
 
   // Per-style appearance buckets (top/following/fixed)
   appearanceByStyle?: AppearanceByStyle;
@@ -153,8 +133,6 @@ export interface editingToolbarSettings {
   toolbarBackgroundColor: string;
   toolbarIconColor: string;
   toolbarIconSize: number;
-  useCurrentLineForRegex: boolean;
-  
 }
 
 export const DEFAULT_SETTINGS: editingToolbarSettings = {
@@ -575,7 +553,6 @@ export const DEFAULT_SETTINGS: editingToolbarSettings = {
     "horizontalPosition": 0,
     "verticalPosition": 0,
     "formatBrushes": {},
-    "customCommands": [],
 
     // Per-style appearance buckets
     "appearanceByStyle": {
@@ -602,6 +579,5 @@ export const DEFAULT_SETTINGS: editingToolbarSettings = {
     // Global appearance defaults: used as the fallback for any empty per-style bucket
     "toolbarBackgroundColor": "rgba(var(--background-secondary-rgb), 0.7)",
     "toolbarIconColor": "var(--text-normal)",
-    "toolbarIconSize": 18,
-    "useCurrentLineForRegex": false
+    "toolbarIconSize": 18
   }

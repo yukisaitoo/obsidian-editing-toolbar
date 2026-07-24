@@ -945,10 +945,6 @@ export default class EditingToolbarPlugin extends Plugin {
     return this.commandsManager;
   }
 
-  public reloadCustomCommands(): void {
-    this.commandsManager.reloadCustomCommands();
-  }
-
   init_evt(container: Document) {
     this.resetFormatBrushStates();
 

@@ -499,13 +499,6 @@ button[class^=editingToolbarCommandsubItem]::after {
 .setting-item .editingToolbarSettingsIcon:empty::before {
   content: "❗";
 }
-.modal.mod-settings .custom-commands-container .editingToolbarSettingsIcon{
-  box-shadow: none!important;
-}
-.modal.mod-settings .custom-commands-container .editingToolbarSettingsIcon:hover{
-  background-color: transparent!important;
-  color: var(--text-normal)!important;
-}
 .modal .setting-item-control>input.id-is-disabled{
   background-color: var(--background-modifier-border);
 }
@@ -1181,36 +1174,6 @@ body.auto-hide-header .workspace-tab-header-container + .workspace-tab-container
   }
  }
 
-/* Command type label */
-.command-type-badge {
-  display: inline-block;
-  padding: 2px 6px;
-  margin-left: 8px;
-  border-radius: 4px;
-  font-size: 0.8em;
-  background-color: var(--background-modifier-border);
-}
-
-.command-type-badge.regex {
-  background-color: var(--text-accent);
-  color: var(--text-on-accent);
-}
-.custom-commands-container .command-list-container .setting-item-name {
-  display: flex;
-  gap: 8px;
-}
-.custom-commands-modal {
-
-  width: auto;
-  max-width: 800px;
-
-}
-.custom-commands-modal input {
-
- width: 100%;
- max-width: 300px;
-}
-
 .command-buttons-container {
   background: var(--background-secondary);
   border-radius: 5px;
@@ -1352,170 +1315,6 @@ body.auto-hide-header .workspace-tab-header-container + .workspace-tab-container
   z-index: 1000;
 }
 
-/* ---------------------------------------------------------------------------
-   Regex command modal (RegexCommandModal.ts) — moved out of inline styles.
-   All scoped under .custom-commands-modal (the modal root class).
-   --------------------------------------------------------------------------- */
-.custom-commands-modal .regex-settings {
-  border: 1px solid var(--background-modifier-border);
-  padding: 10px;
-  border-radius: 5px;
-  margin-bottom: 10px;
-}
-.custom-commands-modal .ai-help-container,
-.custom-commands-modal .regex-examples-container {
-  border-radius: 5px;
-  overflow: hidden;
-}
-.custom-commands-modal .ai-help-container {
-  margin-bottom: 10px;
-}
-.custom-commands-modal .regex-examples-container {
-  margin-top: 15px;
-}
-.custom-commands-modal .regex-collapsible-summary {
-  padding: 8px 12px;
-  background-color: var(--background-secondary);
-  cursor: pointer;
-  font-weight: bold;
-  border-radius: 4px;
-  user-select: none;
-}
-.custom-commands-modal .ai-help-content,
-.custom-commands-modal .examples-content {
-  background-color: var(--background-secondary-alt);
-  border-bottom-left-radius: 5px;
-  border-bottom-right-radius: 5px;
-  margin-top: 1px;
-}
-.custom-commands-modal .ai-help-content {
-  padding: 6px;
-  user-select: text;
-}
-.custom-commands-modal .examples-content {
-  padding: 10px;
-}
-.custom-commands-modal .regex-options {
-  display: flex;
-  gap: 8px;
-}
-.custom-commands-modal .condition-settings {
-  border: 1px solid var(--background-modifier-border);
-  padding: 10px;
-  border-radius: 5px;
-  margin-bottom: 15px;
-}
-.custom-commands-modal .regex-examples-list {
-  padding-left: 20px;
-  margin: 0;
-}
-.custom-commands-modal .regex-examples-list li {
-  margin-bottom: 8px;
-}
-.custom-commands-modal .regex-example-link {
-  color: var(--text-accent);
-  text-decoration: none;
-}
-.custom-commands-modal .regex-example-link:hover {
-  text-decoration: underline;
-}
-.custom-commands-modal .preview-container {
-  margin-top: 20px;
-  margin-bottom: 20px;
-  border: 1px solid var(--background-modifier-border);
-  padding: 10px;
-  border-radius: 5px;
-}
-.custom-commands-modal .preview-input-container {
-  margin-bottom: 10px;
-}
-.custom-commands-modal .preview-field-label {
-  display: block;
-  margin-bottom: 5px;
-}
-.custom-commands-modal .regex-preview-input {
-  height: auto;
-  width: 100%;
-  padding: 8px;
-  border-radius: 4px;
-  border: 1px solid var(--background-modifier-border);
-}
-.custom-commands-modal .preview-output {
-  padding: 8px;
-  border-radius: 4px;
-  border: 1px solid var(--background-modifier-border);
-  background-color: var(--background-secondary);
-  min-height: 3em;
-  color: var(--text-normal);
-}
-.custom-commands-modal .preview-output.is-error {
-  color: var(--text-error);
-}
-.custom-commands-modal .regex-code-container {
-  margin-top: 15px;
-  border-top: 1px solid var(--background-modifier-border);
-  padding-top: 10px;
-}
-.custom-commands-modal .regex-code-title {
-  margin-bottom: 5px;
-  font-weight: bold;
-}
-.custom-commands-modal .regex-code-block {
-  background-color: var(--background-code);
-  padding: 8px;
-  border-radius: 4px;
-  overflow-x: auto;
-  font-family: monospace;
-  font-size: var(--font-smaller);
-}
-.custom-commands-modal .regex-copy-button {
-  margin-top: 5px;
-  padding: 4px 8px;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-/* Custom command modal (CustomCommandModal.ts) — moved out of inline styles. */
-.custom-commands-modal .switch-to-regex-container {
-  margin-bottom: 20px;
-  text-align: center;
-}
-.custom-commands-modal .special-char-buttons {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 5px;
-  margin-top: 5px;
-}
-.custom-commands-modal .char-copy-container {
-  position: relative;
-  display: inline-block;
-}
-.custom-commands-modal .special-char-button {
-  padding: 2px 6px;
-  font-size: 12px;
-  min-width: auto;
-  border: 1px solid var(--background-modifier-border);
-  cursor: pointer;
-}
-.custom-commands-modal .special-char-button:hover {
-  background-color: var(--interactive-accent);
-  color: var(--text-on-accent);
-}
-.custom-commands-modal .copy-tooltip {
-  position: absolute;
-  bottom: 100%;
-  left: 50%;
-  transform: translateX(-50%);
-  background-color: var(--background-modifier-success);
-  color: white;
-  padding: 2px 6px;
-  border-radius: 4px;
-  font-size: 12px;
-  pointer-events: none;
-  white-space: nowrap;
-  z-index: 100;
-}
-
 /* Import/Export modal (ImportExportModal.ts) — moved out of inline styles. */
 .editing-toolbar-import-export-modal .export-container,
 .editing-toolbar-import-export-modal .import-container {
@@ -1570,22 +1369,6 @@ body.auto-hide-header .workspace-tab-header-container + .workspace-tab-container
 .editing-toolbar-settings .command-lists-container {
   padding: 16px;
   border-radius: 8px;
-}
-.editing-toolbar-settings .command-list-container {
-  padding: 16px;
-  border-radius: 8px;
-  background-color: var(--background-secondary);
-  margin-top: 20px;
-  margin-bottom: 20px;
-}
-.editing-toolbar-settings .add-command-button-container {
-  display: flex;
-  gap: 10px;
-  padding: 16px;
-  border-radius: 8px;
-  background-color: var(--background-secondary);
-  margin-top: 20px;
-  margin-bottom: 20px;
 }
 .editing-toolbar-settings .custom-toolbar-container {
   padding: 16px;

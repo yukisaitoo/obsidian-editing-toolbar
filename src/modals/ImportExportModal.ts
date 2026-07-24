@@ -5,7 +5,7 @@ import { strings } from 'src/translations/helper';
 export class ImportExportModal extends Modal {
   plugin: EditingToolbarPlugin;
   mode: 'import' | 'export';
-  exportType: 'all' | 'All commands' | 'custom' | 'following' | 'top' | 'fixed';
+  exportType: 'all' | 'All commands' | 'following' | 'top' | 'fixed';
   importMode: 'overwrite' | 'update';
   textArea!: TextAreaComponent;
   importButton!: ButtonComponent;
@@ -37,14 +37,13 @@ export class ImportExportModal extends Modal {
           dropdown
             .addOption('all', strings.allSettings)
             .addOption('All commands', strings.allToolbarCommands)
-            .addOption('custom', strings.customCommandsOnly)
             .addOption('following', strings.followingStyleOnly)
             .addOption('top', strings.topStyleOnly)
             .addOption('fixed', strings.fixedStyleOnly)
 
           dropdown.setValue(this.exportType)
             .onChange(value => {
-              this.exportType = value as 'all' | 'All commands' | 'custom' | 'following' | 'top' | 'fixed';
+              this.exportType = value as 'all' | 'All commands' | 'following' | 'top' | 'fixed';
               this.updateExportContent();
             });
         });
@@ -150,7 +149,6 @@ export class ImportExportModal extends Modal {
           followingCommands: this.plugin.settings.followingCommands || [],
           topCommands: this.plugin.settings.topCommands || [],
           fixedCommands: this.plugin.settings.fixedCommands || [],
-          customCommands: this.plugin.settings.customCommands || [],
           positionStyle: this.plugin.settings.positionStyle,
           aestheticStyle: this.plugin.settings.aestheticStyle,
           cMenuNumRows: this.plugin.settings.cMenuNumRows,
@@ -176,12 +174,6 @@ export class ImportExportModal extends Modal {
           followingCommands: this.plugin.settings.followingCommands || [],
           topCommands: this.plugin.settings.topCommands || [],
           fixedCommands: this.plugin.settings.fixedCommands || []
-        };
-        break;
-      case 'custom':
-        exportContent = {
-          ...exportContent,
-          customCommands: this.plugin.settings.customCommands || []
         };
         break;
       case 'following':
@@ -211,7 +203,7 @@ export class ImportExportModal extends Modal {
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any -- validates untyped parsed JSON
   private validateExportContent(exportContent: any) {
-    ['menuCommands', 'followingCommands', 'topCommands', 'fixedCommands', 'customCommands'].forEach(key => {
+    ['menuCommands', 'followingCommands', 'topCommands', 'fixedCommands'].forEach(key => {
       if (key in exportContent && !exportContent[key]) {
         exportContent[key] = [];
       }
@@ -245,7 +237,6 @@ export class ImportExportModal extends Modal {
       }
 
       const containsMenuCommands = 'menuCommands' in importData;
-      const containsCustomCommands = 'customCommands' in importData;
       const containsFollowingCommands = 'followingCommands' in importData;
       const containsTopCommands = 'topCommands' in importData;
       const containsFixedCommands = 'fixedCommands' in importData;
@@ -253,13 +244,11 @@ export class ImportExportModal extends Modal {
       const positionStyle = importData.positionStyle;
 
       const hasMenuCommands = containsMenuCommands && Array.isArray(importData.menuCommands) && importData.menuCommands.length > 0;
-      const hasCustomCommands = containsCustomCommands && Array.isArray(importData.customCommands) && importData.customCommands.length > 0;
       const hasFollowingCommands = containsFollowingCommands && Array.isArray(importData.followingCommands) && importData.followingCommands.length > 0;
       const hasTopCommands = containsTopCommands && Array.isArray(importData.topCommands) && importData.topCommands.length > 0;
       const hasFixedCommands = containsFixedCommands && Array.isArray(importData.fixedCommands) && importData.fixedCommands.length > 0;
 
       const emptyMenuCommands = containsMenuCommands && (!Array.isArray(importData.menuCommands) || importData.menuCommands.length === 0);
-      const emptyCustomCommands = containsCustomCommands && (!Array.isArray(importData.customCommands) || importData.customCommands.length === 0);
       const emptyFollowingCommands = containsFollowingCommands && (!Array.isArray(importData.followingCommands) || importData.followingCommands.length === 0);
       const emptyTopCommands = containsTopCommands && (!Array.isArray(importData.topCommands) || importData.topCommands.length === 0);
       const emptyFixedCommands = containsFixedCommands && (!Array.isArray(importData.fixedCommands) || importData.fixedCommands.length === 0);
@@ -268,13 +257,11 @@ export class ImportExportModal extends Modal {
 
       if (containsGeneralSettings) importSummary += '• ' + strings.updateGeneralSettings + '\n';
       if (hasMenuCommands) importSummary += '• ' + strings.updateMainMenuCommands + ' (' + importData.menuCommands.length + ' ' + ')\n';
-      if (hasCustomCommands) importSummary += '• ' + strings.updateCustomCommands + ' (' + importData.customCommands.length + ' ' + ')\n';
       if (hasFollowingCommands) importSummary += '• ' + strings.updateFollowingStyleCommands + ' (' + importData.followingCommands.length + ' ' + ')\n';
       if (hasTopCommands) importSummary += '• ' + strings.updateTopStyleCommands + ' (' + importData.topCommands.length + ' ' + ')\n';
       if (hasFixedCommands) importSummary += '• ' + strings.updateFixedStyleCommands + ' (' + importData.fixedCommands.length + ' ' + ')\n';
       if (this.importMode === 'overwrite') {
         if (emptyMenuCommands) importSummary += '• ' + strings.clearAllMainMenuCommands + ' ⚠️\n';
-        if (emptyCustomCommands) importSummary += '• ' + strings.clearAllCustomCommands + ' ⚠️\n';
         if (emptyFollowingCommands) importSummary += '• ' + strings.clearAllFollowingStyleCommands + ' ⚠️\n';
         if (emptyTopCommands) importSummary += '• ' + strings.clearAllTopStyleCommands + ' ⚠️\n';
         if (emptyFixedCommands) importSummary += '• ' + strings.clearAllFixedStyleCommands + ' ⚠️\n';
@@ -284,9 +271,9 @@ export class ImportExportModal extends Modal {
         importSummary += '• ' + strings.setPositionStyle + ' ' + this.getPositionStyleName(positionStyle) + '\n';
       }
 
-      if (!hasMenuCommands && !hasCustomCommands && !hasFollowingCommands &&
+      if (!hasMenuCommands && !hasFollowingCommands &&
         !hasTopCommands && !hasFixedCommands &&
-        !emptyMenuCommands && !emptyCustomCommands && !emptyFollowingCommands &&
+        !emptyMenuCommands && !emptyFollowingCommands &&
         !emptyTopCommands && !emptyFixedCommands &&
         !containsGeneralSettings) {
         new Notice(strings.validConfigurationFoundImportData);
@@ -307,7 +294,6 @@ export class ImportExportModal extends Modal {
           const backup = {
             positionStyle: this.plugin.settings.positionStyle,
             menuCommands: [...this.plugin.settings.menuCommands],
-            customCommands: [...this.plugin.settings.customCommands],
             followingCommands: [...this.plugin.settings.followingCommands],
             topCommands: [...this.plugin.settings.topCommands],
             fixedCommands: [...this.plugin.settings.fixedCommands]
@@ -323,8 +309,6 @@ export class ImportExportModal extends Modal {
             this.fixImportedCommandIds();
 
             await this.plugin.saveSettings();
-
-            this.plugin.reloadCustomCommands();
 
             dispatchEvent(new Event("editingToolbar-NewCommand"));
 
@@ -356,10 +340,6 @@ export class ImportExportModal extends Modal {
       this.plugin.settings.menuCommands = importData.menuCommands;
     }
 
-    if (importData.customCommands) {
-      this.plugin.settings.customCommands = importData.customCommands;
-    }
-
     if (importData.followingCommands) {
       this.plugin.settings.followingCommands = importData.followingCommands;
     }
@@ -379,10 +359,6 @@ export class ImportExportModal extends Modal {
 
     if (importData.menuCommands) {
       this.updateCommandArray(this.plugin.settings.menuCommands, importData.menuCommands);
-    }
-
-    if (importData.customCommands) {
-      this.updateCommandArray(this.plugin.settings.customCommands, importData.customCommands);
     }
 
     if (importData.followingCommands) {
@@ -471,7 +447,6 @@ export class ImportExportModal extends Modal {
     };
 
     fixCommandsInArray(this.plugin.settings.menuCommands);
-    fixCommandsInArray(this.plugin.settings.customCommands);
     fixCommandsInArray(this.plugin.settings.followingCommands);
     fixCommandsInArray(this.plugin.settings.topCommands);
     fixCommandsInArray(this.plugin.settings.fixedCommands);
@@ -481,7 +456,6 @@ export class ImportExportModal extends Modal {
   restoreBackup(backup: any) {
     this.plugin.settings.positionStyle = backup.positionStyle;
     this.plugin.settings.menuCommands = backup.menuCommands;
-    this.plugin.settings.customCommands = backup.customCommands;
     this.plugin.settings.followingCommands = backup.followingCommands;
     this.plugin.settings.topCommands = backup.topCommands;
     this.plugin.settings.fixedCommands = backup.fixedCommands;
