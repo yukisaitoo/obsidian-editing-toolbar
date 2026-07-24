@@ -9,20 +9,12 @@ const ui: Partial<Record<keyof typeof en, string>> = {
   addSubmenu: "Adicionar Submenu",
   addCommandOntoEditingToolbar:
     "Adicione um comando na Barra de Ferramentas a partir da biblioteca de comandos do Obsidian. Para reordenar os comandos, arraste e solte os itens do comando. Para deletar, use o botão de deletar à direita do item do comando. A Barra de Ferramentas não atualizará automaticamente após reordenar os comandos. Use o botão de atualização acima.",
-  allCommandsHaveBeenRemoved: "Todos os comandos foram removidos.",
   appearance: "Aparência",
   clearAllFixedStyleCommands: "Limpar todos os Comandos de Estilo Fixo",
   clearAllFollowingStyleCommands:
     "Limpar todos os Comandos de Estilo Contextual",
   clearAllTopStyleCommands: "Limpar todos os Comandos de Estilo de Topo",
-  copyCommandsAnotherStyleConfiguration:
-    "Copiar comandos de outra configuração de estilo.",
   currentlyEditingCommands: "Atualmente editando comandos para",
-  import2: "Importar de",
-  removeAllCommandsConfiguration:
-    "Remover todos os comandos desta configuração.",
-  sureWantClearAllCommands:
-    "Tem certeza que deseja limpar todos os comandos sob o estilo atual?",
   backgroundColor: "Cor de Fundo",
   calloutType: "Tipo de Callout",
   cancel: "Cancelar",
@@ -38,7 +30,6 @@ const ui: Partial<Record<keyof typeof en, string>> = {
     "Escolha qual estilo de barra de ferramentas você deseja editar.",
   chooseWhichToolbarStyleCommand:
     "Escolha o comando de qual estilo de barra de ferramentas você deseja editar.",
-  clear: "Limpar",
   clearAllMainMenuCommands: "Limpar todos os Comandos do Menu Principal",
   clickPickerAdjustColor: "Clique no seletor para ajustar a cor",
   closed: "Fechado",

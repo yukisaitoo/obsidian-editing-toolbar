@@ -10,19 +10,11 @@ const ui: Partial<Record<keyof typeof en, string>> = {
   addSubmenu: "Добавить подменю",
   addCommandOntoEditingToolbar:
     "Добавьте команду на панель инструментов из библиотеки команд Obsidian. Для изменения порядка перетаскивайте элементы команд. Для удаления используйте кнопку удаления справа от команды. После изменения порядка панель не обновляется автоматически — используйте кнопку обновления выше. Для значка можно выбрать Custom и указать собственный значок.",
-  allCommandsHaveBeenRemoved: "Все команды были удалены。",
   appearance: "Внешний вид",
   clearAllFixedStyleCommands: "Очистить все команды фиксированного стиля",
   clearAllFollowingStyleCommands: "Очистить все команды стиля следования",
   clearAllTopStyleCommands: "Очистить все команды верхнего стиля",
-  copyCommandsAnotherStyleConfiguration:
-    "Копировать команды из другой конфигурации стиля.",
-  copyCommandsSelectedStyle: "Скопировать команды из выбранного стиля.",
   currentlyEditingCommands: "Сейчас редактируются команды для",
-  import2: "Импортировать из",
-  removeAllCommandsConfiguration: "Удалить все команды из этой конфигурации.",
-  sureWantClearAllCommands:
-    "Вы уверены, что хотите удалить все команды текущего стиля?",
   backgroundColor: "Цвет фона",
   buttonSubmenu: "Подменю кнопки",
   calloutType: "Тип Callout",
@@ -40,7 +32,6 @@ const ui: Partial<Record<keyof typeof en, string>> = {
     "Выберите стиль панели инструментов для редактирования.",
   chooseWhichToolbarStyleCommand:
     "Выберите команду стиля панели инструментов для редактирования.",
-  clear: "Очистить",
   clearAllMainMenuCommands: "Очистить все команды главного меню",
   clickPickerAdjustColor: "Нажмите на палитру для выбора цвета",
   closed: "Свернуто",

@@ -10,7 +10,6 @@ import {
   Setting,
 } from "obsidian";
 import Sortable from "sortablejs";
-import { ConfirmModal } from "src/modals/ConfirmModal";
 import { ImportExportModal } from "src/modals/ImportExportModal";
 import {
   ChangeCmdname,
@@ -469,84 +468,6 @@ export class EditingToolbarSettingTab extends PluginSettingTab {
         });
       });
 
-    const currentConfigType = this.currentEditingConfig;
-    const buttonContainer = containerEl.createDiv("command-buttons-container");
-
-    const importSetting = new Setting(buttonContainer)
-      .setName(strings.import2)
-      .setDesc(strings.copyCommandsAnotherStyleConfiguration);
-
-    let selectedSourceStyle = "Main menu";
-    const configSwitcher = new Setting(buttonContainer);
-
-    configSwitcher.addDropdown((dropdown) => {
-      dropdown.addOption("Main menu", "Main Menu Commands");
-
-      if (currentConfigType !== "following") {
-        dropdown.addOption("following", POSITION_STYLE_LABELS.following);
-      }
-      if (currentConfigType !== "top") {
-        dropdown.addOption("top", POSITION_STYLE_LABELS.top);
-      }
-      if (currentConfigType !== "fixed") {
-        dropdown.addOption("fixed", POSITION_STYLE_LABELS.fixed);
-      }
-
-      dropdown.setValue(selectedSourceStyle).onChange((value) => {
-        selectedSourceStyle = value;
-      });
-    });
-    configSwitcher.addExtraButton((button) => button.setIcon("arrow-right"));
-    configSwitcher.addButton((button) =>
-      button
-        .setButtonText(
-          this.getStyleLabel(this.currentEditingConfig) + " " + strings.import,
-        )
-        .setTooltip(strings.copyCommandsSelectedStyle)
-        .onClick(async () => {
-          const sourceCommands =
-            this.getCommandsArrayByType(selectedSourceStyle);
-
-          if (!sourceCommands || sourceCommands.length === 0) {
-            new Notice(strings.selectedStyleNoCommandsImport);
-            return;
-          }
-
-          const confirmMessage = `${strings.importCommandsFrom} "${this.getStyleLabel(selectedSourceStyle)}" ${strings.toLabel} "${this.getStyleLabel(this.currentEditingConfig)}" ${strings.configuration}?`;
-          ConfirmModal.show(this.app, {
-            message: confirmMessage,
-            onConfirm: async () => {
-              this.setCommandsArrayByType(currentConfigType, [
-                ...sourceCommands,
-              ]);
-              await this.plugin.saveSettings();
-              new Notice(
-                `${strings.commandsImportedFrom} "${this.getStyleLabel(selectedSourceStyle)}" ${strings.toLabel} "${this.getStyleLabel(this.currentEditingConfig)}" ${strings.configuration}`,
-              );
-              this.display();
-            },
-          });
-        }),
-    );
-    importSetting.addButton((button) =>
-      button
-        .setButtonText(
-          strings.clear + " " + this.getStyleLabel(this.currentEditingConfig),
-        )
-        .setTooltip(strings.removeAllCommandsConfiguration)
-        .setWarning()
-        .onClick(async () => {
-          ConfirmModal.show(this.app, {
-            message: strings.sureWantClearAllCommands,
-            onConfirm: async () => {
-              this.setCommandsArrayByType(currentConfigType, []);
-              await this.plugin.saveSettings();
-              new Notice(strings.allCommandsHaveBeenRemoved);
-              this.display();
-            },
-          });
-        }),
-    );
     const commandListContainer = containerEl.createDiv(
       "command-lists-container",
     );
@@ -1423,6 +1344,11 @@ export class EditingToolbarSettingTab extends PluginSettingTab {
   }
 
   private displayImportExportSettings(containerEl: HTMLElement): void {
+    const warningDiv = containerEl.createDiv("import-export-warning");
+    warningDiv.createEl("p", {
+      text: strings.warningImportingConfigurationOverwriteCurren,
+      cls: "warning-text",
+    });
     const importExportContainer = containerEl.createDiv(
       "import-export-container",
     );
@@ -1457,11 +1383,6 @@ export class EditingToolbarSettingTab extends PluginSettingTab {
     const ul = infoDiv.createEl("ul");
     ul.createEl("li", { text: strings.exportGenerateJsonConfigurationCan });
     ul.createEl("li", { text: strings.importPastePreviouslyExportedJson });
-    const warningDiv = containerEl.createDiv("import-export-warning");
-    warningDiv.createEl("p", {
-      text: strings.warningImportingConfigurationOverwriteCurren,
-      cls: "warning-text",
-    });
   }
   // User-facing label for a style key; matches the Appearance tab labels.
   private getStyleLabel(key: string): string {

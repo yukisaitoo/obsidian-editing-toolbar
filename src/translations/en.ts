@@ -6,24 +6,11 @@ export const en = {
   addSubmenu: "Add Submenu",
   addCommandOntoEditingToolbar:
     "Add a command onto Editing Toolbar from Obsidian's commands library. To reorder the commands, drag and drop the command items. To delete them, use the delete buttom to the right of the command item. Editing Toolbar will not automaticaly refresh after reordering commands. Use the refresh button above.",
-  allCommandsHaveBeenRemoved: "All commands have been removed.",
   appearance: "Appearance",
   clearAllFixedStyleCommands: "Clear all Fixed Commands",
   clearAllFollowingStyleCommands: "Clear all Selection Commands",
   clearAllTopStyleCommands: "Clear all Top Commands",
-  commandsImportedFrom: "Commands imported successfully from",
-  copyCommandsAnotherStyleConfiguration:
-    "Copy commands from another style configuration.",
-  copyCommandsSelectedStyle: "Copy commands from selected style.",
   currentlyEditingCommands: "Currently editing commands for",
-  import2: "Import From",
-  importCommandsFrom: "Import commands from",
-  removeAllCommandsConfiguration:
-    "Remove all commands from this configuration.",
-  selectedStyleNoCommandsImport:
-    "The selected style has no commands to import.",
-  sureWantClearAllCommands:
-    "Are you sure you want to clear all commands under the current style?",
   backgroundColor: "Background color",
   buttonSubmenu: "Button Submenu",
   calloutType: "Callout Type",
@@ -41,7 +28,6 @@ export const en = {
     "Choose which toolbar style's appearance you want to edit.",
   chooseWhichToolbarStyleCommand:
     "Choose which toolbar style's command you want to edit.",
-  clear: "Clear",
   clearAllMainMenuCommands: "Clear all Main Menu Commands",
   clickPickerAdjustColor: "Click on the picker to adjust the color",
   closed: "Closed",
@@ -62,7 +48,6 @@ export const en = {
   highlighterColors: "Highlighter Colors",
   standardColors: "Standard Colors",
   themeColors: "Theme Colors",
-  toLabel: "to",
   translucentColors: "Translucent Colors",
   dedupeLines: "Dedupe Lines",
   deduplicationCompletedRemaining: "Deduplication completed, remaining",
