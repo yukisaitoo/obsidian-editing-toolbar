@@ -10,8 +10,6 @@ const ui: Partial<Record<keyof typeof en, string>> = {
   addSubmenu: "Добавить подменю",
   addCommandOntoEditingToolbar:
     "Добавьте команду на панель инструментов из библиотеки команд Obsidian. Для изменения порядка перетаскивайте элементы команд. Для удаления используйте кнопку удаления справа от команды. После изменения порядка панель не обновляется автоматически — используйте кнопку обновления выше. Для значка можно выбрать Custom и указать собственный значок.",
-  allSettings: "Все настройки",
-  allToolbarCommands: "Все команды панели инструментов",
   allCommandsHaveBeenRemoved: "Все команды были удалены。",
   appearance: "Внешний вид",
   clearAllFixedStyleCommands: "Очистить все команды фиксированного стиля",
@@ -22,8 +20,6 @@ const ui: Partial<Record<keyof typeof en, string>> = {
   copyCommandsSelectedStyle: "Скопировать команды из выбранного стиля.",
   currentConfiguration: "Текущая конфигурация",
   currentlyEditingCommands: "Сейчас редактируются команды для",
-  fixedStyleOnly: "Только стиль Fixed",
-  followingStyleOnly: "Только стиль Following",
   import2: "Импортировать из",
   removeAllCommandsConfiguration: "Удалить все команды из этой конфигурации.",
   sureWantClearAllCommands:
@@ -41,7 +37,6 @@ const ui: Partial<Record<keyof typeof en, string>> = {
     "Выберите количество колонок в каждой строке панели инструментов.",
   chooseOffsetEditingToolbarFixed:
     "Выберите смещение панели инструментов в фиксированном режиме.",
-  chooseWhatExport: "Выберите, что экспортировать",
   chooseWhichToolbarStyleS:
     "Выберите стиль панели инструментов для редактирования.",
   clear: "Очистить",
@@ -65,7 +60,6 @@ const ui: Partial<Record<keyof typeof en, string>> = {
     "Переключение между разными конфигурациями команд.",
   themeColors: "Цвета темы",
   standardColors: "Стандартные цвета",
-  topStyleOnly: "Только стиль Top",
   translucentColors: "Полупрозрачные цвета",
   highlighterColors: "Цвета маркера",
   customTheme: "Своя",
@@ -98,7 +92,6 @@ const ui: Partial<Record<keyof typeof en, string>> = {
   error: "Ошибка: ",
   export: "Экспорт",
   exportConfiguration: "Экспорт конфигурации",
-  exportType: "Тип экспорта",
   exportToolbarConfigurationShareOthers:
     "Экспортируйте конфигурацию панели инструментов, чтобы поделиться ею с другими.",
   exportGenerateJsonConfigurationCan:
@@ -123,8 +116,6 @@ const ui: Partial<Record<keyof typeof en, string>> = {
     "Кисть форматирования включена!\nВыделите текст, чтобы применить【",
   fullHalfConverter: "Преобразование полуширинных/полноширинных символов",
   general: "Основные",
-  getInspiredWhatOthersHave:
-    "Вдохновляйтесь работами других пользователей или демонстрируйте свои настройки.",
   horizontalPosition: "Горизонтальная позиция",
   icon: "Значок",
   ifImageTurn: "Если это изображение, включите опцию",
@@ -147,7 +138,6 @@ const ui: Partial<Record<keyof typeof en, string>> = {
   insertLinkNextLine: "Вставить ссылку на следующей строке",
   invalidImportDataFormat: "Неверный формат импортируемых данных",
   item: "Элемент",
-  joinCommunity: "Присоединиться к сообществу",
   linkText: "Текст ссылки",
   linkTitleOptional: "Заголовок ссылки (необязательно)",
   linkUrl: "URL ссылки",
@@ -214,8 +204,6 @@ const ui: Partial<Record<keyof typeof en, string>> = {
   setSizeToolbarIconPx:
     "Установить размер значков панели инструментов (px); по умолчанию: 18px",
   settings: "Настройки",
-  shareToolbarSettingsStylesOur:
-    "Поделитесь своими настройками и стилями панели инструментов в нашем",
   shrinkExtraSpaces: "Сжать лишние пробелы",
   splitLines: "Разделить строки",
   startNumber: "Начальный номер",

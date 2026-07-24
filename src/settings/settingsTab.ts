@@ -1451,19 +1451,6 @@ export class EditingToolbarSettingTab extends PluginSettingTab {
     const ul = infoDiv.createEl("ul");
     ul.createEl("li", { text: strings.exportGenerateJsonConfigurationCan });
     ul.createEl("li", { text: strings.importPastePreviouslyExportedJson });
-    const communityDiv = containerEl.createDiv("community-share-container");
-    communityDiv.createEl("h3", {
-      text: strings.joinCommunity,
-      cls: "community-heading",
-    });
-
-    const shareLink = communityDiv.createEl("p");
-    shareLink.innerHTML =
-      strings.shareToolbarSettingsStylesOur +
-      ' <a href="https://github.com/PKM-er/obsidian-editing-toolbar/discussions/categories/show-and-tell" target="_blank" rel="noopener noreferrer">Show and Tell</a> ';
-    communityDiv.createEl("p", {
-      text: strings.getInspiredWhatOthersHave,
-    });
     const warningDiv = containerEl.createDiv("import-export-warning");
     warningDiv.createEl("p", {
       text: strings.warningImportingConfigurationOverwriteCurren,

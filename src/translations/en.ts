@@ -6,8 +6,6 @@ export const en = {
   addSubmenu: "Add Submenu",
   addCommandOntoEditingToolbar:
     "Add a command onto Editing Toolbar from Obsidian's commands library. To reorder the commands, drag and drop the command items. To delete them, use the delete buttom to the right of the command item. Editing Toolbar will not automaticaly refresh after reordering commands. Use the refresh button above.",
-  allSettings: "All Settings",
-  allToolbarCommands: "All Toolbar Commands",
   allCommandsHaveBeenRemoved: "All commands have been removed.",
   appearance: "Appearance",
   clearAllFixedStyleCommands: "Clear all Fixed Style Commands",
@@ -19,8 +17,6 @@ export const en = {
   copyCommandsSelectedStyle: "Copy commands from selected style.",
   currentConfiguration: "Current Configuration",
   currentlyEditingCommands: "Currently editing commands for",
-  fixedStyleOnly: "Fixed Style Only",
-  followingStyleOnly: "Following Style Only",
   import2: "Import From",
   importCommandsFrom: "Import commands from",
   removeAllCommandsConfiguration:
@@ -42,7 +38,6 @@ export const en = {
     "Choose the number of columns per row to display on Editing Toolbar.",
   chooseOffsetEditingToolbarFixed:
     "Choose the offset of the Editing Toolbar in the fixed position.",
-  chooseWhatExport: "Choose what to export",
   chooseWhichToolbarStyleS:
     "Choose which toolbar style's appearance you want to edit.",
   clear: "Clear",
@@ -69,7 +64,6 @@ export const en = {
     "Switch between different command configurations.",
   themeColors: "Theme Colors",
   toLabel: "to",
-  topStyleOnly: "Top Style Only",
   translucentColors: "Translucent Colors",
   dedupeLines: "Dedupe Lines",
   deduplicationCompletedRemaining: "Deduplication completed, remaining",
@@ -99,7 +93,6 @@ export const en = {
   error: "Error: ",
   export: "Export",
   exportConfiguration: "Export Configuration",
-  exportType: "Export Type",
   exportToolbarConfigurationShareOthers:
     "Export your toolbar configuration to share with others.",
   exportGenerateJsonConfigurationCan:
@@ -123,8 +116,6 @@ export const en = {
   fullHalfConverter: "Full Half Converter",
   general: "General",
   glass: "Glass",
-  getInspiredWhatOthersHave:
-    "Get inspired by what others have created or showcase your own customizations.",
   horizontalPosition: "Horizontal Position",
   id: "ID",
   icon: "Icon",
@@ -147,7 +138,6 @@ export const en = {
   insertLinkNextLine: "Insert a link on the next line",
   invalidImportDataFormat: "Invalid import data format",
   item: "Item",
-  joinCommunity: "Join the Community",
   linkText: "Link Text",
   linkTitleOptional: "Link Title (optional)",
   linkUrl: "Link URL",
@@ -207,8 +197,6 @@ export const en = {
   setColorToolbarIcon: "Set the color of the toolbar icon.",
   setSizeToolbarIconPx: "Set the size of the toolbar icon (px); default: 18px",
   settings: "Settings",
-  shareToolbarSettingsStylesOur:
-    "Share your toolbar settings and styles in our",
   shrinkExtraSpaces: "Shrink Extra Spaces",
   splitLines: "Split Lines",
   startNumber: "Start Number",

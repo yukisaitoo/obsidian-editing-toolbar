@@ -16,8 +16,6 @@ const ui: Partial<Record<keyof typeof en, string>> = {
   fontColors: "Font Colours",
   fontColorFormattingBrush: "Font-Colour formatting brush ON!",
   backgroundColorFormattingBrush: "Background-Colour formatting brush ON!",
-  getInspiredWhatOthersHave:
-    "Get inspired by what others have created or showcase your own customisations.",
   selectPresetToolbarThemeAutomatically:
     "Select a preset toolbar theme, automatically setting the background colour, icon colour, and size for the selected style.",
   setBackgroundColorToolbar: "Set the background colour of the toolbar.",

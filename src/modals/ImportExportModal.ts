@@ -5,7 +5,6 @@ import { strings } from 'src/translations/helper';
 export class ImportExportModal extends Modal {
   plugin: EditingToolbarPlugin;
   mode: 'import' | 'export';
-  exportType: 'all' | 'All commands' | 'following' | 'top' | 'fixed';
   importMode: 'overwrite' | 'update';
   textArea!: TextAreaComponent;
   importButton!: ButtonComponent;
@@ -15,7 +14,6 @@ export class ImportExportModal extends Modal {
     super(app);
     this.plugin = plugin;
     this.mode = mode;
-    this.exportType = 'all';
     this.importMode = 'update';
   }
 
@@ -30,24 +28,6 @@ export class ImportExportModal extends Modal {
     });
 
     if (this.mode === 'export') {
-      new Setting(contentEl)
-        .setName(strings.exportType)
-        .setDesc(strings.chooseWhatExport)
-        .addDropdown(dropdown => {
-          dropdown
-            .addOption('all', strings.allSettings)
-            .addOption('All commands', strings.allToolbarCommands)
-            .addOption('following', strings.followingStyleOnly)
-            .addOption('top', strings.topStyleOnly)
-            .addOption('fixed', strings.fixedStyleOnly)
-
-          dropdown.setValue(this.exportType)
-            .onChange(value => {
-              this.exportType = value as 'all' | 'All commands' | 'following' | 'top' | 'fixed';
-              this.updateExportContent();
-            });
-        });
-
       const exportContainer = contentEl.createDiv('export-container');
 
       this.textArea = new TextAreaComponent(exportContainer);
@@ -132,69 +112,34 @@ export class ImportExportModal extends Modal {
 
   updateExportContent() {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any -- heterogeneous export payload assembled dynamically
-    let exportContent: any = {
+    const exportContent: any = {
       _exportInfo: {
         version: this.plugin.manifest.version,
-        exportType: this.exportType,
+        exportType: 'all',
         exportTime: new Date().toISOString(),
         pluginId: this.plugin.manifest.id
-      }
+      },
+      menuCommands: this.plugin.settings.menuCommands || [],
+      followingCommands: this.plugin.settings.followingCommands || [],
+      topCommands: this.plugin.settings.topCommands || [],
+      fixedCommands: this.plugin.settings.fixedCommands || [],
+      positionStyle: this.plugin.settings.positionStyle,
+      aestheticStyle: this.plugin.settings.aestheticStyle,
+      cMenuNumRows: this.plugin.settings.cMenuNumRows,
+      custom_bg1: this.plugin.settings.custom_bg1,
+      custom_bg2: this.plugin.settings.custom_bg2,
+      custom_bg3: this.plugin.settings.custom_bg3,
+      custom_bg4: this.plugin.settings.custom_bg4,
+      custom_bg5: this.plugin.settings.custom_bg5,
+      custom_fc1: this.plugin.settings.custom_fc1,
+      custom_fc2: this.plugin.settings.custom_fc2,
+      custom_fc3: this.plugin.settings.custom_fc3,
+      custom_fc4: this.plugin.settings.custom_fc4,
+      custom_fc5: this.plugin.settings.custom_fc5,
+      toolbarBackgroundColor: this.plugin.settings.toolbarBackgroundColor,
+      toolbarIconColor: this.plugin.settings.toolbarIconColor,
+      toolbarIconSize: this.plugin.settings.toolbarIconSize,
     };
-
-    switch (this.exportType) {
-      case 'all':
-        exportContent = {
-          ...exportContent,
-          menuCommands: this.plugin.settings.menuCommands || [],
-          followingCommands: this.plugin.settings.followingCommands || [],
-          topCommands: this.plugin.settings.topCommands || [],
-          fixedCommands: this.plugin.settings.fixedCommands || [],
-          positionStyle: this.plugin.settings.positionStyle,
-          aestheticStyle: this.plugin.settings.aestheticStyle,
-          cMenuNumRows: this.plugin.settings.cMenuNumRows,
-          custom_bg1: this.plugin.settings.custom_bg1,
-          custom_bg2: this.plugin.settings.custom_bg2,
-          custom_bg3: this.plugin.settings.custom_bg3,
-          custom_bg4: this.plugin.settings.custom_bg4,
-          custom_bg5: this.plugin.settings.custom_bg5,
-          custom_fc1: this.plugin.settings.custom_fc1,
-          custom_fc2: this.plugin.settings.custom_fc2,
-          custom_fc3: this.plugin.settings.custom_fc3,
-          custom_fc4: this.plugin.settings.custom_fc4,
-          custom_fc5: this.plugin.settings.custom_fc5,
-          toolbarBackgroundColor: this.plugin.settings.toolbarBackgroundColor,
-          toolbarIconColor: this.plugin.settings.toolbarIconColor,
-          toolbarIconSize: this.plugin.settings.toolbarIconSize,
-        };
-        break;
-      case 'All commands':
-        exportContent = {
-          ...exportContent,
-          menuCommands: this.plugin.settings.menuCommands || [],
-          followingCommands: this.plugin.settings.followingCommands || [],
-          topCommands: this.plugin.settings.topCommands || [],
-          fixedCommands: this.plugin.settings.fixedCommands || []
-        };
-        break;
-      case 'following':
-        exportContent = {
-          ...exportContent,
-          followingCommands: this.plugin.settings.followingCommands || []
-        };
-        break;
-      case 'top':
-        exportContent = {
-          ...exportContent,
-          topCommands: this.plugin.settings.topCommands || []
-        };
-        break;
-      case 'fixed':
-        exportContent = {
-          ...exportContent,
-          fixedCommands: this.plugin.settings.fixedCommands || []
-        };
-        break;
-    }
 
     this.validateExportContent(exportContent);
 

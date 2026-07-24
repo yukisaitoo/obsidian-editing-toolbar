@@ -9,8 +9,6 @@ const ui: Partial<Record<keyof typeof en, string>> = {
   addSubmenu: "Adicionar Submenu",
   addCommandOntoEditingToolbar:
     "Adicione um comando na Barra de Ferramentas a partir da biblioteca de comandos do Obsidian. Para reordenar os comandos, arraste e solte os itens do comando. Para deletar, use o botão de deletar à direita do item do comando. A Barra de Ferramentas não atualizará automaticamente após reordenar os comandos. Use o botão de atualização acima.",
-  allSettings: "Todas as Configurações",
-  allToolbarCommands: "Todos os Comandos da Barra de Ferramentas",
   allCommandsHaveBeenRemoved: "Todos os comandos foram removidos.",
   appearance: "Aparência",
   clearAllFixedStyleCommands: "Limpar todos os Comandos de Estilo Fixo",
@@ -21,8 +19,6 @@ const ui: Partial<Record<keyof typeof en, string>> = {
     "Copiar comandos de outra configuração de estilo.",
   currentConfiguration: "Configuração Atual",
   currentlyEditingCommands: "Atualmente editando comandos para",
-  fixedStyleOnly: "Disponível apenas no modo fixo",
-  followingStyleOnly: "Disponível apenas no modo contextual",
   import2: "Importar de",
   removeAllCommandsConfiguration:
     "Remover todos os comandos desta configuração.",
@@ -39,7 +35,6 @@ const ui: Partial<Record<keyof typeof en, string>> = {
     "Escolha o número de colunas por linha para exibir na Barra de Ferramentas.",
   chooseOffsetEditingToolbarFixed:
     "Escolha o deslocamento da Barra de Edição na posição fixa.",
-  chooseWhatExport: "Escolha o que exportar",
   chooseWhichToolbarStyleS:
     "Escolha qual estilo de barra de ferramentas você deseja editar.",
   clear: "Limpar",
@@ -64,7 +59,6 @@ const ui: Partial<Record<keyof typeof en, string>> = {
     "Trocar entre configurações de comando diferentes.",
   themeColors: "Cores do Tema",
   standardColors: "Cores Padrão",
-  topStyleOnly: "Disponível apenas no modo de topo",
   translucentColors: "Cores Translúcidas",
   highlighterColors: "Cores de Marca-Texto",
   customTheme: "Estilo Personalizado",
@@ -86,7 +80,6 @@ const ui: Partial<Record<keyof typeof en, string>> = {
   error: "Erro: ",
   export: "Exportar",
   exportConfiguration: "Exportar Configuração",
-  exportType: "Tipo de Exportação",
   exportToolbarConfigurationShareOthers:
     "Exportar sua configuração da barra de ferramentas para compartilhar com outros.",
   exportGenerateJsonConfigurationCan:
@@ -105,8 +98,6 @@ const ui: Partial<Record<keyof typeof en, string>> = {
   formatBrushSelectTextApply:
     "Pincel de formatação ativado! Selecione o texto para aplicar【",
   general: "Geral",
-  getInspiredWhatOthersHave:
-    "Inspire-se com o que outros criaram ou mostre suas próprias personalizações.",
   horizontalPosition: "Posição Horizontal",
   icon: "Ícone",
   ifImageTurn: "Se for uma imagem, ative",
@@ -127,7 +118,6 @@ const ui: Partial<Record<keyof typeof en, string>> = {
   insertNewLine: "Inserir Nova Linha",
   insertLinkNextLine: "Inserir um link na próxima linha",
   invalidImportDataFormat: "Formato de dados de importação inválido",
-  joinCommunity: "Juntar-se à Comunidade",
   linkText: "Texto do Link",
   linkTitleOptional: "Título do Link (opcional)",
   linkUrl: "URL do Link",
@@ -166,8 +156,6 @@ const ui: Partial<Record<keyof typeof en, string>> = {
   setSizeToolbarIconPx:
     "Definir o tamanho do ícone da barra de ferramentas (px); padrão: 18px",
   settings: "Configurações",
-  shareToolbarSettingsStylesOur:
-    "Compartilhe suas configurações e estilos da barra de ferramentas em nossa",
   suffix: "Sufixo",
   command2: "O comando",
   import3: "Esta importação irá:",
