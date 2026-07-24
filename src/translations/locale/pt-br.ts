@@ -125,7 +125,6 @@ const ui: Partial<Record<keyof typeof en, string>> = {
   edit: "Editar",
   editCustomCommand: "Editar Comando Personalizado",
   editRegularExpressionCommand: "Editar comando de expressão regular",
-  editingToolbarAutoHide: "Auto-ocultação da Barra de Ferramentas",
   editingToolbarCentredDisplay: "Exibição Centralizada da Barra de Ferramentas",
   editingToolbarColumns: "Colunas da Barra de Ferramentas",
   editingToolbarCommands: "Comandos da Barra de Ferramentas",
@@ -269,8 +268,6 @@ const ui: Partial<Record<keyof typeof en, string>> = {
   command2: "O comando",
   selectedTextDoesNotMeet:
     "O texto selecionado não atende aos requisitos da condição",
-  toolbarDisplayedWhenMouseMoves:
-    "A barra de ferramentas é exibida quando o mouse passa por cima dela, caso contrário, ela é automaticamente oculta.",
   import3: "Esta importação irá:",
   title: "Título",
   toolbarBackgroundColor: "Cor de Fundo da Barra de Ferramentas",

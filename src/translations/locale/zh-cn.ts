@@ -113,7 +113,6 @@ const ui: Partial<Record<keyof typeof en, string>> = {
   edit: "编辑",
   editCustomCommand: "编辑自定义命令",
   editRegularExpressionCommand: "编辑正则表达式命令",
-  editingToolbarAutoHide: "工具栏是否自动隐藏",
   editingToolbarCentredDisplay: "工具栏是否居中显示",
   editingToolbarColumns: "工具栏栏目数",
   editingToolbarCommands: "在工具栏中添加命令",
@@ -276,8 +275,6 @@ const ui: Partial<Record<keyof typeof en, string>> = {
   textTools: "文本工具",
   command2: "命令",
   selectedTextDoesNotMeet: "选中的文本不满足条件要求",
-  toolbarDisplayedWhenMouseMoves:
-    "当鼠标移到工具栏上方时，工具栏显示，否则自动隐藏",
   import3: "此次导入将：",
   title: "标题",
   toolbarBackgroundColor: "工具栏背景颜色",

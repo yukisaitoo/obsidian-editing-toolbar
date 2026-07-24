@@ -427,17 +427,6 @@ export class EditingToolbarSettingTab extends PluginSettingTab {
 
     if (editingStyle === "top") {
       new Setting(appearanceSettingContainer)
-        .setName(strings.editingToolbarAutoHide)
-        .setDesc(strings.toolbarDisplayedWhenMouseMoves)
-        .addToggle((toggle) =>
-          toggle.setValue(this.plugin.settings?.autohide).onChange((value) => {
-            this.plugin.settings.autohide = value;
-            this.plugin.saveSettings();
-            this.triggerRefresh();
-          }),
-        );
-
-      new Setting(appearanceSettingContainer)
         .setName(strings.editingToolbarCentredDisplay)
         .setDesc(strings.whetherToolbarCentredFullWidth)
         .addToggle((toggle) =>

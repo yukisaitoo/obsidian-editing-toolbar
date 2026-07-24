@@ -947,9 +947,6 @@ export function editingToolbarPopover(
 
       if (effectiveStyle === "top") {
         editingToolbar.className += " top";
-        if (settings.autohide) {
-          editingToolbar.className += " autohide";
-        }
         if (settings.Iscentered) {
           editingToolbar.className += " centered";
         }

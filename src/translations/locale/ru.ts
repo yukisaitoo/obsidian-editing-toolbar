@@ -134,7 +134,6 @@ const ui: Partial<Record<keyof typeof en, string>> = {
   edit: "Редактировать",
   editCustomCommand: "Редактировать пользовательскую команду",
   editRegularExpressionCommand: "Редактировать команду регулярного выражения",
-  editingToolbarAutoHide: "Автоматически скрывать панель инструментов",
   editingToolbarCentredDisplay: "Центрировать панель инструментов",
   editingToolbarColumns: "Количество колонок панели инструментов",
   editingToolbarCommands: "Команды панели инструментов",
@@ -330,8 +329,6 @@ const ui: Partial<Record<keyof typeof en, string>> = {
   textTools: "Текстовые инструменты",
   command2: "Команда",
   selectedTextDoesNotMeet: "Выделенный текст не соответствует условиям",
-  toolbarDisplayedWhenMouseMoves:
-    "Панель инструментов отображается при наведении курсора, иначе автоматически скрывается",
   import3: "Этот импорт выполнит:",
   title: "Заголовок",
   toolbarBackgroundColor: "Цвет фона панели инструментов",

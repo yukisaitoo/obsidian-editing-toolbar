@@ -153,7 +153,6 @@ export class ImportExportModal extends Modal {
           customCommands: this.plugin.settings.customCommands || [],
           positionStyle: this.plugin.settings.positionStyle,
           aestheticStyle: this.plugin.settings.aestheticStyle,
-          autohide: this.plugin.settings.autohide,
           cMenuNumRows: this.plugin.settings.cMenuNumRows,
           custom_bg1: this.plugin.settings.custom_bg1,
           custom_bg2: this.plugin.settings.custom_bg2,
@@ -218,9 +217,6 @@ export class ImportExportModal extends Modal {
       }
     });
 
-    if ('autohide' in exportContent && exportContent.autohide === undefined) {
-      exportContent.autohide = false;
-    }
     if ('Iscentered' in exportContent && exportContent.Iscentered === undefined) {
       exportContent.Iscentered = false;
     }
@@ -433,7 +429,7 @@ export class ImportExportModal extends Modal {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any -- untyped external import JSON
   importGeneralSettings(importData: any) {
     const generalSettings = [
-      'positionStyle', 'aestheticStyle', 'autohide', 'Iscentered',
+      'positionStyle', 'aestheticStyle', 'Iscentered',
       'cMenuNumRows',
       'custom_bg1', 'custom_bg2', 'custom_bg3', 'custom_bg4', 'custom_bg5',
       'custom_fc1', 'custom_fc2', 'custom_fc3', 'custom_fc4', 'custom_fc5',

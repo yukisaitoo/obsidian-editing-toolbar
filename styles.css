@@ -665,20 +665,9 @@ button[class^=editingToolbarCommandsubItem]::after {
 {
   top: 76px;
 }
-#editingToolbarModalBar.top.autohide {
-  opacity: 0;
-  transition: all 0.5s linear;
-  -webkit-transition: all 0.5s linear;
-}
 #editingToolbarModalBar.top.centered {
   max-width: var(--file-line-width) ;
   align-self: center;
-}
-
-#editingToolbarModalBar.top.autohide:hover {
-  opacity: 1;
-  transition: all 1s linear;
-  -webkit-transition: all 1s linear;
 }
 
 :is(#editingToolbarModalBar, #editingToolbarPopoverBar) :is(.editingToolbarCommandItem, button[class^=editingToolbarCommandsubItem]):not(.editingToolbar-Divider-Line) {

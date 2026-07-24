@@ -131,7 +131,6 @@ export const en = {
   edit: "Edit",
   editCustomCommand: "Edit Custom Command",
   editRegularExpressionCommand: "Edit regular expression command",
-  editingToolbarAutoHide: "Editing Toolbar Auto-hide",
   editingToolbarCentredDisplay: "Editing Toolbar Centred Display",
   editingToolbarColumns: "Editing Toolbar Columns",
   editingToolbarCommands: "Editing Toolbar Commands",
@@ -316,8 +315,6 @@ export const en = {
   command2: "The command",
   selectedTextDoesNotMeet:
     "The selected text does not meet the condition requirements",
-  toolbarDisplayedWhenMouseMoves:
-    "The toolbar is displayed when the mouse moves over it, otherwise it is automatically hidden",
   import3: "This import will:",
   tiny: "Tiny",
   title: "Title",
