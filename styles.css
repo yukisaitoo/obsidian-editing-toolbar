@@ -665,11 +665,6 @@ button[class^=editingToolbarCommandsubItem]::after {
 {
   top: 76px;
 }
-#editingToolbarModalBar.top.centered {
-  max-width: var(--file-line-width) ;
-  align-self: center;
-}
-
 :is(#editingToolbarModalBar, #editingToolbarPopoverBar) :is(.editingToolbarCommandItem, button[class^=editingToolbarCommandsubItem]):not(.editingToolbar-Divider-Line) {
   font-size: 10px;
   clear: both;

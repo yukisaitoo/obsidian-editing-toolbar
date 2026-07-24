@@ -134,7 +134,6 @@ const ui: Partial<Record<keyof typeof en, string>> = {
   edit: "Редактировать",
   editCustomCommand: "Редактировать пользовательскую команду",
   editRegularExpressionCommand: "Редактировать команду регулярного выражения",
-  editingToolbarCentredDisplay: "Центрировать панель инструментов",
   editingToolbarColumns: "Количество колонок панели инструментов",
   editingToolbarCommands: "Команды панели инструментов",
   embedContent: "Встроенное содержимое",
@@ -371,8 +370,6 @@ const ui: Partial<Record<keyof typeof en, string>> = {
     "Предупреждение: режим обновления добавит новые элементы и обновит существующие.",
   whenTextSelectedRegexCommands:
     "Если текст не выделен, команды регулярных выражений будут использовать текущую строку вместо содержимого буфера обмена",
-  whetherToolbarCentredFullWidth:
-    "Отображать панель по центру или на всю ширину. По умолчанию — на всю ширину.",
   whetherInsertBeginningNextLine: "Вставлять в начало следующей строки",
   whitespaceCleaningCompleted: "Очистка пробельных символов завершена",
   description: "[Описание]",

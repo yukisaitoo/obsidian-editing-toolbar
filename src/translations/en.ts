@@ -131,7 +131,6 @@ export const en = {
   edit: "Edit",
   editCustomCommand: "Edit Custom Command",
   editRegularExpressionCommand: "Edit regular expression command",
-  editingToolbarCentredDisplay: "Editing Toolbar Centred Display",
   editingToolbarColumns: "Editing Toolbar Columns",
   editingToolbarCommands: "Editing Toolbar Commands",
   embedContent: "Embed Content",
@@ -356,8 +355,6 @@ export const en = {
     "Warning: Update mode will add new items and update existing ones.",
   whenTextSelectedRegexCommands:
     "When no text is selected, regex commands will use the current line instead of clipboard content",
-  whetherToolbarCentredFullWidth:
-    "Whether the toolbar is centred or full-width, the default is full-width.",
   whetherInsertBeginningNextLine:
     "Whether to insert at the beginning of the next line",
   whitespaceCleaningCompleted: "Whitespace cleaning completed",

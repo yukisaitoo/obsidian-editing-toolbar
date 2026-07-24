@@ -129,7 +129,6 @@ export interface editingToolbarSettings {
   cMenuVisibility: boolean;
   cMenuBottomValue: number;
   cMenuNumRows: number;
-  Iscentered:boolean;
   custom_bg1:string;
   custom_bg2:string;
   custom_bg3:string;
@@ -563,7 +562,6 @@ export const DEFAULT_SETTINGS: editingToolbarSettings = {
     "cMenuWidth": 610,
     "cMenuFontColor": "#2DC26B",
     "cMenuBackgroundColor": "#d3f8b6",
-    "Iscentered":false,
     "custom_bg1": "#FFB78B8C",
     "custom_bg2": "#CDF4698C",
     "custom_bg3": "#A0CCF68C",

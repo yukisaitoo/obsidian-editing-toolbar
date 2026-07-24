@@ -217,9 +217,6 @@ export class ImportExportModal extends Modal {
       }
     });
 
-    if ('Iscentered' in exportContent && exportContent.Iscentered === undefined) {
-      exportContent.Iscentered = false;
-    }
 
     if ('positionStyle' in exportContent && !exportContent.positionStyle) {
       exportContent.positionStyle = 'top';
@@ -429,7 +426,7 @@ export class ImportExportModal extends Modal {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any -- untyped external import JSON
   importGeneralSettings(importData: any) {
     const generalSettings = [
-      'positionStyle', 'aestheticStyle', 'Iscentered',
+      'positionStyle', 'aestheticStyle',
       'cMenuNumRows',
       'custom_bg1', 'custom_bg2', 'custom_bg3', 'custom_bg4', 'custom_bg5',
       'custom_fc1', 'custom_fc2', 'custom_fc3', 'custom_fc4', 'custom_fc5',

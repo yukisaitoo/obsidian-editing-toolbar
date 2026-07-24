@@ -125,7 +125,6 @@ const ui: Partial<Record<keyof typeof en, string>> = {
   edit: "Editar",
   editCustomCommand: "Editar Comando Personalizado",
   editRegularExpressionCommand: "Editar comando de expressão regular",
-  editingToolbarCentredDisplay: "Exibição Centralizada da Barra de Ferramentas",
   editingToolbarColumns: "Colunas da Barra de Ferramentas",
   editingToolbarCommands: "Comandos da Barra de Ferramentas",
   embedContent: "Conteúdo Embutido",
@@ -306,8 +305,6 @@ const ui: Partial<Record<keyof typeof en, string>> = {
     "Aviso: O modo de atualização irá adicionar novos itens e atualizar os existentes com base na configuração importada.",
   whenTextSelectedRegexCommands:
     "Quando não houver texto selecionado, comandos de regex usarão a linha atual em vez do conteúdo da área de transferência",
-  whetherToolbarCentredFullWidth:
-    "Define se a barra de ferramentas é centralizada ou ocupa toda a largura. O padrão é largura completa.",
   whetherInsertBeginningNextLine: "Inserir no início da próxima linha",
   description: "[Descrição]",
   example: "[Exemplo]",

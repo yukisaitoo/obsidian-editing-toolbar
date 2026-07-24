@@ -947,9 +947,6 @@ export function editingToolbarPopover(
 
       if (effectiveStyle === "top") {
         editingToolbar.className += " top";
-        if (settings.Iscentered) {
-          editingToolbar.className += " centered";
-        }
         // If cMenuVisibility is false, visibility is already set to hidden above
       } else if (effectiveStyle === "following") {
         editingToolbar.style.visibility = "hidden";

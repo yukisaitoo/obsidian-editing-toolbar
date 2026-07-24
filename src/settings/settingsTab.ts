@@ -425,20 +425,6 @@ export class EditingToolbarSettingTab extends PluginSettingTab {
           });
       });
 
-    if (editingStyle === "top") {
-      new Setting(appearanceSettingContainer)
-        .setName(strings.editingToolbarCentredDisplay)
-        .setDesc(strings.whetherToolbarCentredFullWidth)
-        .addToggle((toggle) =>
-          toggle
-            .setValue(this.plugin.settings?.Iscentered)
-            .onChange((value) => {
-              this.plugin.settings.Iscentered = value;
-              this.plugin.saveSettings();
-              this.triggerRefresh();
-            }),
-        );
-    }
     if (editingStyle === "fixed") {
       new Setting(appearanceSettingContainer)
         .setName(strings.editingToolbarColumns)

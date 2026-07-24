@@ -113,7 +113,6 @@ const ui: Partial<Record<keyof typeof en, string>> = {
   edit: "编辑",
   editCustomCommand: "编辑自定义命令",
   editRegularExpressionCommand: "编辑正则表达式命令",
-  editingToolbarCentredDisplay: "工具栏是否居中显示",
   editingToolbarColumns: "工具栏栏目数",
   editingToolbarCommands: "在工具栏中添加命令",
   embedContent: "嵌入内容",
@@ -311,7 +310,6 @@ const ui: Partial<Record<keyof typeof en, string>> = {
   warningUpdateModeAddNew: "警告：更新模式将添加新项目并更新现有项目。",
   whenTextSelectedRegexCommands:
     "当没有选中文本时，正则命令将使用当前行内容而不是剪贴板内容",
-  whetherToolbarCentredFullWidth: "工具栏居中还是全宽显示，默认全宽显示",
   whetherInsertBeginningNextLine: "是否在下一行首插入",
   whitespaceCleaningCompleted: "空白字符清洗完成",
   description: "[描述]",
