@@ -6,5 +6,5 @@
   "description": "Unofficial fork of Editing Toolbar — a MS Word-like editing toolbar for Obsidian. Original plugin by Cuman (https://github.com/cumany/obsidian-editing-toolbar).",
   "author": "Yuki Saito",
   "authorUrl": "https://github.com/yukisaitoo",
-  "isDesktopOnly": false
+  "isDesktopOnly": true
 }

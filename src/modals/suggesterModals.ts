@@ -11,14 +11,14 @@ export class ChooseFromIconList extends FuzzySuggestModal<string> {
   plugin: EditingToolbarPlugin;
   command: Command;
   issub: boolean;
-  currentEditingConfig:string;
+  currentEditingConfig: string;
   customCallback: IconSelectCallback | null = null;
   constructor(
     plugin: EditingToolbarPlugin,
     command: Command,
     issub: boolean = false,
     callback?: IconSelectCallback,
-    currentEditingConfig?:string
+    currentEditingConfig?: string
   ) {
     super(plugin.app);
     this.plugin = plugin;
@@ -76,7 +76,7 @@ export class ChooseFromIconList extends FuzzySuggestModal<string> {
         ).open();
         return;
       } else {
-        new CustomIcon(this.app, this.plugin, this.command, this.issub,undefined,this.currentEditingConfig).open();
+        new CustomIcon(this.app, this.plugin, this.command, this.issub, undefined, this.currentEditingConfig).open();
         return;
       }
     }
@@ -116,7 +116,7 @@ class CustomIcon extends Modal {
   plugin: EditingToolbarPlugin;
   item: Command;
   issub: boolean;
-  currentEditingConfig:string;
+  currentEditingConfig: string;
   submitEnterCallback!: (this: HTMLTextAreaElement, ev: KeyboardEvent) => unknown;
   customCallback: IconSelectCallback | null = null;
 
@@ -126,7 +126,7 @@ class CustomIcon extends Modal {
     item: Command, 
     issub: boolean,
     callback?: IconSelectCallback,
-    currentEditingConfig?:string
+    currentEditingConfig?: string
   ) {
     super(app);
     this.plugin = plugin;
@@ -199,8 +199,8 @@ class CustomIcon extends Modal {
 
 export class CommandPicker extends FuzzySuggestModal<Command> {
   command!: Command;
-  currentEditingConfig:string;
-  constructor(private plugin: EditingToolbarPlugin,currentEditingConfig?:string) {
+  currentEditingConfig: string;
+  constructor(private plugin: EditingToolbarPlugin, currentEditingConfig?: string) {
     super(plugin.app);
     this.setPlaceholder(strings.chooseCommand);
     this.currentEditingConfig = currentEditingConfig || "";
@@ -251,9 +251,9 @@ export class ChangeCmdname extends Modal {
   plugin: EditingToolbarPlugin;
   item: Command;
   issub: boolean;
-  currentEditingConfig:string;
+  currentEditingConfig: string;
   submitEnterCallback!: (this: HTMLInputElement, ev: KeyboardEvent) => unknown;
-  constructor(app: App, plugin: EditingToolbarPlugin, item: Command, issub: boolean,currentEditingConfig?:string) {
+  constructor(app: App, plugin: EditingToolbarPlugin, item: Command, issub: boolean, currentEditingConfig?: string) {
     super(plugin.app);
     this.plugin = plugin;
     this.item = item;

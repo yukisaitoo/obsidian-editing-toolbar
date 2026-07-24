@@ -309,16 +309,9 @@ addSpecialCharButtons(suffixSetting, suffixSetting.controlEl.querySelector('inpu
               const customCommandId = `editing-toolbar:${commandId}`;
 
               this.updateCommandIcon(this.plugin.settings.menuCommands, customCommandId);
-
-              if (this.plugin.settings.enableMultipleConfig) {
-                this.updateCommandIcon(this.plugin.settings.followingCommands, customCommandId);
-                this.updateCommandIcon(this.plugin.settings.topCommands, customCommandId);
-                this.updateCommandIcon(this.plugin.settings.fixedCommands, customCommandId);
-
-                if (this.plugin.settings.isLoadOnMobile) {
-                  this.updateCommandIcon(this.plugin.settings.mobileCommands, customCommandId);
-                }
-              }
+              this.updateCommandIcon(this.plugin.settings.followingCommands, customCommandId);
+              this.updateCommandIcon(this.plugin.settings.topCommands, customCommandId);
+              this.updateCommandIcon(this.plugin.settings.fixedCommands, customCommandId);
             }
 
             this.plugin.settings.customCommands[this.commandIndex] = command;

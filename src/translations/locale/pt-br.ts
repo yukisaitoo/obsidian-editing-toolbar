@@ -31,6 +31,24 @@ const ui: Partial<Record<keyof typeof en, string>> = {
   appearance: "Aparência",
   applyRegularExpressionReplacement:
     "Aplicar substituição de expressão regular",
+  clearAllFixedStyleCommands: "Limpar todos os Comandos de Estilo Fixo",
+  clearAllFollowingStyleCommands:
+    "Limpar todos os Comandos de Estilo Contextual",
+  clearAllTopStyleCommands: "Limpar todos os Comandos de Estilo de Topo",
+  commandAlreadyExistsSelectedConfigurations:
+    "Comando já existe nas configurações selecionadas",
+  commandDeployed: "Comando implantado para: ",
+  copyCommandsAnotherStyleConfiguration:
+    "Copiar comandos de outra configuração de estilo.",
+  currentConfiguration: "Configuração Atual",
+  currentlyEditingCommands: "Atualmente editando comandos para",
+  deploy: "Implantar",
+  deployCommandConfigurations: "Implantar comando para configurações",
+  fixedStyleOnly: "Disponível apenas no modo fixo",
+  followingStyleOnly: "Disponível apenas no modo contextual",
+  import2: "Importar de",
+  removeAllCommandsConfiguration:
+    "Remover todos os comandos desta configuração.",
   sureWantClearAllCommands:
     "Tem certeza que deseja limpar todos os comandos sob o estilo atual?",
   backgroundColor: "Cor de Fundo",
@@ -47,18 +65,11 @@ const ui: Partial<Record<keyof typeof en, string>> = {
   chooseOffsetEditingToolbarFixed:
     "Escolha o deslocamento da Barra de Edição na posição fixa.",
   chooseWhatExport: "Escolha o que exportar",
-  chooseWhereEditingToolbarAppend:
-    "Escolha onde a Barra de Ferramentas será inserida ao regenerar.",
   chooseWhichToolbarStyleS:
     "Escolha qual estilo de barra de ferramentas você deseja editar.",
   clear: "Limpar",
   clearAllCustomCommands: "Limpar todos os Comandos Personalizados",
-  clearAllFixedStyleCommands: "Limpar todos os Comandos de Estilo Fixo",
-  clearAllFollowingStyleCommands:
-    "Limpar todos os Comandos de Estilo Contextual",
   clearAllMainMenuCommands: "Limpar todos os Comandos do Menu Principal",
-  clearAllMobileStyleCommands: "Limpar todos os Comandos de Estilo Mobile",
-  clearAllTopStyleCommands: "Limpar todos os Comandos de Estilo de Topo",
   clickPickerAdjustColor: "Clique no seletor para ajustar a cor",
   closed: "Fechado",
   collapseState: "Estado de Colapso",
@@ -69,10 +80,6 @@ const ui: Partial<Record<keyof typeof en, string>> = {
     "ID do Comando e nome do comando não podem ser vazios",
   commandIdCannotContainSpaces: "ID do Comando não pode conter espaços",
   commandName: "Nome do Comando",
-  commandAddedToolbar: "Comando adicionado à barra de ferramentas",
-  commandAlreadyExistsSelectedConfigurations:
-    "Comando já existe nas configurações selecionadas",
-  commandDeployed: "Comando implantado para: ",
   commandIconClickSelect: "Ícone do comando (clique para selecionar)",
   completeRegularExpressionCodeCopy:
     "Código de expressão regular completo (copiar para explicação com IA)",
@@ -90,13 +97,9 @@ const ui: Partial<Record<keyof typeof en, string>> = {
   convertQuotedTextQuoteBlock: "Converter texto citado para bloco de citação",
   copied: "Copiado!",
   copyCode: "Copiar código",
-  copyCommandsAnotherStyleConfiguration:
-    "Copiar comandos de outra configuração de estilo.",
   copyClipboard: "Copiar para a área de transferência",
-  currentConfiguration: "Configuração Atual",
   currentLineEmptyPleaseSelect:
     "A linha atual está vazia, por favor selecione o texto ou mova para uma linha não vazia",
-  currentlyEditingCommands: "Atualmente editando comandos para",
   cursorPositionOffset: "Deslocamento do cursor",
   customBackgroundColor: "Cor de Fundo Personalizada",
   customCommands: "Comandos Personalizados",
@@ -104,8 +107,11 @@ const ui: Partial<Record<keyof typeof en, string>> = {
   customFontColor: "Cor de Texto Personalizada",
   customFontColors: "Cores de Fonte Personalizadas",
   customColors: "Cores Personalizadas",
+  switchBetweenDifferentCommandConfigurations:
+    "Trocar entre configurações de comando diferentes.",
   themeColors: "Cores do Tema",
   standardColors: "Cores Padrão",
+  topStyleOnly: "Disponível apenas no modo de topo",
   translucentColors: "Cores Translúcidas",
   highlighterColors: "Cores de Marca-Texto",
   customTheme: "Estilo Personalizado",
@@ -113,25 +119,18 @@ const ui: Partial<Record<keyof typeof en, string>> = {
   default0FormatKeepText: "Padrão 0, o formato manterá o texto selecionado",
   delete: "Deletar",
   deleteEmptyLinesMultilineMode: "Deletar linhas vazias (modo multilinha)",
-  deploy: "Implantar",
-  deployCommandConfigurations: "Implantar comando para configurações",
-  disable: "Desabilitar",
   displayedNameToolbarMenu: "Nome exibido na barra de ferramentas e menu",
   doWantContinue: "Deseja continuar?",
   dragSliderMovePosition: "Arraste o slider para mover a posição",
   edit: "Editar",
   editCustomCommand: "Editar Comando Personalizado",
   editRegularExpressionCommand: "Editar comando de expressão regular",
-  editingToolbarAppendMethod: "Método de Inserção da Barra de Ferramentas",
   editingToolbarAutoHide: "Auto-ocultação da Barra de Ferramentas",
   editingToolbarCentredDisplay: "Exibição Centralizada da Barra de Ferramentas",
   editingToolbarColumns: "Colunas da Barra de Ferramentas",
   editingToolbarCommands: "Comandos da Barra de Ferramentas",
   embedContent: "Conteúdo Embutido",
   enable: "Habilitar",
-  enableMultipleConfigurations: "Habilitar Múltiplas Configurações",
-  enableDifferentCommandConfigurationsEach:
-    "Habilitar configurações de comandos diferentes para cada modo de posição (following, top, fixed).",
   enableToolbarPositionedTop:
     "Habilitar a barra de ferramentas posicionada no topo.",
   enableToolbarAppearsUponText:
@@ -156,14 +155,8 @@ const ui: Partial<Record<keyof typeof en, string>> = {
   fitEditorWidth: "Ajustar Largura do Editor",
   fixedPositionOffset: "Deslocamento Fixo",
   fixedStyle: "Estilo Fixo",
-  fixedStyleOnly: "Disponível apenas no modo fixo",
   fixedToolbar: "Barra de Ferramentas Fixa",
-  fixedStyleCommandsSuccessfullyInitialized:
-    "Comandos de estilo fixo inicializados com sucesso",
   followingStyle: "Estilo Contextual",
-  followingStyleOnly: "Disponível apenas no modo contextual",
-  followingStyleCommandsSuccessfullyInitialize:
-    "Comandos de estilo contextual inicializados com sucesso",
   fontColors: "Cores de Texto",
   fontColorFormattingBrush: "Pincel de cor da fonte ativado!",
   backgroundColorFormattingBrush: "Pincel de cor de fundo ativado!",
@@ -191,7 +184,6 @@ const ui: Partial<Record<keyof typeof en, string>> = {
   imageWidth: "Largura da Imagem",
   import: "Importar",
   importConfiguration: "Configuração de Importação",
-  import2: "Importar de",
   importMode: "Modo de Importação",
   importToolbarConfigurationJson:
     "Importar configuração da barra de ferramentas em formato JSON.",
@@ -217,17 +209,14 @@ const ui: Partial<Record<keyof typeof en, string>> = {
   loading: "Carregando...",
   matchCaseInsensitive: "Ignorar maiúsculas e minúsculas",
   matchingPattern: "Padrão de correspondência",
-  mobileEnabledNot: "Habilitar em dispositivos móveis",
-  mobileStyle: "Estilo Mobile",
-  mobileStyleOnly: "Disponível apenas no modo mobile",
-  mobileStyleCommandsSuccessfullyInitialized:
-    "Comandos de estilo mobile inicializados com sucesso",
   more: "Mais",
   multilineMode: "Modo multilinha",
   mustExistRegularExpressionText: "Deve existir expressão regular ou texto",
+  updateFixedStyleCommands: "Atualizar Comandos de Estilo Fixo",
+  updateFollowingStyleCommands: "Atualizar Comandos de Estilo Contextual",
+  updateTopStyleCommands: "Atualizar Comandos de Estilo de Topo",
   validConfigurationFoundImportData:
     "Nenhuma configuração válida encontrada nos dados de importação",
-  oneClickClear: "Limpar com um clique",
   onlyApplyCustomCommandWhen:
     "Aplicar o comando personalizado apenas quando o texto corresponder à condição",
   open: "Abrir",
@@ -256,8 +245,6 @@ const ui: Partial<Record<keyof typeof en, string>> = {
   regexPatternCannotEmpty: "Padrão de regex não pode estar vazio",
   regexPatternMatch: "Padrão de regex a ser correspondido",
   regularExpressionExamples: "Exemplos de expressões regulares",
-  removeAllCommandsConfiguration:
-    "Remover todos os comandos desta configuração.",
   removeExtraSpaces: "Remover espaços extra",
   renumberList: "Renumerar Lista",
   replaceAllMatches: "Substituir todas as ocorrências",
@@ -269,7 +256,6 @@ const ui: Partial<Record<keyof typeof en, string>> = {
   save: "Salvar",
   selectPresetToolbarThemeAutomatically:
     "Selecione um estilo de barra de ferramentas pré-definido, automaticamente definindo a cor de fundo, cor do ícone e tamanho para o estilo selecionado.",
-  setMultipleConfig: "Definir Múltiplas Configurações para:",
   setPositionStyle: "Definir Estilo de Posição para:",
   setBackgroundColorToolbar: "Definir a cor de fundo da barra de ferramentas.",
   setColorToolbarIcon: "Definir a cor do ícone da barra de ferramentas.",
@@ -280,14 +266,11 @@ const ui: Partial<Record<keyof typeof en, string>> = {
     "Compartilhe suas configurações e estilos da barra de ferramentas em nossa",
   suffix: "Sufixo",
   switchRegexCommandWindow: "Trocar para Janela de Comando de Regex",
-  switchBetweenDifferentCommandConfigurations:
-    "Trocar entre configurações de comando diferentes.",
   command2: "O comando",
   selectedTextDoesNotMeet:
     "O texto selecionado não atende aos requisitos da condição",
   toolbarDisplayedWhenMouseMoves:
     "A barra de ferramentas é exibida quando o mouse passa por cima dela, caso contrário, ela é automaticamente oculta.",
-  commandAlreadyToolbar: "Este comando já está na barra de ferramentas.",
   import3: "Esta importação irá:",
   title: "Título",
   toolbarBackgroundColor: "Cor de Fundo da Barra de Ferramentas",
@@ -300,21 +283,14 @@ const ui: Partial<Record<keyof typeof en, string>> = {
   toolbarSettings: "Configurações da Barra de Ferramentas",
   toolbarTheme: "Estilo da Barra de Ferramentas",
   topStyle: "Estilo de Topo",
-  topStyleOnly: "Disponível apenas no modo de topo",
   topToolbar: "Barra de Ferramentas de Topo",
-  topStyleCommandsSuccessfullyInitialized:
-    "Comandos de estilo de topo inicializados com sucesso",
   urlFormatError: "Erro de Formato de URL",
   urlMarkdownLink: "URL para Link Markdown",
   updateCustomCommands: "Atualizar Comandos Personalizados",
-  updateFixedStyleCommands: "Atualizar Comandos de Estilo Fixo",
-  updateFollowingStyleCommands: "Atualizar Comandos de Estilo Contextual",
   updateImport: "Atualizar Importação",
   updateMainMenuCommands: "Atualizar Comandos do Menu Principal",
-  updateMobileStyleCommands: "Atualizar Comandos de Estilo Mobile",
   updateModeAddNewItems:
     "Modo de Atualização (Adicionar novos itens e atualizar os existentes)",
-  updateTopStyleCommands: "Atualizar Comandos de Estilo de Topo",
   updateGeneralSettings: "Atualizar configurações gerais",
   usageInstructions: "Instruções de Uso",
   useNRepresentLineBreaks: "Use \\n para representar quebras de linha",
@@ -335,8 +311,6 @@ const ui: Partial<Record<keyof typeof en, string>> = {
     "Quando não houver texto selecionado, comandos de regex usarão a linha atual em vez do conteúdo da área de transferência",
   whetherToolbarCentredFullWidth:
     "Define se a barra de ferramentas é centralizada ou ocupa toda a largura. O padrão é largura completa.",
-  whetherEnableMobileDevicesDevice:
-    "Habilitar o plugin para dispositivos móveis com largura de dispositivo menor que 768px, o padrão é desabilitado.",
   whetherInsertBeginningNextLine: "Inserir no início da próxima linha",
   description: "[Descrição]",
   example: "[Exemplo]",

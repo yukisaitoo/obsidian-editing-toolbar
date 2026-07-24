@@ -24,10 +24,31 @@ export const en = {
   allCommandsHaveBeenRemoved: "All commands have been removed.",
   appearance: "Appearance",
   applyRegularExpressionReplacement: "Apply regular expression replacement",
+  clearAllFixedStyleCommands: "Clear all Fixed Style Commands",
+  clearAllFollowingStyleCommands: "Clear all Following Style Commands",
+  clearAllTopStyleCommands: "Clear all Top Style Commands",
+  commandAlreadyExistsSelectedConfigurations:
+    "Command already exists in selected configurations",
+  commandDeployed: "Command deployed to: ",
+  commandsImportedFrom: "Commands imported successfully from",
+  copyCommandsAnotherStyleConfiguration:
+    "Copy commands from another style configuration.",
+  copyCommandsSelectedStyle: "Copy commands from selected style.",
+  currentConfiguration: "Current Configuration",
+  currentlyEditingCommands: "Currently editing commands for",
+  deploy: "Deploy",
+  deployCommandConfigurations: "Deploy command to configurations",
+  fixedStyleOnly: "Fixed Style Only",
+  followingStyleOnly: "Following Style Only",
+  import2: "Import From",
+  importCommandsFrom: "Import commands from",
+  removeAllCommandsConfiguration:
+    "Remove all commands from this configuration.",
+  selectedStyleNoCommandsImport:
+    "The selected style has no commands to import.",
   sureWantClearAllCommands:
     "Are you sure you want to clear all commands under the current style?",
   backgroundColor: "Background color",
-  body: "Note area",
   buttonSubmenu: "Button Submenu",
   calloutType: "Callout Type",
   cancel: "Cancel",
@@ -43,22 +64,11 @@ export const en = {
   chooseOffsetEditingToolbarFixed:
     "Choose the offset of the Editing Toolbar in the fixed position.",
   chooseWhatExport: "Choose what to export",
-  chooseWhereEditingToolbarAppend:
-    "Choose where Editing Toolbar will append upon regeneration.",
   chooseWhichToolbarStyleS:
     "Choose which toolbar style's appearance you want to edit.",
   clear: "Clear",
-  toLabel: "to",
-  selectedStyleNoCommandsImport:
-    "The selected style has no commands to import.",
-  importCommandsFrom: "Import commands from",
-  commandsImportedFrom: "Commands imported successfully from",
   clearAllCustomCommands: "Clear all Custom Commands",
-  clearAllFixedStyleCommands: "Clear all Fixed Style Commands",
-  clearAllFollowingStyleCommands: "Clear all Following Style Commands",
   clearAllMainMenuCommands: "Clear all Main Menu Commands",
-  clearAllMobileStyleCommands: "Clear all Mobile Style Commands",
-  clearAllTopStyleCommands: "Clear all Top Style Commands",
   clearFormattingBrushClickMouse:
     "Clear formatting brush ON!\nClick the  mouse middle or right key to close the formatting-brush",
   clickPickerAdjustColor: "Click on the picker to adjust the color",
@@ -70,10 +80,6 @@ export const en = {
   commandIdCommandNameCannot: "Command ID and command name cannot be empty",
   commandIdCannotContainSpaces: "Command ID cannot contain spaces",
   commandName: "Command Name",
-  commandAddedToolbar: "Command added to toolbar",
-  commandAlreadyExistsSelectedConfigurations:
-    "Command already exists in selected configurations",
-  commandDeployed: "Command deployed to: ",
   commandIconClickSelect: "Command icon (click to select)",
   completeRegularExpressionCodeCopy:
     "Complete regular expression code (copy to AI for explanation)",
@@ -89,14 +95,9 @@ export const en = {
   convertQuotedTextQuoteBlock: "Convert quoted text to quote block",
   copied: "Copied!",
   copyCode: "Copy code",
-  copyCommandsAnotherStyleConfiguration:
-    "Copy commands from another style configuration.",
-  copyCommandsSelectedStyle: "Copy commands from selected style.",
   copyClipboard: "Copy",
-  currentConfiguration: "Current Configuration",
   currentLineEmptyPleaseSelect:
     "Current line is empty, please select text or move to a non-empty line",
-  currentlyEditingCommands: "Currently editing commands for",
   cursorPositionOffset: "Cursor Position Offset",
   customBackgroundColor: "Custom Background Color",
   customColors: "Custom Colors",
@@ -107,7 +108,11 @@ export const en = {
   customTheme: "Custom Theme",
   highlighterColors: "Highlighter Colors",
   standardColors: "Standard Colors",
+  switchBetweenDifferentCommandConfigurations:
+    "Switch between different command configurations.",
   themeColors: "Theme Colors",
+  toLabel: "to",
+  topStyleOnly: "Top Style Only",
   translucentColors: "Translucent Colors",
   dedupeLines: "Dedupe Lines",
   deduplicationCompletedRemaining: "Deduplication completed, remaining",
@@ -115,13 +120,10 @@ export const en = {
   default0FormatKeepText: "Default 0, format will keep the text selected",
   delete: "Delete",
   deleteEmptyLinesMultilineMode: "Delete empty lines (multiline mode)",
-  deploy: "Deploy",
-  deployCommandConfigurations: "Deploy command to configurations",
   detectedChineseContextConvertedFull:
     "Detected Chinese context: converted to full-width symbols",
   detectedCodeEnglishContextConverted:
     "Detected code/English context: converted to half-width symbols",
-  disable: "Disable",
   displayedNameToolbarMenu: "Displayed name in toolbar and menu",
   doWantContinue: "Do you want to continue?",
   dragSliderMovePosition: "Drag the slider to move the position",
@@ -129,16 +131,12 @@ export const en = {
   edit: "Edit",
   editCustomCommand: "Edit Custom Command",
   editRegularExpressionCommand: "Edit regular expression command",
-  editingToolbarAppendMethod: "Editing Toolbar Append Method",
   editingToolbarAutoHide: "Editing Toolbar Auto-hide",
   editingToolbarCentredDisplay: "Editing Toolbar Centred Display",
   editingToolbarColumns: "Editing Toolbar Columns",
   editingToolbarCommands: "Editing Toolbar Commands",
   embedContent: "Embed Content",
   enable: "Enable",
-  enableMultipleConfigurations: "Enable Multiple Configurations",
-  enableDifferentCommandConfigurationsEach:
-    "Enable different command configurations for each position style (following, top, fixed).",
   enableToolbarPositionedTop: "Enable the toolbar positioned at the top.",
   enableToolbarAppearsUponText:
     "Enable the toolbar that appears upon text selection.",
@@ -169,15 +167,9 @@ export const en = {
   fitEditorWidth: "Fit Editor Width",
   fixedPositionOffset: "Fixed Position Offset",
   fixedStyle: "Fixed Style",
-  fixedStyleOnly: "Fixed Style Only",
   fixedToolbar: "Fixed",
-  fixedStyleCommandsSuccessfullyInitialized:
-    "Fixed style commands successfully initialized",
   followingStyle: "Following Style",
-  followingStyleOnly: "Following Style Only",
   followingToolbar: "Selection",
-  followingStyleCommandsSuccessfullyInitialize:
-    "Following style commands successfully initialized",
   fontColors: "Font Colors",
   fontColorFormattingBrush: "Font-Color formatting brush ON!",
   backgroundColorFormattingBrush: "Background-Color formatting brush ON!",
@@ -207,7 +199,6 @@ export const en = {
   imageWidth: "Image Width",
   import: "Import",
   importConfiguration: "Import Configuration",
-  import2: "Import From",
   importMode: "Import Mode",
   importToolbarConfigurationJson: "Import toolbar configuration from JSON.",
   importExport: "Import/Export",
@@ -240,23 +231,20 @@ export const en = {
   mergeLinesSettings: "Merge Lines Settings",
   mergeCompleted: "Merge completed",
   merged: "Merged with",
-  mobileEnabledNot: "Mobile Enabled or Not",
-  mobileStyle: "Mobile Style",
-  mobileStyleOnly: "Mobile Style Only",
-  mobileStyleCommandsSuccessfullyInitialized:
-    "Mobile style commands successfully initialized",
   more: "More",
   multilineMode: "Multiline mode",
   mustExistRegularExpressionText: "Must exist regular expression or text",
   matchesFound: "No matches found",
   obviousSeparatorListPatternDetected:
     "No obvious separator or list pattern detected",
+  updateFixedStyleCommands: "Update Fixed Style Commands",
+  updateFollowingStyleCommands: "Update Following Style Commands",
+  updateTopStyleCommands: "Update Top Style Commands",
   validConfigurationFoundImportData:
     "No valid configuration found in import data",
   numberLinesCustom: "Number Lines (Custom)",
   numberLinesConfiguration: "Number Lines Configuration",
   numberingCompletedStarting: "Numbering completed: starting from",
-  oneClickClear: "One-click Clear",
   onlyApplyCustomCommandWhen:
     "Only apply custom command when text matches the condition",
   open: "Open",
@@ -292,8 +280,6 @@ export const en = {
   regexPatternMatch: "Regex pattern to match",
   regularExpressionExamples: "Regular expression examples",
   removeAllWhitespace: "Remove All Whitespace",
-  removeAllCommandsConfiguration:
-    "Remove all commands from this configuration.",
   removeExtraSpaces: "Remove extra spaces",
   renumberList: "Renumber List",
   replaceAllMatches: "Replace all matches",
@@ -308,7 +294,6 @@ export const en = {
   selectTextSeeMoreTools: "Select text to see more tools",
   separator: "Separator",
   separatorLeaveEmptySmartSpacing: "Separator (leave empty for smart spacing)",
-  setMultipleConfig: "Set Multiple Config to:",
   setPositionStyle: "Set Position Style to:",
   setBackgroundColorToolbar: "Set the background color of the toolbar.",
   setColorToolbarIcon: "Set the color of the toolbar icon.",
@@ -325,8 +310,6 @@ export const en = {
   superConversionCompletedContextPreserved:
     "Super conversion completed: context preserved and layout optimized",
   switchRegexCommandWindow: "Switch Regex Command Window",
-  switchBetweenDifferentCommandConfigurations:
-    "Switch between different command configurations.",
   tableConvertedMultiLevelList: "Table converted to multi-level list",
   tableList: "Table to List",
   textTools: "Text Tools",
@@ -335,7 +318,6 @@ export const en = {
     "The selected text does not meet the condition requirements",
   toolbarDisplayedWhenMouseMoves:
     "The toolbar is displayed when the mouse moves over it, otherwise it is automatically hidden",
-  commandAlreadyToolbar: "This command is already in the toolbar.",
   import3: "This import will:",
   tiny: "Tiny",
   title: "Title",
@@ -349,23 +331,16 @@ export const en = {
   toolbarSettings: "Toolbar Settings",
   toolbarTheme: "Toolbar Theme",
   topStyle: "Top Style",
-  topStyleOnly: "Top Style Only",
   topToolbar: "Top",
-  topStyleCommandsSuccessfullyInitialized:
-    "Top style commands successfully initialized",
   trimLineEnds: "Trim Line Ends",
   urlFormatError: "URL Format Error",
   urlMarkdownLink: "URL to Markdown link",
   uniqueIdentifierSpacesEG:
     'Unique identifier, no spaces, e.g.: "my-custom-format"',
   updateCustomCommands: "Update Custom Commands",
-  updateFixedStyleCommands: "Update Fixed Style Commands",
-  updateFollowingStyleCommands: "Update Following Style Commands",
   updateImport: "Update Import",
   updateMainMenuCommands: "Update Main Menu Commands",
-  updateMobileStyleCommands: "Update Mobile Style Commands",
   updateModeAddNewItems: "Update Mode (Add new items and update existing ones)",
-  updateTopStyleCommands: "Update Top Style Commands",
   updateGeneralSettings: "Update general settings",
   usageInstructions: "Usage Instructions",
   useNRepresentLineBreaks: "Use \\n to represent line breaks",
@@ -386,12 +361,9 @@ export const en = {
     "When no text is selected, regex commands will use the current line instead of clipboard content",
   whetherToolbarCentredFullWidth:
     "Whether the toolbar is centred or full-width, the default is full-width.",
-  whetherEnableMobileDevicesDevice:
-    "Whether to enable on mobile devices with device width less than 768px, the default is disable.",
   whetherInsertBeginningNextLine:
     "Whether to insert at the beginning of the next line",
   whitespaceCleaningCompleted: "Whitespace cleaning completed",
-  workspace: "Workspace",
   description: "[Description]",
   example: "[Example]",
   output: "[Output]",

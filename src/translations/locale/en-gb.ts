@@ -24,8 +24,6 @@ const ui: Partial<Record<keyof typeof en, string>> = {
   setColorToolbarIcon: "Set the colour of the toolbar icon.",
   toolbarBackgroundColor: "Toolbar Background Colour",
   toolbarIconColor: "Toolbar Icon Colour",
-  whetherEnableMobileDevicesDevice:
-    "Whether to enable on mobile devices with device width less than 768px, the default is disable.",
   format:
     "】format\nClick the mouse middle or right key to close the formatting-brush",
   setCustomFontColor: "🖌️ Set Custom Font Colour",

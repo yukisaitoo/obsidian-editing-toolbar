@@ -30,7 +30,6 @@ import type {
 } from "src/settings/settingsData";
 import {
   AESTHETIC_STYLES,
-  APPEND_METHODS,
   getAppearanceValue,
   POSITION_STYLES,
   resolveNextPositionStyle,
@@ -43,10 +42,6 @@ import {
 import { strings, t } from "src/translations/helper";
 import { GenNonDuplicateID } from "src/util/util";
 
-const APPEND_METHOD_LABELS: Record<string, string> = {
-  body: strings.body,
-  workspace: strings.workspace,
-};
 const POSITION_STYLE_LABELS: Record<string, string> = {
   following: strings.followingToolbar,
   top: strings.topToolbar,
@@ -144,7 +139,6 @@ function getComandindex(item: string, arr: Command[]): number {
 
 export class EditingToolbarSettingTab extends PluginSettingTab {
   plugin: EditingToolbarPlugin;
-  appendMethod!: string;
   pickrs: Pickr[] = [];
   activeTab: string = "general";
   private currentEditingConfig: string;
@@ -254,36 +248,6 @@ export class EditingToolbarSettingTab extends PluginSettingTab {
     const generalSettingContainer = containerEl.createDiv(
       "generalSetting-container",
     );
-    new Setting(generalSettingContainer)
-      .setName(strings.editingToolbarAppendMethod)
-      .setDesc(strings.chooseWhereEditingToolbarAppend)
-      .addDropdown((dropdown) => {
-        const methods: Record<string, string> = {};
-        APPEND_METHODS.map(
-          (method) => (methods[method] = APPEND_METHOD_LABELS[method]),
-        );
-        dropdown.addOptions(methods);
-        dropdown
-          .setValue(this.plugin.settings.appendMethod)
-          .onChange((appendMethod) => {
-            this.plugin.settings.appendMethod = appendMethod;
-            this.plugin.saveSettings();
-          });
-      });
-    new Setting(generalSettingContainer)
-      .setName(strings.enableMultipleConfigurations)
-      .setDesc(strings.enableDifferentCommandConfigurationsEach)
-      .addToggle((toggle) =>
-        toggle
-          .setValue(this.plugin.settings.enableMultipleConfig || false)
-          .onChange(async (value) => {
-            this.plugin.settings.enableMultipleConfig = value;
-            this.plugin.onPositionStyleChange(this.plugin.positionStyle);
-
-            await this.plugin.saveSettings();
-            this.display();
-          }),
-      );
     // Top toolbar toggle
     new Setting(generalSettingContainer)
       .setName(strings.topToolbar)
@@ -363,20 +327,6 @@ export class EditingToolbarSettingTab extends PluginSettingTab {
             this.display();
           });
       });
-    // Mobile setting
-    new Setting(generalSettingContainer)
-      .setName(strings.mobileEnabledNot)
-      .setDesc(strings.whetherEnableMobileDevicesDevice)
-      .addToggle((toggle) =>
-        toggle
-          .setValue(this.plugin.settings.isLoadOnMobile)
-          .onChange((value) => {
-            this.plugin.settings.isLoadOnMobile = value;
-            this.plugin.saveSettings();
-            this.triggerRefresh();
-          }),
-      );
-
     // Custom background and font color settings
     const paintbrushContainer = containerEl.createDiv(
       "custom-paintbrush-container",
@@ -537,183 +487,107 @@ export class EditingToolbarSettingTab extends PluginSettingTab {
     const commandSettingContainer = containerEl.createDiv(
       "commandSetting-container",
     );
-    if (this.plugin.settings.enableMultipleConfig) {
-      new Setting(commandSettingContainer)
-        .setName(strings.currentConfiguration)
-        .setDesc(strings.switchBetweenDifferentCommandConfigurations)
-        .addDropdown((dropdown) => {
-          dropdown.addOption("top", strings.topStyle);
-          dropdown.addOption("fixed", strings.fixedStyle);
-          dropdown.addOption("following", strings.followingStyle);
+    new Setting(commandSettingContainer)
+      .setName(strings.currentConfiguration)
+      .setDesc(strings.switchBetweenDifferentCommandConfigurations)
+      .addDropdown((dropdown) => {
+        dropdown.addOption("top", strings.topStyle);
+        dropdown.addOption("fixed", strings.fixedStyle);
+        dropdown.addOption("following", strings.followingStyle);
 
-          if (this.plugin.settings.isLoadOnMobile) {
-            dropdown.addOption("mobile", strings.mobileStyle);
+        dropdown.setValue(this.currentEditingConfig);
+
+        dropdown.onChange(async (value) => {
+          this.currentEditingConfig = value;
+          this.display();
+        });
+      });
+
+    const currentConfigType = this.currentEditingConfig;
+    const buttonContainer = containerEl.createDiv("command-buttons-container");
+
+    const importSetting = new Setting(buttonContainer)
+      .setName(strings.import2)
+      .setDesc(strings.copyCommandsAnotherStyleConfiguration);
+
+    let selectedSourceStyle = "Main menu";
+    const configSwitcher = new Setting(buttonContainer);
+
+    configSwitcher.addDropdown((dropdown) => {
+      dropdown.addOption("Main menu", "Main Menu Commands");
+
+      if (currentConfigType !== "following") {
+        dropdown.addOption("following", strings.followingStyle);
+      }
+      if (currentConfigType !== "top") {
+        dropdown.addOption("top", strings.topStyle);
+      }
+      if (currentConfigType !== "fixed") {
+        dropdown.addOption("fixed", strings.fixedStyle);
+      }
+
+      dropdown.setValue(selectedSourceStyle).onChange((value) => {
+        selectedSourceStyle = value;
+      });
+    });
+    configSwitcher.addExtraButton((button) => button.setIcon("arrow-right"));
+    configSwitcher.addButton((button) =>
+      button
+        .setButtonText(this.currentEditingConfig + " " + strings.import)
+        .setTooltip(strings.copyCommandsSelectedStyle)
+        .onClick(async () => {
+          const sourceCommands =
+            this.getCommandsArrayByType(selectedSourceStyle);
+
+          if (!sourceCommands || sourceCommands.length === 0) {
+            new Notice(strings.selectedStyleNoCommandsImport);
+            return;
           }
 
-          dropdown.setValue(this.currentEditingConfig);
-
-          dropdown.onChange(async (value) => {
-            this.currentEditingConfig = value;
-            this.display();
+          const confirmMessage = `${strings.importCommandsFrom} "${selectedSourceStyle}" ${strings.toLabel} "${this.currentEditingConfig}" ${strings.configuration}?`;
+          ConfirmModal.show(this.app, {
+            message: confirmMessage,
+            onConfirm: async () => {
+              this.setCommandsArrayByType(currentConfigType, [
+                ...sourceCommands,
+              ]);
+              await this.plugin.saveSettings();
+              new Notice(
+                `${strings.commandsImportedFrom} "${selectedSourceStyle}" ${strings.toLabel} "${this.currentEditingConfig}" ${strings.configuration}`,
+              );
+              this.display();
+            },
           });
-        });
-    }
-    if (this.plugin.settings.enableMultipleConfig) {
-      const currentConfigType = this.currentEditingConfig;
-
-      const buttonContainer = containerEl.createDiv(
-        "command-buttons-container",
-      );
-
-      const importSetting = new Setting(buttonContainer)
-        .setName(strings.import2)
-        .setDesc(strings.copyCommandsAnotherStyleConfiguration);
-
-      let selectedSourceStyle = "Main menu";
-      const configSwitcher = new Setting(buttonContainer);
-
-      configSwitcher.addDropdown((dropdown) => {
-        dropdown.addOption("Main menu", "Main Menu Commands");
-
-        if (
-          currentConfigType !== "following" &&
-          this.plugin.settings.followingCommands
-        ) {
-          dropdown.addOption("following", strings.followingStyle);
-        }
-
-        if (currentConfigType !== "top" && this.plugin.settings.topCommands) {
-          dropdown.addOption("top", strings.topStyle);
-        }
-
-        if (
-          currentConfigType !== "fixed" &&
-          this.plugin.settings.fixedCommands
-        ) {
-          dropdown.addOption("fixed", strings.fixedStyle);
-        }
-
-        if (
-          currentConfigType !== "mobile" &&
-          this.plugin.settings.mobileCommands
-        ) {
-          dropdown.addOption("mobile", strings.mobileStyle);
-        }
-
-        dropdown.setValue(selectedSourceStyle).onChange((value) => {
-          selectedSourceStyle = value;
-        });
-      });
-      configSwitcher.addExtraButton((button) => button.setIcon("arrow-right"));
-      configSwitcher.addButton((button) =>
-        button
-          .setButtonText(this.currentEditingConfig + " " + strings.import)
-          .setTooltip(strings.copyCommandsSelectedStyle)
-          .onClick(async () => {
-            const sourceCommands =
-              this.getCommandsArrayByType(selectedSourceStyle);
-
-            if (!sourceCommands || sourceCommands.length === 0) {
-              new Notice(strings.selectedStyleNoCommandsImport);
-              return;
-            }
-
-            const confirmMessage = `${strings.importCommandsFrom} "${selectedSourceStyle}" ${strings.toLabel} "${this.currentEditingConfig}" ${strings.configuration}?`;
-            ConfirmModal.show(this.app, {
-              message: confirmMessage,
-              onConfirm: async () => {
-                switch (currentConfigType) {
-                  case "Main menu":
-                    this.plugin.settings.menuCommands = [...sourceCommands];
-                    break;
-                  case "following":
-                    this.plugin.settings.followingCommands = [
-                      ...sourceCommands,
-                    ];
-                    break;
-                  case "top":
-                    this.plugin.settings.topCommands = [...sourceCommands];
-                    break;
-                  case "fixed":
-                    this.plugin.settings.fixedCommands = [...sourceCommands];
-                    break;
-                  case "mobile":
-                    this.plugin.settings.mobileCommands = [...sourceCommands];
-                    break;
-                }
-                await this.plugin.saveSettings();
-                new Notice(
-                  `${strings.commandsImportedFrom} "${selectedSourceStyle}" ${strings.toLabel} "${this.currentEditingConfig}" ${strings.configuration}`,
-                );
-                this.display();
-              },
-            });
-          }),
-      );
-      importSetting.addButton((button) =>
-        button
-          .setButtonText(strings.clear + " " + `${this.currentEditingConfig}`)
-          .setTooltip(strings.removeAllCommandsConfiguration)
-          .setWarning()
-          .onClick(async () => {
-            ConfirmModal.show(this.app, {
-              message: strings.sureWantClearAllCommands,
-              onConfirm: async () => {
-                switch (currentConfigType) {
-                  case "following":
-                    this.plugin.settings.followingCommands = [];
-                    break;
-                  case "top":
-                    this.plugin.settings.topCommands = [];
-                    break;
-                  case "fixed":
-                    this.plugin.settings.fixedCommands = [];
-                    break;
-                  case "mobile":
-                    this.plugin.settings.mobileCommands = [];
-                    break;
-                }
-                await this.plugin.saveSettings();
-                new Notice(strings.allCommandsHaveBeenRemoved);
-                this.display();
-              },
-            });
-          }),
-      );
-    } else {
-      const buttonContainer = commandSettingContainer.createDiv(
-        "command-buttons-container",
-      );
-
-      const clearButton = buttonContainer.createEl("button", {
-        text: strings.oneClickClear,
-        cls: "mod-warning",
-      });
-      clearButton.addEventListener("click", async () => {
-        ConfirmModal.show(this.app, {
-          message: strings.sureWantClearAllCommands,
-          onConfirm: async () => {
-            this.plugin.settings.menuCommands = [];
-            await this.plugin.saveSettings();
-            new Notice(strings.allCommandsHaveBeenRemoved);
-            this.display();
-          },
-        });
-      });
-    }
+        }),
+    );
+    importSetting.addButton((button) =>
+      button
+        .setButtonText(strings.clear + " " + `${this.currentEditingConfig}`)
+        .setTooltip(strings.removeAllCommandsConfiguration)
+        .setWarning()
+        .onClick(async () => {
+          ConfirmModal.show(this.app, {
+            message: strings.sureWantClearAllCommands,
+            onConfirm: async () => {
+              this.setCommandsArrayByType(currentConfigType, []);
+              await this.plugin.saveSettings();
+              new Notice(strings.allCommandsHaveBeenRemoved);
+              this.display();
+            },
+          });
+        }),
+    );
     const commandListContainer = containerEl.createDiv(
       "command-lists-container",
     );
     commandListContainer.addClass(`${this.currentEditingConfig}`);
-    if (this.plugin.settings.enableMultipleConfig) {
-      commandListContainer.createEl("div", {
-        cls: `position-style-info ${this.currentEditingConfig}`,
-        text:
-          strings.currentlyEditingCommands +
-          ` "${this.currentEditingConfig} Style" ` +
-          strings.configuration,
-      });
-    }
+    commandListContainer.createEl("div", {
+      cls: `position-style-info ${this.currentEditingConfig}`,
+      text:
+        strings.currentlyEditingCommands +
+        ` "${this.currentEditingConfig} Style" ` +
+        strings.configuration,
+    });
     new Setting(commandListContainer)
       .setName(strings.editingToolbarCommands)
       .setDesc(strings.addCommandOntoEditingToolbar)
@@ -797,28 +671,7 @@ export class EditingToolbarSettingTab extends PluginSettingTab {
             .setButtonText(strings.addToolbar)
             .setTooltip(strings.addCommandToolbar)
             .onClick(() => {
-              if (this.plugin.settings.enableMultipleConfig) {
-                new DeployCommandModal(this.app, this.plugin, command).open();
-              } else {
-                const isInToolbar = this.plugin.settings.menuCommands.some(
-                  (cmd) => cmd.id === `editing-toolbar:${command.id}`,
-                );
-                if (isInToolbar) {
-                  new Notice(strings.commandAlreadyToolbar);
-                  return;
-                }
-                const toolbarCommand = {
-                  id: `editing-toolbar:${command.id}`,
-                  name: command.name,
-                  icon: command.icon || "obsidian-new",
-                };
-                this.plugin.settings.menuCommands.push(toolbarCommand);
-                this.plugin.saveSettings().then(() => {
-                  new Notice(strings.commandAddedToolbar);
-                  dispatchEvent(new Event("editingToolbar-NewCommand"));
-                  this.plugin.reloadCustomCommands();
-                });
-              }
+              new DeployCommandModal(this.app, this.plugin, command).open();
             }),
         )
         .addExtraButton((button) => {
@@ -840,28 +693,18 @@ export class EditingToolbarSettingTab extends PluginSettingTab {
               this.plugin.settings.menuCommands,
               customCommandId,
             );
-
-            if (this.plugin.settings.enableMultipleConfig) {
-              this.removeCommandFromConfig(
-                this.plugin.settings.followingCommands,
-                customCommandId,
-              );
-              this.removeCommandFromConfig(
-                this.plugin.settings.topCommands,
-                customCommandId,
-              );
-              this.removeCommandFromConfig(
-                this.plugin.settings.fixedCommands,
-                customCommandId,
-              );
-
-              if (this.plugin.settings.isLoadOnMobile) {
-                this.removeCommandFromConfig(
-                  this.plugin.settings.mobileCommands,
-                  customCommandId,
-                );
-              }
-            }
+            this.removeCommandFromConfig(
+              this.plugin.settings.followingCommands,
+              customCommandId,
+            );
+            this.removeCommandFromConfig(
+              this.plugin.settings.topCommands,
+              customCommandId,
+            );
+            this.removeCommandFromConfig(
+              this.plugin.settings.fixedCommands,
+              customCommandId,
+            );
             this.plugin.settings.customCommands.splice(index, 1);
             await this.plugin.saveSettings();
             this.plugin.reloadCustomCommands();
@@ -1248,27 +1091,9 @@ export class EditingToolbarSettingTab extends PluginSettingTab {
     });
   }
   private createCommandList(containerEl: HTMLElement): void {
-    let commandsToEdit: Command[] = [];
-    if (this.plugin.settings.enableMultipleConfig) {
-      switch (this.currentEditingConfig) {
-        case "mobile":
-          commandsToEdit = this.plugin.settings.mobileCommands;
-          break;
-        case "following":
-          commandsToEdit = this.plugin.settings.followingCommands;
-          break;
-        case "top":
-          commandsToEdit = this.plugin.settings.topCommands;
-          break;
-        case "fixed":
-          commandsToEdit = this.plugin.settings.fixedCommands;
-          break;
-        default:
-          commandsToEdit = this.plugin.settings.menuCommands;
-      }
-    } else {
-      commandsToEdit = this.plugin.settings.menuCommands;
-    }
+    const commandsToEdit: Command[] = this.getCommandsArrayByType(
+      this.currentEditingConfig,
+    );
     const editingToolbarCommandsContainer = containerEl.createEl("div", {
       cls: "editingToolbarSettingsTabsContainer",
     });
@@ -1306,24 +1131,7 @@ export class EditingToolbarSettingTab extends PluginSettingTab {
           const arrayResult = commandsToEdit;
           const [removed] = arrayResult.splice(command.oldIndex, 1);
           arrayResult.splice(command.newIndex, 0, removed);
-          if (this.plugin.settings.enableMultipleConfig) {
-            switch (this.currentEditingConfig) {
-              case "mobile":
-                this.plugin.settings.mobileCommands = arrayResult;
-                break;
-              case "following":
-                this.plugin.settings.followingCommands = arrayResult;
-                break;
-              case "top":
-                this.plugin.settings.topCommands = arrayResult;
-                break;
-              case "fixed":
-                this.plugin.settings.fixedCommands = arrayResult;
-                break;
-            }
-          } else {
-            this.plugin.settings.menuCommands = arrayResult;
-          }
+          this.setCommandsArrayByType(this.currentEditingConfig, arrayResult);
           this.plugin.saveSettings();
         }
         this.triggerRefresh();
@@ -1846,7 +1654,7 @@ export class EditingToolbarSettingTab extends PluginSettingTab {
       this.aestheticStyleMap[positionStyle] || this.aestheticStyleMap.top;
     element.addClass(positionClass);
   }
-  private getCommandsArrayByType(type: string) {
+  private getCommandsArrayByType(type: string): Command[] {
     switch (type) {
       case "following":
         return this.plugin.settings.followingCommands;
@@ -1854,10 +1662,23 @@ export class EditingToolbarSettingTab extends PluginSettingTab {
         return this.plugin.settings.topCommands;
       case "fixed":
         return this.plugin.settings.fixedCommands;
-      case "mobile":
-        return this.plugin.settings.mobileCommands;
       default:
         return this.plugin.settings.menuCommands;
+    }
+  }
+  private setCommandsArrayByType(type: string, commands: Command[]): void {
+    switch (type) {
+      case "following":
+        this.plugin.settings.followingCommands = commands;
+        break;
+      case "top":
+        this.plugin.settings.topCommands = commands;
+        break;
+      case "fixed":
+        this.plugin.settings.fixedCommands = commands;
+        break;
+      default:
+        this.plugin.settings.menuCommands = commands;
     }
   }
 }

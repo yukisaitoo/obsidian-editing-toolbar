@@ -36,7 +36,7 @@ import { EditingToolbarSettingTab } from "../settings/settingsTab";
 
 let activeDocument: Document;
 
-const STYLE_KEYS: ToolbarStyleKey[] = ["top", "following", "fixed", "mobile"];
+const STYLE_KEYS: ToolbarStyleKey[] = ["top", "following", "fixed"];
 
 export interface AdmonitionDefinition {
   type: string;
@@ -148,22 +148,6 @@ export default class EditingToolbarPlugin extends Plugin {
         dispatchEvent(new Event("editingToolbar-NewCommand"));
       }, 100);
     }
-    this.registerDomEvent(activeDocument, "contextmenu", (e) => {
-      if (
-        this.settings.isLoadOnMobile &&
-        Platform.isMobile &&
-        this.isFollowingToolbarActive()
-      ) {
-        const { target } = e;
-        if (target instanceof HTMLElement) {
-          const iseditor = target.closest(".cm-editor") !== null;
-          if (iseditor) {
-            e.preventDefault();
-          }
-        }
-      }
-    });
-
     this.app.workspace.onLayoutReady(async () => {
       await this.tryGetAdmonitionTypes();
     });
@@ -220,6 +204,19 @@ export default class EditingToolbarPlugin extends Plugin {
     ) as (keyof editingToolbarSettings)[]) {
       if (this.settings[key] === undefined || this.settings[key] === null) {
         (this.settings[key] as unknown) = DEFAULT_SETTINGS[key];
+      }
+    }
+
+    // Every style keeps its own command list. Seed one from the main list only when
+    // it has never been persisted, so a list the user deliberately cleared stays empty.
+    const seedKeys = [
+      "followingCommands",
+      "topCommands",
+      "fixedCommands",
+    ] as const;
+    for (const key of seedKeys) {
+      if (!loadedData || loadedData[key] === undefined) {
+        this.settings[key] = [...this.settings.menuCommands];
       }
     }
   }
@@ -399,18 +396,8 @@ export default class EditingToolbarPlugin extends Plugin {
   }
 
   isLoadMobile() {
-    const screenWidth =
-      window.innerWidth > 0 ? window.innerWidth : screen.width;
-    const isLoadOnMobile = this.settings?.isLoadOnMobile
-      ? this.settings.isLoadOnMobile
-      : false;
-    if (Platform.isMobileApp && !isLoadOnMobile) {
-      if (screenWidth <= 768) {
-        console.log("editing toolbar disable loading on mobile");
-        return false;
-      }
-    }
-    return true;
+    // Mobile is unsupported: the toolbar never loads there.
+    return !Platform.isMobileApp;
   }
 
   onunload(): void {
@@ -586,15 +573,7 @@ export default class EditingToolbarPlugin extends Plugin {
   }
 
   getCurrentCommands(style?: string): Command[] {
-    if (!this.settings.enableMultipleConfig) {
-      return this.settings.menuCommands;
-    }
-    const currentstyle = style || this.positionStyle;
-    if (this.settings.isLoadOnMobile && Platform.isMobileApp) {
-      return this.settings.mobileCommands;
-    }
-
-    switch (currentstyle) {
+    switch (style || this.positionStyle) {
       case "following":
         return this.settings.followingCommands;
       case "top":
@@ -607,22 +586,7 @@ export default class EditingToolbarPlugin extends Plugin {
   }
 
   updateCurrentCommands(commands: Command[], style?: string): void {
-    if (!this.settings.enableMultipleConfig) {
-      this.settings.menuCommands = commands;
-      return;
-    }
-
-    let targetStyle = style;
-
-    if (!targetStyle) {
-      if (this.settings.isLoadOnMobile && Platform.isMobileApp) {
-        targetStyle = "mobile";
-      } else {
-        targetStyle = this.positionStyle;
-      }
-    }
-
-    switch (targetStyle) {
+    switch (style || this.positionStyle) {
       case "following":
         this.settings.followingCommands = commands;
         break;
@@ -631,9 +595,6 @@ export default class EditingToolbarPlugin extends Plugin {
         break;
       case "fixed":
         this.settings.fixedCommands = commands;
-        break;
-      case "mobile":
-        this.settings.mobileCommands = commands;
         break;
       default:
         this.settings.menuCommands = commands;
@@ -1011,17 +972,11 @@ export default class EditingToolbarPlugin extends Plugin {
       this.resetFormatBrushIfActive(container, e);
     });
 
-    if (Platform.isMobileApp) {
-      this.registerDomEvent(container, "selectionchange", () => {
+    this.registerDomEvent(container, "mouseup", (e) => {
+      if (e.button !== 1) {
         debouncedHandleTextSelection();
-      });
-    } else {
-      this.registerDomEvent(container, "mouseup", (e) => {
-        if (e.button !== 1) {
-          debouncedHandleTextSelection();
-        }
-      });
-    }
+      }
+    });
 
     this.registerDomEvent(container, "keyup", this.handleKeyboardSelection);
 
@@ -1261,52 +1216,6 @@ export default class EditingToolbarPlugin extends Plugin {
     // Track the new style both in-memory and in settings
     this.positionStyle = newStyle;
     this.settings.positionStyle = newStyle;
-
-    // If multi-config is enabled, ensure the command arrays for this style exist
-    if (this.settings.enableMultipleConfig) {
-      switch (newStyle) {
-        case "following":
-          if (
-            !this.settings.followingCommands ||
-            this.settings.followingCommands.length === 0
-          ) {
-            this.settings.followingCommands = [...this.settings.menuCommands];
-            this.saveSettings();
-            new Notice(strings.followingStyleCommandsSuccessfullyInitialize);
-          }
-          break;
-        case "top":
-          if (
-            !this.settings.topCommands ||
-            this.settings.topCommands.length === 0
-          ) {
-            this.settings.topCommands = [...this.settings.menuCommands];
-            this.saveSettings();
-            new Notice(strings.topStyleCommandsSuccessfullyInitialized);
-          }
-          break;
-        case "fixed":
-          if (
-            !this.settings.fixedCommands ||
-            this.settings.fixedCommands.length === 0
-          ) {
-            this.settings.fixedCommands = [...this.settings.menuCommands];
-            this.saveSettings();
-            new Notice(strings.fixedStyleCommandsSuccessfullyInitialized);
-          }
-          break;
-        case "mobile":
-          if (
-            !this.settings.mobileCommands ||
-            this.settings.mobileCommands.length === 0
-          ) {
-            this.settings.mobileCommands = [...this.settings.menuCommands];
-            this.saveSettings();
-            new Notice(strings.mobileStyleCommandsSuccessfullyInitialized);
-          }
-          break;
-      }
-    }
 
     // Keep the in-memory size in sync with the active style
     const activeStyle = this.resolveActiveStyle();

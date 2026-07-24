@@ -7,7 +7,6 @@ import {
   Menu,
   MenuItem,
   Notice,
-  Platform,
   setIcon,
   WorkspaceItemExt,
   WorkspaceParent,
@@ -294,9 +293,6 @@ function shouldMoveButtonToMoreMenu(
   const reservedMoreButtonWidth = buttonWidth + 12;
   const reservedFollowingBufferWidth =
     toolbarStyle === "following" ? buttonWidth + 10 : 0;
-  const shouldReserveExtraTouchSpace =
-    Platform.isMobileApp || toolbarStyle === "mobile";
-  const reservedTouchBufferWidth = shouldReserveExtraTouchSpace ? 14 : 0;
   const availableWidth = Math.max(leafWidth - 16, buttonWidth * 2);
 
   return (
@@ -304,8 +300,7 @@ function shouldMoveButtonToMoreMenu(
       nextWidth +
       estimatedGapWidth +
       reservedMoreButtonWidth +
-      reservedFollowingBufferWidth +
-      reservedTouchBufferWidth >=
+      reservedFollowingBufferWidth >=
     availableWidth
   );
 }
@@ -1093,19 +1088,7 @@ export function editingToolbarPopover(
         viewportWidth,
       ].filter((width) => width > 0);
       leafWidth = widthCandidates.length > 0 ? Math.min(...widthCandidates) : 0;
-    } else if (settings.appendMethod === "body") {
-      const existingPopover = targetDocument.querySelector(
-        `.editingToolbarPopoverBar[data-toolbar-style="${effectiveStyle}"]`,
-      ) as HTMLElement | null;
-      if (!existingPopover) {
-        targetDocument.body.appendChild(popoverMenu);
-      }
-      targetDocument.body.appendChild(editingToolbar);
-      leafWidth =
-        targetDocument.defaultView?.innerWidth ||
-        targetDocument.body?.clientWidth ||
-        0;
-    } else if (settings.appendMethod === "workspace") {
+    } else {
       const workspaceRoot = targetDocument.body?.querySelector(
         ".mod-vertical.mod-root",
       ) as HTMLElement | null;
@@ -1155,7 +1138,7 @@ export function editingToolbarPopover(
     };
 
     // Use per-style commands based on the toolbar we are rendering
-    const currentCommands = plugin.getCurrentCommands(effectiveStyle);
+    const currentCommands = plugin.getCurrentCommands();
     const getLocalizedLabel = (label: string): string => t(label);
     const getLocalizedTooltip = (label: string, hotkey: string): string => {
       const localizedLabel = getLocalizedLabel(label);

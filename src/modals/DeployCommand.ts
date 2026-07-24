@@ -24,9 +24,6 @@ export class DeployCommandModal extends Modal {
         { id: 'top', name: strings.topStyle, enabled: true },
         { id: 'fixed', name: strings.fixedStyle, enabled: true },
       ];
-      if (this.plugin.settings.isLoadOnMobile) {
-        this.deployOptions.push({ id: 'mobile', name: strings.mobileStyle, enabled: true });
-      }
     }
   
     onOpen() {
@@ -92,9 +89,6 @@ export class DeployCommandModal extends Modal {
           let targetCommands: Command[] | undefined;
           
           switch (option.id) {
-            case 'mobile':
-              targetCommands = this.plugin.settings.mobileCommands;
-              break;
             case 'following':
               targetCommands = this.plugin.settings.followingCommands;
               break;

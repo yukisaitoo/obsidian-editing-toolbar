@@ -5,7 +5,7 @@ import { strings } from 'src/translations/helper';
 export class ImportExportModal extends Modal {
   plugin: EditingToolbarPlugin;
   mode: 'import' | 'export';
-  exportType: 'all' | 'All commands' | 'custom' | 'following' | 'top' | 'fixed' | 'mobile';
+  exportType: 'all' | 'All commands' | 'custom' | 'following' | 'top' | 'fixed';
   importMode: 'overwrite' | 'update';
   textArea!: TextAreaComponent;
   importButton!: ButtonComponent;
@@ -38,17 +38,13 @@ export class ImportExportModal extends Modal {
             .addOption('all', strings.allSettings)
             .addOption('All commands', strings.allToolbarCommands)
             .addOption('custom', strings.customCommandsOnly)
-          if (this.plugin.settings.enableMultipleConfig) {
-            dropdown
-              .addOption('following', strings.followingStyleOnly)
-              .addOption('top', strings.topStyleOnly)
-              .addOption('fixed', strings.fixedStyleOnly)
-              .addOption('mobile', strings.mobileStyleOnly)
-          }
+            .addOption('following', strings.followingStyleOnly)
+            .addOption('top', strings.topStyleOnly)
+            .addOption('fixed', strings.fixedStyleOnly)
 
           dropdown.setValue(this.exportType)
             .onChange(value => {
-              this.exportType = value as 'all' | 'All commands' | 'custom' | 'following' | 'top' | 'fixed' | 'mobile';
+              this.exportType = value as 'all' | 'All commands' | 'custom' | 'following' | 'top' | 'fixed';
               this.updateExportContent();
             });
         });
@@ -154,14 +150,10 @@ export class ImportExportModal extends Modal {
           followingCommands: this.plugin.settings.followingCommands || [],
           topCommands: this.plugin.settings.topCommands || [],
           fixedCommands: this.plugin.settings.fixedCommands || [],
-          mobileCommands: this.plugin.settings.mobileCommands || [],
           customCommands: this.plugin.settings.customCommands || [],
-          enableMultipleConfig: this.plugin.settings.enableMultipleConfig,
           positionStyle: this.plugin.settings.positionStyle,
           aestheticStyle: this.plugin.settings.aestheticStyle,
-          appendMethod: this.plugin.settings.appendMethod,
           autohide: this.plugin.settings.autohide,
-          isLoadOnMobile: this.plugin.settings.isLoadOnMobile,
           cMenuNumRows: this.plugin.settings.cMenuNumRows,
           custom_bg1: this.plugin.settings.custom_bg1,
           custom_bg2: this.plugin.settings.custom_bg2,
@@ -184,9 +176,7 @@ export class ImportExportModal extends Modal {
           menuCommands: this.plugin.settings.menuCommands || [],
           followingCommands: this.plugin.settings.followingCommands || [],
           topCommands: this.plugin.settings.topCommands || [],
-          fixedCommands: this.plugin.settings.fixedCommands || [],
-          mobileCommands: this.plugin.settings.mobileCommands || [],
-          enableMultipleConfig: this.plugin.settings.enableMultipleConfig
+          fixedCommands: this.plugin.settings.fixedCommands || []
         };
         break;
       case 'custom':
@@ -213,12 +203,6 @@ export class ImportExportModal extends Modal {
           fixedCommands: this.plugin.settings.fixedCommands || []
         };
         break;
-      case 'mobile':
-        exportContent = {
-          ...exportContent,
-          mobileCommands: this.plugin.settings.mobileCommands || []
-        };
-        break;
     }
 
     this.validateExportContent(exportContent);
@@ -228,23 +212,17 @@ export class ImportExportModal extends Modal {
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any -- validates untyped parsed JSON
   private validateExportContent(exportContent: any) {
-    ['menuCommands', 'followingCommands', 'topCommands', 'fixedCommands', 'mobileCommands', 'customCommands'].forEach(key => {
+    ['menuCommands', 'followingCommands', 'topCommands', 'fixedCommands', 'customCommands'].forEach(key => {
       if (key in exportContent && !exportContent[key]) {
         exportContent[key] = [];
       }
     });
 
-    if ('enableMultipleConfig' in exportContent && exportContent.enableMultipleConfig === undefined) {
-      exportContent.enableMultipleConfig = false;
-    }
     if ('autohide' in exportContent && exportContent.autohide === undefined) {
       exportContent.autohide = false;
     }
     if ('Iscentered' in exportContent && exportContent.Iscentered === undefined) {
       exportContent.Iscentered = false;
-    }
-    if ('isLoadOnMobile' in exportContent && exportContent.isLoadOnMobile === undefined) {
-      exportContent.isLoadOnMobile = true;
     }
 
     if ('positionStyle' in exportContent && !exportContent.positionStyle) {
@@ -253,10 +231,6 @@ export class ImportExportModal extends Modal {
     if ('aestheticStyle' in exportContent && !exportContent.aestheticStyle) {
       exportContent.aestheticStyle = 'default';
     }
-    if ('appendMethod' in exportContent && !exportContent.appendMethod) {
-      exportContent.appendMethod = 'workspace';
-    }
-
     if ('cMenuNumRows' in exportContent && exportContent.cMenuNumRows === undefined) {
       exportContent.cMenuNumRows = 1;
     }
@@ -282,9 +256,7 @@ export class ImportExportModal extends Modal {
       const containsFollowingCommands = 'followingCommands' in importData;
       const containsTopCommands = 'topCommands' in importData;
       const containsFixedCommands = 'fixedCommands' in importData;
-      const containsMobileCommands = 'mobileCommands' in importData;
       const containsGeneralSettings = 'positionStyle' in importData || 'aestheticStyle' in importData;
-      const containsEnableMultipleConfig = 'enableMultipleConfig' in importData;
       const positionStyle = importData.positionStyle;
 
       const hasMenuCommands = containsMenuCommands && Array.isArray(importData.menuCommands) && importData.menuCommands.length > 0;
@@ -292,14 +264,12 @@ export class ImportExportModal extends Modal {
       const hasFollowingCommands = containsFollowingCommands && Array.isArray(importData.followingCommands) && importData.followingCommands.length > 0;
       const hasTopCommands = containsTopCommands && Array.isArray(importData.topCommands) && importData.topCommands.length > 0;
       const hasFixedCommands = containsFixedCommands && Array.isArray(importData.fixedCommands) && importData.fixedCommands.length > 0;
-      const hasMobileCommands = containsMobileCommands && Array.isArray(importData.mobileCommands) && importData.mobileCommands.length > 0;
 
       const emptyMenuCommands = containsMenuCommands && (!Array.isArray(importData.menuCommands) || importData.menuCommands.length === 0);
       const emptyCustomCommands = containsCustomCommands && (!Array.isArray(importData.customCommands) || importData.customCommands.length === 0);
       const emptyFollowingCommands = containsFollowingCommands && (!Array.isArray(importData.followingCommands) || importData.followingCommands.length === 0);
       const emptyTopCommands = containsTopCommands && (!Array.isArray(importData.topCommands) || importData.topCommands.length === 0);
       const emptyFixedCommands = containsFixedCommands && (!Array.isArray(importData.fixedCommands) || importData.fixedCommands.length === 0);
-      const emptyMobileCommands = containsMobileCommands && (!Array.isArray(importData.mobileCommands) || importData.mobileCommands.length === 0);
 
       let importSummary = strings.import3 + '\n';
 
@@ -309,18 +279,12 @@ export class ImportExportModal extends Modal {
       if (hasFollowingCommands) importSummary += '• ' + strings.updateFollowingStyleCommands + ' (' + importData.followingCommands.length + ' ' + ')\n';
       if (hasTopCommands) importSummary += '• ' + strings.updateTopStyleCommands + ' (' + importData.topCommands.length + ' ' + ')\n';
       if (hasFixedCommands) importSummary += '• ' + strings.updateFixedStyleCommands + ' (' + importData.fixedCommands.length + ' ' + ')\n';
-      if (hasMobileCommands) importSummary += '• ' + strings.updateMobileStyleCommands + ' (' + importData.mobileCommands.length + ' ' + ')\n';
       if (this.importMode === 'overwrite') {
         if (emptyMenuCommands) importSummary += '• ' + strings.clearAllMainMenuCommands + ' ⚠️\n';
         if (emptyCustomCommands) importSummary += '• ' + strings.clearAllCustomCommands + ' ⚠️\n';
         if (emptyFollowingCommands) importSummary += '• ' + strings.clearAllFollowingStyleCommands + ' ⚠️\n';
         if (emptyTopCommands) importSummary += '• ' + strings.clearAllTopStyleCommands + ' ⚠️\n';
         if (emptyFixedCommands) importSummary += '• ' + strings.clearAllFixedStyleCommands + ' ⚠️\n';
-        if (emptyMobileCommands) importSummary += '• ' + strings.clearAllMobileStyleCommands + ' ⚠️\n';
-      }
-      if (containsEnableMultipleConfig) {
-        const multiConfigStatus = importData.enableMultipleConfig ? strings.enable : strings.disable;
-        importSummary += '• ' + strings.setMultipleConfig + ' ' + multiConfigStatus + '\n';
       }
 
       if (positionStyle) {
@@ -328,10 +292,10 @@ export class ImportExportModal extends Modal {
       }
 
       if (!hasMenuCommands && !hasCustomCommands && !hasFollowingCommands &&
-        !hasTopCommands && !hasFixedCommands && !hasMobileCommands &&
+        !hasTopCommands && !hasFixedCommands &&
         !emptyMenuCommands && !emptyCustomCommands && !emptyFollowingCommands &&
-        !emptyTopCommands && !emptyFixedCommands && !emptyMobileCommands &&
-        !containsGeneralSettings && !containsEnableMultipleConfig) {
+        !emptyTopCommands && !emptyFixedCommands &&
+        !containsGeneralSettings) {
         new Notice(strings.validConfigurationFoundImportData);
         return;
       }
@@ -353,8 +317,7 @@ export class ImportExportModal extends Modal {
             customCommands: [...this.plugin.settings.customCommands],
             followingCommands: [...this.plugin.settings.followingCommands],
             topCommands: [...this.plugin.settings.topCommands],
-            fixedCommands: [...this.plugin.settings.fixedCommands],
-            mobileCommands: [...this.plugin.settings.mobileCommands]
+            fixedCommands: [...this.plugin.settings.fixedCommands]
           };
 
           try {
@@ -415,10 +378,6 @@ export class ImportExportModal extends Modal {
     if (importData.fixedCommands) {
       this.plugin.settings.fixedCommands = importData.fixedCommands;
     }
-
-    if (importData.mobileCommands) {
-      this.plugin.settings.mobileCommands = importData.mobileCommands;
-    }
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any -- untyped external import JSON
@@ -443,10 +402,6 @@ export class ImportExportModal extends Modal {
 
     if (importData.fixedCommands) {
       this.updateCommandArray(this.plugin.settings.fixedCommands, importData.fixedCommands);
-    }
-
-    if (importData.mobileCommands) {
-      this.updateCommandArray(this.plugin.settings.mobileCommands, importData.mobileCommands);
     }
   }
   private updateCommandArray(targetArray: Command[], sourceArray: Command[]) {
@@ -478,8 +433,8 @@ export class ImportExportModal extends Modal {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any -- untyped external import JSON
   importGeneralSettings(importData: any) {
     const generalSettings = [
-      'positionStyle', 'aestheticStyle', 'appendMethod', 'autohide', 'Iscentered',
-      'isLoadOnMobile', 'cMenuNumRows', 'enableMultipleConfig',
+      'positionStyle', 'aestheticStyle', 'autohide', 'Iscentered',
+      'cMenuNumRows',
       'custom_bg1', 'custom_bg2', 'custom_bg3', 'custom_bg4', 'custom_bg5',
       'custom_fc1', 'custom_fc2', 'custom_fc3', 'custom_fc4', 'custom_fc5',
       'toolbarBackgroundColor', 'toolbarIconColor', 'toolbarIconSize'
@@ -527,7 +482,6 @@ export class ImportExportModal extends Modal {
     fixCommandsInArray(this.plugin.settings.followingCommands);
     fixCommandsInArray(this.plugin.settings.topCommands);
     fixCommandsInArray(this.plugin.settings.fixedCommands);
-    fixCommandsInArray(this.plugin.settings.mobileCommands);
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any -- untyped backup JSON snapshot
@@ -538,7 +492,6 @@ export class ImportExportModal extends Modal {
     this.plugin.settings.followingCommands = backup.followingCommands;
     this.plugin.settings.topCommands = backup.topCommands;
     this.plugin.settings.fixedCommands = backup.fixedCommands;
-    this.plugin.settings.mobileCommands = backup.mobileCommands;
   }
 
   onClose() {

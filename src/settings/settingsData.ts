@@ -1,8 +1,7 @@
 import type { Command } from "obsidian";
-export const APPEND_METHODS = ["body", "workspace"];
 export const AESTHETIC_STYLES = ["default", "tiny", "glass", "custom"];
 export const POSITION_STYLES = ["following", "top", "fixed"];
-export type ToolbarStyleKey = "top" | "following" | "fixed" | "mobile";
+export type ToolbarStyleKey = "top" | "following" | "fixed";
 
 export interface StyleAppearanceSettings {
   toolbarBackgroundColor?: string;
@@ -123,12 +122,9 @@ export interface editingToolbarSettings {
   followingCommands: Command[];
   topCommands: Command[];
   fixedCommands: Command[];
-  mobileCommands: Command[];
-  enableMultipleConfig: boolean;
   enableTopToolbar: boolean;
   enableFollowingToolbar: boolean;
   enableFixedToolbar: boolean;
-  appendMethod: string;
   shouldShowMenuOnSelect: boolean;
   cMenuVisibility: boolean;
   cMenuBottomValue: number;
@@ -145,7 +141,6 @@ export interface editingToolbarSettings {
   custom_fc3:string;
   custom_fc4:string;
   custom_fc5:string;
-  isLoadOnMobile:boolean;
   horizontalPosition: number;
   verticalPosition: number;
   formatBrushes: {
@@ -153,7 +148,7 @@ export interface editingToolbarSettings {
   };
   customCommands: CustomCommand[];
 
-  // Per-style appearance buckets (top/following/fixed/mobile)
+  // Per-style appearance buckets (top/following/fixed)
   appearanceByStyle?: AppearanceByStyle;
 
   // Global appearance defaults, used as the fallback for empty per-style buckets
@@ -559,12 +554,9 @@ export const DEFAULT_SETTINGS: editingToolbarSettings = {
     "followingCommands": [],
     "topCommands": [],
     "fixedCommands": [],
-    "mobileCommands": [],
-    "enableMultipleConfig": false,
     "enableTopToolbar": true,
     "enableFollowingToolbar": false,
     "enableFixedToolbar": false,
-    "appendMethod": "workspace",
     "shouldShowMenuOnSelect": false,
     "cMenuVisibility": true,
     "cMenuBottomValue": 4.25,
@@ -584,7 +576,6 @@ export const DEFAULT_SETTINGS: editingToolbarSettings = {
     "custom_fc3": "#245BDB",
     "custom_fc4": "#6425D0",
     "custom_fc5": "#646A73",
-    "isLoadOnMobile": false,
     "horizontalPosition": 0,
     "verticalPosition": 0,
     "formatBrushes": {},
@@ -605,12 +596,6 @@ export const DEFAULT_SETTINGS: editingToolbarSettings = {
         "aestheticStyle": "default"
       },
       "fixed": {
-        "toolbarBackgroundColor": "rgba(var(--background-secondary-rgb), 0.7)",
-        "toolbarIconColor": "var(--text-normal)",
-        "toolbarIconSize": 18,
-        "aestheticStyle": "default"
-      },
-      "mobile": {
         "toolbarBackgroundColor": "rgba(var(--background-secondary-rgb), 0.7)",
         "toolbarIconColor": "var(--text-normal)",
         "toolbarIconSize": 18,

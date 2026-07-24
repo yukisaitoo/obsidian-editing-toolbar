@@ -643,11 +643,11 @@ button[class^=editingToolbarCommandsubItem]::after {
 #editingToolbarModalBar.top {
   display: flex;
   flex-wrap: nowrap;
-  margin-right: 12px;
   position: relative;
   height: calc(var(--toolbar-icon-size) + 18px);
   align-items: center;
   justify-content: center;
+  gap: 8px;
   transition: all 0.2s linear;
   -webkit-transition: all 0.2s linear;
   transform: none;
