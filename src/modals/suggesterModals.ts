@@ -2,7 +2,7 @@ import { App, Command, FuzzyMatch, FuzzySuggestModal, Modal, Notice, SliderCompo
 import { appIcons } from "src/icons/appIcons";
 import type EditingToolbarPlugin from "src/plugin/main";
 import { strings, t } from "src/translations/helper";
-import { setBottomValue, setHorizontalValue } from "src/util/statusBarConstants";
+import { setBottomValue, setHorizontalValue } from "src/util/toolbarVisibility";
 import { findmenuID } from "src/util/util";
 
 type IconSelectCallback = (iconId: string) => void;
@@ -88,7 +88,7 @@ export class ChooseFromIconList extends FuzzySuggestModal<string> {
     
     const currentCommands = this.plugin.getCurrentCommands(this.currentEditingConfig);
     if (this.command.icon) {
-      const menuID = findmenuID(this.plugin, this.command, this.issub,currentCommands);
+      const menuID = findmenuID(this.command, this.issub, currentCommands);
       if (this.issub) {
         currentCommands[menuID['index']].SubmenuCommands![menuID['subindex']].icon = item;
       } else {
@@ -160,7 +160,7 @@ class CustomIcon extends Modal {
 
       this.item.icon = value;
       const currentCommands = this.plugin.getCurrentCommands(this.currentEditingConfig);
-      const menuID = findmenuID(this.plugin, this.item, this.issub,currentCommands);
+      const menuID = findmenuID(this.item, this.issub, currentCommands);
       
       if (!this.issub) {
         const index = menuID['index'];
@@ -273,7 +273,7 @@ export class ChangeCmdname extends Modal {
       .onChange(debounce(async (value) => {
         const currentCommands = this.plugin.getCurrentCommands(this.currentEditingConfig);
         
-        const menuID = findmenuID(this.plugin, this.item, this.issub,currentCommands)
+        const menuID = findmenuID(this.item, this.issub, currentCommands)
         this.item.name = value;
         if (!this.issub)
         {

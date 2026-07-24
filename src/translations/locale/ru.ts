@@ -99,10 +99,16 @@ const ui: Partial<Record<keyof typeof en, string>> = {
     "Текущая строка пуста, выделите текст или перейдите на непустую строку",
   currentlyEditingCommands: "Сейчас редактируются команды для",
   cursorPositionOffset: "Смещение позиции курсора",
-  customBackgroudColor: "Пользовательский цвет фона",
+  customBackgroundColor: "Пользовательский цвет фона",
   customCommands: "Пользовательские команды",
   customCommandsOnly: "Только пользовательские команды",
   customFontColor: "Пользовательский цвет текста",
+  customFontColors: "Пользовательские цвета шрифта",
+  customColors: "Пользовательские цвета",
+  themeColors: "Цвета темы",
+  standardColors: "Стандартные цвета",
+  translucentColors: "Полупрозрачные цвета",
+  highlighterColors: "Цвета маркера",
   customTheme: "Своя",
   dedupeLines: "Удалить дубликаты строк",
   deduplicationCompletedRemaining: "Удаление дубликатов завершено, осталось",
@@ -178,6 +184,8 @@ const ui: Partial<Record<keyof typeof en, string>> = {
   fontColors: "Цвета шрифта",
   fontColorFormattingBrush:
     "Кисть форматирования цвета шрифта включена\nНажмите среднюю кнопку мыши или правую кнопку для отключения кисти",
+  backgroundColorFormattingBrush:
+    "Кисть форматирования цвета фона включена\nНажмите среднюю кнопку мыши или правую кнопку для отключения кисти",
   exampleConvertHttpsExampleCom:
     "Например, преобразовать https://example.com в [https://example.com](https://example.com)",
   formatBrush: "Кисть форматирования",

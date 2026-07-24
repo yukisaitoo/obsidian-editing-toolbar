@@ -1,10 +1,8 @@
 import { editingToolbarSettings } from "src/settings/settingsData";
 
-let activeDocument: Document;
-
 export const setMenuVisibility = (cMenuVisibility: boolean) => {
-  activeDocument = activeWindow.document;
-  
+  const activeDocument = activeWindow.document;
+
   // Hide all toolbar styles (top, following, fixed)
   const toolbarStyles = ["top", "following", "fixed"];
   toolbarStyles.forEach((style) => {
@@ -22,16 +20,18 @@ export const setMenuVisibility = (cMenuVisibility: boolean) => {
   });
 };
 
-export const setBottomValue = (
-  settings: editingToolbarSettings
-) => {
-  activeDocument = activeWindow.document;
-  activeDocument.documentElement.style.setProperty('--toolbar-vertical-offset', `${settings.verticalPosition}px`);
-
-
+export const setBottomValue = (settings: editingToolbarSettings) => {
+  const activeDocument = activeWindow.document;
+  activeDocument.documentElement.style.setProperty(
+    "--toolbar-vertical-offset",
+    `${settings.verticalPosition}px`
+  );
 };
-export const setHorizontalValue = (settings: editingToolbarSettings) =>{
-  activeDocument = activeWindow.document;
-  activeDocument.documentElement.style.setProperty('--toolbar-horizontal-offset', `${settings.horizontalPosition}px`);
-}
 
+export const setHorizontalValue = (settings: editingToolbarSettings) => {
+  const activeDocument = activeWindow.document;
+  activeDocument.documentElement.style.setProperty(
+    "--toolbar-horizontal-offset",
+    `${settings.horizontalPosition}px`
+  );
+};

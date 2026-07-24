@@ -5,10 +5,17 @@ import type { en } from "../en";
 const ui: Partial<Record<keyof typeof en, string>> = {
   clickPickerAdjustColor: "Click on the picker to adjust the colour",
   copyClipboard: "Copy",
-  customBackgroudColor: "Custom Backgroud Colour",
+  customBackgroundColor: "Custom Background Colour",
   customFontColor: "Custom Font Colour",
+  customFontColors: "Custom Font Colours",
+  customColors: "Custom Colours",
+  themeColors: "Theme Colours",
+  standardColors: "Standard Colours",
+  translucentColors: "Translucent Colours",
+  highlighterColors: "Highlighter Colours",
   fontColors: "Font Colours",
   fontColorFormattingBrush: "Font-Colour formatting brush ON!",
+  backgroundColorFormattingBrush: "Background-Colour formatting brush ON!",
   getInspiredWhatOthersHave:
     "Get inspired by what others have created or showcase your own customisations.",
   selectPresetToolbarThemeAutomatically:

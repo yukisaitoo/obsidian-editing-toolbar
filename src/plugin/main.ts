@@ -21,13 +21,13 @@ import {
   getAppearanceValue,
 } from "src/settings/settingsData";
 import {
-  createFollowingbar,
+  createFollowingBar,
   editingToolbarPopover,
-  isExistoolbar,
-  quiteFormatbrushes,
+  getExistingToolbar,
+  quietFormatBrushes,
   resetToolbar,
   selfDestruct,
-  setFormateraser,
+  setFormatEraser,
 } from "src/toolbar/editingToolbar";
 import { strings } from "src/translations/helper";
 import { setBackgroundcolor, setFontcolor } from "src/util/util";
@@ -423,7 +423,7 @@ export default class EditingToolbarPlugin extends Plugin {
       this.formatBrushNotice = null;
     }
 
-    this.quiteAllFormatBrushes();
+    this.quietAllFormatBrushes();
 
     selfDestruct(this);
 
@@ -444,7 +444,7 @@ export default class EditingToolbarPlugin extends Plugin {
     // If the toolbar is globally disabled in settings, just hide any existing toolbars and return.
     if (!this.settings.cMenuVisibility) {
       (["top", "following", "fixed"] as const).forEach((style) => {
-        const el = isExistoolbar(this.app, this, style);
+        const el = getExistingToolbar(this.app, this, style);
         if (el) el.style.display = "none";
       });
       return;
@@ -455,7 +455,7 @@ export default class EditingToolbarPlugin extends Plugin {
     // If the view type is not allowed at all, hide everything and stop.
     if (!ViewUtils.isAllowedViewType(view)) {
       (["top", "following", "fixed"] as const).forEach((style) => {
-        const el = isExistoolbar(this.app, this, style);
+        const el = getExistingToolbar(this.app, this, style);
         if (el) el.style.visibility = "hidden";
       });
       return;
@@ -469,7 +469,7 @@ export default class EditingToolbarPlugin extends Plugin {
     // For non-markdown views (like Canvas), we'll handle them below.
     if (isMarkdownView && !inSourceMode) {
       (["top", "following", "fixed"] as const).forEach((style) => {
-        const el = isExistoolbar(this.app, this, style);
+        const el = getExistingToolbar(this.app, this, style);
         if (el) el.style.visibility = "hidden";
       });
       return;
@@ -494,7 +494,7 @@ export default class EditingToolbarPlugin extends Plugin {
 
     // ---- Per-style handling: create / show / hide independently ----
     for (const { key, enabled } of styles) {
-      const existing = isExistoolbar(this.app, this, key);
+      const existing = getExistingToolbar(this.app, this, key);
 
       if (!enabled) {
         // Style disabled in settings → hide any existing toolbar of that style.
@@ -508,7 +508,7 @@ export default class EditingToolbarPlugin extends Plugin {
         editingToolbarPopover(this.app, this, key);
       }
 
-      const toolbar = isExistoolbar(this.app, this, key);
+      const toolbar = getExistingToolbar(this.app, this, key);
       if (!toolbar) continue;
 
       if (key === "following") {
@@ -961,7 +961,7 @@ export default class EditingToolbarPlugin extends Plugin {
     }
   }
 
-  quiteAllFormatBrushes(): void {
+  quietAllFormatBrushes(): void {
     this.fontColorFormatBrushActive = false;
     this.bgFormatBrushActive = false;
     this.EN_Text_Format_Brush = false;
@@ -1104,7 +1104,7 @@ export default class EditingToolbarPlugin extends Plugin {
         });
       };
       container.addEventListener("contextmenu", preventMenu, { capture: true });
-      quiteFormatbrushes(this);
+      quietFormatBrushes(this);
     }
   }
 
@@ -1160,7 +1160,7 @@ export default class EditingToolbarPlugin extends Plugin {
   }
 
   private hideToolbarIfNotSelected(hostDocument?: Document) {
-    const followingToolbar = isExistoolbar(
+    const followingToolbar = getExistingToolbar(
       this.app,
       this,
       "following",
@@ -1191,7 +1191,7 @@ export default class EditingToolbarPlugin extends Plugin {
     } else if (this.bgFormatBrushActive) {
       setBackgroundcolor(this.settings.cMenuBackgroundColor, cmEditor);
     } else if (this.EN_Text_Format_Brush) {
-      setFormateraser(this, cmEditor);
+      setFormatEraser(this, cmEditor);
     } else if (this.formatBrushActive && this.lastCalloutType) {
       this.applyCalloutFormat(
         cmEditor,
@@ -1221,7 +1221,7 @@ export default class EditingToolbarPlugin extends Plugin {
 
     const targetDocument = this.getToolbarHostDocument(editor);
 
-    const followingToolbar = isExistoolbar(
+    const followingToolbar = getExistingToolbar(
       this.app,
       this,
       "following",
@@ -1233,7 +1233,7 @@ export default class EditingToolbarPlugin extends Plugin {
       followingToolbar.classList.add("editingToolbarFlex");
       followingToolbar.classList.remove("editingToolbarGrid");
 
-      createFollowingbar(
+      createFollowingBar(
         this.app,
         this.toolbarIconSize,
         this,
@@ -1242,7 +1242,7 @@ export default class EditingToolbarPlugin extends Plugin {
         targetDocument,
       );
     } else {
-      createFollowingbar(
+      createFollowingBar(
         this.app,
         this.toolbarIconSize,
         this,

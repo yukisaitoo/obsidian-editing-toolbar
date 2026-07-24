@@ -29,8 +29,12 @@ export class TextEnhancement {
       .replace(/^[ ]+|[ ]+$/gm, "")
       .replace(/(\r\n|\n)+/gm, "\n");
 
-    navigator.clipboard.writeText(plainText);
-    new Notice(strings.plainTextCopiedClipboard);
+    navigator.clipboard
+      .writeText(plainText)
+      .then(() => new Notice(strings.plainTextCopiedClipboard))
+      .catch((error) =>
+        console.error("editing-toolbar: failed to copy plain text", error)
+      );
   }
 
   static insertBlankLines(editor: Editor): void {
@@ -193,9 +197,12 @@ export class TextEnhancement {
     const selection = this.requireSelection(editor);
     if (selection === null) return;
 
+    // Treat the selection as Chinese once at least this fraction of its
+    // characters are CJK; below it, fall back to English typography.
+    const CHINESE_CONTEXT_THRESHOLD = 0.1;
     const cjkRegex = /[\u4e00-\u9fa5]/g;
     const cjkCount = (selection.match(cjkRegex) || []).length;
-    const isChineseContext = cjkCount / selection.length > 0.1;
+    const isChineseContext = cjkCount / selection.length > CHINESE_CONTEXT_THRESHOLD;
 
     let result = selection;
 
@@ -445,8 +452,8 @@ export class TextEnhancement {
   }
 
   static convertListToTableMultiDim(editor: Editor): void {
-    const selection = editor.getSelection();
-    if (!selection || selection.trim() === "") return;
+    const selection = this.requireSelection(editor);
+    if (selection === null) return;
 
     const lines = selection.split(/\r?\n/);
     const listRegex = /^((\s*)(?:[-*+]|\d+\.)\s+)(.*)/;

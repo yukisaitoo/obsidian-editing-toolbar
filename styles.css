@@ -647,6 +647,7 @@ button[class^=editingToolbarCommandsubItem]::after {
   position: relative;
   height: calc(var(--toolbar-icon-size) + 18px);
   align-items: center;
+  justify-content: center;
   transition: all 0.2s linear;
   -webkit-transition: all 0.2s linear;
   transform: none;

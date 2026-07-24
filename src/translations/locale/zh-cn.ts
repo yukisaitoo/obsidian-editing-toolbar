@@ -85,10 +85,16 @@ const ui: Partial<Record<keyof typeof en, string>> = {
   currentLineEmptyPleaseSelect: "当前行为空，请选中文本或移动到非空行",
   currentlyEditingCommands: "当前编辑的命令配置为：",
   cursorPositionOffset: "光标位置偏移量",
-  customBackgroudColor: "设置自定义背景色",
+  customBackgroundColor: "设置自定义背景色",
   customCommands: "自定义命令",
   customCommandsOnly: "仅自定义命令",
   customFontColor: "设置自定义字体颜色",
+  customFontColors: "自定义字体颜色",
+  customColors: "自定义颜色",
+  themeColors: "主题颜色",
+  standardColors: "标准颜色",
+  translucentColors: "半透明颜色",
+  highlighterColors: "荧光笔颜色",
   dedupeLines: "去除重复行",
   deduplicationCompletedRemaining: "去重完成，剩余",
   default0FormatKeepText: "默认0，格式化将保持文本选中",
@@ -150,6 +156,8 @@ const ui: Partial<Record<keyof typeof en, string>> = {
   fontColors: "字体颜色",
   fontColorFormattingBrush:
     "字体颜色格式刷开启\n点击鼠标中键或者右键关闭格式刷",
+  backgroundColorFormattingBrush:
+    "背景颜色格式刷开启\n点击鼠标中键或者右键关闭格式刷",
   exampleConvertHttpsExampleCom:
     "例如，将https://example.com转换为[https://example.com](https://example.com)",
   formatBrush: "格式刷",

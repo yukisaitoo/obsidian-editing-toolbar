@@ -1,155 +1,100 @@
 import { App, MarkdownView } from "obsidian";
 
-let activeDocument: Document;
+// Vendor-prefixed fullscreen APIs are accessed via dynamic property names, so
+// these element/document views expose an index signature.
+interface FullscreenElement extends HTMLElement {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- vendor-prefixed fullscreen API access
+  [key: string]: any;
+}
+
+interface FullscreenDocument extends Document {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- vendor-prefixed fullscreen API access
+  [key: string]: any;
+}
 
 export function workplacefullscreenMode(app: App) {
-    activeDocument = activeWindow.document;
-    const currentleaf = activeDocument;
+  const activeDoc = activeWindow.document;
 
-
-    if (app.workspace.leftSplit.collapsed && app.workspace.rightSplit.collapsed) {
-        app.commands.executeCommandById("app:toggle-right-sidebar");
-        app.commands.executeCommandById("app:toggle-left-sidebar");
-        app.workspace.leftRibbon.show()
-
-        if (currentleaf.body.classList.contains('auto-hide-header')) {
-
-            currentleaf.body.classList.remove('auto-hide-header');
-        }
+  if (app.workspace.leftSplit.collapsed && app.workspace.rightSplit.collapsed) {
+    app.commands.executeCommandById("app:toggle-right-sidebar");
+    app.commands.executeCommandById("app:toggle-left-sidebar");
+    app.workspace.leftRibbon.show();
+    activeDoc.body.classList.remove("auto-hide-header");
+  } else {
+    activeDoc.body.classList.add("auto-hide-header");
+    app.workspace.leftRibbon.hide();
+    if (!app.workspace.leftSplit.collapsed) {
+      app.commands.executeCommandById("app:toggle-left-sidebar");
     }
-    else {
-
-        if (!currentleaf.body.classList.contains('auto-hide-header')) {
-
-
-            currentleaf.body.classList.add('auto-hide-header');
-        }
-        app.workspace.leftRibbon.hide()
-        if (!app.workspace.leftSplit.collapsed) {
-            app.commands.executeCommandById("app:toggle-left-sidebar");
-
-        }
-        if (!app.workspace.rightSplit.collapsed) {
-            app.commands.executeCommandById("app:toggle-right-sidebar");
-        }
+    if (!app.workspace.rightSplit.collapsed) {
+      app.commands.executeCommandById("app:toggle-right-sidebar");
     }
-
-
+  }
 }
 
-
-//full screen mode
+// full screen mode
 export function fullscreenMode(app: App) {
+  const DOC_EL = document.documentElement;
 
+  let TYPE_REQUEST_FULL_SCREEN = "requestFullscreen";
+  let TYPE_EXIT_FULL_SCREEN = "exitFullscreen";
+  let TYPE_FULL_SCREEN_ELEMENT = "fullscreenElement";
+  if ("webkitRequestFullScreen" in DOC_EL) {
+    TYPE_REQUEST_FULL_SCREEN = "webkitRequestFullScreen";
+    TYPE_EXIT_FULL_SCREEN = "webkitExitFullscreen";
+    TYPE_FULL_SCREEN_ELEMENT = "webkitFullscreenElement";
+  } else if ("msRequestFullscreen" in DOC_EL) {
+    TYPE_REQUEST_FULL_SCREEN = "msRequestFullscreen";
+    TYPE_EXIT_FULL_SCREEN = "msExitFullscreen";
+    TYPE_FULL_SCREEN_ELEMENT = "msFullscreenElement";
+  } else if ("mozRequestFullScreen" in DOC_EL) {
+    TYPE_REQUEST_FULL_SCREEN = "mozRequestFullScreen";
+    TYPE_EXIT_FULL_SCREEN = "mozCancelFullScreen";
+    TYPE_FULL_SCREEN_ELEMENT = "mozFullScreenElement";
+  } else if (!("requestFullscreen" in DOC_EL)) {
+    console.warn("editing-toolbar: the current browser does not support the Fullscreen API");
+  }
 
-    Object.defineProperty(exports, "__esModule", { value: true });
-    exports.toggleFull = exports.isFull = exports.exitFull = exports.beFull = void 0;
-    const DOC_EL = document.documentElement;
-    const headEl = DOC_EL.querySelector('head');
-    const styleEl = document.createElement('style');
-    let TYPE_REQUEST_FULL_SCREEN = 'requestFullscreen';
-    let TYPE_EXIT_FULL_SCREEN = 'exitFullscreen';
-    let TYPE_FULL_SCREEN_ELEMENT = 'fullscreenElement';
-    if ("webkitRequestFullScreen" in DOC_EL) {
-        TYPE_REQUEST_FULL_SCREEN = 'webkitRequestFullScreen';
-        TYPE_EXIT_FULL_SCREEN = 'webkitExitFullscreen';
-        TYPE_FULL_SCREEN_ELEMENT = 'webkitFullscreenElement';
-    }
-    else if ("msRequestFullscreen" in DOC_EL) {
-        TYPE_REQUEST_FULL_SCREEN = 'msRequestFullscreen';
-        TYPE_EXIT_FULL_SCREEN = 'msExitFullscreen';
-        TYPE_FULL_SCREEN_ELEMENT = 'msFullscreenElement';
-    }
-    else if ("mozRequestFullScreen" in DOC_EL) {
-        TYPE_REQUEST_FULL_SCREEN = 'mozRequestFullScreen';
-        TYPE_EXIT_FULL_SCREEN = 'mozCancelFullScreen';
-        TYPE_FULL_SCREEN_ELEMENT = 'mozFullScreenElement';
-    }
-    else if (!("requestFullscreen" in DOC_EL)) {
-        // throw "\u5F53\u524D\u6D4F\u89C8\u5668\u4E0D\u652F\u6301Fullscreen API !";
-        console.log("\u5F53\u524D\u6D4F\u89C8\u5668\u4E0D\u652F\u6301Fullscreen API !");
-    }
-    const leaf = app.workspace.getActiveViewOfType(MarkdownView)
-    if (!leaf)
-        return;
-    const el = leaf.containerEl;
-    const modroot = document.body?.querySelector(".mod-vertical.mod-root .workspace-tab-container") as HTMLElement
-    const fullscreenMutationObserver = new MutationObserver(function (mutationRecords) {
-        mutationRecords.forEach(function (mutationRecord) {
-            mutationRecord.addedNodes.forEach(function (node) {
-                if (isFull(modroot)) {
-                    try {
+  const leaf = app.workspace.getActiveViewOfType(MarkdownView);
+  if (!leaf) return;
+  const el = leaf.containerEl;
+  const modroot = document.body?.querySelector(
+    ".mod-vertical.mod-root .workspace-tab-container"
+  ) as HTMLElement;
 
-                        document.body.removeChild(node);
-                        el.appendChild(node);
-                    } catch (error) {
-                        console.log(error instanceof Error ? error.message : String(error))
-                    }
+  const isFull = (element: HTMLElement) =>
+    (element as FullscreenElement) ===
+    (document as FullscreenDocument)[TYPE_FULL_SCREEN_ELEMENT];
+  const beFull = (element: HTMLElement) =>
+    (element as FullscreenElement)[TYPE_REQUEST_FULL_SCREEN]();
+  const exitFull = () =>
+    (document as FullscreenDocument)[TYPE_EXIT_FULL_SCREEN]();
 
-                } else {
-                    return;
-                }
-            });
-        });
-
+  const fullscreenMutationObserver = new MutationObserver((mutationRecords) => {
+    mutationRecords.forEach((mutationRecord) => {
+      mutationRecord.addedNodes.forEach((node) => {
+        if (!isFull(modroot)) return;
+        try {
+          document.body.removeChild(node);
+          el.appendChild(node);
+        } catch (error) {
+          console.log(error instanceof Error ? error.message : String(error));
+        }
+      });
     });
-    modroot.addEventListener("fullscreenchange", function () {
-        if (!isFull(modroot)) {
-            fullscreenMutationObserver.disconnect();
-        }
-    });
-    if (isFull(modroot)) {
-        fullscreenMutationObserver.disconnect();
+  });
 
-        exitFull()
-
-    } else {
-
-        beFull(modroot)
-        fullscreenMutationObserver.observe(document.body, { childList: true });
-
+  modroot.addEventListener("fullscreenchange", () => {
+    if (!isFull(modroot)) {
+      fullscreenMutationObserver.disconnect();
     }
+  });
 
-    interface HTMLElementWithFullscreen extends HTMLElement {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any -- vendor-prefixed fullscreen API access
-      [key: string]: any;
-    }
-
-    interface DocumentWithFullscreen extends Document {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any -- vendor-prefixed fullscreen API access
-      [key: string]: any;
-    }
-
-    function getCurrentElement(el: HTMLElement): HTMLElementWithFullscreen {
-      return el as HTMLElementWithFullscreen;
-    }
-
-    function beFull(el: HTMLElement) {
-
-        return getCurrentElement(el)[TYPE_REQUEST_FULL_SCREEN]();
-    }
-    exports.beFull = beFull;
-    function exitFull() {
-        if (DOC_EL.contains(styleEl)) {
-            headEl === null || headEl === void 0 ? void 0 : headEl.removeChild(styleEl);
-        }
-        return (document as DocumentWithFullscreen)[TYPE_EXIT_FULL_SCREEN]();
-    }
-    exports.exitFull = exitFull;
-    function isFull(el: HTMLElement) {
-        return getCurrentElement(el) === (document as DocumentWithFullscreen)[TYPE_FULL_SCREEN_ELEMENT];
-    }
-    exports.isFull = isFull;
-    function toggleFull(el: HTMLElement) {
-        if (isFull(el)) {
-            exitFull();
-            return false;
-        }
-        else {
-            beFull(el);
-            return true;
-        }
-    }
-    exports.toggleFull = toggleFull;
+  if (isFull(modroot)) {
+    fullscreenMutationObserver.disconnect();
+    exitFull();
+  } else {
+    beFull(modroot);
+    fullscreenMutationObserver.observe(document.body, { childList: true });
+  }
 }
-

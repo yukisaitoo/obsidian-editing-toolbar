@@ -1,14 +1,5 @@
-import {
-  Command,
-  Editor,
-  Notice,
-  htmlToMarkdown,
-} from "obsidian";
+import { Command, Editor, Notice, htmlToMarkdown } from "obsidian";
 
-import {
-  selfDestruct,
-  setFormateraser,
-} from "src/toolbar/editingToolbar";
 import { InsertCalloutModal } from "src/modals/insertCalloutModal";
 import { InsertLinkModal } from "src/modals/insertLinkModal";
 import {
@@ -17,11 +8,15 @@ import {
   TextInputModal,
 } from "src/modals/TextInputModal";
 import EditingToolbarPlugin from "src/plugin/main";
-import { CustomCommand, resolveNextPositionStyle } from "src/settings/settingsData";
+import {
+  CustomCommand,
+  resolveNextPositionStyle,
+} from "src/settings/settingsData";
+import { selfDestruct, setFormatEraser } from "src/toolbar/editingToolbar";
 import { strings } from "src/translations/helper";
 import { fullscreenMode, workplacefullscreenMode } from "src/util/fullscreen";
-import { setMenuVisibility } from "src/util/statusBarConstants";
 import { TextEnhancement } from "src/util/textEnhancement";
+import { setMenuVisibility } from "src/util/toolbarVisibility";
 import {
   renumberSelection,
   setBackgroundcolor,
@@ -38,7 +33,7 @@ export class CommandsManager {
 
   private executeCommandWithoutBlur = async (
     editor: Editor,
-    callback: () => unknown
+    callback: () => unknown,
   ) => {
     await callback();
     editor.focus();
@@ -60,13 +55,16 @@ export class CommandsManager {
 
     const editor = this.getActiveEditor();
     if (editor) {
-      void this.executeCommandWithoutBlur(editor, () => action === "undo" ? editor.undo() : editor.redo());
+      void this.executeCommandWithoutBlur(editor, () =>
+        action === "undo" ? editor.undo() : editor.redo(),
+      );
       return;
     }
 
-    const fallbackCommandIds = action === "undo"
-      ? ["canvas:undo", "editor:undo"]
-      : ["canvas:redo", "editor:redo"];
+    const fallbackCommandIds =
+      action === "undo"
+        ? ["canvas:undo", "editor:undo"]
+        : ["canvas:redo", "editor:redo"];
 
     for (const commandId of fallbackCommandIds) {
       try {
@@ -91,8 +89,12 @@ export class CommandsManager {
       // noop
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- dynamically-invoked untyped canvas API objects
-    const invocationCandidates: Array<{ owner: any; method: string; label: string }> = [
+    const invocationCandidates: Array<{
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any -- dynamically-invoked untyped canvas API objects
+      owner: any;
+      method: string;
+      label: string;
+    }> = [
       { owner: activeView.canvas, method: action, label: `canvas.${action}()` },
       {
         owner: activeView.canvas?.history,
@@ -119,7 +121,8 @@ export class CommandsManager {
       return activeLeafView;
     }
 
-    const canvasLeaves = this.plugin.app.workspace.getLeavesOfType?.("canvas") ?? [];
+    const canvasLeaves =
+      this.plugin.app.workspace.getLeavesOfType?.("canvas") ?? [];
     for (const leaf of canvasLeaves) {
       const view = leaf?.view;
       if (view?.getViewType?.() === "canvas") {
@@ -317,7 +320,7 @@ export class CommandsManager {
     if (command.char > 0) {
       editor.setCursor(
         curserStart.line + command.line,
-        curserStart.ch + command.char + selectedText.length
+        curserStart.ch + command.char + selectedText.length,
       );
     } else {
       const originalSelectionStart = curserStart;
@@ -347,9 +350,7 @@ export class CommandsManager {
           const lineText = editor.getLine(currentLine);
 
           if (!lineText || lineText.trim() === "") {
-            new Notice(
-              strings.currentLineEmptyPleaseSelect
-            );
+            new Notice(strings.currentLineEmptyPleaseSelect);
             return;
           }
 
@@ -371,15 +372,13 @@ export class CommandsManager {
             }
 
             if (!selectedText) {
-              new Notice(
-                strings.pleaseSelectTextCopyText
-              );
+              new Notice(strings.pleaseSelectTextCopyText);
               return;
             }
 
             editor.replaceRange(selectedText, curserStart, curserStart);
             const newEnd = editor.offsetToPos(
-              editor.posToOffset(curserStart) + selectedText.length
+              editor.posToOffset(curserStart) + selectedText.length,
             );
             editor.setSelection(curserStart, newEnd);
           } catch (error) {
@@ -393,9 +392,7 @@ export class CommandsManager {
       if (command.useCondition && command.conditionPattern) {
         const conditionRegex = new RegExp(command.conditionPattern);
         if (!conditionRegex.test(selectedText)) {
-          new Notice(
-            strings.selectedTextDoesNotMeet
-          );
+          new Notice(strings.selectedTextDoesNotMeet);
           return;
         }
       }
@@ -424,15 +421,18 @@ export class CommandsManager {
 
       const replacedText = editor.getSelection();
       const newStart = editor.offsetToPos(
-        editor.posToOffset(updatedCurserStart)
+        editor.posToOffset(updatedCurserStart),
       );
       const newEnd = editor.offsetToPos(
-        editor.posToOffset(updatedCurserStart) + replacedText.length
+        editor.posToOffset(updatedCurserStart) + replacedText.length,
       );
       editor.setSelection(newStart, newEnd);
     } catch (error) {
       console.error("Regex command execution error:", error);
-      new Notice(strings.regexCommandExecutionError + (error instanceof Error ? error.message : String(error)));
+      new Notice(
+        strings.regexCommandExecutionError +
+          (error instanceof Error ? error.message : String(error)),
+      );
     }
   }
 
@@ -475,12 +475,12 @@ export class CommandsManager {
     }
 
     try {
-      const activeLeafEditor = this.plugin.app.workspace.activeLeaf?.view?.editor;
+      const activeLeafEditor =
+        this.plugin.app.workspace.activeLeaf?.view?.editor;
       if (activeLeafEditor) {
         return activeLeafEditor;
       }
-    } catch {
-    }
+    } catch {}
     return null;
   }
 
@@ -514,7 +514,7 @@ export class CommandsManager {
       name: "Renumber Ordered List",
       editorCallback: (editor: Editor) => {
         void this.executeCommandWithoutBlur(editor, () =>
-          renumberSelection(editor)
+          renumberSelection(editor),
         );
       },
     });
@@ -536,7 +536,6 @@ export class CommandsManager {
         await this.plugin.saveSettings();
       },
     });
-
   }
 
   private registerToolbarToggleCommands() {
@@ -547,7 +546,12 @@ export class CommandsManager {
         const s = this.plugin.settings;
         const prevStyle = this.plugin.positionStyle;
         s.enableTopToolbar = !s.enableTopToolbar;
-        const nextStyle = resolveNextPositionStyle(s, "top", s.enableTopToolbar, prevStyle);
+        const nextStyle = resolveNextPositionStyle(
+          s,
+          "top",
+          s.enableTopToolbar,
+          prevStyle,
+        );
         if (nextStyle && nextStyle !== prevStyle) {
           this.plugin.onPositionStyleChange(nextStyle);
         }
@@ -563,7 +567,12 @@ export class CommandsManager {
         const s = this.plugin.settings;
         const prevStyle = this.plugin.positionStyle;
         s.enableFollowingToolbar = !s.enableFollowingToolbar;
-        const nextStyle = resolveNextPositionStyle(s, "following", s.enableFollowingToolbar, prevStyle);
+        const nextStyle = resolveNextPositionStyle(
+          s,
+          "following",
+          s.enableFollowingToolbar,
+          prevStyle,
+        );
         if (nextStyle && nextStyle !== prevStyle) {
           this.plugin.onPositionStyleChange(nextStyle);
         }
@@ -579,7 +588,12 @@ export class CommandsManager {
         const s = this.plugin.settings;
         const prevStyle = this.plugin.positionStyle;
         s.enableFixedToolbar = !s.enableFixedToolbar;
-        const nextStyle = resolveNextPositionStyle(s, "fixed", s.enableFixedToolbar, prevStyle);
+        const nextStyle = resolveNextPositionStyle(
+          s,
+          "fixed",
+          s.enableFixedToolbar,
+          prevStyle,
+        );
         if (nextStyle && nextStyle !== prevStyle) {
           this.plugin.onPositionStyleChange(nextStyle);
         }
@@ -587,7 +601,6 @@ export class CommandsManager {
         this.plugin.handleEditingToolbar();
       },
     });
-
   }
 
   private registerTextToolCommands() {
@@ -621,8 +634,6 @@ export class CommandsManager {
         TextEnhancement.splitLines(editor);
       },
     });
-
-   
 
     this.plugin.addCommand({
       id: "smart-symbols",
@@ -666,9 +677,9 @@ export class CommandsManager {
               editor,
               typedResult.prefix,
               typedResult.suffix,
-              true
+              true,
             );
-          }
+          },
         ).open();
       },
     });
@@ -706,7 +717,7 @@ export class CommandsManager {
             const sep = result.sep || ". ";
 
             TextEnhancement.numberList(editor, start, step, sep, "");
-          }
+          },
         ).open();
       },
     });
@@ -738,7 +749,7 @@ export class CommandsManager {
       id: "list-to-table",
       name: strings.listTable,
       editorCallback: (editor: Editor) => {
-     TextEnhancement.convertListToTableMultiDim(editor);
+        TextEnhancement.convertListToTableMultiDim(editor);
       },
     });
 
@@ -774,9 +785,9 @@ export class CommandsManager {
             TextEnhancement.extractBetween(
               editor,
               typedResult.start,
-              typedResult.end
+              typedResult.end,
             );
-          }
+          },
         ).open();
       },
     });
@@ -802,11 +813,10 @@ export class CommandsManager {
               preserveParagraphs: result.sep === "",
               trimLines: true,
             });
-          }
+          },
         ).open();
       },
     });
-
   }
 
   private registerFormattingCommands() {
@@ -814,7 +824,7 @@ export class CommandsManager {
       id: "format-eraser",
       name: "Format Eraser",
       callback: () =>
-        this.runOnEditor((editor) => setFormateraser(this.plugin, editor)),
+        this.runOnEditor((editor) => setFormatEraser(this.plugin, editor)),
       icon: `eraser`,
     });
 
@@ -823,7 +833,7 @@ export class CommandsManager {
       name: "Change Font Color",
       callback: () =>
         this.runOnEditor((editor) =>
-          setFontcolor(this.plugin.settings.cMenuFontColor, editor)
+          setFontcolor(this.plugin.settings.cMenuFontColor, editor),
         ),
       icon: `<svg width="24" height="24" focusable="false" fill="currentColor"><g fill-rule="evenodd"><path id="change-font-color-icon" d="M3 18h18v3H3z" style="fill:#2DC26B"></path><path d="M8.7 16h-.8a.5.5 0 01-.5-.6l2.7-9c.1-.3.3-.4.5-.4h2.8c.2 0 .4.1.5.4l2.7 9a.5.5 0 01-.5.6h-.8a.5.5 0 01-.4-.4l-.7-2.2c0-.3-.3-.4-.5-.4h-3.4c-.2 0-.4.1-.5.4l-.7 2.2c0 .3-.2.4-.4.4zm2.6-7.6l-.6 2a.5.5 0 00.5.6h1.6a.5.5 0 00.5-.6l-.6-2c0-.3-.3-.4-.5-.4h-.4c-.2 0-.4.1-.5.4z"></path></g></svg>`,
     });
@@ -833,7 +843,7 @@ export class CommandsManager {
       name: "Change Background Color",
       callback: () =>
         this.runOnEditor((editor) =>
-          setBackgroundcolor(this.plugin.settings.cMenuBackgroundColor, editor)
+          setBackgroundcolor(this.plugin.settings.cMenuBackgroundColor, editor),
         ),
       icon: `<svg width="18" height="24" viewBox="0 0 256 256" version="1.1" xmlns="http://www.w3.org/2000/svg"><g   stroke="none" stroke-width="1" fill="currentColor" fill-rule="evenodd"><g  ><g fill="currentColor"><g transform="translate(119.502295, 137.878331) rotate(-135.000000) translate(-119.502295, -137.878331) translate(48.002295, 31.757731)" ><path d="M100.946943,60.8084699 L43.7469427,60.8084699 C37.2852111,60.8084699 32.0469427,66.0467383 32.0469427,72.5084699 L32.0469427,118.70847 C32.0469427,125.170201 37.2852111,130.40847 43.7469427,130.40847 L100.946943,130.40847 C107.408674,130.40847 112.646943,125.170201 112.646943,118.70847 L112.646943,72.5084699 C112.646943,66.0467383 107.408674,60.8084699 100.946943,60.8084699 Z M93.646,79.808 L93.646,111.408 L51.046,111.408 L51.046,79.808 L93.646,79.808 Z" fill-rule="nonzero"></path><path d="M87.9366521,16.90916 L87.9194966,68.2000001 C87.9183543,69.4147389 86.9334998,70.399264 85.7187607,70.4 L56.9423078,70.4 C55.7272813,70.4 54.7423078,69.4150264 54.7423078,68.2 L54.7423078,39.4621057 C54.7423078,37.2523513 55.5736632,35.1234748 57.0711706,33.4985176 L76.4832996,12.4342613 C78.9534987,9.75382857 83.1289108,9.5834005 85.8093436,12.0535996 C87.1658473,13.303709 87.9372691,15.0644715 87.9366521,16.90916 Z" fill-rule="evenodd"></path><path d="M131.3,111.241199 L11.7,111.241199 C5.23826843,111.241199 0,116.479467 0,122.941199 L0,200.541199 C0,207.002931 5.23826843,212.241199 11.7,212.241199 L131.3,212.241199 C137.761732,212.241199 143,207.002931 143,200.541199 L143,122.941199 C143,116.479467 137.761732,111.241199 131.3,111.241199 Z M124,130.241 L124,193.241 L19,193.241 L19,130.241 L124,130.241 Z" fill-rule="nonzero"></path></g></g><path d="M51,218 L205,218 C211.075132,218 216,222.924868 216,229 C216,235.075132 211.075132,240 205,240 L51,240 C44.9248678,240 40,235.075132 40,229 C40,222.924868 44.9248678,218 51,218 Z" id="change-background-color-icon" style="fill:#FA541C"></path></g></g></svg>`,
     });
@@ -866,7 +876,7 @@ export class CommandsManager {
       name: "Highlight",
       callback: () =>
         this.runOnEditor((editor) =>
-          editor.toggleMarkdownFormatting("highlight")
+          editor.toggleMarkdownFormatting("highlight"),
         ),
       icon: "highlight-glyph",
     });
@@ -889,7 +899,7 @@ export class CommandsManager {
       name: "Toggle Strikethrough",
       callback: () =>
         this.runOnEditor((editor) =>
-          editor.toggleMarkdownFormatting("strikethrough")
+          editor.toggleMarkdownFormatting("strikethrough"),
         ),
       icon: "strikethrough-glyph",
     });
@@ -904,7 +914,8 @@ export class CommandsManager {
       id: "editor:cycle-list-checklist",
       name: "Cycle List and Checklist",
       icon: "lucide-check-square",
-      callback: () => this.runOnEditor((editor) => editor.toggleCheckList(true)),
+      callback: () =>
+        this.runOnEditor((editor) => editor.toggleCheckList(true)),
     });
   }
 
@@ -969,7 +980,6 @@ export class CommandsManager {
         }),
       icon: "lucide-scissors",
     });
-
   }
 
   private registerInsertCommands() {
@@ -1009,7 +1019,6 @@ export class CommandsManager {
       hotkeys: [{ modifiers: ["Mod"], key: "F11" }],
       icon: "remix-SplitCellsHorizontal",
     });
-
   }
 
   private registerHeadingCommands() {
@@ -1022,7 +1031,6 @@ export class CommandsManager {
         icon: i === 0 ? "heading-glyph" : `header-${i}`,
       });
     }
-
   }
 
   private registerMappedCommands() {
@@ -1033,7 +1041,7 @@ export class CommandsManager {
         icon: `${type}-glyph`,
         callback: () =>
           this.runOnEditor((editor) =>
-            this.applyCommand(this._commandsMap[type], editor)
+            this.applyCommand(this._commandsMap[type], editor),
           ),
       });
     });
@@ -1053,7 +1061,6 @@ export class CommandsManager {
           }),
       });
     });
-
   }
 
   private trackFormatCommandExecution() {
@@ -1095,7 +1102,6 @@ export class CommandsManager {
     });
   }
 
-
   private getCharacterOffset(commandId: string): number {
     switch (commandId) {
       case "editor:insert-tag":
@@ -1134,7 +1140,7 @@ export class CommandsManager {
             void this.executeCommandWithoutBlur(editor, () => {
               this.applyRegexCommand(editor, command);
               this.plugin.setLastExecutedCommand(
-                `editing-toolbar:${commandId}`
+                `editing-toolbar:${commandId}`,
               );
             });
           } else {
@@ -1150,7 +1156,7 @@ export class CommandsManager {
             void this.executeCommandWithoutBlur(editor, () => {
               this.applyCommand(commandConfig, editor);
               this.plugin.setLastExecutedCommand(
-                `editing-toolbar:${commandId}`
+                `editing-toolbar:${commandId}`,
               );
             });
           }
