@@ -36,13 +36,20 @@
   transition: none !important;
 }
 
+/* The selection bar shrink-wraps its buttons, so it needs its own padding to
+   keep icons off the edge — the top bar gets that from its taller box and
+   centred layout. Height stays auto so it grows with the icon size. */
 #editingToolbarModalBar.editingToolbarFlex {
   display: flex;
+  padding: 4px 6px;
+  gap: 4px;
   transform: none;
 }
 
+/* Spacing comes from the container's gap here, not per-button margins. */
 #editingToolbarModalBar.editingToolbarFlex :is(.editingToolbarCommandItem, button[class^=editingToolbarCommandsubItem]) {
   min-width: 20px;
+  margin: auto 0;
 }
 
 #editingToolbarModalBar .editingToolbarCommandItem {
@@ -66,7 +73,9 @@
    relies on source order to win (equal specificity). */
 :is(#editingToolbarModalBar, #editingToolbarPopoverBar) :is(.editingToolbarCommandItem, button[class^=editingToolbarCommandsubItem]) {
   display: inline-flex;
-  height: 28px;
+  /* Grows with the icon so large sizes push the bar taller rather than
+     spilling out of a fixed box. 28px is the default size's height. */
+  height: max(28px, calc(var(--toolbar-icon-size) + 10px));
   padding: 4px;
   border: none;
   border-radius: var(--radius-s);
@@ -94,7 +103,7 @@
 
 #editingToolbarModalBar .more-menu {
   display: flex;
-  height: 28px;
+  height: max(28px, calc(var(--toolbar-icon-size) + 10px));
   box-shadow: none;
   opacity: 0.8;
   align-items: center;
@@ -111,7 +120,7 @@
 }
 
 #editingToolbarModalBar.editingToolbarDefaultAesthetic:not(.top) :is(.editingToolbarCommandItem, button[class^=editingToolbarCommandsubItem]) {
-  min-height: 28px;
+  min-height: max(28px, calc(var(--toolbar-icon-size) + 10px));
 }
 
 #editingToolbarModalBar.editingToolbarDefaultAesthetic:not(.top) button[class^=editingToolbarCommandsubItem] {
@@ -285,7 +294,7 @@ button[class^=editingToolbarCommandsubItem]::after {
   display: inline-flex;
   width: 0.6px;
   min-width: unset;
-  height: 22px;
+  height: calc(var(--toolbar-icon-size) + 4px);
   margin: 0;
   padding: 0;
   background-color: var(--background-modifier-border);
@@ -853,6 +862,14 @@ button.editingToolbarSettingsButton {
 .toolbar-preview-container #editingToolbarModalBar {
   position: relative;
   visibility: visible !important;
+}
+
+/* The real selection/floating bars are absolutely positioned, so they shrink to
+   fit their buttons. In the settings pane the preview is in normal flow, where
+   it would otherwise stretch to the full pane width and let the bar's
+   space-around fan the buttons out. Top mode is meant to span its pane. */
+.toolbar-preview-container #editingToolbarModalBar:not(.top) {
+  width: fit-content;
 }
 
 /* --- Import / export panels ----------------------------------------------- */

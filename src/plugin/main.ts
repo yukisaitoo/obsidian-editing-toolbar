@@ -1150,23 +1150,9 @@ export default class EditingToolbarPlugin extends Plugin {
       followingToolbar.classList.add("editingToolbarFlex");
       followingToolbar.classList.remove("editingToolbarGrid");
 
-      createFollowingBar(
-        this.app,
-        this.toolbarIconSize,
-        this,
-        editor,
-        true,
-        targetDocument,
-      );
+      createFollowingBar(this.app, this, editor, true, targetDocument);
     } else {
-      createFollowingBar(
-        this.app,
-        this.toolbarIconSize,
-        this,
-        editor,
-        true,
-        targetDocument,
-      );
+      createFollowingBar(this.app, this, editor, true, targetDocument);
     }
   }
 

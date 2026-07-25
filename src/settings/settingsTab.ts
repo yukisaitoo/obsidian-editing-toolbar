@@ -628,13 +628,11 @@ export class EditingToolbarSettingTab extends PluginSettingTab {
       appearanceBucket.toolbarIconSize ??
       this.plugin.settings.toolbarIconSize ??
       18;
+    // Same custom properties the real toolbar sets on itself, so the preview
+    // grows with the icon size instead of staying pinned to the default box.
     editingToolbar.style.setProperty("--editing-toolbar-background-color", bg);
-    const iconSvgs = editingToolbar.querySelectorAll<SVGElement>("svg");
-    iconSvgs.forEach((svg) => {
-      svg.style.color = iconColor;
-      svg.style.width = `${size}px`;
-      svg.style.height = `${size}px`;
-    });
+    editingToolbar.style.setProperty("--editing-toolbar-icon-color", iconColor);
+    editingToolbar.style.setProperty("--toolbar-icon-size", `${size}px`);
   }
   private createCommandList(containerEl: HTMLElement): void {
     const commandsToEdit: Command[] = this.getCommandsArrayByType(

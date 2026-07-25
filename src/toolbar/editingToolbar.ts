@@ -644,7 +644,6 @@ export function setFormatEraser(plugin: EditingToolbarPlugin, editor: Editor) {
 
 export function createFollowingBar(
   app: App,
-  iconSize: number,
   plugin: EditingToolbarPlugin,
   editor: Editor,
   forceShow: boolean = false,
@@ -689,8 +688,6 @@ export function createFollowingBar(
   const viewType = view?.getViewType();
   const isMarkdownView = viewType === "markdown";
 
-  const height = iconSize + 14;
-
   if (isMarkdownView) {
     if (ViewUtils.isSourceMode(view)) {
       if (editingToolbarModalBar) {
@@ -700,7 +697,6 @@ export function createFollowingBar(
           : "hidden";
 
         if (editingToolbarModalBar.style.visibility === "visible") {
-          editingToolbarModalBar.style.height = height + "px";
           editingToolbarModalBar.addClass("editingToolbarFlex");
           editingToolbarModalBar.removeClass("editingToolbarGrid");
 
@@ -715,7 +711,6 @@ export function createFollowingBar(
   } else {
     if (editingToolbarModalBar) {
       editingToolbarModalBar.style.visibility = "visible";
-      editingToolbarModalBar.style.height = height + "px";
       editingToolbarModalBar.addClass("editingToolbarFlex");
       editingToolbarModalBar.removeClass("editingToolbarGrid");
     }
