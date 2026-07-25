@@ -592,41 +592,10 @@ export class EditingToolbarSettingTab extends PluginSettingTab {
     const previewCommands = [
       { id: "bold", name: "Bold", icon: "bold" },
       { id: "italics", name: "Italics", icon: "italic" },
-      { id: "trikethrough", name: "Strikethrough", icon: "strikethrough" },
+      { id: "strikethrough", name: "Strikethrough", icon: "strikethrough" },
       { id: "code", name: "Code", icon: "code" },
       { id: "blockquote", name: "Blockquote", icon: "quote-glyph" },
       { id: "insert-link", name: "Link", icon: "link" },
-      { id: "left-sidebar", name: "Left sidebar", icon: "lucide-panel-left" },
-      {
-        id: "editor:insert-embed",
-        name: "Add embed",
-        icon: "note-glyph",
-      },
-      {
-        id: "editor:insert-link",
-        name: "Insert markdown link",
-        icon: "link-glyph",
-      },
-      {
-        id: "editor:insert-tag",
-        name: "Add tag",
-        icon: "price-tag-glyph",
-      },
-      {
-        id: "editor:insert-wikilink",
-        name: "Add internal link",
-        icon: "bracket-glyph",
-      },
-      {
-        id: "editor:toggle-code",
-        name: "Code",
-        icon: "code-glyph",
-      },
-      {
-        id: "editor:toggle-blockquote",
-        name: "Blockquote",
-        icon: "lucide-text-quote",
-      },
       {
         id: "editor:toggle-checklist-status",
         name: "Checklist status",
@@ -636,11 +605,6 @@ export class EditingToolbarSettingTab extends PluginSettingTab {
         id: "editor:insert-callout",
         name: "Insert Callout",
         icon: "lucide-quote",
-      },
-      {
-        id: "editor:insert-table",
-        name: "Insert Table",
-        icon: "lucide-table",
       },
     ];
     previewCommands.forEach((item) => {
@@ -1019,7 +983,6 @@ export class EditingToolbarSettingTab extends PluginSettingTab {
               .setIcon("editingToolbarSub")
               .setTooltip(strings.addSubmenu)
               .setClass("editingToolbarSettingsButton")
-              .setClass("editingToolbarSettingsButtonaddsub")
               .onClick(async () => {
                 const submenuCommand: SubmenuCommand = {
                   id: "SubmenuCommands-" + GenNonDuplicateID(1),
@@ -1047,7 +1010,6 @@ export class EditingToolbarSettingTab extends PluginSettingTab {
               .setIcon("vertical-split")
               .setTooltip(strings.addSeparator)
               .setClass("editingToolbarSettingsButton")
-              .setClass("editingToolbarSettingsButtonaddsub")
               .onClick(async () => {
                 const dividermenu = {
                   id: "editingToolbar-Divider-Line",

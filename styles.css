@@ -1,30 +1,44 @@
+/* ==========================================================================
+   1. TOKENS — overridden at runtime from plugin settings.
+   ========================================================================== */
+
 :root {
   --editing-toolbar-background-color: var(--background-primary);
   --editing-toolbar-icon-color: var(--text-normal);
   --toolbar-icon-size: 18px;
 }
 
+/* ==========================================================================
+   2. TOOLBAR — shared base (both #editingToolbarModalBar and
+   #editingToolbarPopoverBar). Mode-specific overrides follow in §3/§4.
+   ========================================================================== */
+
 #editingToolbarModalBar {
+  position: absolute;
+  display: grid;
   width: auto;
   height: auto;
-  display: grid;
-  user-select: none;
-  border-radius: var(--radius-m);
-  position: absolute;
-  transition: 100ms cubic-bezier(0.92, -0.53, 0.65, 1.21);
-  -webkit-transition: 100ms cubic-bezier(0.92, -0.53, 0.65, 1.21);
   min-width: fit-content;
+  border: none;
+  border-radius: var(--radius-m);
+  backdrop-filter: none;
+  align-items: center;
+  justify-items: center;
   justify-content: space-around;
+  user-select: none;
+  transition: 100ms cubic-bezier(0.92, -0.53, 0.65, 1.21);
   z-index: var(--layer-modal);
 }
+
+/* Following mode re-anchors the bar on every cursor move; animating that
+   makes it visibly lag the caret. */
 #editingToolbarModalBar[data-toolbar-style="following"] {
- transition: none !important;
-  -webkit-transition: none !important;
+  transition: none !important;
 }
 
 #editingToolbarModalBar.editingToolbarFlex {
   display: flex;
-  transform:none;
+  transform: none;
 }
 
 #editingToolbarModalBar.editingToolbarFlex :is(.editingToolbarCommandItem, button[class^=editingToolbarCommandsubItem]) {
@@ -32,116 +46,65 @@
 }
 
 #editingToolbarModalBar .editingToolbarCommandItem {
-  display: flex;
-  cursor: default;
-  border: none;
-  box-shadow: none;
-  background-color: transparent;
-  border-radius: var(--radius-s);
-  font-size: initial !important;
-  height: auto;
   position: relative;
-  /* margin shorthand first, then the left/right side overrides */
-  margin: auto;
-  margin-left: 4px;
-  margin-right: 0px;
-  padding: 0px;
+  display: flex;
+  height: auto;
+  margin: auto 0 auto 4px;
+  padding: 0;
+  border: none;
+  border-radius: var(--radius-s);
+  background-color: transparent;
+  box-shadow: none;
+  font-size: initial !important;
+  align-items: center;
   justify-content: center;
-  align-content: center;
-  place-items: center;
+  cursor: default;
 }
-.editing-toolbar-content .editingToolbarCommandItem.editingToolbarCommandItem
-{
-flex-wrap: wrap;
+
+/* Button chrome shared by both bars. Dividers deliberately match here too, so
+   they inherit border/box-shadow resets; §5 narrows their box afterwards and
+   relies on source order to win (equal specificity). */
+:is(#editingToolbarModalBar, #editingToolbarPopoverBar) :is(.editingToolbarCommandItem, button[class^=editingToolbarCommandsubItem]) {
+  display: inline-flex;
+  height: 28px;
+  padding: 4px;
+  border: none;
+  border-radius: var(--radius-s);
+  background: transparent;
+  box-shadow: none;
+  outline: none;
+  font-size: 10px;
+  opacity: 1;
+  flex-shrink: 0;
+  clear: both;
+  align-items: center;
+  justify-content: center;
+  cursor: default;
+  contain: none;
 }
-.editing-toolbar-content .setting-item
-{
-  padding-left:1em;
-  padding-right:1em;
+
+#editingToolbarPopoverBar :is(.editingToolbarCommandItem, button[class^=editingToolbarCommandsubItem]) {
+  transition: all 0.2s linear;
 }
+
 :is(#editingToolbarModalBar, #editingToolbarPopoverBar) button[class^=editingToolbarCommandsubItem]>.subitem button:hover,
-:is(#editingToolbarModalBar, #editingToolbarPopoverBar) button[class^=editingToolbarCommand]:hover,
-#editingToolbarSecond:hover {
+:is(#editingToolbarModalBar, #editingToolbarPopoverBar) button[class^=editingToolbarCommand]:hover {
   background-color: var(--background-modifier-hover) !important;
 }
 
-/* Menu-type selector styles in settings */
-.editingToolbarMenuTypeDropdown {
-  min-width: 120px;
-  margin-left: 8px;
-  /* Reserve right padding for the native select chevron so the trailing
-     text (e.g. the "u" in "Submenu"/"Menu") doesn't slide under it. */
-  padding: 4px 28px 4px 8px;
-  border-radius: var(--radius-s);
-  background-color: var(--background-primary-alt);
-  border: 1px solid var(--background-modifier-border);
-  color: var(--text-normal);
-  cursor: pointer;
+#editingToolbarModalBar .more-menu {
+  display: flex;
+  height: 28px;
+  box-shadow: none;
+  opacity: 0.8;
+  align-items: center;
 }
 
-.editingToolbarMenuTypeDropdown:hover {
-  background-color: var(--background-modifier-hover);
+/* --- Default aesthetic ---------------------------------------------------- */
+
+.editingToolbarDefaultAesthetic {
+  background-color: var(--editing-toolbar-background-color);
 }
-
-.editingToolbarMenuTypeDropdown:focus {
-  border-color: var(--interactive-accent);
-  outline: none;
-}
-
-/*----------------------------------------------------------------
-editingToolbar SETTINGS BUTTONS
-----------------------------------------------------------------*/
-
-button.editingToolbarSettingsButton {
-  padding: 4px 14px;
-  border-radius: var(--radius-m);
-}
-
-/*----------------------------------------------------------------
-editingToolbar SETTING ITEMS
-----------------------------------------------------------------*/
-.setting-item.editingToolbarCommandItem:first-child {
-  padding-top: 12px;
-}
-
-.editingToolbarCommandItem {
-  cursor: grab;
-  padding: 10px 0 10px 0;
-}
-
-.editingToolbarSettingsTabsContainer .sortable-fallback {
-  cursor: grabbing;
-  box-shadow: 0px 3px 32px rgb(31 38 135 / 15%);
-}
-
-.editingToolbarSettingsTabsContainer .sortable-grab {
-  cursor: grabbing !important;
-}
-
-.editingToolbarSettingsTabsContainer .sortable-ghost {
-  opacity: 0.4;
-  cursor: grabbing;
-}
-
-.editingToolbarSettingsTabsContainer .sortable-chosen {
-  cursor: grabbing;
-  padding: 10px 0 10px 10px;
-  background-color: var(--color-base-10, --background-primary);
-}
-
-.editingToolbarSettingsTabsContainer .sortable-drag {
-  cursor: grabbing;
-  box-shadow: 0px 3px 32px rgb(31 38 135 / 15%);
-}
-
-.editingToolbarSettingsTabsContainer {
-  border-top: 1px solid var(--background-modifier-border);
-  border-bottom: 1px solid var(--background-modifier-border);
-}
-
-/*----------------------------------------------------------------
-editingToolbar CLASS CHANGES
-----------------------------------------------------------------*/
 
 #editingToolbarModalBar.editingToolbarDefaultAesthetic {
   border: 1px solid var(--background-modifier-border);
@@ -154,16 +117,10 @@ editingToolbar CLASS CHANGES
 #editingToolbarModalBar.editingToolbarDefaultAesthetic:not(.top) button[class^=editingToolbarCommandsubItem] {
   margin: auto;
   padding: 6px;
-  box-shadow: none;
   border: none;
   background-color: transparent;
-
+  box-shadow: none;
   place-items: center;
-
-}
-
-.editingToolbarDefaultAesthetic {
-  background-color: var(--editing-toolbar-background-color);
 }
 
 /* Toolbar icons honor the configured icon colour and size. */
@@ -177,109 +134,114 @@ editingToolbar CLASS CHANGES
   max-height: var(--toolbar-icon-size);
 }
 
-/*----------------------------------------------------------------
-editingToolbar ICONS
-----------------------------------------------------------------*/
-
-.editingToolbarIconPick {
-  line-height: normal;
-  vertical-align: middle;
-  margin-right: 8px;
+.workspace-tabs.mod-stacked .workspace-tab-header:not(.is-active)+.workspace-leaf #editingToolbarModalBar {
+  opacity: 0;
 }
 
-.editingToolbarIconPick svg {
-  width: 18px;
-  height: 18px;
-}
+/* ==========================================================================
+   3. TOOLBAR — top mode. Must stay after §2 (overrides the base bar).
+   ========================================================================== */
 
-/*----------------------------------------------------------------
-editingToolbar SUPPORT
-----------------------------------------------------------------*/
-
-#editingToolbarModalBar {
-  align-items: center;
-  justify-items: center;
-  border: none;
-  backdrop-filter: none;
-}
-
-div.modal-container.editingToolbar-Modal:not(:is(.changename,.customicon)) .modal-bg {
-  background-color: transparent !important;
-  backdrop-filter: none !important;
+#editingToolbarModalBar.top {
   position: relative;
+  display: flex;
+  height: calc(var(--toolbar-icon-size) + 18px);
+  /* Override the base rule's min-width:fit-content so the bar can't grow wider
+     than the pane (which is what pushed icons off-screen). Keep it pinned to
+     the pane width and let JS (collapseOverflowToFit) move the excess into the
+     "more" popover; overflow:hidden clips rather than spilling if a measure is
+     ever off. */
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+  gap: 10px;
+  flex-wrap: nowrap;
+  align-items: center;
+  justify-content: center;
+  transform: none;
+  transition: all 0.2s linear;
+  z-index: var(--layer-status-bar);
 }
 
-.modal-container.editingToolbar-Modal:not(:is(.changename,.customicon)) .modal {
-  padding: 10px 20px;
-  width: 220px;
+/* ==========================================================================
+   4. TOOLBAR — overflow popover bar.
+   ========================================================================== */
+
+#editingToolbarPopoverBar {
   position: absolute;
-  bottom: 2em;
-  right: 0.5em;
-  background-color: rgb(var(--mono-rgb-0), 0.65);
-  backdrop-filter: blur(2px);
+  right: 0;
+  display: inline-flex;
+  width: fit-content;
+  height: auto !important;
+  margin-left: 25px;
+  margin-right: 25px;
+  overflow: visible;
+  border-radius: var(--radius-m);
+  background-color: var(--editing-toolbar-background-color);
+  background-clip: padding-box;
+  flex-wrap: wrap;
+  align-items: center;
+  transition: all 0.1s linear;
+  z-index: var(--layer-popover);
 }
 
-.modal-container.editingToolbar-Modal .modal-title {
-  display: none;
+.markdown-source-view.mod-cm6 #editingToolbarPopoverBar {
+  margin-top: calc(var(--toolbar-icon-size) + 20px);
 }
 
-.modal-container.editingToolbar-Modal .modal input[type='range'] {
-  width: 90%;
-
+@media screen and (max-width: 768px) {
+  #editingToolbarPopoverBar {
+    left: 15%;
+    right: unset;
+    transform: translateX(-15%);
+  }
 }
 
-body.theme-dark .modal-container.editingToolbar-Modal .modal input[type='range'] {
-  background-color: var(--background-secondary);
-}
+/* ==========================================================================
+   5. SUBMENUS, DIVIDERS AND COLOUR PICKERS
+   ========================================================================== */
 
+/* Chevron affordance on any button that opens a submenu. */
 button[class^=editingToolbarCommandsubItem]::after {
-
   content: url("data:image/svg+xml,%3Csvg width='4' height='4' version='1.1' xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1024 1024' enable-background='new 0 0 1024 1024' xml:space='preserve'%3E%3Cpath fill='%23808080' d='M13.24 80.11 l461.75 560.8 q14.56 16.02 36.41 16.02 q21.85 0 36.42 -16.02 l463.2 -560.8 q10.2 -10.19 12.38 -24.75 q2.18 -14.57 -3.64 -27.68 q-5.82 -13.11 -18.21 -20.39 q-12.39 -7.29 -26.95 -7.29 l-924.95 0 q-20.4 0 -34.23 13.11 q-13.84 13.11 -15.29 32.77 q-1.46 19.66 13.11 34.23 Z'/%3E%3C/svg%3E");
-
   margin-left: 1px;
   margin-top: 6px;
-
 }
 
 :is(#editingToolbarModalBar, #editingToolbarPopoverBar) button[class^=editingToolbarCommandsubItem]>.subitem {
-  border-radius: var(--radius-m);
   position: absolute;
-  user-select: none;
-  transform: translateY(105%) translateX(0%);
-  -webkit-transform: translateY(105%) translateX(0%);
   display: flex;
-
-  box-shadow: none;
+  transform: translateY(105%);
   border: 1px solid var(--background-modifier-border-hover);
+  border-radius: var(--radius-m);
   background-color: var(--background-secondary);
-  z-index:1;
+  box-shadow: none;
+  user-select: none;
   visibility: hidden;
   transition: all 0.15s linear;
-  -webkit-transition: all 0.15s linear;
+  z-index: 1;
 }
 
-:is(#editingToolbarModalBar, #editingToolbarPopoverBar) button[class^=editingToolbarCommandsubItem] >.subitem:hover  {
-  visibility:visible;
+:is(#editingToolbarModalBar, #editingToolbarPopoverBar) button[class^=editingToolbarCommandsubItem]:hover>.subitem,
+:is(#editingToolbarModalBar, #editingToolbarPopoverBar) button[class^=editingToolbarCommandsubItem]>.subitem:hover {
+  visibility: visible;
   transition: all 0.3s linear;
-  -webkit-transition:  all 0.3s linear;
 }
 
-:is(#editingToolbarModalBar, #editingToolbarPopoverBar) button[class^=editingToolbarCommandsubItem]:first-child>.subitem
-{
+/* Flyouts open toward the middle of the bar so they can't run off either edge. */
+:is(#editingToolbarModalBar, #editingToolbarPopoverBar) button[class^=editingToolbarCommandsubItem]:is(:first-child, :nth-child(2))>.subitem {
   left: 0;
 }
-:is(#editingToolbarModalBar, #editingToolbarPopoverBar) button[class^=editingToolbarCommandsubItem]:nth-child(2)>.subitem
-{
-  left: 0;
-}
-:is(#editingToolbarModalBar, #editingToolbarPopoverBar) button[class^=editingToolbarCommandsubItem]:nth-last-child(1)>.subitem
-{
+
+:is(#editingToolbarModalBar, #editingToolbarPopoverBar) button[class^=editingToolbarCommandsubItem]:is(:nth-last-child(1), :nth-last-child(2))>.subitem {
   right: 0;
 }
-:is(#editingToolbarModalBar, #editingToolbarPopoverBar) button[class^=editingToolbarCommandsubItem]:nth-last-child(2)>.subitem
-{
-  right: 0;
+
+/* In following/flex mode the bar floats over the text, so flyouts drop upward. */
+:is(#editingToolbarModalBar, #editingToolbarPopoverBar):not(:is(.top,.editingToolbarFlex)) button[class^=editingToolbarCommandsubItem]:not(.editingToolbarSecond)>.subitem {
+  bottom: calc(100% + calc(var(--toolbar-icon-size) + 18px));
 }
+
 @media screen and (max-width: 768px) {
   :is(#editingToolbarModalBar, #editingToolbarPopoverBar):not(:is(.top,.editingToolbarFlex)) button[class^=editingToolbarCommandsubItem]>.subitem {
     left: 58%;
@@ -293,10 +255,10 @@ button[class^=editingToolbarCommandsubItem]::after {
 }
 
 :is(#editingToolbarModalBar, #editingToolbarPopoverBar) button[class^=editingToolbarCommandsubItem]>.subitem button.menu-item:not(.editingToolbar-Divider-Line) {
-  background-color: transparent;
-  line-height: 2em;
   display: inline-flex;
+  background-color: transparent;
   box-shadow: none;
+  line-height: 2em;
   align-items: center;
 }
 
@@ -306,51 +268,401 @@ button[class^=editingToolbarCommandsubItem]::after {
   padding: 6px 8px;
 }
 
+.editingToolbarCommandsubItem-font-color button {
+  background-color: transparent;
+}
+
+/* --- Dividers ------------------------------------------------------------
+   Only top mode has the horizontal room to show separators; everywhere else
+   they collapse. These rules must stay after §2 — the second selector ties
+   the base button rule on specificity and wins on source order alone. */
+
+:is(#editingToolbarModalBar:not(.top), #editingToolbarPopoverBar) button.editingToolbar-Divider-Line {
+  display: none;
+}
+
+:is(#editingToolbarModalBar, #editingToolbarPopoverBar) button.editingToolbar-Divider-Line {
+  display: inline-flex;
+  width: 0.6px;
+  min-width: unset;
+  height: 22px;
+  margin: 0;
+  padding: 0;
+  background-color: var(--background-modifier-border);
+  opacity: 0.8;
+  flex-shrink: 0;
+  align-self: center;
+}
+
+.theme-dark :is(#editingToolbarModalBar, #editingToolbarPopoverBar) button.editingToolbar-Divider-Line {
+  background-color: #4f4f5188;
+}
+
+:is(#editingToolbarModalBar, #editingToolbarPopoverBar) button.editingToolbar-Divider-Line svg {
+  display: none;
+}
+
+/* --- Colour picker popover ------------------------------------------------ */
+
+.x-color-picker-wrapper {
+  position: absolute;
+  top: 1.8em;
+  right: -50%;
+  width: fit-content;
+  min-width: 1px;
+  padding: 10px;
+  transform: translateX(50%);
+  border-radius: var(--radius-s);
+  background-color: var(--color-base-10, var(--background-primary));
+  box-shadow: 0 8px 10px 1px rgba(0, 0, 0, 0.14);
+  font-family: Source Sans Pro, sans-serif;
+  font-weight: 400;
+}
+
+/* Near an edge of the bar the picker is nudged inward so it stays on screen;
+   the further from the edge, the smaller the nudge. */
+:is(#editingToolbarModalBar, #editingToolbarPopoverBar) button:is(:first-child, :nth-child(2)).editingToolbarCommandsubItem-font-color .x-color-picker-wrapper {
+  left: 0;
+  right: unset;
+  transform: translateX(0);
+}
+
+:is(#editingToolbarModalBar, #editingToolbarPopoverBar) button:nth-child(3).editingToolbarCommandsubItem-font-color .x-color-picker-wrapper {
+  left: -30px;
+  right: unset;
+  transform: translateX(0);
+}
+
+:is(#editingToolbarModalBar, #editingToolbarPopoverBar) button:nth-child(4).editingToolbarCommandsubItem-font-color .x-color-picker-wrapper {
+  left: -50px;
+  right: unset;
+  transform: translateX(0);
+}
+
+:is(#editingToolbarModalBar, #editingToolbarPopoverBar) button:is(:nth-last-child(1), :nth-last-child(2)).editingToolbarCommandsubItem-font-color .x-color-picker-wrapper {
+  right: 0;
+  transform: translateX(0);
+}
+
+:is(#editingToolbarModalBar, #editingToolbarPopoverBar) button:nth-last-child(3).editingToolbarCommandsubItem-font-color .x-color-picker-wrapper {
+  right: 0;
+  transform: translateX(30px);
+}
+
+:is(#editingToolbarModalBar, #editingToolbarPopoverBar) button:nth-last-child(4).editingToolbarCommandsubItem-font-color .x-color-picker-wrapper {
+  right: 0;
+  transform: translateX(40px);
+}
+
+:is(#editingToolbarModalBar, #editingToolbarPopoverBar) button:nth-last-child(5).editingToolbarCommandsubItem-font-color .x-color-picker-wrapper {
+  right: 0;
+  transform: translateX(50px);
+}
+
 :is(#editingToolbarModalBar, #editingToolbarPopoverBar):not(:is(.top,.editingToolbarFlex)) button.editingToolbarCommandsubItem-font-color .x-color-picker-wrapper {
   top: auto;
   bottom: calc(100% - 2rem);
 }
 
-:is(#editingToolbarModalBar, #editingToolbarPopoverBar):not(:is(.top,.editingToolbarFlex)) button[class^=editingToolbarCommandsubItem]:not(.editingToolbarSecond)>.subitem {
-  bottom: calc(100% + calc(var(--toolbar-icon-size) + 18px));
+.x-color-picker-wrapper table.x-color-picker-table:is(#x-color-picker-table, #x-backgroundcolor-picker-table) {
+  width: unset;
+  margin: auto !important;
+  border-collapse: separate;
+  border-spacing: 6px;
 }
 
-:is(#editingToolbarModalBar, #editingToolbarPopoverBar) button.editingToolbarCommandsubItem-font-color .subitem {
-  visibility: hidden;
-  transition: all 0.15s linear;
-  -webkit-transition: all 0.15s linear;
+.x-color-picker-wrapper .x-color-picker-table th {
+  border: 0;
+  background: transparent !important;
+  color: #718096;
+  font-weight: normal;
+  text-align: left;
 }
 
-:is(#editingToolbarModalBar, #editingToolbarPopoverBar) button.editingToolbarCommandsubItem-font-color .subitem:hover {
-  visibility: visible;
-  transition: all 0.3s linear;
-  -webkit-transition: all 0.3s linear;
+.x-color-picker-wrapper :is(#x-color-picker-table, #x-backgroundcolor-picker-table) td {
+  padding: 9px;
+  border: solid 1px var(--background-modifier-border);
+  /* The cell is a colour swatch; 1px text keeps it from being stretched by
+     the (empty) content box. */
+  font-size: 1px;
+  cursor: default;
 }
 
-:is(#editingToolbarModalBar, #editingToolbarPopoverBar) button[class^=editingToolbarCommandsubItem]:hover>.subitem {
-  visibility: visible;
-  transition: all 0.3s linear;
-  -webkit-transition: all 0.3s linear;
-  z-index:1;
+.x-color-picker-wrapper #x-backgroundcolor-picker-table td {
+  border-radius: 50%;
 }
 
-.editingToolbarCommandsubItem-font-color button {
-  background-color: transparent;
+.x-color-picker-wrapper .x-color-picker-table tr td:hover {
+  filter: brightness(1.2);
+  box-shadow: 0 3px 6px -4px rgba(0, 0, 0, .12), 0 6px 16px 0 rgba(0, 0, 0, .08), 0 9px 28px 8px rgba(0, 0, 0, .05);
 }
 
-.editingToolbarSettingsTabsContainer .editingToolbarCommandItem .setting-item-info {
+.pickr .pcr-button {
+  background-color: var(--pcr-color);
+}
 
-  flex: 30%;
+/* --- Dropdown-menu variant (Obsidian Menu, rendered outside the bar) ------- */
+
+/* Category headings are rendered as disabled menu items; the ::before/::after
+   rules draw the rule line on either side of the label. */
+.menu.editing-toolbar-dropdown-menu .menu-separator {
+  display: none;
+}
+
+.menu.editing-toolbar-dropdown-menu .menu-item.is-disabled {
+  display: flex !important;
+  padding: 8px 12px;
+  gap: 6px;
+  background-color: transparent !important;
+  color: var(--text-muted);
+  filter: contrast(0.5);
+  font-size: 10px;
+  font-weight: 400;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  opacity: 0.7 !important;
+  align-items: center;
+  cursor: default !important;
+}
+
+.theme-dark .menu.editing-toolbar-dropdown-menu .menu-item.is-disabled {
+  color: var(--text-muted);
+  opacity: 0.7;
+}
+
+.menu.editing-toolbar-dropdown-menu .menu-item.is-disabled::before,
+.menu.editing-toolbar-dropdown-menu .menu-item.is-disabled::after {
+  content: '';
+  height: 1px;
+  background-color: var(--background-modifier-border);
+  opacity: 0.5;
+  flex: 1;
+}
+
+.menu.editing-toolbar-dropdown-menu .menu-item.is-disabled:hover {
+  background-color: transparent !important;
+}
+
+.menu.editing-toolbar-dropdown-menu .menu-item-hotkey {
+  margin-left: auto;
+  color: var(--text-muted);
+  font-family: var(--font-monospace);
+  font-size: 10px;
+  opacity: 0.7;
+}
+
+/* Obsidian's editor tooltips default to a z-index below the toolbar, so an
+   autocomplete popup opened under a top-mode bar renders behind it. */
+.cm-tooltip {
+  z-index: 1000;
+}
+
+/* ==========================================================================
+   6. SETTINGS TAB
+   ========================================================================== */
+
+.editing-toolbar-tabs {
+  display: flex;
+  margin-bottom: 24px;
+  padding: 0 8px;
+  border-bottom: 2px solid var(--background-modifier-border);
+}
+
+.editing-toolbar-tab {
+  display: flex;
+  margin-bottom: -2px;
+  padding: 8px 12px;
+  gap: 8px;
+  border-bottom: 2px solid transparent;
+  color: var(--text-muted);
+  align-items: center;
+  cursor: pointer;
+}
+
+.editing-toolbar-tab:hover {
+  background-color: var(--background-modifier-hover);
+  color: var(--text-normal);
+}
+
+.editing-toolbar-tab.active {
+  border-bottom-color: var(--text-accent);
+  color: var(--text-accent);
+}
+
+.editing-toolbar-header {
+  display: flex;
+  margin-bottom: 24px;
+  padding: 0 8px;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.editing-toolbar-title-container {
+  flex-shrink: 0;
+}
+
+.editing-toolbar-title {
   margin: 0;
 }
 
+.editing-toolbar-content {
+  padding: 0 8px;
+}
+
+.editing-toolbar-content .setting-item {
+  padding-left: 1em;
+  padding-right: 1em;
+}
+
+/* Doubled class beats Obsidian's `.setting-item .setting-item-*` rules, which
+   otherwise force the command row onto a single non-wrapping line. */
+.editing-toolbar-content .editingToolbarCommandItem.editingToolbarCommandItem {
+  flex-wrap: wrap;
+}
+
+/* Must stay after the base rules above — same specificity, wins on order. */
+@media screen and (max-width: 1024px) {
+  .editing-toolbar-header {
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .editing-toolbar-tabs .editing-toolbar-tab:not(.active)>span {
+    display: none;
+  }
+}
+
+/* --- Section containers --------------------------------------------------- */
+
+.editing-toolbar-settings .generalSetting-container,
+.editing-toolbar-settings .custom-paintbrush-container,
+.editing-toolbar-settings .appearanceSetting-container,
+.editing-toolbar-settings .commandSetting-container,
+.editing-toolbar-settings .import-export-container {
+  margin-bottom: 20px;
+  padding: 16px;
+  border-radius: 8px;
+  background-color: var(--background-secondary);
+}
+
+.editing-toolbar-settings .custom-toolbar-container {
+  padding: 16px;
+  border-radius: 8px;
+  background-color: var(--background-secondary);
+}
+
+.editing-toolbar-settings .command-lists-container {
+  padding: 16px;
+  border-radius: 8px;
+}
+
+/* The command list is tinted to match the position-style banner above it. */
+.command-lists-container.following {
+  border: 1px solid rgba(var(--color-green-rgb), 0.3);
+  background-color: rgba(var(--color-green-rgb), 0.1);
+}
+
+.command-lists-container.top {
+  border: 1px solid rgba(var(--color-yellow-rgb), 0.3);
+  background-color: rgba(var(--color-yellow-rgb), 0.1);
+}
+
+.position-style-info {
+  position: sticky;
+  top: 0;
+  margin-bottom: 1rem;
+  padding: 0.5rem;
+  border-radius: 4px;
+  background-color: rgba(var(--color-purple-rgb), 0.8);
+  color: white;
+  font-weight: bold;
+  text-align: center;
+}
+
+.position-style-info.following {
+  background-color: rgba(var(--color-green-rgb), 0.8);
+}
+
+.position-style-info.top {
+  background-color: rgba(var(--color-yellow-rgb), 0.8);
+}
+
+/* --- Command list rows and drag-and-drop ---------------------------------- */
+
+.editingToolbarSettingsTabsContainer {
+  border-top: 1px solid var(--background-modifier-border);
+  border-bottom: 1px solid var(--background-modifier-border);
+}
+
+.editingToolbarCommandItem {
+  padding: 10px 0;
+  cursor: grab;
+}
+
+.setting-item.editingToolbarCommandItem:first-child {
+  padding-top: 12px;
+}
+
+.editingToolbarSettingsTabsContainer :is(.sortable-fallback, .sortable-drag) {
+  box-shadow: 0px 3px 32px rgb(31 38 135 / 15%);
+  cursor: grabbing;
+}
+
+.editingToolbarSettingsTabsContainer .sortable-grab {
+  cursor: grabbing !important;
+}
+
+.editingToolbarSettingsTabsContainer .sortable-ghost {
+  opacity: 0.4;
+  cursor: grabbing;
+}
+
+.editingToolbarSettingsTabsContainer .sortable-chosen {
+  padding: 10px 0 10px 10px;
+  background-color: var(--color-base-10, var(--background-primary));
+  cursor: grabbing;
+}
+
+@keyframes sortable-feedback {
+  0% { transform: scale(1); }
+  50% { transform: scale(0.98); }
+  100% { transform: scale(1); }
+}
+
+@keyframes toolbar-fade-in {
+  from { opacity: 0; }
+  to { opacity: 0.3; }
+}
+
+.sortable-chosen-feedback {
+  position: relative;
+  animation: sortable-feedback 0.3s ease-in-out;
+}
+
+.sortable-chosen-feedback::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 4px;
+  background: var(--background-modifier-hover);
+  opacity: 0;
+  animation: toolbar-fade-in 0.3s ease-in-out forwards;
+  pointer-events: none;
+}
+
+.editingToolbarSettingsTabsContainer .editingToolbarCommandItem .setting-item-info {
+  margin: 0;
+  flex: 30%;
+}
+
 .editingToolbarSettingsTabsContainer .editingToolbarSettingsTabsContainer_sub {
+  display: flex;
+  min-height: 45px;
+  margin-left: 10px;
+  padding: 0;
   border-left: 1px solid var(--background-modifier-border);
   flex-flow: column;
-  min-height: 45px;
-  display: flex;
-  padding: 0;
-  margin-left: 10px;
   flex: 70%;
 }
 
@@ -358,6 +670,8 @@ button[class^=editingToolbarCommandsubItem]::after {
   border: 2px dashed rgba(var(--interactive-accent-rgb), 0.5);
 }
 
+/* TODO: user-facing copy; the rest of the plugin routes strings through
+   src/translations, this one can't be translated. */
 .editingToolbarSettingsTabsContainer .editingToolbarSettingsTabsContainer_sub:empty::before {
   content: "✖️Drag it here";
   margin: auto;
@@ -365,42 +679,246 @@ button[class^=editingToolbarCommandsubItem]::after {
 }
 
 .editingToolbarSettingsTabsContainer .editingToolbarSettingsTabsContainer_sub .editingToolbarCommandItem {
-  flex: auto;
   margin-left: 2em;
+  flex: auto;
 }
 
 .editingToolbarSettingsTabsContainer .editingToolbarSettingsTabsContainer_sub .setting-item-control {
   flex: 0;
 }
 
-.modal.mod-settings button:not(.mod-cta):not(.mod-warning).editingToolbarSettingsButton.editingToolbarSettingsButtonaddsub {
-  background-color: var(--background-secondary-alt);
+/* Divider rows are full-bleed inside a padded list. Oversized left/right
+   borders paint the tint out past the container instead of a negative-margin
+   hack, which would break the sortable drop targets. */
+.editingToolbarSettingsTabsContainer .editingToolbar-Divider-Line {
+  padding: 0;
+  border-left: 200px solid rgba(var(--interactive-accent-rgb), 0.05);
+  border-right: 200px solid rgba(var(--interactive-accent-rgb), 0.05);
+  background: rgba(var(--interactive-accent-rgb), 0.2);
+  line-height: 0px;
+  text-align: center;
+}
+
+.editingToolbarSettingsTabsContainer .editingToolbar-Divider-Line .setting-item-info {
+  flex: 1 1 auto;
+}
+
+.editingToolbarSettingsTabsContainer .editingToolbar-Divider-Line .setting-item-info .setting-item-name {
+  font-size: 12px;
+  text-align: right;
+}
+
+.editingToolbarSettingsTabsContainer .editingToolbar-Divider-Line .setting-item-control {
+  justify-content: flex-start;
+}
+
+/* A divider row only keeps its delete action, re-skinned as an ✖ glyph. */
+.editingToolbarSettingsTabsContainer .editingToolbar-Divider-Line .setting-item-control button:not(:last-child),
+.editingToolbarSettingsTabsContainer .editingToolbar-Divider-Line .setting-item-control button:last-child svg {
+  display: none;
+}
+
+.editingToolbarSettingsTabsContainer .editingToolbar-Divider-Line .setting-item-control button:last-child {
+  padding: 0;
+  background-color: transparent !important;
+}
+
+.editingToolbarSettingsTabsContainer .editingToolbar-Divider-Line .setting-item-control button:last-child::before {
+  content: url("data:image/svg+xml,%3Csvg width='16' height='16' viewBox='0 0 1024 1024' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M511.674077 66.707284c-246.52265 0-446.347744 199.835328-446.347744 446.347744s199.825095 446.356954 446.347744 446.356954c246.50423 0 446.348768-199.844537 446.348768-446.356954S758.177284 66.707284 511.674077 66.707284zM744.967424 667.159826c21.8701 21.8701 21.8701 57.310264 0 79.199807-21.8701 21.851681-57.30924 21.851681-79.198783-0.019443L511.674077 592.264045 357.56007 746.359632c-21.8701 21.8701-57.30924 21.851681-79.17934-0.019443s-21.8701-57.290821 0-79.160921L432.493713 513.065262 278.379707 358.950232c-21.8701-21.86089-21.8701-57.328683 0-79.18855 21.8701-21.87931 57.30924-21.87931 79.17934 0l154.114007 154.104797 154.095587-154.104797c21.889543-21.87931 57.32766-21.87931 79.198783-0.010233 21.8701 21.8701 21.8701 57.348126 0 79.207993L590.89128 513.065262 744.967424 667.159826z' fill='%23666666'/%3E%3C/svg%3E");
+}
+
+/* --- Settings controls ---------------------------------------------------- */
+
+button.editingToolbarSettingsButton {
+  padding: 4px 14px;
+  border-radius: var(--radius-m);
+}
+
+.editingToolbarSettingsButton svg {
+  display: flex;
+  max-width: 1.3em;
+  max-height: 1.3em;
 }
 
 .setting-item button.editingToolbarSettingsIcon {
   display: flex;
   transform: translateX(-30%);
-  -webkit-transform: translateX(-30%);
 }
 
-.setting-item .editingToolbarSettingsIcon:empty::before {
-  content: "❗";
-}
-.modal .setting-item-control>input.id-is-disabled{
-  background-color: var(--background-modifier-border);
-}
 .setting-item button.editingToolbarSettingsIcon svg {
   max-width: 1.5em;
   max-height: 1.5em;
+}
+
+/* A command with no icon still needs a hit target, so show a placeholder. */
+.setting-item .editingToolbarSettingsIcon:empty::before {
+  content: "❗";
+}
+
+.modal.mod-settings button:not(.mod-cta):not(.mod-warning).editingToolbarSettingsIcon {
+  background-color: transparent;
+  box-shadow: 0 1px 1px 0px var(--background-modifier-border);
 }
 
 .modal.mod-settings button:not(.mod-cta):not(.mod-warning).editingToolbarSettingsIcon:hover {
   background-color: var(--interactive-accent-hover);
 }
 
-.modal.mod-settings button:not(.mod-cta):not(.mod-warning).editingToolbarSettingsIcon {
-  background-color: transparent;
-  box-shadow: 0 1px 1px 0px var(--background-modifier-border);
+.editing-toolbar-settings .setting-item-name .editingToolbarSettingsIcon {
+  margin-right: 8px;
+}
+
+.editingToolbarIconPick {
+  margin-right: 8px;
+  line-height: normal;
+  vertical-align: middle;
+}
+
+.editingToolbarIconPick svg {
+  width: 18px;
+  height: 18px;
+}
+
+.editingToolbarMenuTypeDropdown {
+  min-width: 120px;
+  margin-left: 8px;
+  /* Reserve right padding for the native select chevron so the trailing
+     text (e.g. the "u" in "Submenu"/"Menu") doesn't slide under it. */
+  padding: 4px 28px 4px 8px;
+  border: 1px solid var(--background-modifier-border);
+  border-radius: var(--radius-s);
+  background-color: var(--background-primary-alt);
+  color: var(--text-normal);
+  cursor: pointer;
+}
+
+.editingToolbarMenuTypeDropdown:hover {
+  background-color: var(--background-modifier-hover);
+}
+
+.editingToolbarMenuTypeDropdown:focus {
+  border-color: var(--interactive-accent);
+  outline: none;
+}
+
+.setting-item:is(.custom_bg, .custom_font) .pickr-container {
+  position: relative;
+  display: flex;
+  gap: 8px;
+}
+
+.setting-item:is(.custom_bg, .custom_font) .pickr-container .picker {
+  width: 32px;
+  height: 32px;
+}
+
+/* Highlight ring drawn around the setting the user was just deep-linked to. */
+.setting-item.toolbar-cta {
+  position: relative;
+}
+
+.setting-item.toolbar-cta:after {
+  content: "";
+  position: absolute;
+  top: -10%;
+  left: -2%;
+  width: 104%;
+  height: 120%;
+  outline: 2px solid var(--text-accent);
+  border-radius: 1em;
+  pointer-events: none;
+}
+
+.editing-toolbar-textarea-input {
+  width: 100%;
+  min-height: 80px;
+  resize: vertical;
+}
+
+/* --- Live toolbar preview ------------------------------------------------- */
+
+.editing-toolbar-settings .toolbar-preview-section {
+  margin-top: 20px;
+}
+
+.editing-toolbar-settings .toolbar-preview-label {
+  margin-bottom: 10px;
+}
+
+.editing-toolbar-settings .preview-toolbar-wrapper {
+  padding: 15px;
+}
+
+/* The preview reuses the real toolbar element, which JS hides by default. */
+.toolbar-preview-container #editingToolbarModalBar {
+  position: relative;
+  visibility: visible !important;
+}
+
+/* --- Import / export panels ----------------------------------------------- */
+
+.editing-toolbar-settings .import-export-info {
+  margin-top: 20px;
+  padding: 16px;
+  border-radius: 8px;
+  background-color: var(--background-secondary);
+}
+
+.editing-toolbar-settings .import-export-info ul {
+  padding-left: 20px;
+}
+
+.editing-toolbar-settings .import-export-heading,
+.editing-toolbar-settings .community-heading {
+  margin-top: 0;
+}
+
+.editing-toolbar-settings .import-export-warning {
+  margin-top: 20px;
+  margin-bottom: 20px;
+  padding: 16px;
+  border: 1px solid rgba(var(--color-red-rgb), 0.3);
+  border-radius: 8px;
+  background-color: rgba(var(--color-red-rgb), 0.1);
+}
+
+.editing-toolbar-settings .import-export-warning .warning-text {
+  margin: 0;
+}
+
+/* ==========================================================================
+   7. MODALS
+   ========================================================================== */
+
+/* The toolbar's own popup modals (resize handle, etc.) float over the note
+   instead of dimming it, so the backdrop is neutralised. The rename and
+   custom-icon modals are excluded — those are ordinary centred dialogs. */
+div.modal-container.editingToolbar-Modal:not(:is(.changename,.customicon)) .modal-bg {
+  position: relative;
+  background-color: transparent !important;
+  backdrop-filter: none !important;
+}
+
+.modal-container.editingToolbar-Modal:not(:is(.changename,.customicon)) .modal {
+  position: absolute;
+  right: 0.5em;
+  bottom: 2em;
+  width: 220px;
+  padding: 10px 20px;
+  background-color: rgb(var(--mono-rgb-0), 0.65);
+  backdrop-filter: blur(2px);
+}
+
+.modal-container.editingToolbar-Modal .modal-title {
+  display: none;
+}
+
+.modal-container.editingToolbar-Modal .modal input[type='range'] {
+  width: 90%;
+}
+
+body.theme-dark .modal-container.editingToolbar-Modal .modal input[type='range'] {
+  background-color: var(--background-secondary);
 }
 
 @media screen and (min-width: 781px) {
@@ -412,568 +930,44 @@ button[class^=editingToolbarCommandsubItem]::after {
   }
 }
 
-.editingToolbarSettingsButton svg {
-  max-width: 1.3em;
-  max-height: 1.3em;
-  display: flex;
-}
+/* --- Import/export modal (ImportExportModal.ts) --------------------------- */
 
-.cmdr-page-header {
-  min-width: 1em;
-}
-
-.x-color-picker-wrapper {
-  right: -50%;
-  transform: translateX(50%);
-  top: 1.8em;
-  min-width: 1px;
+.editing-toolbar-import-export-modal .export-container,
+.editing-toolbar-import-export-modal .import-container {
   padding: 10px;
-  box-shadow: 0 8px 10px 1px rgba(0, 0, 0, 0.14);
-  position: absolute;
-  width: fit-content;
-  font-weight: 400;
-  font-family: Source Sans Pro, sans-serif;
-  border-radius: var(--radius-s);
-  background-color: var(--color-base-10, --background-primary);
-}
-:is(#editingToolbarModalBar, #editingToolbarPopoverBar) button:first-child.editingToolbarCommandsubItem-font-color .x-color-picker-wrapper {
-  right: unset;
-  transform: translateX(0);
-  left: 0px;
-}
-:is(#editingToolbarModalBar, #editingToolbarPopoverBar) button:nth-child(2).editingToolbarCommandsubItem-font-color .x-color-picker-wrapper {
-  right: unset;
-  transform: translateX(0);
-  left: 0px;
-}
-:is(#editingToolbarModalBar, #editingToolbarPopoverBar) button:nth-child(3).editingToolbarCommandsubItem-font-color .x-color-picker-wrapper {
-  right: unset;
-  transform: translateX(0);
-  left: -30px;
-}
-:is(#editingToolbarModalBar, #editingToolbarPopoverBar) button:nth-child(4).editingToolbarCommandsubItem-font-color .x-color-picker-wrapper {
-  right: unset;
-  transform: translateX(0);
-  left: -50px;
-}
-:is(#editingToolbarModalBar, #editingToolbarPopoverBar) button:nth-last-child(1).editingToolbarCommandsubItem-font-color .x-color-picker-wrapper {
-  right: 0px;
-  transform: translateX(0);
-}
-:is(#editingToolbarModalBar, #editingToolbarPopoverBar) button:nth-last-child(2).editingToolbarCommandsubItem-font-color .x-color-picker-wrapper {
-  right: 0px;
-  transform: translateX(0);
-}
-:is(#editingToolbarModalBar, #editingToolbarPopoverBar) button:nth-last-child(3).editingToolbarCommandsubItem-font-color .x-color-picker-wrapper {
-  right: 0px;
-  transform: translateX(30px);
-}
-:is(#editingToolbarModalBar, #editingToolbarPopoverBar) button:nth-last-child(4).editingToolbarCommandsubItem-font-color .x-color-picker-wrapper {
-  right: 0px;
-  transform: translateX(40px);
-}
-:is(#editingToolbarModalBar, #editingToolbarPopoverBar) button:nth-last-child(5).editingToolbarCommandsubItem-font-color .x-color-picker-wrapper {
-  right: 0px;
-  transform: translateX(50px);
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 5px;
 }
 
-.markdown-source-view.mod-cm6 .x-color-picker-wrapper table.x-color-picker-table#x-color-picker-table {
-  width: unset;
-  border-collapse: separate;
-  border-spacing: 6px;
-  margin: auto !important;
-}
-
-.x-color-picker-wrapper table.x-color-picker-table#x-backgroundcolor-picker-table {
-  width: unset;
-  border-collapse: separate;
-  border-spacing: 6px;
-  margin: auto !important;
-}
-
-.x-color-picker-wrapper .x-color-picker-table th {
-  border: 0;
-  text-align: left;
-  font-weight: normal;
-  background: transparent !important;
-  color: #718096;
-}
-
-.x-color-picker-wrapper #x-color-picker-table td {
-  font-size: 1px;
-  padding: 9px;
-  cursor: default;
-  border: solid 1px var(--background-modifier-border);
-}
-
-.x-color-picker-wrapper #x-backgroundcolor-picker-table td {
-  font-size: 1px;
-  border-radius: 50%;
-  padding: 9px;
-  cursor: default;
-  border: solid 1px var(--background-modifier-border);
-}
-
-.x-color-picker-wrapper .x-color-picker-table tr td:hover {
-  filter: brightness(1.2);
-  box-shadow: 0 3px 6px -4px rgba(0, 0, 0, .12), 0 6px 16px 0 rgba(0, 0, 0, .08), 0 9px 28px 8px rgba(0, 0, 0, .05);
-}
-
-/**top**/
-#editingToolbarModalBar.top {
-  display: flex;
-  flex-wrap: nowrap;
-  position: relative;
-  height: calc(var(--toolbar-icon-size) + 18px);
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  /* Override the base rule's min-width:fit-content so the bar can't grow wider
-     than the pane (which is what pushed icons off-screen). Keep it pinned to
-     the pane width and let JS (collapseOverflowToFit) move the excess into the
-     "more" popover; overflow:hidden clips rather than spilling if a measure is
-     ever off. */
-  min-width: 0;
-  max-width: 100%;
-  overflow: hidden;
-  transition: all 0.2s linear;
-  -webkit-transition: all 0.2s linear;
-  transform: none;
-  z-index: var(--layer-status-bar);
-}
-#editingToolbarModalBar ~.excalidraw .FixedSideContainer_side_top
-{
-  top: 38px!important;
-}
-.excalidraw-wrapper #editingToolbarModalBar.top
-{
-  top: 38px;
-}
-.excalidraw-wrapper #editingToolbarPopoverBar
-{
-  top: 76px;
-}
-:is(#editingToolbarModalBar, #editingToolbarPopoverBar) :is(.editingToolbarCommandItem, button[class^=editingToolbarCommandsubItem]):not(.editingToolbar-Divider-Line) {
-  font-size: 10px;
-  clear: both;
-  opacity: 1;
-  flex-shrink: 0;
-  height: 28px;
-  padding: 4px 4px;
-  border: none;
-  background: transparent;
-  cursor: default;
-  outline: none;
-  box-shadow: none;
-  border-radius: var(--radius-s);
-  display: inline-flex;
-  justify-content: center;
-  align-items: center;
- contain: none;
-
-}
-#editingToolbarModalBar ~.canvas-controls{
-  top: calc(var(--size-4-2) + 50px);
-}
-
-#editingToolbarPopoverBar {
-
-  flex-wrap: wrap;
-  display: inline-flex;
-  height: auto !important;
-  align-items: center;
-  overflow: visible;
-  width: fit-content;
-  z-index: var(--layer-popover);
-  background-color: var(--editing-toolbar-background-color);
-  background-clip: padding-box;
-  border-radius: var(--radius-m);
-  margin-left: 25px;
-  margin-right: 25px;
-  transition: all 0.1s linear;
-  -webkit-transition: all 0.1s linear;
-  position: absolute;
-  right: 0;
-}
-
-@media screen and (max-width: 768px) {
-  #editingToolbarPopoverBar {
-   left: 15%;
-   transform: translateX(-15%);
-   right: unset;
-  }
-}
-.markdown-source-view.mod-cm6 #editingToolbarPopoverBar {
-  margin-top: calc(var(--toolbar-icon-size) + 20px);
-}
-
-#editingToolbarPopoverBar :is(.editingToolbarCommandItem, button[class^=editingToolbarCommandsubItem]) {
-
-  height: 28px;
-  font-size: 10px;
-  clear: both;
-  opacity: 1;
-  flex-shrink: 0;
-  padding: 4px 4px;
-  border: none;
-  background: transparent;
-  cursor: default;
-  outline: none;
-  box-shadow: none;
-  border-radius: var(--radius-s);
-  display: inline-flex;
-  justify-content: center;
-  align-items: center;
-  transition: all 0.2s linear;
-  -webkit-transition: all 0.2s linear;
-
-}
-
-#editingToolbarModalBar .more-menu {
-  display: flex;
-  align-items: center;
-  box-shadow: none;
-  height: 28px;
-  opacity: 0.8;
-}
-
-/*Divider-Line**/
-
-.editingToolbarSettingsTabsContainer .editingToolbar-Divider-Line {
-  padding: 0;
-
-  line-height: 0px;
-  border-left: 200px solid rgba(var(--interactive-accent-rgb), 0.05);
-  border-right: 200px solid rgba(var(--interactive-accent-rgb), 0.05);
-  text-align: center;
-  background: rgba(var(--interactive-accent-rgb), 0.2);
-}
-
-.editingToolbarSettingsTabsContainer .editingToolbar-Divider-Line .setting-item-control button:not(:last-child) {
-  display: none;
-}
-
-.editingToolbarSettingsTabsContainer .editingToolbar-Divider-Line .setting-item-info {
-  flex: 1 1 auto;
-}
-
-.editingToolbarSettingsTabsContainer .editingToolbar-Divider-Line .setting-item-control {
-  justify-content: flex-start;
-}
-
-.editingToolbarSettingsTabsContainer .editingToolbar-Divider-Line .setting-item-info .setting-item-name {
-  font-size: 12px;
-  text-align: right;
-
-}
-
-.editingToolbarSettingsTabsContainer .editingToolbar-Divider-Line .setting-item-control button:last-child {
-  padding: 0;
-  background-color: transparent !important;
-}
-
-.editingToolbarSettingsTabsContainer .editingToolbar-Divider-Line .setting-item-control button:last-child svg {
-  display: none;
-}
-
-.editingToolbarSettingsTabsContainer .editingToolbar-Divider-Line .setting-item-control button:last-child::before {
-  content: url("data:image/svg+xml,%3Csvg width='16' height='16' viewBox='0 0 1024 1024' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M511.674077 66.707284c-246.52265 0-446.347744 199.835328-446.347744 446.347744s199.825095 446.356954 446.347744 446.356954c246.50423 0 446.348768-199.844537 446.348768-446.356954S758.177284 66.707284 511.674077 66.707284zM744.967424 667.159826c21.8701 21.8701 21.8701 57.310264 0 79.199807-21.8701 21.851681-57.30924 21.851681-79.198783-0.019443L511.674077 592.264045 357.56007 746.359632c-21.8701 21.8701-57.30924 21.851681-79.17934-0.019443s-21.8701-57.290821 0-79.160921L432.493713 513.065262 278.379707 358.950232c-21.8701-21.86089-21.8701-57.328683 0-79.18855 21.8701-21.87931 57.30924-21.87931 79.17934 0l154.114007 154.104797 154.095587-154.104797c21.889543-21.87931 57.32766-21.87931 79.198783-0.010233 21.8701 21.8701 21.8701 57.348126 0 79.207993L590.89128 513.065262 744.967424 667.159826z' fill='%23666666'/%3E%3C/svg%3E");
-}
-
-:is(#editingToolbarModalBar:not(.top), #editingToolbarPopoverBar) button.editingToolbar-Divider-Line
-{
-  display: none;
-}
-:is(#editingToolbarModalBar, #editingToolbarPopoverBar) button.editingToolbar-Divider-Line
-{
-  min-width: unset;
-  flex-shrink: 0;
-  display: inline-flex;
-  width: 0.6px;
-  background-color: var(--background-modifier-border);
-  height: 22px;
-  opacity: 0.8;
-  margin: 0;
-  padding:0;
-  align-self: center;
-}
-
-.theme-dark :is(#editingToolbarModalBar, #editingToolbarPopoverBar) button.editingToolbar-Divider-Line {
-
-  background-color: #4f4f5188;
-
-}
-
-:is(#editingToolbarModalBar, #editingToolbarPopoverBar) button.editingToolbar-Divider-Line svg {
-  display: none;
-}
-
-/* Category heading in dropdown menu - text centered on the line */
-.menu.editing-toolbar-dropdown-menu .menu-separator
-{
-  display:none;
-}
-.menu.editing-toolbar-dropdown-menu .menu-item.is-disabled {
-  opacity: 0.7 !important;
-  cursor: default !important;
-  font-size: 10px;
-  font-weight: 400;
-  color: var(--text-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.8px;
-  padding: 8px 12px;
-  background-color: transparent !important;
-  display: flex !important;
-  align-items: center;
-  gap: 6px;
-    color: var(--text-muted); /* Text fades into the transparent background */
-    filter: contrast(0.5);
-}
-.theme-dark .menu.editing-toolbar-dropdown-menu .menu-item.is-disabled
-{
-    color: var(--text-muted); /* Text fades into the transparent background */
-     opacity: 0.7;
-}
-
-/* Left line */
-.menu.editing-toolbar-dropdown-menu .menu-item.is-disabled::before {
-  content: '';
-  flex: 1;
-  height: 1px;
-  background-color: var(--background-modifier-border);
-  opacity: 0.5;
-}
-
-/* Right line */
-.menu.editing-toolbar-dropdown-menu .menu-item.is-disabled::after {
-  content: '';
-  flex: 1;
-  height: 1px;
-  background-color: var(--background-modifier-border);
-  opacity: 0.5;
-}
-
-.menu.editing-toolbar-dropdown-menu .menu-item.is-disabled:hover {
-  background-color: transparent !important;
-}
-
-.workspace-tabs.mod-stacked .workspace-tab-header:not(.is-active)+.workspace-leaf #editingToolbarModalBar {
-  opacity: 0;
-}
-
-:is(.cm-line, p) mark[style^="background:rgba"] {
-  color: var(--text-normal);
-}
-
-:is(.cm-line, p) mark[style^="background:#"] {
-  color: black;
-}
-
-:is(.cm-line, p) span[style^="background:rgba"] {
-  color: var(--text-normal);
-}
-
-:is(.cm-line, p) span[style^="background:#"] {
-  color: black;
-}
-
-/* Hotkey styles */
-.menu.editing-toolbar-dropdown-menu .menu-item-hotkey {
-        margin-left: auto;
-        font-size:10px;
-        color: var(--text-muted);
-        opacity: 0.7;
-        font-family: var(--font-monospace);
-      }
-.setting-item.toolbar-cta:after {
-  content: "";
-  position: absolute;
-  top: -10%;
-  width: 104%;
-  left: -2%;
-  height: 120%;
-  outline: 2px solid var(--text-accent);
-  border-radius: 1em;
-  pointer-events: none;
-}
-
-.setting-item.toolbar-cta {
-  position: relative;
-}
-
-.toolbar-pickr  .pcr-last-color,
-.pickr  .pcr-button{
-  background-color: var(--pcr-color);
-}
-.toolbar-pickr .pcr-interaction :not(:is(input.pcr-save,.pcr-result)){
-  display:none;
-}
-.toolbar-pickr .pcr-swatches {
-  display:none;
-}
-.toolbar-pickr {
-  display:flex;
-}
-
-div[data-type="thino_view"] .memo-editor-wrapper:has(#editingToolbarModalBar)
-{
-    padding-top:0;
-    padding-left:0;
-    padding-right:0;
-}
-
-div[data-type="thino_view"] .memo-editor-wrapper:has(#editingToolbarModalBar) .common-tools-wrapper
-{
-   padding-left:16px;
-    padding-right:16px;
-}
-div[data-type="thino_view"] .memo-editor-wrapper #editingToolbarModalBar ~ .cm-editor{
-    padding-top:38px;
-    padding-bottom:0px;
-    padding-left:16px;
-    padding-right:16px;
-}
-div[data-type=thino_view] .common-editor-wrapper .common-editor-inputer:has(#editingToolbarModalBar)
-{
-  min-height:118px;
-}
-
-div[data-type=thino_view] #editingToolbarModalBar.top
-{
-  position:absolute!important;
+.editing-toolbar-import-export-modal .import-export-textarea {
   width: 100%;
-}
-body.auto-hide-header .workspace-tab-header-container:hover + .workspace-tab-container .workspace-leaf .workspace-leaf-content>.view-header {
-  margin-top: 0;
-  transition: all 0.1s linear;
-}
-
-body.auto-hide-header .workspace-tab-header-container + .workspace-tab-container .workspace-leaf .workspace-leaf-content>.view-header:hover {
-  margin-top: 0;
-  transition: all 0.6s linear;
-}
-body.auto-hide-header .workspace-tab-header-container + .workspace-tab-container .workspace-leaf .workspace-leaf-content>.view-header {
-  margin-top: -40px;
-  transition: all 0.6s linear;
+  height: 200px;
+  padding: 8px;
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 4px;
+  font-family: monospace;
+  font-size: 12px;
 }
 
-.setting-item:is(.custom_bg, .custom_font) .pickr-container {
+.editing-toolbar-import-export-modal .import-export-button-container {
   display: flex;
-  gap: 8px;
-  position: relative;
+  margin-top: 16px;
+  justify-content: flex-end;
 }
 
-.setting-item:is(.custom_bg, .custom_font) .pickr-container .picker {
-  width: 32px;
-  height: 32px;
+.editing-toolbar-import-export-modal .import-export-warning {
+  margin-top: 16px;
+  padding: 8px 12px;
+  border: 1px solid rgba(var(--color-red-rgb), 0.3);
+  border-radius: 4px;
+  background-color: rgba(var(--color-red-rgb), 0.1);
 }
 
-@media screen and (max-width: 1024px) {
-  .editing-toolbar-header {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-  }
-}
-/* Header container styles */
-.editing-toolbar-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 1em;
-  padding: 0.5em 0;
-}
-
-/* Title container styles */
-.editing-toolbar-title-container {
-  flex-shrink: 0;
-}
-
-.editing-toolbar-title {
+.editing-toolbar-import-export-modal .import-export-warning p {
   margin: 0;
 }
 
-.editing-toolbar-tabs {
-  display: flex;
-  border-bottom: 2px solid var(--background-modifier-border);
-  margin-bottom: 24px;
-  padding: 0 8px;
-}
-
-.editing-toolbar-tab {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 12px;
-  cursor: pointer;
-  border-bottom: 2px solid transparent;
-  margin-bottom: -2px;
-  color: var(--text-muted);
-}
-
-.editing-toolbar-tab:hover {
-  color: var(--text-normal);
-  background-color: var(--background-modifier-hover);
-}
-
-.editing-toolbar-tab.active {
-  color: var(--text-accent);
-  border-bottom-color: var(--text-accent);
-}
-
-.editing-toolbar-content {
-  padding: 0 8px;
-}
-
-.editing-toolbar-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 24px;
-  padding: 0 8px;
-}
-
-/* Added to your styles.css file */
-@keyframes sortable-feedback {
-  0% {
-    transform: scale(1);
-  }
-  50% {
-    transform: scale(0.98);
-  }
-  100% {
-    transform: scale(1);
-  }
-}
-
-.sortable-chosen-feedback {
-  animation: sortable-feedback 0.3s ease-in-out;
-  position: relative;
-}
-
-.sortable-chosen-feedback::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: var(--background-modifier-hover);
-  opacity: 0;
-  animation: toolbar-fade-in 0.3s ease-in-out forwards;
-  pointer-events: none;
-  border-radius: 4px;
-}
-
-@keyframes toolbar-fade-in {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 0.3;
-  }
-}
+/* --- Insert-callout modal ------------------------------------------------- */
 
 .insert-callout-modal textarea {
   width: 100%;
@@ -982,13 +976,14 @@ body.auto-hide-header .workspace-tab-header-container + .workspace-tab-container
 
 .callout-type-container {
   display: flex;
-  align-items: center;
   gap: 8px;
+  align-items: center;
 }
-.callout-type-container .setting-item
-{
+
+.callout-type-container .setting-item {
   width: 100%;
 }
+
 .callout-icon-container {
   display: flex;
   width: 24px;
@@ -1001,298 +996,188 @@ body.auto-hide-header .workspace-tab-header-container + .workspace-tab-container
   height: 16px;
   color: rgb(var(--callout-color));
 }
-.insert-link-modal .setting-item
-{
- border-top: none;
+
+/* --- Insert-link modal ---------------------------------------------------- */
+
+.insert-link-modal .setting-item {
+  border-top: none;
 }
-.insert-link-modal   input{
-     width: 100%;
+
+.insert-link-modal input {
+  width: 100%;
 }
-.modal .insert-link-modal-title{
+
+.modal .insert-link-modal-title {
   font-size: 12px;
   color: var(--text-muted);
 }
-.insert-link-modal .preview-setting
-{
+
+.insert-link-modal .preview-setting {
   display: block;
 }
-.insert-link-modal .preview-setting input{
+
+.insert-link-modal .preview-setting input {
   width: 100%;
-  background-color: transparent;
   border: none;
+  background-color: transparent;
   color: var(--text-muted);
   font-size: 12px;
 }
 
- .position-style-info{
-  margin-bottom: 1rem;
-  padding: 0.5rem;
-  border-radius: 4px;
-  text-align: center;
-  font-weight: bold;
-  position: sticky;
-  color: white;
-  background-color: rgba(var(--color-purple-rgb), 0.8);
-  top: 0;
- }
- .position-style-info.following{
-  background-color: rgba(var(--color-green-rgb), 0.8);
- }
- .position-style-info.top{
-  background-color: rgba(var(--color-yellow-rgb), 0.8);
- }
+/* --- Confirm modal -------------------------------------------------------- */
 
- .command-lists-container.following{
-  background-color: rgba(var(--color-green-rgb), 0.1);
-  border: 1px solid rgba(var(--color-green-rgb), 0.3);
- }
- .command-lists-container.top{
-  background-color: rgba(var(--color-yellow-rgb), 0.1);
-  border: 1px solid rgba(var(--color-yellow-rgb), 0.3);
- }
-
- @media screen and (max-width: 1024px) {
-  .editing-toolbar-tabs .editing-toolbar-tab:not(.active)>span {
-    display: none;
-  }
- }
-
-.command-buttons-container {
-  background: var(--background-secondary);
-  border-radius: 5px;
-  padding: 10px;
-  margin-bottom: 15px;
-}
-
-.command-buttons-container .setting-item {
-  border: none;
-  padding: 8px 0;
-}
-
-.command-buttons-container .setting-item-control {
+.confirm-modal .confirm-modal-buttons {
   display: flex;
-  gap: 10px;
-  align-items: center;
-}
-
-/* Toolbar preview styles */
-.toolbar-preview {
-  background-color: var(--editing-toolbar-background-color);
-}
-
-.toolbar-preview .clickable-icon svg {
-  color: var(--editing-toolbar-icon-color);
-  width: var(--toolbar-icon-size);
-  height: var(--toolbar-icon-size);
-}
-
- .toolbar-preview-container #editingToolbarModalBar{
-  visibility:visible !important;
-  position: relative;
- }
-
- .confirm-modal .confirm-modal-buttons {
   gap: 8px;
-  display: flex;
   justify-content: flex-end;
 }
-.confirm-modal p{
+
+.confirm-modal p {
   margin: 0;
   line-height: 1.6;
 }
 
-.editing-toolbar-textarea-input {
-  width: 100%;
-  min-height: 80px;
-  resize: vertical;
-}
+/* ==========================================================================
+   8. EDITOR AND HOST INTEGRATIONS
+   ========================================================================== */
+
+/* --- Format brush --------------------------------------------------------- */
 
 .format-brush-cursor .cm-content {
   cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1024 1024' width='18' height='18'%3E%3Cpath d='M786.285714 56.888889h121.93727A20.280889 20.280889 0 0 0 928.507937 36.591746v-16.294603A20.284952 20.284952 0 0 0 908.222984 0h-398.287238A20.280889 20.280889 0 0 0 489.650794 20.297143v16.294603A20.284952 20.284952 0 0 0 509.935746 56.888889H635.936508v910.222222h-126.000762A20.280889 20.280889 0 0 0 489.650794 987.408254v16.294603a20.284952 20.284952 0 0 0 20.284952 20.297143h398.287238a20.280889 20.280889 0 0 0 20.284953-20.297143v-16.294603a20.284952 20.284952 0 0 0-20.284953-20.297143H786.285714V56.888889zM359.619048 903.233016H310.857143V690.793651H266.15873v213.577143H217.396825V690.793651H172.698413v213.577143h-29.415619c-49.290159 0-42.573206-44.901587-42.573207-44.901588S97.076825 722.306032 97.10527 642.031746H480.467302c-0.008127 80.428698-3.604317 216.299683-3.604318 216.299683s6.716952 44.901587-42.57727 44.901587H404.31746V690.793651H359.619048v212.439365zM97.828571 597.333333l0.065016-1.235301c2.816-50.704254-5.640127-98.588444 66.186159-123.936508 71.830349-25.35619 47.896381-35.210159 54.934349-83.098413 7.037968-47.88419-18.310095-71.826286-18.310095-207.034921 0-109.04381 51.301587-125.456254 79.766349-127.723682 0.353524-0.934603 0.723302-1.414095 1.113397-1.414095 16.420571 0 95.288889-7.200508 95.288889 128 0 135.208635-25.348063 159.15073-18.314159 207.03492 7.037968 47.888254-16.891937 57.742222 54.938413 83.098413 71.822222 25.348063 63.370159 73.236317 66.186159 123.936508l0.121904 2.373079H97.824508zM288.507937 166.603175a34.539683 34.539683 0 1 0 0-69.079365 34.539683 34.539683 0 0 0 0 69.079365z' fill='%235c5c5c'/%3E%3C/svg%3E") 16 16, auto;
-}
-.format-brush-cursor button[aria-label="Format Brush"]
-{
-    background-color: var(--background-modifier-hover) !important ;
 }
 
 .theme-dark.format-brush-cursor .cm-content {
   cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1024 1024' width='18' height='18'%3E%3Cpath d='M786.285714 56.888889h121.93727A20.280889 20.280889 0 0 0 928.507937 36.591746v-16.294603A20.284952 20.284952 0 0 0 908.222984 0h-398.287238A20.280889 20.280889 0 0 0 489.650794 20.297143v16.294603A20.284952 20.284952 0 0 0 509.935746 56.888889H635.936508v910.222222h-126.000762A20.280889 20.280889 0 0 0 489.650794 987.408254v16.294603a20.284952 20.284952 0 0 0 20.284952 20.297143h398.287238a20.280889 20.280889 0 0 0 20.284953-20.297143v-16.294603a20.284952 20.284952 0 0 0-20.284953-20.297143H786.285714V56.888889zM359.619048 903.233016H310.857143V690.793651H266.15873v213.577143H217.396825V690.793651H172.698413v213.577143h-29.415619c-49.290159 0-42.573206-44.901587-42.573207-44.901588S97.076825 722.306032 97.10527 642.031746H480.467302c-0.008127 80.428698-3.604317 216.299683-3.604318 216.299683s6.716952 44.901587-42.57727 44.901587H404.31746V690.793651H359.619048v212.439365zM97.828571 597.333333l0.065016-1.235301c2.816-50.704254-5.640127-98.588444 66.186159-123.936508 71.830349-25.35619 47.896381-35.210159 54.934349-83.098413 7.037968-47.88419-18.310095-71.826286-18.310095-207.034921 0-109.04381 51.301587-125.456254 79.766349-127.723682 0.353524-0.934603 0.723302-1.414095 1.113397-1.414095 16.420571 0 95.288889-7.200508 95.288889 128 0 135.208635-25.348063 159.15073-18.314159 207.03492 7.037968 47.888254-16.891937 57.742222 54.938413 83.098413 71.822222 25.348063 63.370159 73.236317 66.186159 123.936508l0.121904 2.373079H97.824508zM288.507937 166.603175a34.539683 34.539683 0 1 0 0-69.079365 34.539683 34.539683 0 0 0 0 69.079365z' fill='%23dadada'/%3E%3C/svg%3E") 16 16, auto;
 }
 
-/* 1) TOP – full-width bar at the top of its box */
-.preview-toolbar-wrapper.preview-top #editingToolbarModalBar {
+.format-brush-cursor button[aria-label="Format Brush"] {
+  background-color: var(--background-modifier-hover) !important;
+}
+
+/* Inline highlights written by the colour commands: a hex background is always
+   a light swatch, so force dark text; rgba() ones are translucent over the
+   theme background and keep the theme's text colour. */
+:is(.cm-line, p) :is(mark, span)[style^="background:rgba"] {
+  color: var(--text-normal);
+}
+
+:is(.cm-line, p) :is(mark, span)[style^="background:#"] {
+  color: black;
+}
+
+/* --- Obsidian canvas ------------------------------------------------------ */
+
+#editingToolbarModalBar ~ .canvas-controls {
+  top: calc(var(--size-4-2) + 50px);
+}
+
+/* --- Excalidraw plugin ---------------------------------------------------- */
+
+#editingToolbarModalBar ~ .excalidraw .FixedSideContainer_side_top {
+  top: 38px !important;
+}
+
+.excalidraw-wrapper #editingToolbarModalBar.top {
+  top: 38px;
+}
+
+.excalidraw-wrapper #editingToolbarPopoverBar {
+  top: 76px;
+}
+
+/* --- Thino plugin --------------------------------------------------------- */
+
+/* Thino's editor pads its own wrapper; the bar has to sit flush against the
+   edge, so the padding moves down onto the inner elements instead. */
+div[data-type="thino_view"] .memo-editor-wrapper:has(#editingToolbarModalBar) {
+  padding-top: 0;
+  padding-left: 0;
+  padding-right: 0;
+}
+
+div[data-type="thino_view"] .memo-editor-wrapper:has(#editingToolbarModalBar) .common-tools-wrapper {
+  padding-left: 16px;
+  padding-right: 16px;
+}
+
+div[data-type="thino_view"] .memo-editor-wrapper #editingToolbarModalBar ~ .cm-editor {
+  padding-top: 38px;
+  padding-bottom: 0px;
+  padding-left: 16px;
+  padding-right: 16px;
+}
+
+div[data-type=thino_view] .common-editor-wrapper .common-editor-inputer:has(#editingToolbarModalBar) {
+  min-height: 118px;
+}
+
+div[data-type=thino_view] #editingToolbarModalBar.top {
+  position: absolute !important;
   width: 100%;
-  position: center;
-  border-radius: var(--radius-m);
 }
 
-/* 2) FOLLOWING – small floating pill in the middle */
-.preview-toolbar-wrapper.preview-following {
-  display: flex;
-  justify-content: center;
-}
-.preview-toolbar-wrapper.preview-following #editingToolbarModalBar {
-  position: center;
-  justify-content: center;
-  width: 0;
-  border-radius: var(--radius-m);
+/* --- Auto-hide-header themes ---------------------------------------------- */
+
+/* Themes that slide the view header off-screen must not do so while the top
+   bar is mounted, or the bar slides with it. */
+body.auto-hide-header .workspace-tab-header-container + .workspace-tab-container .workspace-leaf .workspace-leaf-content>.view-header {
+  margin-top: -40px;
+  transition: all 0.6s linear;
 }
 
-.is-phone.is-hidden-nav #editingToolbarModalBar.top
-{
-    margin-top: calc(var(--safe-area-inset-top) );
-
+body.auto-hide-header .workspace-tab-header-container + .workspace-tab-container .workspace-leaf .workspace-leaf-content>.view-header:hover {
+  margin-top: 0;
+  transition: all 0.6s linear;
 }
 
-.is-phone:not(.is-hidden-nav) #editingToolbarModalBar.top
-{
-    margin-top: calc(var(--safe-area-inset-top) + var(--view-header-height));
-
+body.auto-hide-header .workspace-tab-header-container:hover + .workspace-tab-container .workspace-leaf .workspace-leaf-content>.view-header {
+  margin-top: 0;
+  transition: all 0.1s linear;
 }
-.is-phone #editingToolbarModalBar.top
-{
-    margin-right:0px;
-    padding:0;
+
+/* --- Mobile --------------------------------------------------------------- */
+
+.is-phone.is-hidden-nav #editingToolbarModalBar.top {
+  margin-top: var(--safe-area-inset-top);
+}
+
+.is-phone:not(.is-hidden-nav) #editingToolbarModalBar.top {
+  margin-top: calc(var(--safe-area-inset-top) + var(--view-header-height));
+}
+
+.is-phone #editingToolbarModalBar.top {
+  margin-right: 0px;
+  padding: 0;
 }
 
 .is-phone #editingToolbarModalBar.top::-webkit-scrollbar {
   display: none;
 }
 
-.is-phone .mod-root .workspace-leaf-content[data-type="markdown"] .view-content:has(.editingToolbarModalBar){
+.is-phone .markdown-source-view.mod-cm6 #editingToolbarPopoverBar {
+  margin-top: calc(var(--safe-area-inset-top) + var(--view-header-height) + var(--toolbar-icon-size) + 10px);
+}
+
+.is-phone .mod-root .workspace-leaf-content[data-type="markdown"] .view-content:has(.editingToolbarModalBar) {
   mask-image: none;
 }
 
-.is-mobile.is-hidden-nav .mod-root .workspace-leaf-content[data-type="markdown"]:has(.editingToolbarModalBar) .view-header
-{
-
-    display:none;
-}
-
-.is-phone .markdown-source-view.mod-cm6 #editingToolbarPopoverBar {
-     margin-top: calc(var(--safe-area-inset-top) + var(--view-header-height) + var(--toolbar-icon-size) + 10px);
+.is-mobile.is-hidden-nav .mod-root .workspace-leaf-content[data-type="markdown"]:has(.editingToolbarModalBar) .view-header {
+  display: none;
 }
 
 .is-phone .mod-root .workspace-leaf-content .view-content:has(.editingToolbarModalBar) .markdown-source-view > .cm-editor > .cm-scroller {
   padding-top: 0px;
 }
 
-.is-phone .mod-root .workspace-leaf-content .view-content:has(.editingToolbarModalBar) .markdown-reading-view > .markdown-preview-view
- {
+.is-phone .mod-root .workspace-leaf-content .view-content:has(.editingToolbarModalBar) .markdown-reading-view > .markdown-preview-view {
   padding-top: calc(var(--safe-area-inset-top) + var(--view-header-height) + 36px);
 }
 
-.cm-tooltip {
-  z-index: 1000;
-}
-
-/* Import/Export modal (ImportExportModal.ts) — moved out of inline styles. */
-.editing-toolbar-import-export-modal .export-container,
-.editing-toolbar-import-export-modal .import-container {
-  border: 1px solid var(--background-modifier-border);
-  padding: 10px;
-  border-radius: 5px;
-}
-.editing-toolbar-import-export-modal .import-export-textarea {
-  width: 100%;
-  height: 200px;
-  font-family: monospace;
-  font-size: 12px;
-  padding: 8px;
-  border: 1px solid var(--background-modifier-border);
-  border-radius: 4px;
-}
-.editing-toolbar-import-export-modal .import-export-button-container {
-  display: flex;
-  justify-content: flex-end;
-  margin-top: 16px;
-}
-.editing-toolbar-import-export-modal .import-export-warning {
-  margin-top: 16px;
-  padding: 8px 12px;
-  background-color: rgba(var(--color-red-rgb), 0.1);
-  border-radius: 4px;
-  border: 1px solid rgba(var(--color-red-rgb), 0.3);
-}
-.editing-toolbar-import-export-modal .import-export-warning p {
-  margin: 0;
-}
-
-/* Settings tab sections (settingsTab.ts) — moved out of inline styles; scoped to the tab root. */
-.editing-toolbar-settings .generalSetting-container,
-.editing-toolbar-settings .custom-paintbrush-container,
-.editing-toolbar-settings .appearanceSetting-container,
-.editing-toolbar-settings .commandSetting-container,
-.editing-toolbar-settings .import-export-container {
-  padding: 16px;
-  border-radius: 8px;
-  background-color: var(--background-secondary);
-  margin-bottom: 20px;
-}
-.editing-toolbar-settings .command-buttons-container {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  padding: 16px;
-  border-radius: 8px;
-  background-color: var(--background-secondary);
-}
-.editing-toolbar-settings .command-lists-container {
-  padding: 16px;
-  border-radius: 8px;
-}
-.editing-toolbar-settings .custom-toolbar-container {
-  padding: 16px;
-  border-radius: 8px;
-  background-color: var(--background-secondary);
-}
-.editing-toolbar-settings .setting-item-name .editingToolbarSettingsIcon {
-  margin-right: 8px;
-}
-.editing-toolbar-settings .toolbar-preview-section {
-  margin-top: 20px;
-}
-.editing-toolbar-settings .toolbar-preview-label {
-  margin-bottom: 10px;
-}
-.editing-toolbar-settings .preview-toolbar-wrapper {
-  padding: 15px;
-}
-.editing-toolbar-settings .import-export-info {
-  margin-top: 20px;
-  padding: 16px;
-  border-radius: 8px;
-  background-color: var(--background-secondary);
-}
-.editing-toolbar-settings .import-export-info ul {
-  padding-left: 20px;
-}
-.editing-toolbar-settings .import-export-heading,
-.editing-toolbar-settings .community-heading {
-  margin-top: 0;
-}
-.editing-toolbar-settings .community-share-container {
-  margin-top: 20px;
-  padding: 16px;
-  border-radius: 8px;
-  background-color: rgba(var(--color-green-rgb), 0.1);
-  border: 1px solid rgba(var(--color-green-rgb), 0.3);
-}
-.editing-toolbar-settings .import-export-warning {
-  margin-top: 20px;
-  margin-bottom: 20px;
-  padding: 16px;
-  border-radius: 8px;
-  background-color: rgba(var(--color-red-rgb), 0.1);
-  border: 1px solid rgba(var(--color-red-rgb), 0.3);
-}
-.editing-toolbar-settings .import-export-warning .warning-text {
-  margin: 0;
-}
-
 /* ==========================================================================
-   Vendored: Pickr 1.8.4 "nano" theme (@simonwep/pickr/dist/themes/nano.min.css)
-   Inlined here because the plugin ships styles.css directly to the vault and no
+   9. VENDORED — Pickr 1.8.4 "nano" theme (@simonwep/pickr/dist/themes/nano.min.css)
+   Inlined because the plugin ships styles.css directly to the vault and no
    longer bundles CSS through the build. Update if the pinned pickr version changes.
    ========================================================================== */
 /*! Pickr 1.8.4 MIT | https://github.com/Simonwep/pickr */
