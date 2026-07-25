@@ -1132,7 +1132,7 @@ export function editingToolbarPopover(
     };
 
     // Use per-style commands based on the toolbar we are rendering
-    const currentCommands = plugin.getCurrentCommands();
+    const currentCommands = plugin.getCurrentCommands(effectiveStyle);
     const getLocalizedLabel = (label: string): string => t(label);
     const getLocalizedTooltip = (label: string, hotkey: string): string => {
       const localizedLabel = getLocalizedLabel(label);

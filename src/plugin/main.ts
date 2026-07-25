@@ -439,12 +439,31 @@ export default class EditingToolbarPlugin extends Plugin {
 
     const view = this.app.workspace.getActiveViewOfType(ItemView);
 
-    // If the view type is not allowed at all, hide everything and stop.
+    // Focus moved off the note — a sidebar/settings got focus, or the main pane
+    // itself became a non-editor view (PDF, graph, image, base, …). Decide from
+    // the main-area content rather than the focused pane: getMostRecentLeaf()
+    // ignores sidebars, so it still points at the note you're editing when you
+    // just clicked a sidebar, but points at the PDF/graph when the main pane
+    // itself changed. Keep the top and fixed bars only while that main content
+    // is an editable note or canvas — so dipping into a sidebar doesn't flicker
+    // them, but reading mode and non-editor views correctly hide them. The
+    // selection-following bar always hides here; it has no selection to track.
     if (!ViewUtils.isAllowedViewType(view)) {
-      (["top", "following", "fixed"] as const).forEach((style) => {
-        const el = getExistingToolbar(this.app, this, style);
-        if (el) el.style.visibility = "hidden";
-      });
+      const following = getExistingToolbar(this.app, this, "following");
+      if (following) following.style.visibility = "hidden";
+
+      const mainView = this.app.workspace.getMostRecentLeaf()?.view ?? null;
+      const mainType = mainView?.getViewType();
+      const mainEditable =
+        mainType === "canvas" ||
+        (mainType === "markdown" && ViewUtils.isSourceMode(mainView));
+
+      if (!mainEditable) {
+        (["top", "fixed"] as const).forEach((style) => {
+          const el = getExistingToolbar(this.app, this, style);
+          if (el) el.style.visibility = "hidden";
+        });
+      }
       return;
     }
 

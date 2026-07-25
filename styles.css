@@ -1406,6 +1406,7 @@ body.auto-hide-header .workspace-tab-header-container + .workspace-tab-container
 }
 .editing-toolbar-settings .import-export-warning {
   margin-top: 20px;
+  margin-bottom: 20px;
   padding: 16px;
   border-radius: 8px;
   background-color: rgba(var(--color-red-rgb), 0.1);
