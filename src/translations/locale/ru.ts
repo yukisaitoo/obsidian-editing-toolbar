@@ -11,7 +11,6 @@ const ui: Partial<Record<keyof typeof en, string>> = {
   addCommandOntoEditingToolbar:
     "Добавьте команду на панель инструментов из библиотеки команд Obsidian. Для изменения порядка перетаскивайте элементы команд. Для удаления используйте кнопку удаления справа от команды. Для значка можно выбрать Custom и указать собственный значок.",
   appearance: "Внешний вид",
-  clearAllFixedStyleCommands: "Очистить все команды фиксированного стиля",
   clearAllFollowingStyleCommands: "Очистить все команды стиля следования",
   clearAllTopStyleCommands: "Очистить все команды верхнего стиля",
   currentlyEditingCommands: "Сейчас редактируются команды для",
@@ -24,10 +23,6 @@ const ui: Partial<Record<keyof typeof en, string>> = {
   chooseCommand: "Выберите команду",
   chooseIcon2: "Выберите значок",
   chooseHowImportConfiguration: "Выберите способ импорта конфигурации",
-  chooseNumberColumnsPerRow:
-    "Выберите количество колонок в каждой строке панели инструментов.",
-  chooseOffsetEditingToolbarFixed:
-    "Выберите смещение панели инструментов в фиксированном режиме.",
   chooseWhichToolbarStyleS:
     "Выберите стиль панели инструментов для редактирования.",
   chooseWhichToolbarStyleCommand:
@@ -61,17 +56,13 @@ const ui: Partial<Record<keyof typeof en, string>> = {
   detectedCodeEnglishContextConverted:
     "Обнаружен код/английский текст: символы преобразованы в полуширинные",
   doWantContinue: "Вы хотите продолжить?",
-  dragSliderMovePosition: "Перетащите ползунок для изменения позиции",
   dropdownMenu: "Выпадающее меню",
-  editingToolbarColumns: "Количество колонок панели инструментов",
   editingToolbarCommands: "Команды панели инструментов",
   embedContent: "Встроенное содержимое",
   enableToolbarPositionedTop:
     "Включить панель инструментов в верхней части окна.",
   enableToolbarAppearsUponText:
     "Включить панель инструментов, появляющуюся при выделении текста.",
-  enableToolbarWhosePositionMay:
-    "Включить панель инструментов с произвольным фиксированным расположением.",
   endString: "Конечная строка",
   enterEndString: "Введите конечную строку",
   enterPrefix: "Введите префикс",
@@ -91,8 +82,6 @@ const ui: Partial<Record<keyof typeof en, string>> = {
   failedCopyConfiguration: "Не удалось скопировать конфигурацию",
   fetchRemoteTitle: "Получить заголовок URL",
   fitEditorWidth: "Подогнать под ширину редактора",
-  fixedPositionOffset: "Смещение фиксированной позиции",
-  fixedToolbar: "Фиксированная панель инструментов",
   fontColors: "Цвета шрифта",
   fontColorFormattingBrush:
     "Кисть форматирования цвета шрифта включена\nНажмите среднюю кнопку мыши или правую кнопку для отключения кисти",
@@ -103,7 +92,6 @@ const ui: Partial<Record<keyof typeof en, string>> = {
     "Кисть форматирования включена!\nВыделите текст, чтобы применить【",
   fullHalfConverter: "Преобразование полуширинных/полноширинных символов",
   general: "Основные",
-  horizontalPosition: "Горизонтальная позиция",
   icon: "Значок",
   ifImageTurn: "Если это изображение, включите опцию",
   imageHeight: "Высота изображения",
@@ -141,7 +129,6 @@ const ui: Partial<Record<keyof typeof en, string>> = {
   matchesFound: "Совпадений не найдено",
   obviousSeparatorListPatternDetected:
     "Не обнаружено явных разделителей или шаблонов списка",
-  updateFixedStyleCommands: "Обновить команды фиксированного стиля",
   updateFollowingStyleCommands: "Обновить команды стиля следования",
   updateTopStyleCommands: "Обновить команды верхнего стиля",
   validConfigurationFoundImportData:
@@ -220,7 +207,6 @@ const ui: Partial<Record<keyof typeof en, string>> = {
     "Режим обновления (добавить новые элементы и обновить существующие)",
   updateGeneralSettings: "Обновить основные настройки",
   usageInstructions: "Инструкция по использованию",
-  verticalPosition: "Вертикальная позиция",
   verticalSplit: "Вертикальное разделение",
   warningImportingConfigurationOverwriteCurren:
     "Предупреждение: импорт конфигурации перезапишет текущие настройки. Рекомендуется сначала экспортировать текущую конфигурацию в качестве резервной копии.",
@@ -248,19 +234,15 @@ const ui: Partial<Record<keyof typeof en, string>> = {
 export default ui;
 
 export const commandNames: Record<string, string> = {
-  "Adjust Toolbar Position[Fixed mode]":
-    "Настроить положение панели [фиксированный режим]",
   'Command ID "${this.commandId}" already exists':
     'ID команды "${this.commandId}" уже существует',
   "Result:": "Результат:",
   "All settings": "Все настройки",
   "Following style only": "Только стиль Following",
   "Top style only": "Только стиль Top",
-  "Fixed style only": "Только стиль Fixed",
   "Main Menu Commands": "Команды главного меню",
   "Following Style Commands": "Команды стиля следования",
   "Top Style Commands": "Команды верхнего стиля",
-  "Fixed Style Commands": "Команды фиксированного стиля",
   "Warning: Overwrite mode will completely replace your current settings with the imported ones.":
     "Предупреждение: режим перезаписи полностью заменит текущие настройки импортированными.",
   "All commands": "Все команды",
@@ -332,7 +314,6 @@ export const commandNames: Record<string, string> = {
   "Manage Templates": "Управление шаблонами",
   following: "Плавающая",
   top: "Сверху",
-  fixed: "Закреплённая",
   "Optional. Leave empty unless your server requires authentication.":
     "Необязательно. Оставьте пустым, если ваш сервер не требует авторизации.",
   "Get Models": "Получить список",

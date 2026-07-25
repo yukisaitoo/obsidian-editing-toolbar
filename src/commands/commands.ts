@@ -445,27 +445,6 @@ export class CommandsManager {
         this.plugin.handleEditingToolbar();
       },
     });
-
-    this.plugin.addCommand({
-      id: "toggle-fixed-toolbar",
-      name: "Toggle Fixed Toolbar",
-      callback: async () => {
-        const s = this.plugin.settings;
-        const prevStyle = this.plugin.positionStyle;
-        s.enableFixedToolbar = !s.enableFixedToolbar;
-        const nextStyle = resolveNextPositionStyle(
-          s,
-          "fixed",
-          s.enableFixedToolbar,
-          prevStyle,
-        );
-        if (nextStyle && nextStyle !== prevStyle) {
-          this.plugin.onPositionStyleChange(nextStyle);
-        }
-        await this.plugin.saveSettings();
-        this.plugin.handleEditingToolbar();
-      },
-    });
   }
 
   private registerTextToolCommands() {

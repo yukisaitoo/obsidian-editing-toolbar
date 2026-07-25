@@ -1,7 +1,7 @@
 import type { Command } from "obsidian";
 
-export const POSITION_STYLES = ["top", "following", "fixed"];
-export type ToolbarStyleKey = "top" | "following" | "fixed";
+export const POSITION_STYLES = ["top", "following"];
+export type ToolbarStyleKey = "top" | "following";
 
 export interface StyleAppearanceSettings {
   toolbarBackgroundColor?: string;
@@ -54,7 +54,7 @@ export function setAppearanceValue<K extends keyof StyleAppearanceSettings>(
   store[style]![key] = value;
 }
 
-export type PositionToggleStyle = "top" | "following" | "fixed";
+export type PositionToggleStyle = "top" | "following";
 
 /**
  * After a position-toolbar toggle, decide which style should become the primary
@@ -63,7 +63,7 @@ export type PositionToggleStyle = "top" | "following" | "fixed";
  *
  * `enabled` is the toggled style's new on/off state; `prevStyle` is the current
  * primary style. When a style is turned on it becomes primary; when the current
- * primary is turned off, the next enabled style (top → following → fixed) takes over.
+ * primary is turned off, the next enabled style (top → following) takes over.
  */
 export function resolveNextPositionStyle(
   settings: editingToolbarSettings,
@@ -77,9 +77,8 @@ export function resolveNextPositionStyle(
   const enabledFlags: Record<PositionToggleStyle, boolean> = {
     top: settings.enableTopToolbar,
     following: settings.enableFollowingToolbar,
-    fixed: settings.enableFixedToolbar,
   };
-  for (const style of ["top", "following", "fixed"] as PositionToggleStyle[]) {
+  for (const style of ["top", "following"] as PositionToggleStyle[]) {
     if (style !== toggledStyle && enabledFlags[style]) return style;
   }
   return null;
@@ -104,10 +103,8 @@ export interface editingToolbarSettings {
   menuCommands: Command[];
   followingCommands: Command[];
   topCommands: Command[];
-  fixedCommands: Command[];
   enableTopToolbar: boolean;
   enableFollowingToolbar: boolean;
-  enableFixedToolbar: boolean;
   shouldShowMenuOnSelect: boolean;
   cMenuVisibility: boolean;
   cMenuBottomValue: number;
@@ -122,13 +119,11 @@ export interface editingToolbarSettings {
   custom_fc3: string;
   custom_fc4: string;
   custom_fc5: string;
-  horizontalPosition: number;
-  verticalPosition: number;
   formatBrushes: {
     [key: string]: boolean;
   };
 
-  // Per-style appearance buckets (top/following/fixed)
+  // Per-style appearance buckets (top/following)
   appearanceByStyle?: AppearanceByStyle;
 
   // Global appearance defaults, used as the fallback for empty per-style buckets
@@ -529,7 +524,7 @@ export const DEFAULT_TOOLBAR_COMMANDS: Command[] = [
 ];
 
 // Pull a command (with its icon) out of the shared default set by id, deep-copied
-// so the following default never aliases the top/fixed default's objects.
+// so the following default never aliases the top default's objects.
 const cloneToolbarDefault = (id: string): Command =>
   structuredClone(
     DEFAULT_TOOLBAR_COMMANDS.find((command) => command.id === id)!,
@@ -569,10 +564,8 @@ export const DEFAULT_SETTINGS: editingToolbarSettings = {
   menuCommands: DEFAULT_TOOLBAR_COMMANDS,
   followingCommands: [],
   topCommands: [],
-  fixedCommands: [],
   enableTopToolbar: true,
   enableFollowingToolbar: false,
-  enableFixedToolbar: false,
   shouldShowMenuOnSelect: false,
   cMenuVisibility: true,
   cMenuBottomValue: 4.25,
@@ -590,8 +583,6 @@ export const DEFAULT_SETTINGS: editingToolbarSettings = {
   custom_fc3: "#245BDB",
   custom_fc4: "#6425D0",
   custom_fc5: "#646A73",
-  horizontalPosition: 0,
-  verticalPosition: 0,
   formatBrushes: {},
 
   appearanceByStyle: {
@@ -602,12 +593,6 @@ export const DEFAULT_SETTINGS: editingToolbarSettings = {
       toolbarBackgroundTransparency: 100,
     },
     following: {
-      toolbarBackgroundColor: "var(--background-secondary)",
-      toolbarIconColor: "var(--text-normal)",
-      toolbarIconSize: 18,
-      toolbarBackgroundTransparency: 100,
-    },
-    fixed: {
       toolbarBackgroundColor: "var(--background-secondary)",
       toolbarIconColor: "var(--text-normal)",
       toolbarIconSize: 18,

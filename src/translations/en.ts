@@ -7,7 +7,6 @@ export const en = {
   addCommandOntoEditingToolbar:
     "Add a command onto Editing Toolbar from Obsidian's commands library. To reorder the commands, drag and drop the command items. To delete them, use the delete button to the right of the command item.",
   appearance: "Appearance",
-  clearAllFixedStyleCommands: "Clear all Fixed Commands",
   clearAllFollowingStyleCommands: "Clear all Selection Commands",
   clearAllTopStyleCommands: "Clear all Top Commands",
   currentlyEditingCommands: "Currently editing commands for",
@@ -20,10 +19,6 @@ export const en = {
   chooseCommand: "Choose a command",
   chooseIcon2: "Choose an icon",
   chooseHowImportConfiguration: "Choose how to import the configuration",
-  chooseNumberColumnsPerRow:
-    "Choose the number of columns per row to display on Editing Toolbar.",
-  chooseOffsetEditingToolbarFixed:
-    "Choose the offset of the Editing Toolbar in the fixed position.",
   chooseWhichToolbarStyleS:
     "Choose which toolbar style's appearance you want to edit.",
   chooseWhichToolbarStyleCommand:
@@ -57,16 +52,12 @@ export const en = {
   detectedCodeEnglishContextConverted:
     "Detected code/English context: converted to half-width symbols",
   doWantContinue: "Do you want to continue?",
-  dragSliderMovePosition: "Drag the slider to move the position",
   dropdownMenu: "Dropdown Menu",
-  editingToolbarColumns: "Editing Toolbar Columns",
   editingToolbarCommands: "Editing Toolbar Commands",
   embedContent: "Embed Content",
   enableToolbarPositionedTop: "Enable the toolbar positioned at the top.",
   enableToolbarAppearsUponText:
     "Enable the toolbar that appears upon text selection.",
-  enableToolbarWhosePositionMay:
-    "Enable the toolbar whose position may be fixed where you please.",
   endString: "End String",
   enterEndString: "Enter end string",
   enterPrefix: "Enter prefix",
@@ -86,8 +77,6 @@ export const en = {
   failedCopyConfiguration: "Failed to copy configuration",
   fetchRemoteTitle: "Fetch Remote Title",
   fitEditorWidth: "Fit Editor Width",
-  fixedPositionOffset: "Fixed Position Offset",
-  fixedToolbar: "Fixed",
   followingToolbar: "Selection",
   fontColors: "Font Colors",
   fontColorFormattingBrush: "Font-Color formatting brush ON!",
@@ -96,7 +85,6 @@ export const en = {
   formatBrushSelectTextApply: "Format brush ON! Select text to apply【",
   fullHalfConverter: "Full Half Converter",
   general: "General",
-  horizontalPosition: "Horizontal Position",
   id: "ID",
   icon: "Icon",
   ifImageTurn: "If it is an image, turn on",
@@ -133,7 +121,6 @@ export const en = {
   matchesFound: "No matches found",
   obviousSeparatorListPatternDetected:
     "No obvious separator or list pattern detected",
-  updateFixedStyleCommands: "Update Fixed Commands",
   updateFollowingStyleCommands: "Update Selection Commands",
   updateTopStyleCommands: "Update Top Commands",
   validConfigurationFoundImportData:
@@ -213,7 +200,6 @@ export const en = {
   updateModeAddNewItems: "Update Mode (Add new items and update existing ones)",
   updateGeneralSettings: "Update general settings",
   usageInstructions: "Usage Instructions",
-  verticalPosition: "Vertical Position",
   verticalSplit: "Vertical Split",
   warningImportingConfigurationOverwriteCurren:
     "Warning: Importing configuration will overwrite your current settings. Consider exporting your current configuration first as a backup.",

@@ -3,7 +3,6 @@ import {
   App,
   ButtonComponent,
   Command,
-  debounce,
   Notice,
   PluginSettingTab,
   setIcon,
@@ -16,7 +15,6 @@ import {
   ChangeCmdname,
   ChooseFromIconList,
   CommandPicker,
-  openSlider,
 } from "src/modals/suggesterModals";
 import type EditingToolbarPlugin from "src/plugin/main";
 import type {
@@ -41,7 +39,6 @@ import { GenNonDuplicateID } from "src/util/util";
 const POSITION_STYLE_LABELS: Record<string, string> = {
   top: strings.topToolbar,
   following: strings.followingToolbar,
-  fixed: strings.fixedToolbar,
 };
 
 interface SubmenuCommand {
@@ -278,30 +275,6 @@ export class EditingToolbarSettingTab extends PluginSettingTab {
             this.display();
           });
       });
-    new Setting(generalSettingContainer)
-      .setName(strings.fixedToolbar)
-      .setDesc(strings.enableToolbarWhosePositionMay)
-      .addToggle((toggle) => {
-        toggle
-          .setValue(this.plugin.settings.enableFixedToolbar || false)
-          .onChange(async (value) => {
-            const s = this.plugin.settings;
-            const prevStyle = this.plugin.positionStyle;
-            s.enableFixedToolbar = value;
-            const nextStyle = resolveNextPositionStyle(
-              s,
-              "fixed",
-              value,
-              prevStyle,
-            );
-            if (nextStyle && nextStyle !== prevStyle) {
-              this.plugin.onPositionStyleChange(nextStyle);
-            }
-            await this.plugin.saveSettings();
-            this.plugin.handleEditingToolbar();
-            this.display();
-          });
-      });
     const paintbrushContainer = containerEl.createDiv(
       "custom-paintbrush-container",
     );
@@ -417,36 +390,6 @@ export class EditingToolbarSettingTab extends PluginSettingTab {
           });
       });
 
-    if (editingStyle === "fixed") {
-      new Setting(appearanceSettingContainer)
-        .setName(strings.editingToolbarColumns)
-        .setDesc(strings.chooseNumberColumnsPerRow)
-        .addSlider((slider) => {
-          slider
-            .setLimits(1, 32, 1)
-            .setValue(this.plugin.settings.cMenuNumRows)
-            .onChange(
-              debounce(
-                async (value: number) => {
-                  this.plugin.settings.cMenuNumRows = value;
-                  await this.plugin.saveSettings();
-                  this.triggerRefresh();
-                },
-                100,
-                true,
-              ),
-            )
-            .setDynamicTooltip();
-        });
-      new Setting(appearanceSettingContainer)
-        .setName(strings.fixedPositionOffset)
-        .setDesc(strings.chooseOffsetEditingToolbarFixed)
-        .addButton((button) =>
-          button.setButtonText(strings.settings).onClick(() => {
-            new openSlider(this.app, this.plugin).open();
-          }),
-        );
-    }
     this.createColorSettings(containerEl);
   }
   private displayCommandSettings(containerEl: HTMLElement): void {
@@ -675,19 +618,6 @@ export class EditingToolbarSettingTab extends PluginSettingTab {
     editingToolbar.addClass(
       this.positionLayoutMap[editingStyle] || this.positionLayoutMap.top,
     );
-    if (editingStyle === "fixed") {
-      const icon =
-        getAppearanceValue(
-          this.plugin.settings,
-          "toolbarIconSize",
-          this.plugin.resolveActiveStyle(),
-        ) || 18;
-      const cols = this.plugin.settings.cMenuNumRows || 6;
-      editingToolbar.style.display = "grid";
-      editingToolbar.style.gridTemplateColumns = `repeat(${cols}, ${icon + 10}px)`;
-      editingToolbar.style.gap = `${Math.max((icon - 18) / 4, 2)}px`;
-      editingToolbar.style.margin = "0 auto"; // centers the grid like top/following
-    }
     const previewCommands = [
       { id: "bold", name: "Bold", icon: "bold" },
       { id: "italics", name: "Italics", icon: "italic" },
@@ -1307,7 +1237,6 @@ export class EditingToolbarSettingTab extends PluginSettingTab {
   private positionLayoutMap: { [key: string]: string } = {
     top: "top",
     following: "editingToolbarFlex",
-    fixed: "fixed",
   };
   private getCommandsArrayByType(type: string): Command[] {
     switch (type) {
@@ -1315,8 +1244,6 @@ export class EditingToolbarSettingTab extends PluginSettingTab {
         return this.plugin.settings.followingCommands;
       case "top":
         return this.plugin.settings.topCommands;
-      case "fixed":
-        return this.plugin.settings.fixedCommands;
       default:
         return this.plugin.settings.menuCommands;
     }
@@ -1328,9 +1255,6 @@ export class EditingToolbarSettingTab extends PluginSettingTab {
         break;
       case "top":
         this.plugin.settings.topCommands = commands;
-        break;
-      case "fixed":
-        this.plugin.settings.fixedCommands = commands;
         break;
       default:
         this.plugin.settings.menuCommands = commands;

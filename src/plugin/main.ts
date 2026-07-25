@@ -37,7 +37,7 @@ import { EditingToolbarSettingTab } from "../settings/settingsTab";
 
 let activeDocument: Document;
 
-const STYLE_KEYS: ToolbarStyleKey[] = ["top", "following", "fixed"];
+const STYLE_KEYS: ToolbarStyleKey[] = ["top", "following"];
 
 export interface AdmonitionDefinition {
   type: string;
@@ -121,10 +121,6 @@ export default class EditingToolbarPlugin extends Plugin {
           if (this.isFollowingToolbarActive()) {
             editingToolbarPopover(this.app, this, "following", leaf.doc);
           }
-
-          if (this.settings.enableFixedToolbar) {
-            editingToolbarPopover(this.app, this, "fixed", leaf.doc);
-          }
         }, 50);
       }),
     );
@@ -202,13 +198,12 @@ export default class EditingToolbarPlugin extends Plugin {
     }
 
     // Every style keeps its own command list, each with its own fresh-install
-    // default (top and fixed share the full set; following gets a curated inline
-    // set). Seed a list only when it has never been persisted, so a list the user
-    // deliberately cleared stays empty. Deep-copy so styles sharing a default (and
-    // the module-level default constants) never alias each other's command objects.
+    // default (top gets the full set; following gets a curated inline set). Seed a
+    // list only when it has never been persisted, so a list the user deliberately
+    // cleared stays empty. Deep-copy so the module-level default constants are
+    // never aliased by the persisted command objects.
     const seedDefaults = {
       topCommands: DEFAULT_TOOLBAR_COMMANDS,
-      fixedCommands: DEFAULT_TOOLBAR_COMMANDS,
       followingCommands: DEFAULT_FOLLOWING_COMMANDS,
     } as const;
     for (const key of Object.keys(
@@ -428,7 +423,7 @@ export default class EditingToolbarPlugin extends Plugin {
     }
 
     if (!this.settings.cMenuVisibility) {
-      (["top", "following", "fixed"] as const).forEach((style) => {
+      (["top", "following"] as const).forEach((style) => {
         const el = getExistingToolbar(this.app, this, style);
         if (el) el.style.display = "none";
       });
@@ -442,9 +437,9 @@ export default class EditingToolbarPlugin extends Plugin {
     // the main-area content rather than the focused pane: getMostRecentLeaf()
     // ignores sidebars, so it still points at the note you're editing when you
     // just clicked a sidebar, but points at the PDF/graph when the main pane
-    // itself changed. Keep the top and fixed bars only while that main content
-    // is an editable note or canvas — so dipping into a sidebar doesn't flicker
-    // them, but reading mode and non-editor views correctly hide them. The
+    // itself changed. Keep the top bar only while that main content is an
+    // editable note or canvas — so dipping into a sidebar doesn't flicker it,
+    // but reading mode and non-editor views correctly hide it. The
     // selection-following bar always hides here; it has no selection to track.
     if (!ViewUtils.isAllowedViewType(view)) {
       const following = getExistingToolbar(this.app, this, "following");
@@ -457,10 +452,8 @@ export default class EditingToolbarPlugin extends Plugin {
         (mainType === "markdown" && ViewUtils.isSourceMode(mainView));
 
       if (!mainEditable) {
-        (["top", "fixed"] as const).forEach((style) => {
-          const el = getExistingToolbar(this.app, this, style);
-          if (el) el.style.visibility = "hidden";
-        });
+        const el = getExistingToolbar(this.app, this, "top");
+        if (el) el.style.visibility = "hidden";
       }
       return;
     }
@@ -471,7 +464,7 @@ export default class EditingToolbarPlugin extends Plugin {
 
     // Reading mode hides everything; non-markdown views (Canvas, …) handled below.
     if (isMarkdownView && !inSourceMode) {
-      (["top", "following", "fixed"] as const).forEach((style) => {
+      (["top", "following"] as const).forEach((style) => {
         const el = getExistingToolbar(this.app, this, style);
         if (el) el.style.visibility = "hidden";
       });
@@ -485,12 +478,10 @@ export default class EditingToolbarPlugin extends Plugin {
     // still points at it), which is the "toggle won't turn it off" bug.
     const topEnabled = this.isTopToolbarActive();
     const followingEnabled = this.isFollowingToolbarActive();
-    const fixedEnabled = this.settings.enableFixedToolbar;
 
-    const styles: { key: "top" | "following" | "fixed"; enabled: boolean }[] = [
+    const styles: { key: "top" | "following"; enabled: boolean }[] = [
       { key: "top", enabled: topEnabled },
       { key: "following", enabled: followingEnabled },
-      { key: "fixed", enabled: fixedEnabled },
     ];
 
     for (const { key, enabled } of styles) {
@@ -577,8 +568,6 @@ export default class EditingToolbarPlugin extends Plugin {
         return this.settings.followingCommands;
       case "top":
         return this.settings.topCommands;
-      case "fixed":
-        return this.settings.fixedCommands;
       default:
         return this.settings.menuCommands;
     }
@@ -591,9 +580,6 @@ export default class EditingToolbarPlugin extends Plugin {
         break;
       case "top":
         this.settings.topCommands = commands;
-        break;
-      case "fixed":
-        this.settings.fixedCommands = commands;
         break;
       default:
         this.settings.menuCommands = commands;
@@ -610,7 +596,6 @@ export default class EditingToolbarPlugin extends Plugin {
   async resetSettings(): Promise<void> {
     this.settings = structuredClone(DEFAULT_SETTINGS);
     this.settings.topCommands = structuredClone(DEFAULT_TOOLBAR_COMMANDS);
-    this.settings.fixedCommands = structuredClone(DEFAULT_TOOLBAR_COMMANDS);
     this.settings.followingCommands = structuredClone(
       DEFAULT_FOLLOWING_COMMANDS,
     );

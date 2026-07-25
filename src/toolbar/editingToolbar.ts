@@ -21,7 +21,6 @@ import {
   ToolbarStyleKey,
 } from "src/settings/settingsData";
 import { strings, t } from "src/translations/helper";
-import { setBottomValue, setHorizontalValue } from "src/util/toolbarVisibility";
 import {
   backcolorpicker,
   colorpicker,
@@ -844,7 +843,6 @@ export function editingToolbarPopover(
 
     if (settings.enableTopToolbar) stylesToRender.push("top");
     if (settings.enableFollowingToolbar) stylesToRender.push("following");
-    if (settings.enableFixedToolbar) stylesToRender.push("fixed");
 
     stylesToRender.forEach((styleKey) => {
       editingToolbarPopover(app, plugin, styleKey, targetDocument);
@@ -909,13 +907,6 @@ export function editingToolbarPopover(
         editingToolbar.className += " top";
       } else if (effectiveStyle === "following") {
         editingToolbar.style.visibility = "hidden";
-      } else if (effectiveStyle === "fixed") {
-        const rowSize = resolvedIconSize || 18;
-        const baseStyle = `left: calc(50% - calc(${settings.cMenuNumRows * (rowSize + 10)}px / 2));
-           bottom: 4.25em;
-           grid-template-columns: repeat(${settings.cMenuNumRows}, ${rowSize + 10}px);
-           gap: ${(rowSize - 18) / 4}px`;
-        editingToolbar.setAttribute("style", baseStyle);
       }
     }
     editingToolbar.setAttribute("id", "editingToolbarModalBar");
@@ -1372,8 +1363,6 @@ export function editingToolbarPopover(
     }
   }
 
-  setHorizontalValue(plugin.settings);
-  setBottomValue(plugin.settings);
   setsvgColor(settings.cMenuFontColor, settings.cMenuBackgroundColor);
 }
 

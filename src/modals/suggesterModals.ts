@@ -1,8 +1,7 @@
-import { App, Command, FuzzyMatch, FuzzySuggestModal, Modal, Notice, SliderComponent, TextComponent, debounce, setIcon } from "obsidian";
+import { App, Command, FuzzyMatch, FuzzySuggestModal, Modal, Notice, TextComponent, debounce, setIcon } from "obsidian";
 import { appIcons } from "src/icons/appIcons";
 import type EditingToolbarPlugin from "src/plugin/main";
 import { strings, t } from "src/translations/helper";
-import { setBottomValue, setHorizontalValue } from "src/util/toolbarVisibility";
 import { findmenuID } from "src/util/util";
 
 type IconSelectCallback = (iconId: string) => void;
@@ -303,97 +302,5 @@ export class ChangeCmdname extends Modal {
     setTimeout(() => {
       dispatchEvent(new Event("editingToolbar-NewCommand"));
     }, 100);
-  }
-};
-
-export class openSlider extends Modal {
-  plugin: EditingToolbarPlugin;
-  private needSave: boolean = false;
-
-  constructor(app: App, plugin: EditingToolbarPlugin) {
-    super(plugin.app);
-    this.plugin = plugin;
-    this.containerEl.addClass("editingToolbar-Modal");
-  }
-
-  onOpen() {
-    const { contentEl } = this;
-    contentEl.createEl("p", { text: strings.dragSliderMovePosition });
-
-    const containerEl = contentEl.createDiv({ cls: "slider-container" });
-
-    const verticalContainer = containerEl.createDiv({ cls: "vertical-slider-container" });
-    verticalContainer.createEl("p", { text: strings.verticalPosition });
-
-    const horizontalContainer = containerEl.createDiv({ cls: "horizontal-slider-container" });
-    horizontalContainer.createEl("p", { text: strings.horizontalPosition });
-      const columnsContainer = containerEl.createDiv({ cls: "columns-slider-container" });
-      columnsContainer.createEl("p", { text: strings.editingToolbarColumns });
-    const bodyHeight = document.body.clientHeight;
-    const bodyWidth = document.body.clientWidth;
-
-    const verticalMax = Math.floor(bodyHeight / 3);
-    const verticalMin = -Math.floor(bodyHeight);
-    const horizontalMax = Math.floor(bodyWidth / 2);
-    const horizontalMin = -Math.floor(bodyWidth / 2);
-    const verticalSlider = new SliderComponent(verticalContainer)
-      .setLimits(verticalMin, verticalMax, 5)
-      .setValue(this.plugin.settings.verticalPosition || 0)
-      .onChange(debounce((value) => {
-        this.needSave = true;
-        this.plugin.settings.verticalPosition = value;
-        setBottomValue(this.plugin.settings);
-      }, 100, true))
-      .setDynamicTooltip();
-
-    const horizontalSlider = new SliderComponent(horizontalContainer)
-      .setLimits(horizontalMin, horizontalMax, 10)
-      .setValue(this.plugin.settings.horizontalPosition || 0)
-      .onChange(debounce((value) => {
-        this.needSave = true;
-        this.plugin.settings.horizontalPosition = value;
-        setHorizontalValue(this.plugin.settings);
-      }, 100, true))
-      .setDynamicTooltip();
-    const columnsSlider = new SliderComponent(columnsContainer)
-      .setLimits(1, 32, 1)
-      .setValue(this.plugin.settings.cMenuNumRows || 12)
-      .onChange(debounce(async (value) => {
-        this.needSave = true;
-        this.plugin.settings.cMenuNumRows = value;
-        await this.plugin.saveSettings();
-        setTimeout(() => {
-          dispatchEvent(new Event("editingToolbar-NewCommand"));
-        }, 100);
-      }, 100, true))
-      .setDynamicTooltip();
-
-
-    const resetContainer = containerEl.createDiv({ cls: "reset-container" });
-
-    resetContainer.createEl("button", {
-      text: strings.reset,
-      cls: "reset-button"
-    }).addEventListener("click", () => {
-      this.needSave = true;
-      verticalSlider.setValue(0);
-      horizontalSlider.setValue(0);
-      columnsSlider.setValue(12);
-      this.plugin.settings.verticalPosition = 0;
-      this.plugin.settings.horizontalPosition = 0;
-      this.plugin.settings.cMenuNumRows = 12;
-      setBottomValue(this.plugin.settings);
-      setHorizontalValue(this.plugin.settings);
-
-    });
-  }
-
-  async onClose() {
-    const { contentEl } = this;
-    contentEl.empty();
-
-    if (this.needSave) {
-      await this.plugin.saveSettings();
-    }
   }
 };

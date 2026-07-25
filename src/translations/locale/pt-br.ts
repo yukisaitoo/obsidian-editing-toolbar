@@ -10,7 +10,6 @@ const ui: Partial<Record<keyof typeof en, string>> = {
   addCommandOntoEditingToolbar:
     "Adicione um comando na Barra de Ferramentas a partir da biblioteca de comandos do Obsidian. Para reordenar os comandos, arraste e solte os itens do comando. Para deletar, use o botão de deletar à direita do item do comando.",
   appearance: "Aparência",
-  clearAllFixedStyleCommands: "Limpar todos os Comandos de Estilo Fixo",
   clearAllFollowingStyleCommands:
     "Limpar todos os Comandos de Estilo Contextual",
   clearAllTopStyleCommands: "Limpar todos os Comandos de Estilo de Topo",
@@ -22,10 +21,6 @@ const ui: Partial<Record<keyof typeof en, string>> = {
   chooseCommand: "Escolha um comando",
   chooseIcon2: "Escolha um ícone",
   chooseHowImportConfiguration: "Escolha como importar a configuração",
-  chooseNumberColumnsPerRow:
-    "Escolha o número de colunas por linha para exibir na Barra de Ferramentas.",
-  chooseOffsetEditingToolbarFixed:
-    "Escolha o deslocamento da Barra de Edição na posição fixa.",
   chooseWhichToolbarStyleS:
     "Escolha qual estilo de barra de ferramentas você deseja editar.",
   chooseWhichToolbarStyleCommand:
@@ -54,16 +49,12 @@ const ui: Partial<Record<keyof typeof en, string>> = {
   highlighterColors: "Cores de Marca-Texto",
   delete: "Deletar",
   doWantContinue: "Deseja continuar?",
-  dragSliderMovePosition: "Arraste o slider para mover a posição",
-  editingToolbarColumns: "Colunas da Barra de Ferramentas",
   editingToolbarCommands: "Comandos da Barra de Ferramentas",
   embedContent: "Conteúdo Embutido",
   enableToolbarPositionedTop:
     "Habilitar a barra de ferramentas posicionada no topo.",
   enableToolbarAppearsUponText:
     "Habilitar a barra de ferramentas que aparece ao selecionar texto.",
-  enableToolbarWhosePositionMay:
-    "Habilitar a barra de ferramentas cuja posição pode ser fixa onde você preferir.",
   enterIconCodeFormatSvg:
     "Digite o código do ícone, formato como <svg>.... </svg>",
   error: "Erro: ",
@@ -76,8 +67,6 @@ const ui: Partial<Record<keyof typeof en, string>> = {
   failedCopyConfiguration: "Falha ao copiar configuração",
   fetchRemoteTitle: "Obter Título Remoto",
   fitEditorWidth: "Ajustar Largura do Editor",
-  fixedPositionOffset: "Deslocamento Fixo",
-  fixedToolbar: "Barra de Ferramentas Fixa",
   fontColors: "Cores de Texto",
   fontColorFormattingBrush: "Pincel de cor da fonte ativado!",
   backgroundColorFormattingBrush: "Pincel de cor de fundo ativado!",
@@ -85,7 +74,6 @@ const ui: Partial<Record<keyof typeof en, string>> = {
   formatBrushSelectTextApply:
     "Pincel de formatação ativado! Selecione o texto para aplicar【",
   general: "Geral",
-  horizontalPosition: "Posição Horizontal",
   icon: "Ícone",
   ifImageTurn: "Se for uma imagem, ative",
   imageHeight: "Altura da Imagem",
@@ -110,7 +98,6 @@ const ui: Partial<Record<keyof typeof en, string>> = {
   linkUrl: "URL do Link",
   loading: "Carregando...",
   more: "Mais",
-  updateFixedStyleCommands: "Atualizar Comandos de Estilo Fixo",
   updateFollowingStyleCommands: "Atualizar Comandos de Estilo Contextual",
   updateTopStyleCommands: "Atualizar Comandos de Estilo de Topo",
   validConfigurationFoundImportData:
@@ -161,7 +148,6 @@ const ui: Partial<Record<keyof typeof en, string>> = {
     "Modo de Atualização (Adicionar novos itens e atualizar os existentes)",
   updateGeneralSettings: "Atualizar configurações gerais",
   usageInstructions: "Instruções de Uso",
-  verticalPosition: "Posição Vertical",
   verticalSplit: "Divisão Vertical",
   warningImportingConfigurationOverwriteCurren:
     "Aviso: A importação de configuração irá sobrescrever suas configurações atuais. Considere exportar sua configuração atual primeiro como backup.",

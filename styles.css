@@ -1,6 +1,4 @@
 :root {
-  --toolbar-horizontal-offset: 0px;
-  --toolbar-vertical-offset: 0px;
   --editing-toolbar-background-color: var(--background-secondary);
   --editing-toolbar-background-opacity: 100%;
   --editing-toolbar-icon-color: var(--text-normal);
@@ -19,16 +17,10 @@
   min-width: fit-content;
   justify-content: space-around;
   z-index: var(--layer-modal);
-  transform: translate(var(--toolbar-horizontal-offset), var(--toolbar-vertical-offset));
 }
 #editingToolbarModalBar[data-toolbar-style="following"] {
  transition: none !important;
   -webkit-transition: none !important;
-}
-
-#editingToolbarModalBar.fixed{
-    display: grid;
-    grid-template-columns: repeat(12, calc(var(--toolbar-icon-size) + 10px));
 }
 
 #editingToolbarModalBar.editingToolbarFlex {
@@ -1039,9 +1031,6 @@ body.auto-hide-header .workspace-tab-header-container + .workspace-tab-container
  .position-style-info.following{
   background-color: rgba(var(--color-green-rgb), 0.8);
  }
- .position-style-info.fixed{
-  background-color: rgba(var(--color-blue-rgb), 0.8);
- }
  .position-style-info.top{
   background-color: rgba(var(--color-yellow-rgb), 0.8);
  }
@@ -1049,10 +1038,6 @@ body.auto-hide-header .workspace-tab-header-container + .workspace-tab-container
  .command-lists-container.following{
   background-color: rgba(var(--color-green-rgb), 0.1);
   border: 1px solid rgba(var(--color-green-rgb), 0.3);
- }
- .command-lists-container.fixed{
-  background-color: rgba(var(--color-blue-rgb), 0.1);
-  border: 1px solid rgba(var(--color-blue-rgb), 0.3);
  }
  .command-lists-container.top{
   background-color: rgba(var(--color-yellow-rgb), 0.1);
@@ -1145,18 +1130,6 @@ body.auto-hide-header .workspace-tab-header-container + .workspace-tab-container
   width: 0;
   border-radius: var(--radius-m);
 }
-
-/* 3) FIXED – compact grid at the bottom */
-.preview-toolbar-wrapper.preview-fixed {
-  display: flex;
-  justify-content: center;
-}
-.preview-toolbar-wrapper.preview-fixed #editingToolbarModalBar {
-  margin: 8px auto 8px auto;
-  align-self: flex-end;
-  border-radius: var(--radius-m);
-}
-/* 3) FIXED – For Mobile */
 
 .is-phone.is-hidden-nav #editingToolbarModalBar.top
 {
