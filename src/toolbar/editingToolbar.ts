@@ -22,10 +22,7 @@ import {
   ToolbarStyleKey,
 } from "src/settings/settingsData";
 import { strings, t } from "src/translations/helper";
-import {
-  setBottomValue,
-  setHorizontalValue,
-} from "src/util/toolbarVisibility";
+import { setBottomValue, setHorizontalValue } from "src/util/toolbarVisibility";
 import {
   backcolorpicker,
   colorpicker,
@@ -876,6 +873,13 @@ export function editingToolbarPopover(
     if (existingToolbar) {
       existingToolbar.style.display = "none";
     }
+    return;
+  }
+
+  const commandsForStyle = plugin.getCurrentCommands(effectiveStyle);
+  if (!commandsForStyle || commandsForStyle.length === 0) {
+    getExistingToolbar(app, plugin, effectiveStyle, targetDocument)?.remove();
+    plugin.clearToolbarCache(effectiveStyle);
     return;
   }
 

@@ -168,6 +168,11 @@ export const en = {
   removeAllWhitespace: "Remove All Whitespace",
   renumberList: "Renumber List",
   reset: "Reset",
+  resetConfiguration: "Reset configuration",
+  resetConfigurationDesc:
+    "Restore all settings and toolbar command lists to their defaults. This can't be undone.",
+  resetConfigurationConfirm:
+    "This restores every setting and all toolbar command lists to their defaults.\nThis can't be undone.",
   result: "Result: ",
   selectPresetToolbarThemeAutomatically:
     "Select a preset toolbar theme, automatically setting the background color, icon color, and size for the selected style.",
@@ -236,6 +241,10 @@ export const en = {
   overwriteModeReplaceExistingSettings:
     "⚠️ Overwrite mode will replace existing settings with imported ones.",
   format: "】format\nClick the mouse right key to close the formatting-brush",
-  setCustomBackground: "🎨 Set Custom Background",
-  setCustomFontColor: "🖌️ Set Custom Font Color",
+  setCustomBackground: "🎨 Custom text background colors",
+  setCustomBackgroundDesc:
+    "User-defined colors for the background color toolbar command.",
+  setCustomFontColor: "🖌️ Custom text colors",
+  setCustomFontColorDesc:
+    "User-defined colors for the font colors toolbar command.",
 } as const;

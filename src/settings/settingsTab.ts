@@ -10,6 +10,7 @@ import {
   Setting,
 } from "obsidian";
 import Sortable from "sortablejs";
+import { ConfirmModal } from "src/modals/ConfirmModal";
 import { ImportExportModal } from "src/modals/ImportExportModal";
 import {
   ChangeCmdname,
@@ -39,8 +40,8 @@ import { strings, t } from "src/translations/helper";
 import { GenNonDuplicateID } from "src/util/util";
 
 const POSITION_STYLE_LABELS: Record<string, string> = {
-  following: strings.followingToolbar,
   top: strings.topToolbar,
+  following: strings.followingToolbar,
   fixed: strings.fixedToolbar,
 };
 const AESTHETIC_STYLE_LABELS: Record<string, string> = {
@@ -313,7 +314,7 @@ export class EditingToolbarSettingTab extends PluginSettingTab {
     );
     new Setting(paintbrushContainer)
       .setName(strings.setCustomBackground)
-      .setDesc(strings.clickPickerAdjustColor)
+      .setDesc(strings.setCustomBackgroundDesc)
       .setClass("custom_bg")
       .then((setting) => {
         const pickerContainer = setting.controlEl.createDiv({
@@ -347,7 +348,7 @@ export class EditingToolbarSettingTab extends PluginSettingTab {
       });
     new Setting(paintbrushContainer)
       .setName(strings.setCustomFontColor)
-      .setDesc(strings.clickPickerAdjustColor)
+      .setDesc(strings.setCustomFontColorDesc)
       .setClass("custom_font")
       .then((setting) => {
         const pickerContainer = setting.controlEl.createDiv({
@@ -372,6 +373,27 @@ export class EditingToolbarSettingTab extends PluginSettingTab {
           this.setupPickrEvents(pickr, `custom_fc${i + 1}`, "color");
           this.pickrs.push(pickr);
         }
+      });
+
+    new Setting(containerEl)
+      .setName(strings.resetConfiguration)
+      .setDesc(strings.resetConfigurationDesc)
+      .addButton((button) => {
+        button
+          .setButtonText(strings.reset)
+          .setWarning()
+          .onClick(() => {
+            ConfirmModal.show(this.app, {
+              title: strings.resetConfiguration,
+              message: strings.resetConfigurationConfirm,
+              confirmText: strings.reset,
+              confirmWarning: true,
+              onConfirm: async () => {
+                await this.plugin.resetSettings();
+                this.display();
+              },
+            });
+          });
       });
   }
   private displayAppearanceSettings(containerEl: HTMLElement): void {

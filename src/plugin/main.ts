@@ -16,7 +16,9 @@ import addIcons from "src/icons/customIcons";
 import { InsertLinkModal } from "src/modals/insertLinkModal";
 import type { ToolbarStyleKey } from "src/settings/settingsData";
 import {
+  DEFAULT_FOLLOWING_COMMANDS,
   DEFAULT_SETTINGS,
+  DEFAULT_TOOLBAR_COMMANDS,
   editingToolbarSettings,
   getAppearanceValue,
 } from "src/settings/settingsData";
@@ -205,16 +207,21 @@ export default class EditingToolbarPlugin extends Plugin {
       }
     }
 
-    // Every style keeps its own command list. Seed one from the main list only when
-    // it has never been persisted, so a list the user deliberately cleared stays empty.
-    const seedKeys = [
-      "followingCommands",
-      "topCommands",
-      "fixedCommands",
-    ] as const;
-    for (const key of seedKeys) {
+    // Every style keeps its own command list, each with its own fresh-install
+    // default (top and fixed share the full set; following gets a curated inline
+    // set). Seed a list only when it has never been persisted, so a list the user
+    // deliberately cleared stays empty. Deep-copy so styles sharing a default (and
+    // the module-level default constants) never alias each other's command objects.
+    const seedDefaults = {
+      topCommands: DEFAULT_TOOLBAR_COMMANDS,
+      fixedCommands: DEFAULT_TOOLBAR_COMMANDS,
+      followingCommands: DEFAULT_FOLLOWING_COMMANDS,
+    } as const;
+    for (const key of Object.keys(
+      seedDefaults,
+    ) as (keyof typeof seedDefaults)[]) {
       if (!loadedData || loadedData[key] === undefined) {
-        this.settings[key] = [...this.settings.menuCommands];
+        this.settings[key] = structuredClone(seedDefaults[key]);
       }
     }
   }
@@ -601,6 +608,29 @@ export default class EditingToolbarPlugin extends Plugin {
 
   async saveSettings() {
     await this.saveData(this.settings);
+  }
+
+  // Restore every setting and command list to the shipped defaults, persist, and
+  // rebuild the live toolbars. Seeds the per-style command lists the same way
+  // loadSettings() does, since DEFAULT_SETTINGS keeps them empty.
+  async resetSettings(): Promise<void> {
+    this.settings = structuredClone(DEFAULT_SETTINGS);
+    this.settings.topCommands = structuredClone(DEFAULT_TOOLBAR_COMMANDS);
+    this.settings.fixedCommands = structuredClone(DEFAULT_TOOLBAR_COMMANDS);
+    this.settings.followingCommands = structuredClone(
+      DEFAULT_FOLLOWING_COMMANDS,
+    );
+
+    this.initAppearanceStore();
+    this.appearanceEditStyle = null;
+    this.toolbarIconSize = this.settings.toolbarIconSize;
+
+    await this.saveSettings();
+
+    // Tear down existing toolbars, then let onPositionStyleChange re-apply the
+    // global appearance variables and dispatch the rebuild event.
+    selfDestruct(this);
+    this.onPositionStyleChange(this.settings.positionStyle);
   }
 
   setLastExecutedCommand(commandId: string): void {

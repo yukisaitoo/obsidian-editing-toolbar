@@ -1,110 +1,133 @@
-import { App, ButtonComponent, Command, Modal, Notice, Setting, TextAreaComponent } from "obsidian";
+import {
+  App,
+  ButtonComponent,
+  Command,
+  Modal,
+  Notice,
+  Setting,
+  TextAreaComponent,
+} from "obsidian";
 import { ConfirmModal } from "src/modals/ConfirmModal";
 import type EditingToolbarPlugin from "src/plugin/main";
-import { strings } from 'src/translations/helper';
+import { strings } from "src/translations/helper";
 export class ImportExportModal extends Modal {
   plugin: EditingToolbarPlugin;
-  mode: 'import' | 'export';
-  importMode: 'overwrite' | 'update';
+  mode: "import" | "export";
+  importMode: "overwrite" | "update";
   textArea!: TextAreaComponent;
   importButton!: ButtonComponent;
   warningContent!: HTMLElement;
 
-  constructor(app: App, plugin: EditingToolbarPlugin, mode: 'import' | 'export') {
+  constructor(
+    app: App,
+    plugin: EditingToolbarPlugin,
+    mode: "import" | "export",
+  ) {
     super(app);
     this.plugin = plugin;
     this.mode = mode;
-    this.importMode = 'update';
+    this.importMode = "update";
   }
 
   onOpen() {
     const { contentEl } = this;
 
-    contentEl.addClass('editing-toolbar-import-export-modal');
+    contentEl.addClass("editing-toolbar-import-export-modal");
 
-    contentEl.createEl('h2', {
-      text: this.mode === 'import' ? strings.importConfiguration : strings.exportConfiguration,
-      cls: 'import-export-title'
+    contentEl.createEl("h2", {
+      text:
+        this.mode === "import"
+          ? strings.importConfiguration
+          : strings.exportConfiguration,
+      cls: "import-export-title",
     });
 
-    if (this.mode === 'export') {
-      const exportContainer = contentEl.createDiv('export-container');
+    if (this.mode === "export") {
+      const exportContainer = contentEl.createDiv("export-container");
 
       this.textArea = new TextAreaComponent(exportContainer);
       this.textArea
-        .setValue('')
+        .setValue("")
         .setPlaceholder(strings.loading)
-        .then(textArea => {
-          textArea.inputEl.addClass('import-export-textarea');
+        .then((textArea) => {
+          textArea.inputEl.addClass("import-export-textarea");
         });
 
       this.updateExportContent();
-      ;
+      const buttonContainer = contentEl.createDiv(
+        "import-export-button-container",
+      );
 
-      const buttonContainer = contentEl.createDiv('import-export-button-container');
-
-      const copyButton = buttonContainer.createEl('button', {
+      const copyButton = buttonContainer.createEl("button", {
         text: strings.copyClipboard,
-        cls: 'mod-cta'
+        cls: "mod-cta",
       });
 
-      copyButton.addEventListener('click', () => {
-        navigator.clipboard.writeText(this.textArea.getValue())
+      copyButton.addEventListener("click", () => {
+        navigator.clipboard
+          .writeText(this.textArea.getValue())
           .then(() => {
             new Notice(strings.configurationCopiedClipboard);
           })
-          .catch(err => {
-            console.error('Failed to copy: ', err);
+          .catch((err) => {
+            console.error("Failed to copy: ", err);
             new Notice(strings.failedCopyConfiguration);
           });
       });
     } else {
-
       new Setting(contentEl)
         .setName(strings.importMode)
         .setDesc(strings.chooseHowImportConfiguration)
-        .addDropdown(dropdown => {
+        .addDropdown((dropdown) => {
           dropdown
-            .addOption('update', strings.updateModeAddNewItems)
-            .addOption('overwrite', strings.overwriteModeReplaceSettingsImported)
+            .addOption("update", strings.updateModeAddNewItems)
+            .addOption(
+              "overwrite",
+              strings.overwriteModeReplaceSettingsImported,
+            )
             .setValue(this.importMode)
-            .onChange(value => {
-              this.importMode = value as 'overwrite' | 'update';
-              this.importButton.setButtonText(this.importMode === 'overwrite' ? strings.overwriteImport : strings.updateImport);
-              this.warningContent.setText(this.importMode === 'overwrite' ? strings.warningOverwriteModeReplaceExisting : strings.warningUpdateModeAddNew);
+            .onChange((value) => {
+              this.importMode = value as "overwrite" | "update";
+              this.importButton.setButtonText(
+                this.importMode === "overwrite"
+                  ? strings.overwriteImport
+                  : strings.updateImport,
+              );
+              this.warningContent.setText(
+                this.importMode === "overwrite"
+                  ? strings.warningOverwriteModeReplaceExisting
+                  : strings.warningUpdateModeAddNew,
+              );
             });
         });
-      const importContainer = contentEl.createDiv('import-container');
+      const importContainer = contentEl.createDiv("import-container");
 
       this.textArea = new TextAreaComponent(importContainer);
       this.textArea
-        .setValue('')
+        .setValue("")
         .setPlaceholder(strings.pasteConfigurationHere)
-        .then(textArea => {
-          textArea.inputEl.addClass('import-export-textarea');
+        .then((textArea) => {
+          textArea.inputEl.addClass("import-export-textarea");
         });
 
+      const buttonContainer = contentEl.createDiv(
+        "import-export-button-container",
+      );
 
+      new Setting(buttonContainer).addButton((button) => {
+        this.importButton = button
+          .setIcon("import")
+          .setButtonText(strings.importConfiguration)
+          .onClick(() => {
+            this.importConfiguration();
+          });
+      });
 
+      const warningDiv = contentEl.createDiv("import-export-warning");
 
-      const buttonContainer = contentEl.createDiv('import-export-button-container');
-
-      new Setting(buttonContainer)
-        .addButton(button => {
-          this.importButton = button
-            .setIcon('import')
-            .setButtonText(strings.importConfiguration)
-            .onClick(() => {
-              this.importConfiguration();
-            });
-        });
-
-
-      const warningDiv = contentEl.createDiv('import-export-warning');
-
-      const warningParagraph = warningDiv.createEl('p', {
+      const warningParagraph = warningDiv.createEl("p", {
         text: strings.warningUpdateModeAddNew,
-        cls: 'warning-text'
+        cls: "warning-text",
       });
       this.warningContent = warningParagraph;
     }
@@ -115,9 +138,9 @@ export class ImportExportModal extends Modal {
     const exportContent: any = {
       _exportInfo: {
         version: this.plugin.manifest.version,
-        exportType: 'all',
+        exportType: "all",
         exportTime: new Date().toISOString(),
-        pluginId: this.plugin.manifest.id
+        pluginId: this.plugin.manifest.id,
       },
       menuCommands: this.plugin.settings.menuCommands || [],
       followingCommands: this.plugin.settings.followingCommands || [],
@@ -148,20 +171,27 @@ export class ImportExportModal extends Modal {
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any -- validates untyped parsed JSON
   private validateExportContent(exportContent: any) {
-    ['menuCommands', 'followingCommands', 'topCommands', 'fixedCommands'].forEach(key => {
+    [
+      "menuCommands",
+      "followingCommands",
+      "topCommands",
+      "fixedCommands",
+    ].forEach((key) => {
       if (key in exportContent && !exportContent[key]) {
         exportContent[key] = [];
       }
     });
 
-
-    if ('positionStyle' in exportContent && !exportContent.positionStyle) {
-      exportContent.positionStyle = 'top';
+    if ("positionStyle" in exportContent && !exportContent.positionStyle) {
+      exportContent.positionStyle = "top";
     }
-    if ('aestheticStyle' in exportContent && !exportContent.aestheticStyle) {
-      exportContent.aestheticStyle = 'default';
+    if ("aestheticStyle" in exportContent && !exportContent.aestheticStyle) {
+      exportContent.aestheticStyle = "default";
     }
-    if ('cMenuNumRows' in exportContent && exportContent.cMenuNumRows === undefined) {
+    if (
+      "cMenuNumRows" in exportContent &&
+      exportContent.cMenuNumRows === undefined
+    ) {
       exportContent.cMenuNumRows = 1;
     }
   }
@@ -176,76 +206,145 @@ export class ImportExportModal extends Modal {
 
       const importData = JSON.parse(importText);
 
-      if (!importData || typeof importData !== 'object') {
+      if (!importData || typeof importData !== "object") {
         new Notice(strings.invalidImportDataFormat);
         return;
       }
 
-      const containsMenuCommands = 'menuCommands' in importData;
-      const containsFollowingCommands = 'followingCommands' in importData;
-      const containsTopCommands = 'topCommands' in importData;
-      const containsFixedCommands = 'fixedCommands' in importData;
-      const containsGeneralSettings = 'positionStyle' in importData || 'aestheticStyle' in importData;
+      const containsMenuCommands = "menuCommands" in importData;
+      const containsFollowingCommands = "followingCommands" in importData;
+      const containsTopCommands = "topCommands" in importData;
+      const containsFixedCommands = "fixedCommands" in importData;
+      const containsGeneralSettings =
+        "positionStyle" in importData || "aestheticStyle" in importData;
       const positionStyle = importData.positionStyle;
 
-      const hasMenuCommands = containsMenuCommands && Array.isArray(importData.menuCommands) && importData.menuCommands.length > 0;
-      const hasFollowingCommands = containsFollowingCommands && Array.isArray(importData.followingCommands) && importData.followingCommands.length > 0;
-      const hasTopCommands = containsTopCommands && Array.isArray(importData.topCommands) && importData.topCommands.length > 0;
-      const hasFixedCommands = containsFixedCommands && Array.isArray(importData.fixedCommands) && importData.fixedCommands.length > 0;
+      const hasMenuCommands =
+        containsMenuCommands &&
+        Array.isArray(importData.menuCommands) &&
+        importData.menuCommands.length > 0;
+      const hasFollowingCommands =
+        containsFollowingCommands &&
+        Array.isArray(importData.followingCommands) &&
+        importData.followingCommands.length > 0;
+      const hasTopCommands =
+        containsTopCommands &&
+        Array.isArray(importData.topCommands) &&
+        importData.topCommands.length > 0;
+      const hasFixedCommands =
+        containsFixedCommands &&
+        Array.isArray(importData.fixedCommands) &&
+        importData.fixedCommands.length > 0;
 
-      const emptyMenuCommands = containsMenuCommands && (!Array.isArray(importData.menuCommands) || importData.menuCommands.length === 0);
-      const emptyFollowingCommands = containsFollowingCommands && (!Array.isArray(importData.followingCommands) || importData.followingCommands.length === 0);
-      const emptyTopCommands = containsTopCommands && (!Array.isArray(importData.topCommands) || importData.topCommands.length === 0);
-      const emptyFixedCommands = containsFixedCommands && (!Array.isArray(importData.fixedCommands) || importData.fixedCommands.length === 0);
+      const emptyMenuCommands =
+        containsMenuCommands &&
+        (!Array.isArray(importData.menuCommands) ||
+          importData.menuCommands.length === 0);
+      const emptyFollowingCommands =
+        containsFollowingCommands &&
+        (!Array.isArray(importData.followingCommands) ||
+          importData.followingCommands.length === 0);
+      const emptyTopCommands =
+        containsTopCommands &&
+        (!Array.isArray(importData.topCommands) ||
+          importData.topCommands.length === 0);
+      const emptyFixedCommands =
+        containsFixedCommands &&
+        (!Array.isArray(importData.fixedCommands) ||
+          importData.fixedCommands.length === 0);
 
-      let importSummary = strings.import3 + '\n';
+      let importSummary = strings.import3 + "\n";
 
-      if (containsGeneralSettings) importSummary += '• ' + strings.updateGeneralSettings + '\n';
-      if (hasMenuCommands) importSummary += '• ' + strings.updateMainMenuCommands + ' (' + importData.menuCommands.length + ' ' + ')\n';
-      if (hasFollowingCommands) importSummary += '• ' + strings.updateFollowingStyleCommands + ' (' + importData.followingCommands.length + ' ' + ')\n';
-      if (hasTopCommands) importSummary += '• ' + strings.updateTopStyleCommands + ' (' + importData.topCommands.length + ' ' + ')\n';
-      if (hasFixedCommands) importSummary += '• ' + strings.updateFixedStyleCommands + ' (' + importData.fixedCommands.length + ' ' + ')\n';
-      if (this.importMode === 'overwrite') {
-        if (emptyMenuCommands) importSummary += '• ' + strings.clearAllMainMenuCommands + ' ⚠️\n';
-        if (emptyFollowingCommands) importSummary += '• ' + strings.clearAllFollowingStyleCommands + ' ⚠️\n';
-        if (emptyTopCommands) importSummary += '• ' + strings.clearAllTopStyleCommands + ' ⚠️\n';
-        if (emptyFixedCommands) importSummary += '• ' + strings.clearAllFixedStyleCommands + ' ⚠️\n';
+      if (containsGeneralSettings)
+        importSummary += "• " + strings.updateGeneralSettings + "\n";
+      if (hasMenuCommands)
+        importSummary +=
+          "• " +
+          strings.updateMainMenuCommands +
+          " (" +
+          importData.menuCommands.length +
+          " " +
+          ")\n";
+      if (hasFollowingCommands)
+        importSummary +=
+          "• " +
+          strings.updateFollowingStyleCommands +
+          " (" +
+          importData.followingCommands.length +
+          " " +
+          ")\n";
+      if (hasTopCommands)
+        importSummary +=
+          "• " +
+          strings.updateTopStyleCommands +
+          " (" +
+          importData.topCommands.length +
+          " " +
+          ")\n";
+      if (hasFixedCommands)
+        importSummary +=
+          "• " +
+          strings.updateFixedStyleCommands +
+          " (" +
+          importData.fixedCommands.length +
+          " " +
+          ")\n";
+      if (this.importMode === "overwrite") {
+        if (emptyMenuCommands)
+          importSummary += "• " + strings.clearAllMainMenuCommands + " ⚠️\n";
+        if (emptyFollowingCommands)
+          importSummary +=
+            "• " + strings.clearAllFollowingStyleCommands + " ⚠️\n";
+        if (emptyTopCommands)
+          importSummary += "• " + strings.clearAllTopStyleCommands + " ⚠️\n";
+        if (emptyFixedCommands)
+          importSummary += "• " + strings.clearAllFixedStyleCommands + " ⚠️\n";
       }
 
       if (positionStyle) {
-        importSummary += '• ' + strings.setPositionStyle + ' ' + this.getPositionStyleName(positionStyle) + '\n';
+        importSummary +=
+          "• " +
+          strings.setPositionStyle +
+          " " +
+          this.getPositionStyleName(positionStyle) +
+          "\n";
       }
 
-      if (!hasMenuCommands && !hasFollowingCommands &&
-        !hasTopCommands && !hasFixedCommands &&
-        !emptyMenuCommands && !emptyFollowingCommands &&
-        !emptyTopCommands && !emptyFixedCommands &&
-        !containsGeneralSettings) {
+      if (
+        !hasMenuCommands &&
+        !hasFollowingCommands &&
+        !hasTopCommands &&
+        !hasFixedCommands &&
+        !emptyMenuCommands &&
+        !emptyFollowingCommands &&
+        !emptyTopCommands &&
+        !emptyFixedCommands &&
+        !containsGeneralSettings
+      ) {
         new Notice(strings.validConfigurationFoundImportData);
         return;
       }
 
-      if (this.importMode === 'overwrite') {
-        importSummary += '\n' + strings.overwriteModeReplaceExistingSettings;
+      if (this.importMode === "overwrite") {
+        importSummary += "\n" + strings.overwriteModeReplaceExistingSettings;
       } else {
-        importSummary += '\n' + strings.updateModeMergeImportedSettings;
+        importSummary += "\n" + strings.updateModeMergeImportedSettings;
       }
 
       ConfirmModal.show(this.app, {
-        message: importSummary + '\n' + strings.doWantContinue,
+        message: importSummary + "\n" + strings.doWantContinue,
+        confirmWarning: true,
         onConfirm: async () => {
-
-
           const backup = {
             positionStyle: this.plugin.settings.positionStyle,
             menuCommands: [...this.plugin.settings.menuCommands],
             followingCommands: [...this.plugin.settings.followingCommands],
             topCommands: [...this.plugin.settings.topCommands],
-            fixedCommands: [...this.plugin.settings.fixedCommands]
+            fixedCommands: [...this.plugin.settings.fixedCommands],
           };
 
           try {
-            if (this.importMode === 'overwrite') {
+            if (this.importMode === "overwrite") {
               this.performOverwriteImport(importData);
             } else {
               this.performUpdateImport(importData);
@@ -263,18 +362,16 @@ export class ImportExportModal extends Modal {
             this.restoreBackup(backup);
             throw error;
           }
-
-
-        }
+        },
       });
-
     } catch (error) {
-      console.error('Import error: ', error);
-      new Notice(strings.error + ' ' + (error instanceof Error ? error.message : String(error)));
+      console.error("Import error: ", error);
+      new Notice(
+        strings.error +
+          " " +
+          (error instanceof Error ? error.message : String(error)),
+      );
     }
-
-
-
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any -- untyped external import JSON
@@ -303,19 +400,31 @@ export class ImportExportModal extends Modal {
     this.importGeneralSettings(importData);
 
     if (importData.menuCommands) {
-      this.updateCommandArray(this.plugin.settings.menuCommands, importData.menuCommands);
+      this.updateCommandArray(
+        this.plugin.settings.menuCommands,
+        importData.menuCommands,
+      );
     }
 
     if (importData.followingCommands) {
-      this.updateCommandArray(this.plugin.settings.followingCommands, importData.followingCommands);
+      this.updateCommandArray(
+        this.plugin.settings.followingCommands,
+        importData.followingCommands,
+      );
     }
 
     if (importData.topCommands) {
-      this.updateCommandArray(this.plugin.settings.topCommands, importData.topCommands);
+      this.updateCommandArray(
+        this.plugin.settings.topCommands,
+        importData.topCommands,
+      );
     }
 
     if (importData.fixedCommands) {
-      this.updateCommandArray(this.plugin.settings.fixedCommands, importData.fixedCommands);
+      this.updateCommandArray(
+        this.plugin.settings.fixedCommands,
+        importData.fixedCommands,
+      );
     }
   }
   private updateCommandArray(targetArray: Command[], sourceArray: Command[]) {
@@ -325,7 +434,7 @@ export class ImportExportModal extends Modal {
 
     sourceArray.forEach((importedCommand: Command) => {
       const existingCommandIndex = targetArray.findIndex(
-        cmd => cmd.id === importedCommand.id
+        (cmd) => cmd.id === importedCommand.id,
       );
 
       if (existingCommandIndex >= 0) {
@@ -334,10 +443,13 @@ export class ImportExportModal extends Modal {
         targetArray.push(importedCommand);
       }
 
-      if (importedCommand.SubmenuCommands && targetArray[existingCommandIndex]?.SubmenuCommands) {
+      if (
+        importedCommand.SubmenuCommands &&
+        targetArray[existingCommandIndex]?.SubmenuCommands
+      ) {
         this.updateCommandArray(
           targetArray[existingCommandIndex].SubmenuCommands!,
-          importedCommand.SubmenuCommands
+          importedCommand.SubmenuCommands,
         );
       }
     });
@@ -347,14 +459,25 @@ export class ImportExportModal extends Modal {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any -- untyped external import JSON
   importGeneralSettings(importData: any) {
     const generalSettings = [
-      'positionStyle', 'aestheticStyle',
-      'cMenuNumRows',
-      'custom_bg1', 'custom_bg2', 'custom_bg3', 'custom_bg4', 'custom_bg5',
-      'custom_fc1', 'custom_fc2', 'custom_fc3', 'custom_fc4', 'custom_fc5',
-      'toolbarBackgroundColor', 'toolbarIconColor', 'toolbarIconSize'
+      "positionStyle",
+      "aestheticStyle",
+      "cMenuNumRows",
+      "custom_bg1",
+      "custom_bg2",
+      "custom_bg3",
+      "custom_bg4",
+      "custom_bg5",
+      "custom_fc1",
+      "custom_fc2",
+      "custom_fc3",
+      "custom_fc4",
+      "custom_fc5",
+      "toolbarBackgroundColor",
+      "toolbarIconColor",
+      "toolbarIconSize",
     ];
 
-    generalSettings.forEach(key => {
+    generalSettings.forEach((key) => {
       if (importData[key] !== undefined) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any -- dynamic settings-key write from imported data
         (this.plugin.settings as any)[key] = importData[key];
@@ -364,23 +487,25 @@ export class ImportExportModal extends Modal {
 
   fixImportedCommandIds() {
     const commandMappings: { [key: string]: string } = {
-      'editor:toggle-numbered-list': 'editing-toolbar:toggle-numbered-list',
-      'editor:toggle-bullet-list': 'editing-toolbar:toggle-bullet-list',
-      'editor:toggle-highlight': 'editing-toolbar:toggle-highlight',
-      'toggle-highlight': 'editing-toolbar:toggle-highlight',
-      'editing-toolbar:editor:toggle-bold': 'editing-toolbar:toggle-bold',
-      'editing-toolbar:editor:toggle-italics': 'editing-toolbar:toggle-italics',
-      'editing-toolbar:editor:toggle-strikethrough': 'editing-toolbar:toggle-strikethrough',
-      'editing-toolbar:editor:toggle-inline-math': 'editing-toolbar:toggle-inline-math',
-      'editing-toolbar:editor:insert-callout': 'editing-toolbar:insert-callout',
-      'editing-toolbar:editor:insert-link': 'editing-toolbar:insert-link',
-      'cMenuToolbar-Divider-Line': 'editingToolbar-Divider-Line',
+      "editor:toggle-numbered-list": "editing-toolbar:toggle-numbered-list",
+      "editor:toggle-bullet-list": "editing-toolbar:toggle-bullet-list",
+      "editor:toggle-highlight": "editing-toolbar:toggle-highlight",
+      "toggle-highlight": "editing-toolbar:toggle-highlight",
+      "editing-toolbar:editor:toggle-bold": "editing-toolbar:toggle-bold",
+      "editing-toolbar:editor:toggle-italics": "editing-toolbar:toggle-italics",
+      "editing-toolbar:editor:toggle-strikethrough":
+        "editing-toolbar:toggle-strikethrough",
+      "editing-toolbar:editor:toggle-inline-math":
+        "editing-toolbar:toggle-inline-math",
+      "editing-toolbar:editor:insert-callout": "editing-toolbar:insert-callout",
+      "editing-toolbar:editor:insert-link": "editing-toolbar:insert-link",
+      "cMenuToolbar-Divider-Line": "editingToolbar-Divider-Line",
     };
 
     const fixCommandsInArray = (commands: Command[]) => {
       if (!commands || !Array.isArray(commands)) return;
 
-      commands.forEach(cmd => {
+      commands.forEach((cmd) => {
         if (cmd.id && commandMappings[cmd.id]) {
           cmd.id = commandMappings[cmd.id];
         }
@@ -413,15 +538,14 @@ export class ImportExportModal extends Modal {
 
   getPositionStyleName(style: string): string {
     switch (style) {
-      case 'following':
+      case "following":
         return strings.followingToolbar;
-      case 'top':
+      case "top":
         return strings.topToolbar;
-      case 'fixed':
+      case "fixed":
         return strings.fixedToolbar;
       default:
         return style;
     }
   }
-
-} 
+}
