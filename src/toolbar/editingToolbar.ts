@@ -17,7 +17,6 @@ import type EditingToolbarPlugin from "src/plugin/main";
 import {
   AppearanceByStyle,
   editingToolbarSettings,
-  getAppearanceValue,
   StyleAppearanceSettings,
   ToolbarStyleKey,
 } from "src/settings/settingsData";
@@ -619,14 +618,7 @@ export function createFollowingBar(
   const viewType = view?.getViewType();
   const isMarkdownView = viewType === "markdown";
 
-  const height =
-    getAppearanceValue(
-      plugin.settings,
-      "aestheticStyle",
-      plugin.resolveActiveStyle(),
-    ) === "tiny"
-      ? 30
-      : iconSize + 14;
+  const height = iconSize + 14;
 
   if (isMarkdownView) {
     if (ViewUtils.isSourceMode(view)) {
@@ -891,38 +883,17 @@ export function editingToolbarPopover(
   const resolvedIconSize =
     appearanceForStyle.toolbarIconSize ?? plugin.toolbarIconSize ?? 18;
 
-  const resolvedAestheticStyle: string =
-    (appearanceForStyle.aestheticStyle as string) ??
-    settings.aestheticStyle ??
-    "default";
-
-  // Explicit colours only for "custom"; other aesthetics get theirs from CSS classes.
   const resolvedBgColor =
-    resolvedAestheticStyle === "custom"
-      ? (appearanceForStyle.toolbarBackgroundColor ??
-        settings.toolbarBackgroundColor)
-      : undefined;
+    appearanceForStyle.toolbarBackgroundColor ??
+    settings.toolbarBackgroundColor;
 
   const resolvedIconColor =
-    resolvedAestheticStyle === "custom"
-      ? (appearanceForStyle.toolbarIconColor ?? settings.toolbarIconColor)
-      : undefined;
+    appearanceForStyle.toolbarIconColor ?? settings.toolbarIconColor;
 
-  const aestheticStyleMap: { [key: string]: string } = {
-    default: "editingToolbarDefaultAesthetic",
-    tiny: "editingToolbarTinyAesthetic",
-    glass: "editingToolbarGlassAesthetic",
-    custom: "editingToolbarCustomAesthetic",
-  };
-
-  function applyAestheticStyle(element: HTMLElement, style: string) {
-    Object.values(aestheticStyleMap).forEach((className) => {
-      element.removeClass(className);
-    });
-
-    const selectedClass = aestheticStyleMap[style] || aestheticStyleMap.default;
-    element.addClass(selectedClass);
-  }
+  const resolvedTransparency =
+    appearanceForStyle.toolbarBackgroundTransparency ??
+    settings.toolbarBackgroundTransparency ??
+    0;
 
   const generateMenu = () => {
     let btnWidth = 0;
@@ -951,8 +922,6 @@ export function editingToolbarPopover(
 
     const popoverMenu = createEl("div");
     popoverMenu.addClass("editingToolbarpopover");
-    popoverMenu.addClass("editingToolbarTinyAesthetic");
-
     popoverMenu.addClass("editingToolbarPopoverBar");
     popoverMenu.setAttribute("data-toolbar-style", effectiveStyle);
 
@@ -961,8 +930,18 @@ export function editingToolbarPopover(
     popoverMenu.style.visibility = "hidden";
     popoverMenu.style.height = "0";
 
-    applyAestheticStyle(editingToolbar, resolvedAestheticStyle);
-    applyAestheticStyle(popoverMenu, resolvedAestheticStyle);
+    editingToolbar.addClass("editingToolbarDefaultAesthetic");
+    popoverMenu.addClass("editingToolbarDefaultAesthetic");
+
+    const opacityValue = `${100 - resolvedTransparency}%`;
+    editingToolbar.style.setProperty(
+      "--editing-toolbar-background-opacity",
+      opacityValue,
+    );
+    popoverMenu.style.setProperty(
+      "--editing-toolbar-background-opacity",
+      opacityValue,
+    );
 
     if (resolvedBgColor) {
       editingToolbar.style.setProperty(

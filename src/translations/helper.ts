@@ -3,7 +3,6 @@
 import { moment } from "obsidian";
 
 import { en } from "./en";
-import enGB, { commandNames as enGBCommands } from "./locale/en-gb";
 import ja, { commandNames as jaCommands } from "./locale/ja";
 import ptBR, { commandNames as ptBRCommands } from "./locale/pt-br";
 import ru, { commandNames as ruCommands } from "./locale/ru";
@@ -17,7 +16,6 @@ type Locale = {
 };
 
 const localeMap: { [k: string]: Locale } = {
-  "en-gb": { ui: enGB, commands: enGBCommands },
   ja: { ui: ja, commands: jaCommands },
   "pt-br": { ui: ptBR, commands: ptBRCommands },
   ru: { ui: ru, commands: ruCommands },

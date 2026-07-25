@@ -8,7 +8,7 @@ const ui: Partial<Record<keyof typeof en, string>> = {
   addSeparator: "Adicionar Separador",
   addSubmenu: "Adicionar Submenu",
   addCommandOntoEditingToolbar:
-    "Adicione um comando na Barra de Ferramentas a partir da biblioteca de comandos do Obsidian. Para reordenar os comandos, arraste e solte os itens do comando. Para deletar, use o botão de deletar à direita do item do comando. A Barra de Ferramentas não atualizará automaticamente após reordenar os comandos. Use o botão de atualização acima.",
+    "Adicione um comando na Barra de Ferramentas a partir da biblioteca de comandos do Obsidian. Para reordenar os comandos, arraste e solte os itens do comando. Para deletar, use o botão de deletar à direita do item do comando.",
   appearance: "Aparência",
   clearAllFixedStyleCommands: "Limpar todos os Comandos de Estilo Fixo",
   clearAllFollowingStyleCommands:
@@ -34,6 +34,7 @@ const ui: Partial<Record<keyof typeof en, string>> = {
   clickPickerAdjustColor: "Clique no seletor para ajustar a cor",
   closed: "Fechado",
   collapseState: "Estado de Colapso",
+  default: "Padrão",
   command: "Comando",
   commandId: "ID do Comando",
   configurationCopiedClipboard:
@@ -51,8 +52,6 @@ const ui: Partial<Record<keyof typeof en, string>> = {
   standardColors: "Cores Padrão",
   translucentColors: "Cores Translúcidas",
   highlighterColors: "Cores de Marca-Texto",
-  customTheme: "Estilo Personalizado",
-  default: "Padrão",
   delete: "Deletar",
   doWantContinue: "Deseja continuar?",
   dragSliderMovePosition: "Arraste o slider para mover a posição",
@@ -136,8 +135,6 @@ const ui: Partial<Record<keyof typeof en, string>> = {
   renumberList: "Renumerar Lista",
   reset: "Reiniciar",
   result: "Resultado: ",
-  selectPresetToolbarThemeAutomatically:
-    "Selecione um estilo de barra de ferramentas pré-definido, automaticamente definindo a cor de fundo, cor do ícone e tamanho para o estilo selecionado.",
   setPositionStyle: "Definir Estilo de Posição para:",
   setBackgroundColorToolbar: "Definir a cor de fundo da barra de ferramentas.",
   setColorToolbarIcon: "Definir a cor do ícone da barra de ferramentas.",
@@ -156,7 +153,6 @@ const ui: Partial<Record<keyof typeof en, string>> = {
   toolbarPreviewHypotheticalCommandConfigurati:
     "Visualização da barra de ferramentas (com uma configuração de comandos hipotética).",
   toolbarSettings: "Configurações da Barra de Ferramentas",
-  toolbarTheme: "Estilo da Barra de Ferramentas",
   topToolbar: "Barra de Ferramentas de Topo",
   urlFormatError: "Erro de Formato de URL",
   updateImport: "Atualizar Importação",

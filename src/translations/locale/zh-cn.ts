@@ -155,8 +155,6 @@ const ui: Partial<Record<keyof typeof en, string>> = {
   removeAllWhitespace: "移除所有空白",
   renumberList: "列表重新编号",
   reset: "重置",
-  selectPresetToolbarThemeAutomatically:
-    "选择预设的工具栏主题，自动设置背景颜色、图标颜色和大小",
   selectTextSeeMoreTools: "选中文本后显示更多工具",
   separator: "分隔符",
   separatorLeaveEmptySmartSpacing: "分隔符 (留空则开启智能中英间距)",
@@ -186,7 +184,6 @@ const ui: Partial<Record<keyof typeof en, string>> = {
   toolbarPosition: "工具栏位置",
   toolbarPreviewHypotheticalCommandConfigurati: "工具栏预览（按钮仅供参考）",
   toolbarSettings: "工具栏设置",
-  toolbarTheme: "工具栏主题",
   topToolbar: "顶部工具栏",
   trimLineEnds: "去除行首尾空格",
   urlFormatError: "URL格式错误",
@@ -220,8 +217,6 @@ const ui: Partial<Record<keyof typeof en, string>> = {
 export default ui;
 
 export const commandNames: Record<string, string> = {
-  "Choose between a glass morphism, tiny and default style":
-    "选择毛玻璃,简约和默认风格",
   "Adjust Toolbar Position[Fixed mode]": "调整工具栏位置[固定模式]",
   "Result:": "结果：",
   "All settings": "所有设置",

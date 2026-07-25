@@ -1,5 +1,4 @@
 import type { Command } from "obsidian";
-export const AESTHETIC_STYLES = ["default", "tiny", "glass", "custom"];
 
 export const POSITION_STYLES = ["top", "following", "fixed"];
 export type ToolbarStyleKey = "top" | "following" | "fixed";
@@ -8,7 +7,7 @@ export interface StyleAppearanceSettings {
   toolbarBackgroundColor?: string;
   toolbarIconColor?: string;
   toolbarIconSize?: number;
-  aestheticStyle?: string;
+  toolbarBackgroundTransparency?: number;
 }
 
 export interface AppearanceByStyle {
@@ -101,7 +100,6 @@ export interface editingToolbarSettings {
   cMenuWidth: number;
   cMenuFontColor: string;
   cMenuBackgroundColor: string;
-  aestheticStyle: string;
   positionStyle: string;
   menuCommands: Command[];
   followingCommands: Command[];
@@ -137,6 +135,7 @@ export interface editingToolbarSettings {
   toolbarBackgroundColor: string;
   toolbarIconColor: string;
   toolbarIconSize: number;
+  toolbarBackgroundTransparency: number;
 }
 
 export const DEFAULT_TOOLBAR_COMMANDS: Command[] = [
@@ -566,7 +565,6 @@ export const DEFAULT_FOLLOWING_COMMANDS: Command[] = [
 ];
 
 export const DEFAULT_SETTINGS: editingToolbarSettings = {
-  aestheticStyle: "default",
   positionStyle: "top",
   menuCommands: DEFAULT_TOOLBAR_COMMANDS,
   followingCommands: [],
@@ -598,27 +596,28 @@ export const DEFAULT_SETTINGS: editingToolbarSettings = {
 
   appearanceByStyle: {
     top: {
-      toolbarBackgroundColor: "rgba(var(--background-secondary-rgb), 0.7)",
+      toolbarBackgroundColor: "var(--background-secondary)",
       toolbarIconColor: "var(--text-normal)",
       toolbarIconSize: 18,
-      aestheticStyle: "default",
+      toolbarBackgroundTransparency: 100,
     },
     following: {
-      toolbarBackgroundColor: "rgba(var(--background-secondary-rgb), 0.7)",
+      toolbarBackgroundColor: "var(--background-secondary)",
       toolbarIconColor: "var(--text-normal)",
       toolbarIconSize: 18,
-      aestheticStyle: "default",
+      toolbarBackgroundTransparency: 100,
     },
     fixed: {
-      toolbarBackgroundColor: "rgba(var(--background-secondary-rgb), 0.7)",
+      toolbarBackgroundColor: "var(--background-secondary)",
       toolbarIconColor: "var(--text-normal)",
       toolbarIconSize: 18,
-      aestheticStyle: "default",
+      toolbarBackgroundTransparency: 100,
     },
   },
 
   // Global appearance defaults: used as the fallback for any empty per-style bucket
-  toolbarBackgroundColor: "rgba(var(--background-secondary-rgb), 0.7)",
+  toolbarBackgroundColor: "var(--background-secondary)",
   toolbarIconColor: "var(--text-normal)",
   toolbarIconSize: 18,
+  toolbarBackgroundTransparency: 100,
 };

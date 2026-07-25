@@ -26,7 +26,6 @@ import type {
   ToolbarStyleKey,
 } from "src/settings/settingsData";
 import {
-  AESTHETIC_STYLES,
   getAppearanceValue,
   POSITION_STYLES,
   resolveNextPositionStyle,
@@ -43,12 +42,6 @@ const POSITION_STYLE_LABELS: Record<string, string> = {
   top: strings.topToolbar,
   following: strings.followingToolbar,
   fixed: strings.fixedToolbar,
-};
-const AESTHETIC_STYLE_LABELS: Record<string, string> = {
-  default: strings.default,
-  tiny: strings.tiny,
-  glass: strings.glass,
-  custom: strings.customTheme,
 };
 
 interface SubmenuCommand {
@@ -550,91 +543,6 @@ export class EditingToolbarSettingTab extends PluginSettingTab {
 
     const toolbarContainer = containerEl.createDiv("custom-toolbar-container");
     new Setting(toolbarContainer)
-      .setName(strings.toolbarTheme)
-      .setDesc(strings.selectPresetToolbarThemeAutomatically)
-      .addDropdown((dropdown) => {
-        const aesthetics: Record<string, string> = {};
-        AESTHETIC_STYLES.forEach((aesthetic) => {
-          aesthetics[aesthetic] = AESTHETIC_STYLE_LABELS[aesthetic];
-        });
-        dropdown.addOptions(aesthetics);
-        dropdown.selectEl.options[3].disabled = true; // disable the raw "custom" option
-        dropdown.addOption("light", strings.light);
-        dropdown.addOption("dark", strings.dark);
-        dropdown.addOption("vibrant", strings.vibrant);
-        dropdown.addOption("minimal", strings.minimal);
-        dropdown.addOption("elegant", strings.elegant);
-        dropdown.setValue(
-          (appearanceBucket.aestheticStyle as string) ??
-            this.plugin.settings.aestheticStyle,
-        );
-        dropdown.onChange(async (value) => {
-          const style = this.resolveEditingStyle();
-          const bucket = this.getAppearanceBucket(style);
-
-          if (value in aesthetics) {
-            bucket.aestheticStyle = value;
-            bucket.toolbarIconSize = 18;
-          } else {
-            // custom presets all map to "custom" aestheticStyle
-            bucket.aestheticStyle = "custom";
-          }
-          switch (value) {
-            case "light":
-              bucket.toolbarBackgroundColor = "#F5F8FA";
-              bucket.toolbarIconColor = "#4A5568";
-              bucket.toolbarIconSize = 18;
-              break;
-            case "dark":
-              bucket.toolbarBackgroundColor = "#2D3033";
-              bucket.toolbarIconColor = "#E2E8F0";
-              bucket.toolbarIconSize = 18;
-              break;
-            case "vibrant":
-              bucket.toolbarBackgroundColor = "#7E57C2";
-              bucket.toolbarIconColor = "#FFFFFF";
-              bucket.toolbarIconSize = 20;
-              break;
-            case "minimal":
-              bucket.toolbarBackgroundColor = "#F8F9FA";
-              bucket.toolbarIconColor = "#6B7280";
-              bucket.toolbarIconSize = 16;
-              break;
-            case "elegant":
-              bucket.toolbarBackgroundColor = "#1A2F28";
-              bucket.toolbarIconColor = "#D4AF37";
-              bucket.toolbarIconSize = 19;
-              break;
-          }
-          // Push the current style's values into the global CSS vars
-          const bg =
-            bucket.toolbarBackgroundColor ??
-            this.plugin.settings.toolbarBackgroundColor;
-          const icon =
-            bucket.toolbarIconColor ?? this.plugin.settings.toolbarIconColor;
-          const size = bucket.toolbarIconSize ?? 18;
-
-          document.documentElement.style.setProperty(
-            "--editing-toolbar-background-color",
-            bg,
-          );
-          document.documentElement.style.setProperty(
-            "--editing-toolbar-icon-color",
-            icon,
-          );
-          document.documentElement.style.setProperty(
-            "--toolbar-icon-size",
-            `${size}px`,
-          );
-
-          this.plugin.toolbarIconSize = size;
-          this.destroyPickrs();
-          this.display();
-          await this.plugin.saveSettings();
-          this.triggerRefresh();
-        });
-      });
-    new Setting(toolbarContainer)
       .setName(strings.toolbarBackgroundColor)
       .setDesc(strings.setBackgroundColorToolbar)
       .setClass("toolbar_background")
@@ -649,7 +557,7 @@ export class EditingToolbarSettingTab extends PluginSettingTab {
             el: pickerEl,
             containerEl: pickerContainer,
             swatches: ["#F5F8FA", "#F4F1E8", "#2D3033", "#1A2F28", "#2A1D3B"],
-            opacity: true,
+            opacity: false,
             defaultColor:
               appearanceBucket.toolbarBackgroundColor ??
               this.plugin.settings.toolbarBackgroundColor,
@@ -705,7 +613,6 @@ export class EditingToolbarSettingTab extends PluginSettingTab {
             const style = this.resolveEditingStyle();
             const bucket = this.getAppearanceBucket(style);
             bucket.toolbarIconSize = value;
-            bucket.aestheticStyle = "custom";
             // Only touch the live toolbar when editing the active style
             if (activeStyle === style) {
               this.plugin.toolbarIconSize = value;
@@ -716,6 +623,35 @@ export class EditingToolbarSettingTab extends PluginSettingTab {
             }
             await this.plugin.saveSettings();
             // Rebuild settings UI + live toolbar so both pick up the new size
+            this.display();
+            this.triggerRefresh();
+          });
+      });
+    new Setting(toolbarContainer)
+      .setName(strings.toolbarBackgroundTransparency)
+      .setDesc(strings.setTransparencyToolbarBackground)
+      .addSlider((slider) => {
+        const initialTransparency =
+          appearanceBucket.toolbarBackgroundTransparency ??
+          this.plugin.settings.toolbarBackgroundTransparency;
+
+        slider
+          .setValue(initialTransparency)
+          .setLimits(0, 100, 1)
+          .setDynamicTooltip()
+          .onChange(async (value) => {
+            const activeStyle = this.plugin.positionStyle;
+            const style = this.resolveEditingStyle();
+            const bucket = this.getAppearanceBucket(style);
+            bucket.toolbarBackgroundTransparency = value;
+            if (activeStyle === style) {
+              document.documentElement.style.setProperty(
+                "--editing-toolbar-background-opacity",
+                `${100 - value}%`,
+              );
+            }
+            await this.plugin.saveSettings();
+            // Rebuild settings UI + live toolbar so both pick up the new value
             this.display();
             this.triggerRefresh();
           });
@@ -735,15 +671,9 @@ export class EditingToolbarSettingTab extends PluginSettingTab {
     editingToolbar.classList.add("editing-toolbar-preview");
     editingToolbar.classList.add(`preview-${editingStyle}`);
     editingToolbar.setAttribute("id", "editingToolbarModalBar");
-    // Use the per-style aesthetic if set; fall back to the global one
-    const previewAestheticStyle =
-      (appearanceBucket.aestheticStyle as string) ??
-      this.plugin.settings.aestheticStyle ??
-      "default";
-    this.applyAestheticStyle(
-      editingToolbar,
-      previewAestheticStyle,
-      editingStyle,
+    editingToolbar.addClass("editingToolbarDefaultAesthetic");
+    editingToolbar.addClass(
+      this.positionLayoutMap[editingStyle] || this.positionLayoutMap.top,
     );
     if (editingStyle === "fixed") {
       const icon =
@@ -802,20 +732,9 @@ export class EditingToolbarSettingTab extends PluginSettingTab {
         icon: "checkbox-glyph",
       },
       {
-        id: "editor:toggle-comments",
-        name: "Comment",
-        icon: "percent-sign-glyph",
-      },
-
-      {
         id: "editor:insert-callout",
         name: "Insert Callout",
         icon: "lucide-quote",
-      },
-      {
-        id: "editor:insert-mathblock",
-        name: "MathBlock",
-        icon: "lucide-sigma-square",
       },
       {
         id: "editor:insert-table",
@@ -833,10 +752,7 @@ export class EditingToolbarSettingTab extends PluginSettingTab {
         setIcon(button.buttonEl, item.icon);
       }
     });
-    // Apply the current style's colours and icon size directly to the preview.
-    // Only override colours when we're using a custom theme; for the built-in
-    // "default", "tiny" and "glass" styles we rely on the CSS classes instead.
-    const usesCustomColours = previewAestheticStyle === "custom";
+    // Apply the current style's colours, transparency and icon size to the preview.
     const bg =
       appearanceBucket.toolbarBackgroundColor ??
       this.plugin.settings.toolbarBackgroundColor;
@@ -847,18 +763,19 @@ export class EditingToolbarSettingTab extends PluginSettingTab {
       appearanceBucket.toolbarIconSize ??
       this.plugin.settings.toolbarIconSize ??
       18;
-    if (usesCustomColours && bg) {
-      editingToolbar.style.backgroundColor = bg;
-    } else {
-      editingToolbar.style.removeProperty("background-color");
-    }
+    const transparency =
+      appearanceBucket.toolbarBackgroundTransparency ??
+      this.plugin.settings.toolbarBackgroundTransparency ??
+      0;
+
+    editingToolbar.style.setProperty("--editing-toolbar-background-color", bg);
+    editingToolbar.style.setProperty(
+      "--editing-toolbar-background-opacity",
+      `${100 - transparency}%`,
+    );
     const iconSvgs = editingToolbar.querySelectorAll<SVGElement>("svg");
     iconSvgs.forEach((svg) => {
-      if (usesCustomColours && iconColor) {
-        svg.style.color = iconColor;
-      } else {
-        svg.style.removeProperty("color");
-      }
+      svg.style.color = iconColor;
       svg.style.width = `${size}px`;
       svg.style.height = `${size}px`;
     });
@@ -1172,17 +1089,15 @@ export class EditingToolbarSettingTab extends PluginSettingTab {
         });
       } else {
         setting.addButton((addicon) => {
-          addicon
-            .setClass("editingToolbarSettingsIcon")
-            .onClick(async () => {
-              new ChooseFromIconList(
-                this.plugin,
-                newCommand,
-                false,
-                undefined,
-                this.currentEditingConfig,
-              ).open();
-            });
+          addicon.setClass("editingToolbarSettingsIcon").onClick(async () => {
+            new ChooseFromIconList(
+              this.plugin,
+              newCommand,
+              false,
+              undefined,
+              this.currentEditingConfig,
+            ).open();
+          });
           checkHtml(newCommand.icon ?? "")
             ? (addicon.buttonEl.innerHTML = newCommand.icon ?? "")
             : addicon.setIcon(newCommand.icon ?? "");
@@ -1307,10 +1222,6 @@ export class EditingToolbarSettingTab extends PluginSettingTab {
             hexColor,
           );
         }
-        // Changing a colour implies a custom aesthetic for this style
-        if (bucket.aestheticStyle !== "custom") {
-          bucket.aestheticStyle = "custom";
-        }
         this.display();
         this.triggerRefresh();
       } else {
@@ -1392,30 +1303,12 @@ export class EditingToolbarSettingTab extends PluginSettingTab {
     if (key === "Main menu") return "Main Menu Commands";
     return POSITION_STYLE_LABELS[key] ?? key;
   }
-  private aestheticStyleMap: { [key: string]: string } = {
-    default: "editingToolbarDefaultAesthetic",
-    tiny: "editingToolbarTinyAesthetic",
-    glass: "editingToolbarGlassAesthetic",
-    custom: "editingToolbarCustomAesthetic",
+  // Maps a position style to its layout class (used by the preview toolbar).
+  private positionLayoutMap: { [key: string]: string } = {
     top: "top",
     following: "editingToolbarFlex",
     fixed: "fixed",
   };
-  private applyAestheticStyle(
-    element: HTMLElement,
-    aestheticStyle: string,
-    positionStyle: string,
-  ) {
-    Object.values(this.aestheticStyleMap).forEach((className) => {
-      element.removeClass(className);
-    });
-    const selectedAestheticClass =
-      this.aestheticStyleMap[aestheticStyle] || this.aestheticStyleMap.default;
-    element.addClass(selectedAestheticClass);
-    const positionClass =
-      this.aestheticStyleMap[positionStyle] || this.aestheticStyleMap.top;
-    element.addClass(positionClass);
-  }
   private getCommandsArrayByType(type: string): Command[] {
     switch (type) {
       case "following":

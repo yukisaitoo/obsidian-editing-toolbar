@@ -147,7 +147,6 @@ export class ImportExportModal extends Modal {
       topCommands: this.plugin.settings.topCommands || [],
       fixedCommands: this.plugin.settings.fixedCommands || [],
       positionStyle: this.plugin.settings.positionStyle,
-      aestheticStyle: this.plugin.settings.aestheticStyle,
       cMenuNumRows: this.plugin.settings.cMenuNumRows,
       custom_bg1: this.plugin.settings.custom_bg1,
       custom_bg2: this.plugin.settings.custom_bg2,
@@ -162,6 +161,8 @@ export class ImportExportModal extends Modal {
       toolbarBackgroundColor: this.plugin.settings.toolbarBackgroundColor,
       toolbarIconColor: this.plugin.settings.toolbarIconColor,
       toolbarIconSize: this.plugin.settings.toolbarIconSize,
+      toolbarBackgroundTransparency:
+        this.plugin.settings.toolbarBackgroundTransparency,
     };
 
     this.validateExportContent(exportContent);
@@ -184,9 +185,6 @@ export class ImportExportModal extends Modal {
 
     if ("positionStyle" in exportContent && !exportContent.positionStyle) {
       exportContent.positionStyle = "top";
-    }
-    if ("aestheticStyle" in exportContent && !exportContent.aestheticStyle) {
-      exportContent.aestheticStyle = "default";
     }
     if (
       "cMenuNumRows" in exportContent &&
@@ -215,8 +213,7 @@ export class ImportExportModal extends Modal {
       const containsFollowingCommands = "followingCommands" in importData;
       const containsTopCommands = "topCommands" in importData;
       const containsFixedCommands = "fixedCommands" in importData;
-      const containsGeneralSettings =
-        "positionStyle" in importData || "aestheticStyle" in importData;
+      const containsGeneralSettings = "positionStyle" in importData;
       const positionStyle = importData.positionStyle;
 
       const hasMenuCommands =
@@ -460,7 +457,6 @@ export class ImportExportModal extends Modal {
   importGeneralSettings(importData: any) {
     const generalSettings = [
       "positionStyle",
-      "aestheticStyle",
       "cMenuNumRows",
       "custom_bg1",
       "custom_bg2",
@@ -475,6 +471,7 @@ export class ImportExportModal extends Modal {
       "toolbarBackgroundColor",
       "toolbarIconColor",
       "toolbarIconSize",
+      "toolbarBackgroundTransparency",
     ];
 
     generalSettings.forEach((key) => {

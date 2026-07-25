@@ -5,7 +5,7 @@ export const en = {
   addSeparator: "Add Separator",
   addSubmenu: "Add Submenu",
   addCommandOntoEditingToolbar:
-    "Add a command onto Editing Toolbar from Obsidian's commands library. To reorder the commands, drag and drop the command items. To delete them, use the delete buttom to the right of the command item. Editing Toolbar will not automaticaly refresh after reordering commands. Use the refresh button above.",
+    "Add a command onto Editing Toolbar from Obsidian's commands library. To reorder the commands, drag and drop the command items. To delete them, use the delete button to the right of the command item.",
   appearance: "Appearance",
   clearAllFixedStyleCommands: "Clear all Fixed Commands",
   clearAllFollowingStyleCommands: "Clear all Selection Commands",
@@ -32,6 +32,7 @@ export const en = {
   clickPickerAdjustColor: "Click on the picker to adjust the color",
   closed: "Closed",
   collapseState: "Collapse State",
+  default: "Default",
   command: "Command",
   commandId: "Command ID",
   configurationCopiedClipboard: "Configuration copied to clipboard",
@@ -44,14 +45,12 @@ export const en = {
   customColors: "Custom Colors",
   customFontColor: "Custom Font Color",
   customFontColors: "Custom Font Colors",
-  customTheme: "Custom Theme",
   highlighterColors: "Highlighter Colors",
   standardColors: "Standard Colors",
   themeColors: "Theme Colors",
   translucentColors: "Translucent Colors",
   dedupeLines: "Dedupe Lines",
   deduplicationCompletedRemaining: "Deduplication completed, remaining",
-  default: "Default",
   delete: "Delete",
   detectedChineseContextConvertedFull:
     "Detected Chinese context: converted to full-width symbols",
@@ -97,7 +96,6 @@ export const en = {
   formatBrushSelectTextApply: "Format brush ON! Select text to apply【",
   fullHalfConverter: "Full Half Converter",
   general: "General",
-  glass: "Glass",
   horizontalPosition: "Horizontal Position",
   id: "ID",
   icon: "Icon",
@@ -174,8 +172,6 @@ export const en = {
   resetConfigurationConfirm:
     "This restores every setting and all toolbar command lists to their defaults.\nThis can't be undone.",
   result: "Result: ",
-  selectPresetToolbarThemeAutomatically:
-    "Select a preset toolbar theme, automatically setting the background color, icon color, and size for the selected style.",
   selectTextSeeMoreTools: "Select text to see more tools",
   separator: "Separator",
   separatorLeaveEmptySmartSpacing: "Separator (leave empty for smart spacing)",
@@ -183,6 +179,8 @@ export const en = {
   setBackgroundColorToolbar: "Set the background color of the toolbar.",
   setColorToolbarIcon: "Set the color of the toolbar icon.",
   setSizeToolbarIconPx: "Set the size of the toolbar icon (px); default: 18px",
+  setTransparencyToolbarBackground:
+    "Set the background transparency of the toolbar (%); 0% is fully opaque.",
   settings: "Settings",
   shrinkExtraSpaces: "Shrink Extra Spaces",
   splitLines: "Split Lines",
@@ -197,9 +195,9 @@ export const en = {
   textTools: "Text Tools",
   command2: "The command",
   import3: "This import will:",
-  tiny: "Tiny",
   title: "Title",
   toolbarBackgroundColor: "Toolbar Background Color",
+  toolbarBackgroundTransparency: "Toolbar Background Transparency",
   toolbarCommands: "Toolbar Commands",
   toolbarIconColor: "Toolbar Icon Color",
   toolbarIconSize: "Toolbar Icon Size",
@@ -207,7 +205,6 @@ export const en = {
   toolbarPreviewHypotheticalCommandConfigurati:
     "Toolbar Preview (with hypothetical command configuration)",
   toolbarSettings: "Toolbar Settings",
-  toolbarTheme: "Toolbar Theme",
   topToolbar: "Top",
   trimLineEnds: "Trim Line Ends",
   urlFormatError: "URL Format Error",
@@ -233,11 +230,6 @@ export const en = {
   insert2: "to insert",
   updateModeMergeImportedSettings:
     "ℹ️ Update mode will merge imported settings with existing ones.",
-  light: "┌ Light",
-  elegant: "└ Elegant",
-  dark: "├ Dark",
-  minimal: "├ Minimal",
-  vibrant: "├ Vibrant",
   overwriteModeReplaceExistingSettings:
     "⚠️ Overwrite mode will replace existing settings with imported ones.",
   format: "】format\nClick the mouse right key to close the formatting-brush",

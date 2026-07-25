@@ -9,7 +9,7 @@ const ui: Partial<Record<keyof typeof en, string>> = {
   addSeparator: "Добавить разделитель",
   addSubmenu: "Добавить подменю",
   addCommandOntoEditingToolbar:
-    "Добавьте команду на панель инструментов из библиотеки команд Obsidian. Для изменения порядка перетаскивайте элементы команд. Для удаления используйте кнопку удаления справа от команды. После изменения порядка панель не обновляется автоматически — используйте кнопку обновления выше. Для значка можно выбрать Custom и указать собственный значок.",
+    "Добавьте команду на панель инструментов из библиотеки команд Obsidian. Для изменения порядка перетаскивайте элементы команд. Для удаления используйте кнопку удаления справа от команды. Для значка можно выбрать Custom и указать собственный значок.",
   appearance: "Внешний вид",
   clearAllFixedStyleCommands: "Очистить все команды фиксированного стиля",
   clearAllFollowingStyleCommands: "Очистить все команды стиля следования",
@@ -36,6 +36,7 @@ const ui: Partial<Record<keyof typeof en, string>> = {
   clickPickerAdjustColor: "Нажмите на палитру для выбора цвета",
   closed: "Свернуто",
   collapseState: "Состояние сворачивания",
+  default: "По умолчанию",
   command: "Команда",
   commandId: "ID команды",
   configurationCopiedClipboard: "Конфигурация скопирована в буфер обмена",
@@ -52,10 +53,8 @@ const ui: Partial<Record<keyof typeof en, string>> = {
   standardColors: "Стандартные цвета",
   translucentColors: "Полупрозрачные цвета",
   highlighterColors: "Цвета маркера",
-  customTheme: "Своя",
   dedupeLines: "Удалить дубликаты строк",
   deduplicationCompletedRemaining: "Удаление дубликатов завершено, осталось",
-  default: "По умолчанию",
   delete: "Удалить",
   detectedChineseContextConvertedFull:
     "Обнаружен китайский контекст: символы преобразованы в полноширинные",
@@ -179,8 +178,6 @@ const ui: Partial<Record<keyof typeof en, string>> = {
   renumberList: "Перенумеровать список",
   reset: "Сбросить",
   result: "Результат: ",
-  selectPresetToolbarThemeAutomatically:
-    "Выберите готовую тему панели инструментов, чтобы автоматически настроить цвет фона, цвет значков и размер для выбранного стиля.",
   selectTextSeeMoreTools:
     "Выделите текст, чтобы увидеть дополнительные инструменты",
   separator: "Разделитель",
@@ -214,7 +211,6 @@ const ui: Partial<Record<keyof typeof en, string>> = {
   toolbarPreviewHypotheticalCommandConfigurati:
     "Предпросмотр панели инструментов (с примерной конфигурацией команд)",
   toolbarSettings: "Настройки панели инструментов",
-  toolbarTheme: "Тема панели инструментов",
   topToolbar: "Верхняя панель инструментов",
   trimLineEnds: "Удалить пробелы в начале и конце строк",
   urlFormatError: "Неверный формат URL",
@@ -241,11 +237,6 @@ const ui: Partial<Record<keyof typeof en, string>> = {
   insert2: "вставить",
   updateModeMergeImportedSettings:
     "ℹ️ Режим обновления объединит импортированные настройки с существующими.",
-  light: "┌ Светлая",
-  elegant: "└ Элегантная",
-  dark: "├ Тёмная",
-  minimal: "├ Минималистичная",
-  vibrant: "├ Яркая",
   overwriteModeReplaceExistingSettings:
     "⚠️ Режим перезаписи заменит существующие настройки импортированными.",
   format:
@@ -257,8 +248,6 @@ const ui: Partial<Record<keyof typeof en, string>> = {
 export default ui;
 
 export const commandNames: Record<string, string> = {
-  "Choose between a glass morphism, tiny and default style":
-    "Выберите стиль: стеклянный, компактный или стандартный",
   "Adjust Toolbar Position[Fixed mode]":
     "Настроить положение панели [фиксированный режим]",
   'Command ID "${this.commandId}" already exists':
@@ -344,9 +333,6 @@ export const commandNames: Record<string, string> = {
   following: "Плавающая",
   top: "Сверху",
   fixed: "Закреплённая",
-  default: "Стандартная",
-  tiny: "Компактная",
-  glass: "Стеклянная",
   "Optional. Leave empty unless your server requires authentication.":
     "Необязательно. Оставьте пустым, если ваш сервер не требует авторизации.",
   "Get Models": "Получить список",

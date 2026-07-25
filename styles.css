@@ -1,7 +1,8 @@
 :root {
   --toolbar-horizontal-offset: 0px;
   --toolbar-vertical-offset: 0px;
-  --editing-toolbar-background-color: rgba(var(--background-secondary-rgb), 0.7);
+  --editing-toolbar-background-color: var(--background-secondary);
+  --editing-toolbar-background-opacity: 100%;
   --editing-toolbar-icon-color: var(--text-normal);
   --toolbar-icon-size: 18px;
 }
@@ -23,46 +24,6 @@
 #editingToolbarModalBar[data-toolbar-style="following"] {
  transition: none !important;
   -webkit-transition: none !important;
-}
-
-#editingToolbarModalBar.editingToolbarCustomAesthetic,
-:is(#editingToolbarModalBar, #editingToolbarPopoverBar).editingToolbarCustomAesthetic button[class^=editingToolbarCommandsubItem]>.subitem,
-#editingToolbarPopoverBar.editingToolbarCustomAesthetic {
-  background-color: var(--editing-toolbar-background-color);
-  gap: calc(var(--toolbar-icon-size) / 15) !important;
-}
-
-:is(#editingToolbarModalBar, #editingToolbarPopoverBar).editingToolbarCustomAesthetic button[class^=editingToolbarCommandsubItem]>.subitem::before {
-
-  content: '';
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px); /* Safari compatibility */
-
-  border-radius: inherit; /* Inherit parent's border-radius */
-}
-#editingToolbarModalBar.editingToolbarCustomAesthetic
-{
-  padding:calc(var(--toolbar-icon-size) / 4);
-}
-:is(#editingToolbarModalBar, #editingToolbarPopoverBar).editingToolbarCustomAesthetic :is(.editingToolbarCommandItem, button[class^=editingToolbarCommandsubItem]):not(.editingToolbar-Divider-Line) {
-
-height: var(--toolbar-icon-size) + 8px;
-}
-
-/* Applied to toolbar icons */
-:is(#editingToolbarModalBar, #editingToolbarPopoverBar).editingToolbarCustomAesthetic .editingToolbarCommandItem svg,
-:is(#editingToolbarModalBar, #editingToolbarPopoverBar).editingToolbarCustomAesthetic button[class^=editingToolbarCommandsubItem] svg,
-:is(#editingToolbarModalBar, #editingToolbarPopoverBar).editingToolbarCustomAesthetic button[class^=editingToolbarCommandsubItem]>.subitem svg
- {
-  color: var(--editing-toolbar-icon-color);
-  width: var(--toolbar-icon-size);
-  height: var(--toolbar-icon-size);
-  max-width: var(--toolbar-icon-size);
-  max-height: var(--toolbar-icon-size);
 }
 
 #editingToolbarModalBar.fixed{
@@ -211,41 +172,18 @@ editingToolbar CLASS CHANGES
 }
 
 .editingToolbarDefaultAesthetic {
-  background-color: var(--color-base-10, --background-primary);
+  background-color: color-mix(in srgb, var(--editing-toolbar-background-color) var(--editing-toolbar-background-opacity, 100%), transparent);
 }
 
-:is(#editingToolbarModalBar, #editingToolbarPopoverBar).editingToolbarGlassAesthetic {
-  backdrop-filter: var(--raised-blur, blur(6px));
-  -webkit-backdrop-filter: var(--raised-blur, blur(6px));
-  box-shadow: var(--raised-shadow, none);
-  background-clip: padding-box;
-  border: var(--raised-mask-border-width, 1px) solid transparent;
-  background-color: var(--raised-background, color-mix(in srgb, var(--background-secondary) 60%, transparent));
-}
-
-.is-phone:not(.is-floating-nav) :is(#editingToolbarModalBar, #editingToolbarPopoverBar).editingToolbarGlassAesthetic {
-  --raised-background: transparent;
-}
-
-:is(#editingToolbarModalBar, #editingToolbarPopoverBar).editingToolbarGlassAesthetic :is(.editingToolbarCommandItem, button[class^=editingToolbarCommandsubItem]) {
-  background-color: transparent;
-  box-shadow: none;
-}
-
-#editingToolbarModalBar.editingToolbarGlassAesthetic:not(.top) button[class^=editingToolbarCommandsubItem] {
-  margin: auto;
-  padding: 4px 4px;
-  box-shadow: none;
-  border: none;
-  display: flex;
-  border-radius: var(--radius-s);
-  font-size: 10px;
-  margin-right: 0px;
-  position: relative;
-  background-color: transparent;
-  place-items: center;
-  clear: both;
-  height: 28px;
+/* Toolbar icons honor the configured icon colour and size. */
+:is(#editingToolbarModalBar, #editingToolbarPopoverBar).editingToolbarDefaultAesthetic .editingToolbarCommandItem svg,
+:is(#editingToolbarModalBar, #editingToolbarPopoverBar).editingToolbarDefaultAesthetic button[class^=editingToolbarCommandsubItem] svg,
+:is(#editingToolbarModalBar, #editingToolbarPopoverBar).editingToolbarDefaultAesthetic button[class^=editingToolbarCommandsubItem]>.subitem svg {
+  color: var(--editing-toolbar-icon-color);
+  width: var(--toolbar-icon-size);
+  height: var(--toolbar-icon-size);
+  max-width: var(--toolbar-icon-size);
+  max-height: var(--toolbar-icon-size);
 }
 
 /*----------------------------------------------------------------
@@ -272,11 +210,6 @@ editingToolbar SUPPORT
   justify-items: center;
   border: none;
   backdrop-filter: none;
-}
-
-#editingToolbarModalBar.editingToolbarGlassAesthetic [class^=editingToolbarCommandsubItem] {
-
-  background-color: #ffffff00;
 }
 
 div.modal-container.editingToolbar-Modal:not(:is(.changename,.customicon)) .modal-bg {
@@ -306,45 +239,6 @@ div.modal-container.editingToolbar-Modal:not(:is(.changename,.customicon)) .moda
 
 body.theme-dark .modal-container.editingToolbar-Modal .modal input[type='range'] {
   background-color: var(--background-secondary);
-}
-
-/* tiny style */
-#editingToolbarModalBar.editingToolbarTinyAesthetic {
-  align-items: center;
-  justify-items: center;
-  border: 1px solid var(--background-modifier-border-hover);
-  backdrop-filter: none;
-  background-color: var(--background-secondary);
-}
-
-#editingToolbarModalBar.editingToolbarTinyAesthetic .editingToolbarCommandItem {
-  margin: auto;
-  padding: 0px;
-  box-shadow: none;
-  margin-left: 0px;
-  margin-right: 0px;
-  position: relative;
-  background-color: transparent;
-
-}
-
-:is(#editingToolbarModalBar).editingToolbarTinyAesthetic:not(.top) button[class^=editingToolbarCommandsubItem] {
-  margin: auto;
-  padding: 4px 4px;
-  box-shadow: none;
-  border: none;
-  display: flex;
-  border-radius: var(--radius-s);
-  font-size: 10px;
-  margin-right: 0px;
-  position: relative;
-  background-color: transparent;
-
-  place-items: center;
-  clear: both;
-  max-width: 28px;
-  max-height: 28px;
-
 }
 
 button[class^=editingToolbarCommandsubItem]::after {
@@ -692,7 +586,7 @@ button[class^=editingToolbarCommandsubItem]::after {
   overflow: visible;
   width: fit-content;
   z-index: var(--layer-popover);
-  background-color: var(--color-base-10, --background-primary);
+  background-color: color-mix(in srgb, var(--editing-toolbar-background-color) var(--editing-toolbar-background-opacity, 100%), transparent);
   background-clip: padding-box;
   border-radius: var(--radius-m);
   margin-left: 25px;
@@ -742,11 +636,6 @@ button[class^=editingToolbarCommandsubItem]::after {
   box-shadow: none;
   height: 28px;
   opacity: 0.8;
-}
-
-#editingToolbarModalBar.editingToolbarCustomAesthetic .more-menu>.editingToolbarCommandItem svg {
-  width: calc(var(--toolbar-icon-size) * 0.8);
-  height: calc(var(--toolbar-icon-size) * 0.8);
 }
 
 /*Divider-Line**/
@@ -1385,6 +1274,12 @@ body.auto-hide-header .workspace-tab-header-container + .workspace-tab-container
 }
 .editing-toolbar-settings .toolbar-preview-label {
   margin-bottom: 10px;
+}
+.editing-toolbar-settings .preview-toolbar-wrapper {
+  padding: 15px;
+  border-radius: 8px;
+  background-color: rgba(var(--color-purple-rgb), 0.35);
+  border: 1px solid rgba(var(--color-purple-rgb), 0.5);
 }
 .editing-toolbar-settings .import-export-info {
   margin-top: 20px;
