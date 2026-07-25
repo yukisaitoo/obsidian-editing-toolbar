@@ -11,7 +11,6 @@ import {
   Plugin,
 } from "obsidian";
 import { CommandsManager } from "src/commands/commands";
-import { StatusBar } from "src/components/StatusBar";
 import addIcons from "src/icons/customIcons";
 import { InsertLinkModal } from "src/modals/insertLinkModal";
 import type { ToolbarStyleKey } from "src/settings/settingsData";
@@ -62,8 +61,6 @@ const ADMONITION_PLUGIN_ID = "obsidian-admonition";
 
 export default class EditingToolbarPlugin extends Plugin {
   settings!: editingToolbarSettings;
-  statusBarIcon!: HTMLElement;
-  statusBar!: StatusBar;
   public toolbarIconSize!: number;
   public positionStyle!: string;
 
@@ -105,9 +102,6 @@ export default class EditingToolbarPlugin extends Plugin {
     this.commandsManager = new CommandsManager(this);
     this.commandsManager.registerCommands();
     this.app.workspace.onLayoutReady(() => {
-      this.statusBar = new StatusBar(this);
-      this.statusBar.init();
-
       // Delay lets Settings Search finish scanning tabs before we apply visibility
       setTimeout(() => {
         if (!this.settings.cMenuVisibility) {
