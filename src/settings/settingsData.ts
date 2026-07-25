@@ -7,7 +7,6 @@ export interface StyleAppearanceSettings {
   toolbarBackgroundColor?: string;
   toolbarIconColor?: string;
   toolbarIconSize?: number;
-  toolbarBackgroundTransparency?: number;
 }
 
 export interface AppearanceByStyle {
@@ -129,7 +128,6 @@ export interface editingToolbarSettings {
   toolbarBackgroundColor: string;
   toolbarIconColor: string;
   toolbarIconSize: number;
-  toolbarBackgroundTransparency: number;
 }
 
 export const DEFAULT_TOOLBAR_COMMANDS: Command[] = [
@@ -588,13 +586,11 @@ export const DEFAULT_SETTINGS: editingToolbarSettings = {
       toolbarBackgroundColor: "var(--background-secondary)",
       toolbarIconColor: "var(--text-normal)",
       toolbarIconSize: 18,
-      toolbarBackgroundTransparency: 100,
     },
     following: {
       toolbarBackgroundColor: "var(--background-secondary)",
       toolbarIconColor: "var(--text-normal)",
       toolbarIconSize: 18,
-      toolbarBackgroundTransparency: 100,
     },
   },
 
@@ -602,5 +598,4 @@ export const DEFAULT_SETTINGS: editingToolbarSettings = {
   toolbarBackgroundColor: "var(--background-secondary)",
   toolbarIconColor: "var(--text-normal)",
   toolbarIconSize: 18,
-  toolbarBackgroundTransparency: 100,
 };

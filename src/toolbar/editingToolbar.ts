@@ -960,11 +960,6 @@ export function editingToolbarPopover(
   const resolvedIconColor =
     appearanceForStyle.toolbarIconColor ?? settings.toolbarIconColor;
 
-  const resolvedTransparency =
-    appearanceForStyle.toolbarBackgroundTransparency ??
-    settings.toolbarBackgroundTransparency ??
-    0;
-
   const generateMenu = () => {
     const editingToolbar = createEl("div");
     if (editingToolbar) {
@@ -991,16 +986,6 @@ export function editingToolbarPopover(
 
     editingToolbar.addClass("editingToolbarDefaultAesthetic");
     popoverMenu.addClass("editingToolbarDefaultAesthetic");
-
-    const opacityValue = `${100 - resolvedTransparency}%`;
-    editingToolbar.style.setProperty(
-      "--editing-toolbar-background-opacity",
-      opacityValue,
-    );
-    popoverMenu.style.setProperty(
-      "--editing-toolbar-background-opacity",
-      opacityValue,
-    );
 
     if (resolvedBgColor) {
       editingToolbar.style.setProperty(

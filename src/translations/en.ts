@@ -166,8 +166,6 @@ export const en = {
   setBackgroundColorToolbar: "Set the background color of the toolbar.",
   setColorToolbarIcon: "Set the color of the toolbar icon.",
   setSizeToolbarIconPx: "Set the size of the toolbar icon (px); default: 18px",
-  setTransparencyToolbarBackground:
-    "Set the background transparency of the toolbar (%); 0% is fully opaque.",
   settings: "Settings",
   shrinkExtraSpaces: "Shrink Extra Spaces",
   splitLines: "Split Lines",
@@ -184,7 +182,6 @@ export const en = {
   import3: "This import will:",
   title: "Title",
   toolbarBackgroundColor: "Toolbar Background Color",
-  toolbarBackgroundTransparency: "Toolbar Background Transparency",
   toolbarCommands: "Toolbar Commands",
   toolbarIconColor: "Toolbar Icon Color",
   toolbarIconSize: "Toolbar Icon Size",

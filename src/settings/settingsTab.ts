@@ -570,35 +570,6 @@ export class EditingToolbarSettingTab extends PluginSettingTab {
             this.triggerRefresh();
           });
       });
-    new Setting(toolbarContainer)
-      .setName(strings.toolbarBackgroundTransparency)
-      .setDesc(strings.setTransparencyToolbarBackground)
-      .addSlider((slider) => {
-        const initialTransparency =
-          appearanceBucket.toolbarBackgroundTransparency ??
-          this.plugin.settings.toolbarBackgroundTransparency;
-
-        slider
-          .setValue(initialTransparency)
-          .setLimits(0, 100, 1)
-          .setDynamicTooltip()
-          .onChange(async (value) => {
-            const activeStyle = this.plugin.positionStyle;
-            const style = this.resolveEditingStyle();
-            const bucket = this.getAppearanceBucket(style);
-            bucket.toolbarBackgroundTransparency = value;
-            if (activeStyle === style) {
-              document.documentElement.style.setProperty(
-                "--editing-toolbar-background-opacity",
-                `${100 - value}%`,
-              );
-            }
-            await this.plugin.saveSettings();
-            // Rebuild settings UI + live toolbar so both pick up the new value
-            this.display();
-            this.triggerRefresh();
-          });
-      });
     const previewContainer = toolbarContainer.createDiv(
       "toolbar-preview-container",
     );
@@ -682,7 +653,7 @@ export class EditingToolbarSettingTab extends PluginSettingTab {
         setIcon(button.buttonEl, item.icon);
       }
     });
-    // Apply the current style's colours, transparency and icon size to the preview.
+    // Apply the current style's colours and icon size to the preview.
     const bg =
       appearanceBucket.toolbarBackgroundColor ??
       this.plugin.settings.toolbarBackgroundColor;
@@ -693,16 +664,7 @@ export class EditingToolbarSettingTab extends PluginSettingTab {
       appearanceBucket.toolbarIconSize ??
       this.plugin.settings.toolbarIconSize ??
       18;
-    const transparency =
-      appearanceBucket.toolbarBackgroundTransparency ??
-      this.plugin.settings.toolbarBackgroundTransparency ??
-      0;
-
     editingToolbar.style.setProperty("--editing-toolbar-background-color", bg);
-    editingToolbar.style.setProperty(
-      "--editing-toolbar-background-opacity",
-      `${100 - transparency}%`,
-    );
     const iconSvgs = editingToolbar.querySelectorAll<SVGElement>("svg");
     iconSvgs.forEach((svg) => {
       svg.style.color = iconColor;
