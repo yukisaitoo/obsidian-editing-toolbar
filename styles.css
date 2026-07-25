@@ -529,6 +529,14 @@ button[class^=editingToolbarCommandsubItem]::after {
   align-items: center;
   justify-content: center;
   gap: 10px;
+  /* Override the base rule's min-width:fit-content so the bar can't grow wider
+     than the pane (which is what pushed icons off-screen). Keep it pinned to
+     the pane width and let JS (collapseOverflowToFit) move the excess into the
+     "more" popover; overflow:hidden clips rather than spilling if a measure is
+     ever off. */
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
   transition: all 0.2s linear;
   -webkit-transition: all 0.2s linear;
   transform: none;

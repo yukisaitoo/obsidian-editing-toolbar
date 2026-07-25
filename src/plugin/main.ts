@@ -26,7 +26,6 @@ import {
   editingToolbarPopover,
   getExistingToolbar,
   quietFormatBrushes,
-  resetToolbar,
   selfDestruct,
   setFormatEraser,
 } from "src/toolbar/editingToolbar";
@@ -71,12 +70,11 @@ export default class EditingToolbarPlugin extends Plugin {
   public admonitionDefinitions: Record<string, AdmonitionDefinition> | null =
     null;
 
-  isMoreButton!: boolean;
   bgFormatBrushActive!: boolean;
   fontColorFormatBrushActive!: boolean;
   EN_Text_Format_Brush!: boolean;
   tempNotice: Notice | null = null;
-  leafWidth!: number;
+  topToolbarResizeObserver: ResizeObserver | null = null;
 
   lastExecutedCommand: string | null = null;
   formatBrushActive: boolean = false;
@@ -130,9 +128,6 @@ export default class EditingToolbarPlugin extends Plugin {
     );
     this.registerEvent(
       this.app.workspace.on("layout-change", this.handleEditingToolbar_layout),
-    );
-    this.registerEvent(
-      this.app.workspace.on("resize", this.handleEditingToolbar_resize),
     );
     if (this.settings.cMenuVisibility == true) {
       setTimeout(() => {
@@ -397,7 +392,9 @@ export default class EditingToolbarPlugin extends Plugin {
   onunload(): void {
     this.app.workspace.off("active-leaf-change", this.handleEditingToolbar);
     this.app.workspace.off("layout-change", this.handleEditingToolbar_layout);
-    this.app.workspace.off("resize", this.handleEditingToolbar_resize);
+
+    this.topToolbarResizeObserver?.disconnect();
+    this.topToolbarResizeObserver = null;
 
     if (this.formatBrushNotice) {
       this.formatBrushNotice.hide();
@@ -512,43 +509,6 @@ export default class EditingToolbarPlugin extends Plugin {
     this.handleEditingToolbar();
   };
 
-  handleEditingToolbar_resize = () => {
-    if (!this.settings.cMenuVisibility || !this.isTopToolbarActive()) {
-      return false;
-    }
-
-    const view = this.app.workspace.getActiveViewOfType(ItemView);
-    if (!ViewUtils.isSourceMode(view)) {
-      return false;
-    }
-
-    const leafwidth = this.app.workspace.activeLeaf?.view?.leaf?.width ?? 0;
-    if (leafwidth <= 0 || this.leafWidth === leafwidth) {
-      return false;
-    }
-
-    this.leafWidth = leafwidth;
-
-    if (this.settings.cMenuWidth && leafwidth) {
-      const diff = leafwidth - this.settings.cMenuWidth;
-
-      // Don't rebuild while the configured width still fits
-      if (diff < 78 && leafwidth > this.settings.cMenuWidth) {
-        return;
-      }
-
-      setTimeout(() => {
-        resetToolbar(this);
-        editingToolbarPopover(this.app, this);
-      }, 200);
-    }
-
-    return true;
-  };
-
-  setIsMoreButton(status: boolean): void {
-    this.isMoreButton = status;
-  }
   setBgFormatBrushActive(status: boolean): void {
     this.bgFormatBrushActive = status;
   }

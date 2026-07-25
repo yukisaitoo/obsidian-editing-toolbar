@@ -266,35 +266,122 @@ function syncToolbarVisibilityAfterAction(
   }
 }
 
-function shouldMoveButtonToMoreMenu(
-  currentWidth: number,
-  nextWidth: number,
-  leafWidth: number,
-  buttonWidth: number,
-  toolbarStyle?: ToolbarStyleKey | string,
-): boolean {
-  if (leafWidth <= 100) {
-    return false;
+// Reflow the toolbar to the current pane width by shuffling buttons between the
+// bar and the "more" (») popover — moving overflow out when it's too narrow and
+// pulling buttons back in when there's room again. This is a pure DOM move (no
+// teardown/rebuild), so it's cheap enough to run live on every resize frame.
+//
+// It measures real laid-out geometry rather than estimating from icon-size /
+// padding constants, so it stays correct for any button count and any CSS.
+// Available room = the pane's content width (the bar's containing block), NOT
+// the bar's own box, which can shrink-to-fit its content and never report
+// overflow. Needed width = the rendered span of the visible buttons, which
+// captures the real gaps/padding the browser applied.
+function reflowToolbarOverflow(
+  app: App,
+  editingToolbar: HTMLElement,
+  popoverBar: HTMLElement | null,
+): void {
+  if (!popoverBar || !editingToolbar.isConnected) return;
+
+  const OVERFLOW_TOLERANCE = 1;
+
+  const parent = editingToolbar.parentElement;
+  let available: number;
+  if (parent) {
+    const cs = getComputedStyle(parent);
+    const padX =
+      (parseFloat(cs.paddingLeft) || 0) + (parseFloat(cs.paddingRight) || 0);
+    available = parent.clientWidth - padX;
+  } else {
+    available = editingToolbar.clientWidth;
+  }
+  if (available <= 0) return; // not laid out yet — a later resize tick retries
+
+  // The » button is kept as the last child of the bar and toggled via display,
+  // so a hidden one contributes no width. Everything else is a real button.
+  const moreOf = (): HTMLElement | null =>
+    editingToolbar.querySelector<HTMLElement>(":scope > .more-menu");
+  const visibleSpan = (): number => {
+    let left = Infinity;
+    let right = -Infinity;
+    for (const el of Array.from(editingToolbar.children) as HTMLElement[]) {
+      if (el.style.display === "none") continue;
+      const r = el.getBoundingClientRect();
+      if (r.left < left) left = r.left;
+      if (r.right > right) right = r.right;
+    }
+    return right > left ? right - left : 0;
+  };
+  const overflowing = (): boolean =>
+    visibleSpan() > available + OVERFLOW_TOLERANCE;
+
+  // Nothing stored in the popover and the bar already fits → no » needed at all.
+  if (!moreOf() && !popoverBar.firstElementChild && !overflowing()) return;
+
+  const more = moreOf() ?? createMoreMenu(app, editingToolbar, popoverBar);
+  if (!more) return; // view not allowed / no host
+
+  // Expansion: pull buttons back from the popover while they still fit. The »
+  // only costs width while the popover keeps at least one item, so drop it from
+  // the measurement when the button we're testing would empty the popover.
+  while (popoverBar.firstElementChild) {
+    more.style.display = popoverBar.childElementCount === 1 ? "none" : "";
+    const candidate = popoverBar.firstElementChild as HTMLElement;
+    editingToolbar.insertBefore(candidate, more);
+    if (overflowing()) {
+      popoverBar.insertBefore(candidate, popoverBar.firstChild); // revert
+      break;
+    }
   }
 
-  const estimatedButtonCount = Math.max(
-    1,
-    Math.round(currentWidth / Math.max(buttonWidth, 1)),
-  );
-  const estimatedGapWidth = estimatedButtonCount * 6;
-  const reservedMoreButtonWidth = buttonWidth + 12;
-  const reservedFollowingBufferWidth =
-    toolbarStyle === "following" ? buttonWidth + 10 : 0;
-  const availableWidth = Math.max(leafWidth - 16, buttonWidth * 2);
+  // Collapse: push trailing buttons into the popover until the bar fits.
+  if (overflowing()) {
+    more.style.display = ""; // » is about to be shown; reserve its width.
+    let guard = editingToolbar.children.length;
+    while (overflowing() && guard-- > 0) {
+      const movable = (Array.from(editingToolbar.children) as HTMLElement[]).filter(
+        (el) => el !== more,
+      );
+      const last = movable[movable.length - 1];
+      if (!last) break;
+      // Prepend so the popover reads left-to-right in original command order.
+      popoverBar.insertBefore(last, popoverBar.firstChild);
+    }
+  }
 
-  return (
-    currentWidth +
-      nextWidth +
-      estimatedGapWidth +
-      reservedMoreButtonWidth +
-      reservedFollowingBufferWidth >=
-    availableWidth
-  );
+  more.style.display = popoverBar.firstElementChild ? "" : "none";
+}
+
+// Keep the top toolbar reflowing as its pane resizes, without rebuilding it.
+// Observe the PANE (parent), not the bar — moving buttons changes the bar's
+// size, so observing the bar would feed back into itself; the pane's width is
+// unaffected by our moves, so there's no observer loop.
+export function observeToolbarResize(
+  plugin: EditingToolbarPlugin,
+  app: App,
+  editingToolbar: HTMLElement,
+  popoverBar: HTMLElement | null,
+): void {
+  plugin.topToolbarResizeObserver?.disconnect();
+  plugin.topToolbarResizeObserver = null;
+
+  const parent = editingToolbar.parentElement;
+  if (!parent || !popoverBar) return;
+
+  const ownerWindow = editingToolbar.ownerDocument.defaultView ?? window;
+  const observer = new ownerWindow.ResizeObserver(() => {
+    if (!editingToolbar.isConnected) {
+      observer.disconnect();
+      if (plugin.topToolbarResizeObserver === observer) {
+        plugin.topToolbarResizeObserver = null;
+      }
+      return;
+    }
+    reflowToolbarOverflow(app, editingToolbar, popoverBar);
+  });
+  observer.observe(parent);
+  plugin.topToolbarResizeObserver = observer;
 }
 
 export function createDiv(selector: string) {
@@ -397,27 +484,13 @@ function setColorHex(color: string) {
 
 function createMoreMenu(
   app: App,
-  plugin: EditingToolbarPlugin,
-  selector: HTMLDivElement,
-) {
+  selector: HTMLElement,
+  moreContainer: HTMLElement,
+): HTMLElement | undefined {
   const view = app.workspace.getActiveViewOfType(ItemView);
   if (!view || !ViewUtils.isAllowedViewType(view)) return;
 
-  if (!plugin.isMoreButton) return;
-
   const toolbarStyle = selector.getAttribute("data-toolbar-style");
-  const moreContainer = (
-    toolbarStyle
-      ? selector.ownerDocument?.querySelector(
-          `.editingToolbarPopoverBar[data-toolbar-style="${toolbarStyle}"]`,
-        )
-      : view.containerEl.querySelector("#editingToolbarPopoverBar")
-  ) as HTMLElement | null;
-
-  if (!moreContainer) {
-    plugin.setIsMoreButton(false);
-    return;
-  }
 
   const resetMorePopoverPosition = (popoverEl: HTMLElement) => {
     popoverEl.style.removeProperty("left");
@@ -496,7 +569,6 @@ function createMoreMenu(
       }
     });
   moreButton.buttonEl.innerHTML = `<svg  width="14" height="14"  version="1.1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" enable-background="new 0 0 1024 1024" xml:space="preserve"><path fill="#666" d="M510.29 14.13 q17.09 -15.07 40.2 -14.07 q23.12 1 39.2 18.08 l334.66 385.92 q25.12 30.15 34.16 66.83 q9.04 36.68 0.5 73.87 q-8.54 37.19 -32.66 67.34 l-335.67 390.94 q-15.07 18.09 -38.69 20.1 q-23.62 2.01 -41.71 -13.07 q-18.08 -15.08 -20.09 -38.19 q-2.01 -23.12 13.06 -41.21 l334.66 -390.94 q11.06 -13.06 11.56 -29.65 q0.5 -16.58 -10.55 -29.64 l-334.67 -386.92 q-15.07 -17.09 -13.56 -40.7 q1.51 -23.62 19.59 -38.7 ZM81.17 14.13 q17.08 -15.07 40.19 -14.07 q23.11 1 39.2 18.08 l334.66 385.92 q25.12 30.15 34.16 66.83 q9.04 36.68 0.5 73.87 q-8.54 37.19 -32.66 67.34 l-335.67 390.94 q-15.07 18.09 -38.69 20.6 q-23.61 2.51 -41.7 -12.57 q-18.09 -15.08 -20.1 -38.69 q-2.01 -23.62 13.06 -41.71 l334.66 -390.94 q11.06 -13.06 11.56 -29.65 q0.5 -16.58 -10.55 -29.64 l-334.66 -386.92 q-15.08 -17.09 -13.57 -40.7 q1.51 -23.62 19.6 -38.7 Z"/></svg>`;
-  plugin.setIsMoreButton(false);
   return cMoreMenu;
 }
 
@@ -894,10 +966,6 @@ export function editingToolbarPopover(
     0;
 
   const generateMenu = () => {
-    let btnWidth = 0;
-    let leafWidth = 0;
-    const buttonWidth = resolvedIconSize + 8;
-
     const editingToolbar = createEl("div");
     if (editingToolbar) {
       editingToolbar.addClass("editingToolbarModalBar");
@@ -1025,19 +1093,6 @@ export function editingToolbarPopover(
           targetDom.insertAdjacentElement("afterbegin", editingToolbar);
         }
       }
-
-      const targetWidth = targetDom?.clientWidth || targetDom?.offsetWidth || 0;
-      const currentLeafWidth =
-        currentleaf?.clientWidth ||
-        currentleaf?.getBoundingClientRect().width ||
-        0;
-      const viewportWidth = targetDocument.defaultView?.innerWidth || 0;
-      const widthCandidates = [
-        targetWidth,
-        currentLeafWidth,
-        viewportWidth,
-      ].filter((width) => width > 0);
-      leafWidth = widthCandidates.length > 0 ? Math.min(...widthCandidates) : 0;
     } else {
       const workspaceRoot = targetDocument.body?.querySelector(
         ".mod-vertical.mod-root",
@@ -1055,12 +1110,6 @@ export function editingToolbarPopover(
       }
 
       workspaceRoot.insertAdjacentElement("afterbegin", editingToolbar);
-      const workspaceWidth = targetDocument.body?.clientWidth || 0;
-      const viewportWidth = targetDocument.defaultView?.innerWidth || 0;
-      const widthCandidates = [workspaceWidth, viewportWidth].filter(
-        (width) => width > 0,
-      );
-      leafWidth = widthCandidates.length > 0 ? Math.min(...widthCandidates) : 0;
     }
 
     const editingToolbarPopoverBar =
@@ -1072,21 +1121,6 @@ export function editingToolbarPopover(
             `.editingToolbarPopoverBar[data-toolbar-style="${effectiveStyle}"]`,
           ) as HTMLElement | null);
 
-    const resolveButtonHost = (shouldUseMoreMenu: boolean): HTMLElement => {
-      if (!shouldUseMoreMenu) {
-        return editingToolbar;
-      }
-
-      if (editingToolbarPopoverBar) {
-        return editingToolbarPopoverBar;
-      }
-
-      console.warn(
-        `Editing Toolbar: missing popover host for style "${effectiveStyle}", falling back to toolbar host.`,
-      );
-      return editingToolbar;
-    };
-
     const currentCommands = plugin.getCurrentCommands(effectiveStyle);
     const getLocalizedLabel = (label: string): string => t(label);
     const getLocalizedTooltip = (label: string, hotkey: string): string => {
@@ -1097,20 +1131,9 @@ export function editingToolbarPopover(
     currentCommands.forEach((item, index) => {
       let tip: string | undefined;
       if ("SubmenuCommands" in item) {
-        let parentBtn: ButtonComponent;
-
-        if (
-          shouldMoveButtonToMoreMenu(
-            btnWidth,
-            buttonWidth,
-            leafWidth,
-            buttonWidth,
-            effectiveStyle,
-          )
-        ) {
-          plugin.setIsMoreButton(true);
-          parentBtn = new ButtonComponent(resolveButtonHost(true));
-        } else parentBtn = new ButtonComponent(editingToolbar);
+        // Build every button into the main bar; overflow is resolved by
+        // measurement after the bar is laid out (see collapseOverflowToFit).
+        const parentBtn = new ButtonComponent(editingToolbar);
 
         parentBtn.setClass("editingToolbarCommandsubItem" + index);
         if (index >= settings.cMenuNumRows) {
@@ -1121,8 +1144,6 @@ export function editingToolbarPopover(
         }
 
         applyButtonIcon(parentBtn, item.icon);
-
-        btnWidth += buttonWidth + 2;
 
         const menuType = item.menuType || "submenu";
 
@@ -1230,7 +1251,6 @@ export function editingToolbarPopover(
               customColorSelector: ".custom_font",
             },
           );
-          btnWidth += buttonWidth;
         } else if (item.id === "editing-toolbar:change-background-color") {
           createColorPickerButton(
             app,
@@ -1249,21 +1269,8 @@ export function editingToolbarPopover(
               customColorSelector: ".custom_bg",
             },
           );
-          btnWidth += buttonWidth;
         } else {
-          let button: ButtonComponent;
-          if (
-            shouldMoveButtonToMoreMenu(
-              btnWidth,
-              buttonWidth,
-              leafWidth,
-              buttonWidth,
-              effectiveStyle,
-            )
-          ) {
-            plugin.setIsMoreButton(true);
-            button = new ButtonComponent(resolveButtonHost(true));
-          } else button = new ButtonComponent(editingToolbar);
+          const button = new ButtonComponent(editingToolbar);
           const hotkey = getHotkey(app, item.id);
 
           tip = getLocalizedTooltip(item.name, hotkey);
@@ -1289,21 +1296,15 @@ export function editingToolbarPopover(
             button.setClass("editingToolbar-Divider-Line");
 
           applyButtonIcon(button, item.icon);
-
-          btnWidth += buttonWidth;
         }
       }
     });
 
-    createMoreMenu(app, plugin, editingToolbar);
-    if (
-      Math.abs(plugin.settings.cMenuWidth - Number(btnWidth)) >
-      btnWidth + 4
-    ) {
-      plugin.settings.cMenuWidth = Number(btnWidth);
-      setTimeout(() => {
-        plugin.saveSettings();
-      }, 100);
+    // Initial fit (synchronous, no flash), then keep it reflowing live as the
+    // pane resizes — top style only; the following/menu bars wrap instead.
+    reflowToolbarOverflow(app, editingToolbar, editingToolbarPopoverBar);
+    if (effectiveStyle === "top") {
+      observeToolbarResize(plugin, app, editingToolbar, editingToolbarPopoverBar);
     }
   };
   if (!plugin.isLoadMobile()) return;

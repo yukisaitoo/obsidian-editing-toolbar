@@ -96,7 +96,6 @@ export type CustomColorKey =
   | `custom_fc${1 | 2 | 3 | 4 | 5}`;
 
 export interface editingToolbarSettings {
-  cMenuWidth: number;
   cMenuFontColor: string;
   cMenuBackgroundColor: string;
   positionStyle: string;
@@ -570,7 +569,6 @@ export const DEFAULT_SETTINGS: editingToolbarSettings = {
   cMenuVisibility: true,
   cMenuBottomValue: 4.25,
   cMenuNumRows: 12,
-  cMenuWidth: 610,
   cMenuFontColor: "#2DC26B",
   cMenuBackgroundColor: "#d3f8b6",
   custom_bg1: "#FFB78B8C",
