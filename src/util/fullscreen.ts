@@ -32,7 +32,6 @@ export function workplacefullscreenMode(app: App) {
   }
 }
 
-// full screen mode
 export function fullscreenMode(app: App) {
   const DOC_EL = document.documentElement;
 

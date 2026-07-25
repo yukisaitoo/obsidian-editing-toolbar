@@ -200,7 +200,7 @@ export const en = {
   toolbarIconSize: "Toolbar Icon Size",
   toolbarPosition: "Toolbar Position",
   toolbarPreviewHypotheticalCommandConfigurati:
-    "Toolbar Preview (With a hypothetical command configuration.)",
+    "Toolbar Preview (with hypothetical command configuration)",
   toolbarSettings: "Toolbar Settings",
   toolbarTheme: "Toolbar Theme",
   topToolbar: "Top",

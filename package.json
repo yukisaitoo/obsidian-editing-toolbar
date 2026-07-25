@@ -5,9 +5,7 @@
   "main": "main.js",
   "repository": "https://github.com/yukisaitoo/obsidian-editing-toolbar",
   "scripts": {
-    "typecheck": "tsc --noEmit",
-    "lint": "eslint src",
-    "build": "npm run typecheck && npm run lint && rollup --config rollup.config.mjs --environment BUILD:production",
+    "build": "tsc --noEmit && eslint src && rollup --config rollup.config.mjs --environment BUILD:production",
     "deploy": "npm run build && bash deploy.sh"
   },
   "keywords": [],

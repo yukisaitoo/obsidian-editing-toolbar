@@ -4,22 +4,22 @@ import { strings } from "src/translations/helper";
 interface BuiltInCalloutType {
     type: string;
     aliases: string[];
-    icon: string; 
+    icon: string;
     label: string;
-    color: string; // CSS variable or color string
+    color: string;
 }
 interface AdmonitionIconDefinition {
     name: string;
     type:  string; // 'default' means Admonition handles it
-    svg?: string; // If it's custom SVG
+    svg?: string;
 }
 interface CombinedCalloutTypeInfo {
-    type: string;       // The actual callout type string (e.g., 'note', 'ad-warning')
-    label: string;      // Display label in the dropdown
+    type: string; // e.g. 'note', 'ad-warning'
+    label: string;
     icon: string | AdmonitionIconDefinition;
-    color: string;      // CSS variable or actual color string
-    isAdmonition: boolean; // Flag to distinguish
-    sourcePlugin?: string; // Optional: to indicate it's from 'Admonition Plugin'
+    color: string;
+    isAdmonition: boolean;
+    sourcePlugin?: string;
 }
 export class InsertCalloutModal extends Modal {
     public type: string = "note";
@@ -62,16 +62,14 @@ export class InsertCalloutModal extends Modal {
         }
     }
     private prepareCalloutOptions() {
-        // 1. Add built-in types
         this.builtInCalloutTypes.forEach(bt => {
             this.allCalloutOptions.push({
                 type: bt.type,
                 label: bt.label,
-                icon: bt.icon, // IconName
+                icon: bt.icon,
                 color: bt.color,
                 isAdmonition: false
             });
-            // Add aliases for built-in types
             bt.aliases.forEach(alias => {
                 this.allCalloutOptions.push({
                     type: alias,
@@ -82,7 +80,6 @@ export class InsertCalloutModal extends Modal {
                 });
             });
         });
-        // 2. Add types from Admonition plugin
         if (this.plugin.admonitionDefinitions) {
             const admonitionTypes = Object.values(this.plugin.admonitionDefinitions);
             if (admonitionTypes.length > 0) {
@@ -91,9 +88,9 @@ export class InsertCalloutModal extends Modal {
                     if (!this.allCalloutOptions.some(opt => opt.type === ad.type)) {
                         this.allCalloutOptions.push({
                             type: ad.type,
-                            label: ad.title || ad.type.charAt(0).toUpperCase() + ad.type.slice(1), // Use admonition title or formatted type
-                            icon: ad.icon, // AdmonitionIconDefinition
-                            color: `rgb(${ad.color})`, // Admonition color is usually "R,G,B"
+                            label: ad.title || ad.type.charAt(0).toUpperCase() + ad.type.slice(1),
+                            icon: ad.icon,
+                            color: `rgb(${ad.color})`, // Admonition stores colour as "R,G,B"
                             isAdmonition: true,
                             sourcePlugin: "Admonition"
                         });
@@ -122,19 +119,14 @@ export class InsertCalloutModal extends Modal {
         });
 
         const typeContainer = contentEl.createDiv("callout-type-container");
-        // Ensure iconContainerEl is created fresh each time display is called
         this.iconContainerEl = typeContainer.createDiv("callout-icon-container");
         new Setting(typeContainer)
             .setName(strings.calloutType)
             .addDropdown((dropdown: DropdownComponent) => {
-                // Populate built-in types first
                 const builtIns = this.allCalloutOptions.filter(opt => !opt.isAdmonition);
-           
-                // Add admonition types, with a separator if there are both kinds
                 const admonitions = this.allCalloutOptions.filter(opt => opt.isAdmonition);
                 if (builtIns.length > 0 && admonitions.length > 0) {
-                    // Add a visual separator. DropdownComponent doesn't directly support <optgroup> or disabled options as separators.
-                    // A common workaround is an option with a distinct value and visual cue.
+                    // DropdownComponent has no <optgroup>; fake a separator with a disabled option
                     dropdown.addOption("---separator---", "---- Admonitions ----");
                     const separatorOption = dropdown.selectEl.options[dropdown.selectEl.options.length - 1];
                     if (separatorOption) {
@@ -148,22 +140,21 @@ export class InsertCalloutModal extends Modal {
                 builtIns.forEach(opt => {
                     dropdown.addOption(opt.type, opt.label);
                 });
-                // Ensure the current `this.type` is valid and selected
                 if (!this.allCalloutOptions.some(opt => opt.type === this.type)) {
                     this.type = this.allCalloutOptions.length > 0 ? this.allCalloutOptions[0].type : "note";
                 }
                 dropdown.setValue(this.type);
                 dropdown.onChange((value) => {
                     if (value === "---separator---") {
-                        // If the separator is somehow selected, revert to the previous valid type
+                        // Separator isn't selectable — revert to the last valid type
                         dropdown.setValue(this.type);
                         return;
                     }
                     this.type = value;
-                    this.updateIconAndColor(this.iconContainerEl, value); // Pass the iconContainerEl
+                    this.updateIconAndColor(this.iconContainerEl, value);
                 });
             });
-        this.updateIconAndColor(this.iconContainerEl, this.type); // Initial icon update
+        this.updateIconAndColor(this.iconContainerEl, this.type);
 
         new Setting(contentEl)
             .setName(strings.title)
@@ -235,41 +226,38 @@ export class InsertCalloutModal extends Modal {
         }, 10);
     }
     private updateIconAndColor(iconContainer: HTMLElement, typeKey: string) {
-        if (!iconContainer) return; // Guard against null iconContainer
+        if (!iconContainer) return;
         const typeInfo = this.allCalloutOptions.find(t => t.type === typeKey);
-        iconContainer.empty(); // Clear previous icon
+        iconContainer.empty();
         if (typeInfo) {
             if (typeInfo.isAdmonition) {
                 const adIcon = typeInfo.icon as AdmonitionIconDefinition;
                 if (adIcon.type === 'custom' && adIcon.svg) {
-                    // Admonition custom SVG icon
-                    iconContainer.innerHTML = adIcon.svg; // Directly set SVG content
+                    iconContainer.innerHTML = adIcon.svg;
                     const svgEl = iconContainer.querySelector('svg');
                     if (svgEl) {
-                        svgEl.style.fill = typeInfo.color; // Set fill color for custom SVG
-                        svgEl.style.width = "var(--icon-size)"; // Use Obsidian's icon size variable
+                        svgEl.style.fill = typeInfo.color;
+                        svgEl.style.width = "var(--icon-size)";
                         svgEl.style.height = "var(--icon-size)";
                     }
                 } else if ( adIcon.name.startsWith('lucide-')) {
-                    // Admonition using a Lucide icon
                     setIcon(iconContainer, adIcon.name);
                     iconContainer.style.setProperty("--callout-color", typeInfo.color);
-                } else if (adIcon.type === 'default') { // Admonition's own default icon handling
-                    setIcon(iconContainer, adIcon.name); // May not always be a valid IconName
+                } else if (adIcon.type === 'default') {
+                    setIcon(iconContainer, adIcon.name); // may not be a valid IconName
                     iconContainer.style.setProperty("--callout-color", typeInfo.color);
                 } else {
-                    // Other Admonition icon types not explicitly handled, use a placeholder
+                    // Unhandled Admonition icon type → placeholder
                     setIcon(iconContainer, "lucide-box");
                     iconContainer.style.setProperty("--callout-color", typeInfo.color);
                 }
             } else {
-                // Built-in callout type
                 setIcon(iconContainer, typeInfo.icon as string);
                 iconContainer.style.setProperty("--callout-color", typeInfo.color);
             }
         } else {
-            // Fallback if typeInfo is not found (should not happen if dropdown is correct)
-            setIcon(iconContainer, "lucide-alert-circle"); // Default error icon
+            // Shouldn't happen if the dropdown is in sync with allCalloutOptions
+            setIcon(iconContainer, "lucide-alert-circle");
             iconContainer.style.removeProperty("--callout-color");
         }
     }

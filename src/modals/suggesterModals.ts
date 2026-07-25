@@ -278,7 +278,6 @@ export class ChangeCmdname extends Modal {
         if (!this.issub)
         {
           const index = menuID['index']
-          //  console.log(index,"index")
           if (index === -1) {
             currentCommands.push(this.item);
           } else {

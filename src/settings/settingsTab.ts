@@ -236,7 +236,6 @@ export class EditingToolbarSettingTab extends PluginSettingTab {
     const generalSettingContainer = containerEl.createDiv(
       "generalSetting-container",
     );
-    // Top toolbar toggle
     new Setting(generalSettingContainer)
       .setName(strings.topToolbar)
       .setDesc(strings.enableToolbarPositionedTop)
@@ -246,7 +245,6 @@ export class EditingToolbarSettingTab extends PluginSettingTab {
           .onChange(async (value) => {
             const s = this.plugin.settings;
             const prevStyle = this.plugin.positionStyle;
-            // Update only the Top toolbar flag
             s.enableTopToolbar = value;
             const nextStyle = resolveNextPositionStyle(
               s,
@@ -258,12 +256,10 @@ export class EditingToolbarSettingTab extends PluginSettingTab {
               this.plugin.onPositionStyleChange(nextStyle);
             }
             await this.plugin.saveSettings();
-            // Immediately refresh toolbars to reflect this toggle
             this.plugin.handleEditingToolbar();
             this.display();
           });
       });
-    // Following toolbar toggle
     new Setting(generalSettingContainer)
       .setName(strings.followingToolbar)
       .setDesc(strings.enableToolbarAppearsUponText)
@@ -273,7 +269,6 @@ export class EditingToolbarSettingTab extends PluginSettingTab {
           .onChange(async (value) => {
             const s = this.plugin.settings;
             const prevStyle = this.plugin.positionStyle;
-            // Update only the Following toolbar flag
             s.enableFollowingToolbar = value;
             const nextStyle = resolveNextPositionStyle(
               s,
@@ -289,7 +284,6 @@ export class EditingToolbarSettingTab extends PluginSettingTab {
             this.display();
           });
       });
-    // Fixed toolbar toggle
     new Setting(generalSettingContainer)
       .setName(strings.fixedToolbar)
       .setDesc(strings.enableToolbarWhosePositionMay)
@@ -299,7 +293,6 @@ export class EditingToolbarSettingTab extends PluginSettingTab {
           .onChange(async (value) => {
             const s = this.plugin.settings;
             const prevStyle = this.plugin.positionStyle;
-            // Update only the Fixed toolbar flag
             s.enableFixedToolbar = value;
             const nextStyle = resolveNextPositionStyle(
               s,
@@ -315,7 +308,6 @@ export class EditingToolbarSettingTab extends PluginSettingTab {
             this.display();
           });
       });
-    // Custom background and font color settings
     const paintbrushContainer = containerEl.createDiv(
       "custom-paintbrush-container",
     );
@@ -386,13 +378,10 @@ export class EditingToolbarSettingTab extends PluginSettingTab {
     const appearanceSettingContainer = containerEl.createDiv(
       "appearanceSetting-container",
     );
-    // Aesthetic style setting
-
-    // Decide which style we are editing in this tab
     const editingStyle = this.resolveEditingStyle();
     this.plugin.appearanceEditStyle = editingStyle;
 
-    // Style picker – only controls which style's settings you edit
+    // Style picker – only controls which style's settings you edit, not the active toolbar
     new Setting(appearanceSettingContainer)
       .setName(strings.toolbarSettings)
       .setDesc(strings.chooseWhichToolbarStyleS)
@@ -406,8 +395,8 @@ export class EditingToolbarSettingTab extends PluginSettingTab {
           .setValue(editingStyle)
           .onChange(async (value) => {
             const style = value as ToolbarStyleKey;
-            this.plugin.appearanceEditStyle = style; // which style we edit
-            this.plugin.settings.positionStyle = style; // persist choice
+            this.plugin.appearanceEditStyle = style;
+            this.plugin.settings.positionStyle = style;
             await this.plugin.saveSettings();
             this.display();
           });
@@ -443,7 +432,6 @@ export class EditingToolbarSettingTab extends PluginSettingTab {
           }),
         );
     }
-    // Color settings
     this.createColorSettings(containerEl);
   }
   private displayCommandSettings(containerEl: HTMLElement): void {
@@ -554,7 +542,6 @@ export class EditingToolbarSettingTab extends PluginSettingTab {
         dropdown.addOption("vibrant", strings.vibrant);
         dropdown.addOption("minimal", strings.minimal);
         dropdown.addOption("elegant", strings.elegant);
-        // Use the bucket for the currently edited style
         dropdown.setValue(
           (appearanceBucket.aestheticStyle as string) ??
             this.plugin.settings.aestheticStyle,
@@ -570,7 +557,6 @@ export class EditingToolbarSettingTab extends PluginSettingTab {
             // custom presets all map to "custom" aestheticStyle
             bucket.aestheticStyle = "custom";
           }
-          // Set colours/sizes in the per-style bucket
           switch (value) {
             case "light":
               bucket.toolbarBackgroundColor = "#F5F8FA";
@@ -696,7 +682,6 @@ export class EditingToolbarSettingTab extends PluginSettingTab {
             const activeStyle = this.plugin.positionStyle;
             const style = this.resolveEditingStyle();
             const bucket = this.getAppearanceBucket(style);
-            // Per-style value
             bucket.toolbarIconSize = value;
             bucket.aestheticStyle = "custom";
             // Only touch the live toolbar when editing the active style
@@ -708,8 +693,7 @@ export class EditingToolbarSettingTab extends PluginSettingTab {
               );
             }
             await this.plugin.saveSettings();
-            // Rebuild the settings UI and live toolbar so the preview
-            // and the real toolbar both pick up the new size.
+            // Rebuild settings UI + live toolbar so both pick up the new size
             this.display();
             this.triggerRefresh();
           });
@@ -1167,7 +1151,6 @@ export class EditingToolbarSettingTab extends PluginSettingTab {
       } else {
         setting.addButton((addicon) => {
           addicon
-            //    .setIcon(newCommand.icon)
             .setClass("editingToolbarSettingsIcon")
             .onClick(async () => {
               new ChooseFromIconList(
@@ -1306,8 +1289,6 @@ export class EditingToolbarSettingTab extends PluginSettingTab {
         if (bucket.aestheticStyle !== "custom") {
           bucket.aestheticStyle = "custom";
         }
-        // Immediately refresh the settings UI and live toolbar so the
-        // preview and real toolbar both match the new colour.
         this.display();
         this.triggerRefresh();
       } else {

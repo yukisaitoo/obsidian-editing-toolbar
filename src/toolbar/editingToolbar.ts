@@ -49,7 +49,6 @@ const viewTypeToSelectorMap: { [key: string]: string } = {
 function getRootSplits(app: App): WorkspaceParentExt[] {
   const rootSplits: WorkspaceParentExt[] = [];
 
-  // push the main window's root split to the list
   rootSplits.push(
     app.workspace.rootSplit as WorkspaceParent as WorkspaceParentExt,
   );
@@ -57,7 +56,6 @@ function getRootSplits(app: App): WorkspaceParentExt[] {
   // @ts-expect-error floatingSplit is undocumented
   const floatingSplit = app.workspace.floatingSplit as WorkspaceParentExt;
   floatingSplit?.children.forEach((child: WorkspaceItemExt) => {
-    // if this is a window, push it to the list
     if (child instanceof WorkspaceWindow) {
       rootSplits.push(child as unknown as WorkspaceParentExt);
     }
@@ -166,7 +164,6 @@ const getNestedObject = (nestedObj: any, pathArr: (string | number)[]) => {
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any -- untyped hotkey key-combo structure
 function setHilite(keys: any, how: string) {
-  // need to check if existing key combo is overridden by undefining it
   if (keys && keys[1][0] !== undefined) {
     return how + keys.flat(2).join("+").replace("Mod", "Ctrl") + how;
   } else {
@@ -746,25 +743,19 @@ function calculateTopPosition(
 }
 
 interface ColorPickerButtonConfig {
-  // Tooltip on the main toolbar button.
   tooltip: string;
-  // Pre-rendered swatch-table markup (font vs. background palette).
   pickerHtml: string;
-  // Table id wired up by createTableCell for click-to-apply behaviour.
+  // Wired up by createTableCell for click-to-apply
   tableId: string;
-  // Flips the plugin into the matching format-brush mode.
   activateFormatBrush: () => void;
-  // Notice shown when that format-brush mode turns on.
   formatBrushMessage: string;
-  // Tooltip on the "open custom colour settings" palette button.
   customColorTooltip: string;
-  // Settings element highlighted with a CTA when that panel opens.
+  // CSS selector for the settings element to highlight with a CTA
   customColorSelector: string;
 }
 
-// Builds a toolbar button that carries an inline colour-swatch submenu plus
-// format-brush and custom-colour shortcuts. The font-colour and background-colour
-// commands share this whole structure and differ only via `config`.
+// Builds a colour-swatch submenu button with format-brush and custom-colour
+// shortcuts. Font- and background-colour share it, differing only via `config`.
 function createColorPickerButton(
   app: App,
   plugin: EditingToolbarPlugin,
@@ -867,18 +858,14 @@ export function editingToolbarPopover(
     if (settings.enableFixedToolbar) stylesToRender.push("fixed");
 
     stylesToRender.forEach((styleKey) => {
-      // Each call below runs the rest of this function with an explicit style.
       editingToolbarPopover(app, plugin, styleKey, targetDocument);
     });
 
     return;
   }
 
-  // From here on, we are rendering a single toolbar instance for a specific style
   const effectiveStyle: ToolbarStyleKey = style as ToolbarStyleKey;
 
-  // If toolbar visibility is disabled globally, hide any existing toolbars and return early
-  // This prevents toolbars from being created when they should be hidden
   if (!settings.cMenuVisibility) {
     const existingToolbar = getExistingToolbar(
       app,
@@ -889,10 +876,9 @@ export function editingToolbarPopover(
     if (existingToolbar) {
       existingToolbar.style.display = "none";
     }
-    return; // Don't create new toolbars when visibility is disabled
+    return;
   }
 
-  // Per-style appearance for this toolbar instance
   const appearanceStore = (settings.appearanceByStyle ||
     {}) as AppearanceByStyle;
   const appearanceForStyle = (appearanceStore[effectiveStyle] ||
@@ -906,8 +892,7 @@ export function editingToolbarPopover(
     settings.aestheticStyle ??
     "default";
 
-  // Only use explicit colours when the style is "custom".
-  // For "default", "tiny" and "glass", let the CSS classes define colours.
+  // Explicit colours only for "custom"; other aesthetics get theirs from CSS classes.
   const resolvedBgColor =
     resolvedAestheticStyle === "custom"
       ? (appearanceForStyle.toolbarBackgroundColor ??
@@ -947,7 +932,6 @@ export function editingToolbarPopover(
 
       if (effectiveStyle === "top") {
         editingToolbar.className += " top";
-        // If cMenuVisibility is false, visibility is already set to hidden above
       } else if (effectiveStyle === "following") {
         editingToolbar.style.visibility = "hidden";
       } else if (effectiveStyle === "fixed") {
@@ -973,11 +957,9 @@ export function editingToolbarPopover(
     popoverMenu.style.visibility = "hidden";
     popoverMenu.style.height = "0";
 
-    // Apply per-style aesthetic
     applyAestheticStyle(editingToolbar, resolvedAestheticStyle);
     applyAestheticStyle(popoverMenu, resolvedAestheticStyle);
 
-    // Apply per-style colors and icon size via CSS variables on each toolbar
     if (resolvedBgColor) {
       editingToolbar.style.setProperty(
         "--editing-toolbar-background-color",
@@ -1131,7 +1113,6 @@ export function editingToolbarPopover(
       return editingToolbar;
     };
 
-    // Use per-style commands based on the toolbar we are rendering
     const currentCommands = plugin.getCurrentCommands(effectiveStyle);
     const getLocalizedLabel = (label: string): string => t(label);
     const getLocalizedTooltip = (label: string, hotkey: string): string => {
@@ -1362,15 +1343,14 @@ export function editingToolbarPopover(
     targetDocument,
   );
   if (existingToolbar && effectiveStyle !== "top") {
-    // Check cMenuVisibility first - if disabled, hide all toolbars with display: none
     if (!settings.cMenuVisibility) {
       existingToolbar.style.display = "none";
     } else if (effectiveStyle === "following") {
       existingToolbar.style.visibility = "hidden";
-      existingToolbar.style.display = ""; // Reset display to allow visibility to work
+      existingToolbar.style.display = ""; // clear display:none so visibility can take over
     } else {
       existingToolbar.style.visibility = "visible";
-      existingToolbar.style.display = ""; // Reset display to allow visibility to work
+      existingToolbar.style.display = "";
     }
 
     if (resolvedBgColor) {

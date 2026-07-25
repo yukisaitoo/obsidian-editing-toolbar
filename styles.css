@@ -117,7 +117,9 @@ flex-wrap: wrap;
 .editingToolbarMenuTypeDropdown {
   min-width: 120px;
   margin-left: 8px;
-  padding: 4px 8px;
+  /* Reserve right padding for the native select chevron so the trailing
+     text (e.g. the "u" in "Submenu"/"Menu") doesn't slide under it. */
+  padding: 4px 28px 4px 8px;
   border-radius: var(--radius-s);
   background-color: var(--background-primary-alt);
   border: 1px solid var(--background-modifier-border);
@@ -347,7 +349,7 @@ body.theme-dark .modal-container.editingToolbar-Modal .modal input[type='range']
 
 button[class^=editingToolbarCommandsubItem]::after {
 
-  content: url("data:image/svg+xml,%3Csvg width='4' height='4' version='1.1' xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1024 1024' enable-background='new 0 0 1024 1024' xml:space='preserve'%3E%3Cpath fill='%23666' d='M13.24 80.11 l461.75 560.8 q14.56 16.02 36.41 16.02 q21.85 0 36.42 -16.02 l463.2 -560.8 q10.2 -10.19 12.38 -24.75 q2.18 -14.57 -3.64 -27.68 q-5.82 -13.11 -18.21 -20.39 q-12.39 -7.29 -26.95 -7.29 l-924.95 0 q-20.4 0 -34.23 13.11 q-13.84 13.11 -15.29 32.77 q-1.46 19.66 13.11 34.23 Z'/%3E%3C/svg%3E");
+  content: url("data:image/svg+xml,%3Csvg width='4' height='4' version='1.1' xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1024 1024' enable-background='new 0 0 1024 1024' xml:space='preserve'%3E%3Cpath fill='%23808080' d='M13.24 80.11 l461.75 560.8 q14.56 16.02 36.41 16.02 q21.85 0 36.42 -16.02 l463.2 -560.8 q10.2 -10.19 12.38 -24.75 q2.18 -14.57 -3.64 -27.68 q-5.82 -13.11 -18.21 -20.39 q-12.39 -7.29 -26.95 -7.29 l-924.95 0 q-20.4 0 -34.23 13.11 q-13.84 13.11 -15.29 32.77 q-1.46 19.66 13.11 34.23 Z'/%3E%3C/svg%3E");
 
   margin-left: 1px;
   margin-top: 6px;
@@ -640,7 +642,7 @@ button[class^=editingToolbarCommandsubItem]::after {
   height: calc(var(--toolbar-icon-size) + 18px);
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: 10px;
   transition: all 0.2s linear;
   -webkit-transition: all 0.2s linear;
   transform: none;

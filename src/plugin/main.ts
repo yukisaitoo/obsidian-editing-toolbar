@@ -106,8 +106,7 @@ export default class EditingToolbarPlugin extends Plugin {
       this.statusBar = new StatusBar(this);
       this.statusBar.init();
 
-      // Ensure toolbar respects initial visibility state after Settings Search completes
-      // Use a small delay to ensure Settings Search has finished scanning settings tabs
+      // Delay lets Settings Search finish scanning tabs before we apply visibility
       setTimeout(() => {
         if (!this.settings.cMenuVisibility) {
           this.handleEditingToolbar();
@@ -198,7 +197,6 @@ export default class EditingToolbarPlugin extends Plugin {
     const loadedData = await this.loadData();
     this.settings = Object.assign({}, DEFAULT_SETTINGS, loadedData);
 
-    // normalize settings
     for (const key of Object.keys(
       DEFAULT_SETTINGS,
     ) as (keyof editingToolbarSettings)[]) {
@@ -428,7 +426,6 @@ export default class EditingToolbarPlugin extends Plugin {
       activeDocument.body.classList.remove("format-brush-cursor");
     }
 
-    // If the toolbar is globally disabled in settings, just hide any existing toolbars and return.
     if (!this.settings.cMenuVisibility) {
       (["top", "following", "fixed"] as const).forEach((style) => {
         const el = getExistingToolbar(this.app, this, style);
@@ -471,8 +468,7 @@ export default class EditingToolbarPlugin extends Plugin {
     const isMarkdownView = viewType === "markdown";
     const inSourceMode = isMarkdownView && ViewUtils.isSourceMode(view);
 
-    // For markdown views in reading mode, hide all toolbars.
-    // For non-markdown views (like Canvas), we'll handle them below.
+    // Reading mode hides everything; non-markdown views (Canvas, …) handled below.
     if (isMarkdownView && !inSourceMode) {
       (["top", "following", "fixed"] as const).forEach((style) => {
         const el = getExistingToolbar(this.app, this, style);
@@ -480,8 +476,6 @@ export default class EditingToolbarPlugin extends Plugin {
       });
       return;
     }
-
-    // ---- Determine which styles SHOULD be active ----
 
     // The explicit enable flags are the single source of truth. Legacy
     // positionStyle-only configs are migrated into these flags in
@@ -498,18 +492,14 @@ export default class EditingToolbarPlugin extends Plugin {
       { key: "fixed", enabled: fixedEnabled },
     ];
 
-    // ---- Per-style handling: create / show / hide independently ----
     for (const { key, enabled } of styles) {
       const existing = getExistingToolbar(this.app, this, key);
 
       if (!enabled) {
-        // Style disabled in settings → hide any existing toolbar of that style.
         if (existing) existing.style.visibility = "hidden";
         continue;
       }
 
-      // Style is enabled:
-      // If we don't have this toolbar yet, create it for this style.
       if (!existing) {
         editingToolbarPopover(this.app, this, key);
       }
@@ -518,30 +508,19 @@ export default class EditingToolbarPlugin extends Plugin {
       if (!toolbar) continue;
 
       if (key === "following") {
-        // Following toolbar only works in markdown source mode
-        // For other views (Canvas, etc.), hide it
-        if (!inSourceMode) {
-          toolbar.style.visibility = "hidden";
-        } else {
-          // In markdown source mode, stays hidden until text is selected.
-          // Your `showFollowingToolbar` / selection handlers will reveal it.
-          toolbar.style.visibility = "hidden";
-        }
+        // Following bar stays hidden until a selection reveals it (selection handlers)
+        toolbar.style.visibility = "hidden";
       } else {
-        // Top / Fixed: visible in markdown source mode and other allowed views
         toolbar.style.visibility = "visible";
       }
     }
   };
 
   handleEditingToolbar_layout = () => {
-    // When the workspace layout changes (splits, panes, etc.),
-    // just recompute toolbar creation/visibility using the main handler.
     this.handleEditingToolbar();
   };
 
   handleEditingToolbar_resize = () => {
-    // Only care about resizing when the toolbar is visible and top-style is active
     if (!this.settings.cMenuVisibility || !this.isTopToolbarActive()) {
       return false;
     }
@@ -561,7 +540,7 @@ export default class EditingToolbarPlugin extends Plugin {
     if (this.settings.cMenuWidth && leafwidth) {
       const diff = leafwidth - this.settings.cMenuWidth;
 
-      // Same guard as before: don't rebuild if the configured width still fits
+      // Don't rebuild while the configured width still fits
       if (diff < 78 && leafwidth > this.settings.cMenuWidth) {
         return;
       }
@@ -636,8 +615,7 @@ export default class EditingToolbarPlugin extends Plugin {
     }
   }
 
-  // Ordered list of "wrap" formats to match against a whole selection.
-  // First match wins, mirroring the original if/else chain.
+  // "Wrap" formats matched against a whole selection; first match wins.
   private static readonly SELECTION_WRAP_FORMATS: Array<{
     re: RegExp;
     command: string;
@@ -1228,11 +1206,9 @@ export default class EditingToolbarPlugin extends Plugin {
     const previousEditStyle = this.appearanceEditStyle;
     this.appearanceEditStyle = null;
 
-    // Track the new style both in-memory and in settings
     this.positionStyle = newStyle;
     this.settings.positionStyle = newStyle;
 
-    // Keep the in-memory size in sync with the active style
     const activeStyle = this.resolveActiveStyle();
     this.toolbarIconSize = getAppearanceValue(
       this.settings,

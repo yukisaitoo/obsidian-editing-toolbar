@@ -1,13 +1,7 @@
 import { pickerIconNames } from "src/icons/customIcons";
 
-// Obsidian-native icons, used to populate the icon picker.
-// Three groups, in order:
-//   1. "Custom" sentinel + this plugin's own custom icons.
-//   2. Lucide icons.
-//      Obsidian bundles Lucide icons up to v0.446.0
-//        - https://docs.obsidian.md/Plugins/User+interface/Icons
-//        - https://lucide.dev
-//   3. Obsidian's other legacy internal icons ("vault", "sidebar-left"...).
+// Icon-picker list, in order: "Custom" sentinel + this plugin's icons, then
+// Lucide icons (Obsidian bundles up to v0.446.0), then legacy Obsidian internals.
 export const appIcons: string[] = [
   "Custom", // sentinel → opens the custom-SVG modal; not a registered icon
   ...pickerIconNames,

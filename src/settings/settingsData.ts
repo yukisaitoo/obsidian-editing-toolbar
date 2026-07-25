@@ -23,16 +23,14 @@ export function getAppearanceValue<K extends keyof StyleAppearanceSettings>(
   key: K,
   style: string,
 ): NonNullable<StyleAppearanceSettings[K]> {
-  // The per-style bucket fields are optional, but the fallback global field on
-  // `settings` is always populated from DEFAULT_SETTINGS, so the result is never
-  // undefined.
+  // The global field is always populated from DEFAULT_SETTINGS, so this never resolves undefined.
   const bucketValue = settings.appearanceByStyle?.[style]?.[key];
   return (bucketValue ?? (settings as unknown as StyleAppearanceSettings)[key]) as NonNullable<StyleAppearanceSettings[K]>;
 }
 
 /**
- * Write a per-style appearance value into `style`'s bucket (creating the store and
- * bucket as needed). Explicit replacement for the old defineProperty setter.
+ * Write a per-style appearance value into `style`'s bucket, creating the store and
+ * bucket as needed.
  */
 export function setAppearanceValue<K extends keyof StyleAppearanceSettings>(
   settings: editingToolbarSettings,
@@ -554,7 +552,6 @@ export const DEFAULT_SETTINGS: editingToolbarSettings = {
     "verticalPosition": 0,
     "formatBrushes": {},
 
-    // Per-style appearance buckets
     "appearanceByStyle": {
       "top": {
         "toolbarBackgroundColor": "rgba(var(--background-secondary-rgb), 0.7)",

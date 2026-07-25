@@ -151,32 +151,27 @@ export function setFontcolor(color: string, editor: Editor) {
     return;
   }
 
-  // Regex to match font color tags, with multiline support
   const fontColorRegex = /<font\s+color=["']?[^"'>]+["']?>(.*?)<\/font>/gms;
   const hasColorTag = fontColorRegex.test(selectText);
-  // Function to check if the text is already wrapped in the same color
   const isAlreadyInSameColor = (text: string, targetColor: string): boolean => {
     const cleanColorRegex = new RegExp(`^<font\\s+color=["']?${targetColor}["']?>(.+)<\\/font>$`, 'ms');
     return cleanColorRegex.test(text.trim());
   };
 
-  // If the text is already in the same color, do nothing
   if (isAlreadyInSameColor(selectText, color)) {
     return;
   }
 
-  // Function to replace color while preserving text content and line breaks
   const replaceColor = (match: string, text: string) => {
-    return text.split('\n').map(line => 
+    return text.split('\n').map(line =>
       line.trim() ? `<font color="${color}">${line}</font>` : line
     ).join('\n');
   };
 
-  // Replace existing font color tags or wrap text in new color tag
   const newText = selectText.replace(fontColorRegex, replaceColor);
 
-  // If no color tags existed, wrap each non-empty line in a new color tag
-  const finalText = newText === selectText 
+  // No tags matched → wrap each non-empty line fresh
+  const finalText = newText === selectText
     ? selectText.split('\n').map(line => 
         line.trim() ? `<font color="${color}">${line}</font>` : line
       ).join('\n')
@@ -196,18 +191,15 @@ export function setBackgroundcolor(color: string, editor: Editor) {
     return;
   }
 
-  // Regex to match background color tags, with multiline support
   const bgColorRegex = /<mark\s+style=["']?background:(?:#[0-9a-fA-F]{3,6}|rgba?\([^)]+\))["']?>([\s\S]*?)<\/mark>/g;
   const hasColorTag = bgColorRegex.test(selectText);
 
-  // Function to check if the text is already wrapped in the same background color
   const isAlreadyInSameColor = (text: string, targetColor: string): boolean => {
     const escapedColor = targetColor.replace(/([()[{*+.$^\\|?])/g, '\\$1');
     const cleanColorRegex = new RegExp(`^<mark\\s+style=["']?background:${escapedColor}["']?>([\\s\\S]+)<\\/mark>$`);
     return cleanColorRegex.test(text.trim());
   };
 
-  // If the text is already in the same color, do nothing
   if (isAlreadyInSameColor(selectText, color)) {
     return;
   }
