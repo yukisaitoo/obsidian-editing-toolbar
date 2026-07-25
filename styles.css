@@ -116,7 +116,7 @@
 }
 
 #editingToolbarModalBar.editingToolbarDefaultAesthetic {
-  border: 1px solid var(--background-modifier-border);
+  border-bottom: 1px solid var(--background-modifier-border);
 }
 
 #editingToolbarModalBar.editingToolbarDefaultAesthetic:not(.top) :is(.editingToolbarCommandItem, button[class^=editingToolbarCommandsubItem]) {
@@ -157,12 +157,12 @@
   height: calc(var(--toolbar-icon-size) + 18px);
   /* Override the base rule's min-width:fit-content so the bar can't grow wider
      than the pane (which is what pushed icons off-screen). Keep it pinned to
-     the pane width and let JS (collapseOverflowToFit) move the excess into the
-     "more" popover; overflow:hidden clips rather than spilling if a measure is
-     ever off. */
+     the pane width and let JS (reflowToolbarOverflow) move the excess into the
+     "more" popover. Overflow must stay visible: the §5 submenu flyouts hang
+     below the bar's box, so any clipping here reduces them to a hairline. */
   min-width: 0;
   max-width: 100%;
-  overflow: hidden;
+  overflow: visible;
   gap: 10px;
   flex-wrap: nowrap;
   align-items: center;
@@ -282,11 +282,13 @@ button[class^=editingToolbarCommandsubItem]::after {
 }
 
 /* --- Dividers ------------------------------------------------------------
-   Only top mode has the horizontal room to show separators; everywhere else
-   they collapse. These rules must stay after §2 — the second selector ties
-   the base button rule on specificity and wins on source order alone. */
+   Only top mode has the horizontal room to show separators in the bar itself;
+   everywhere else they collapse. Scoped to direct children so dividers inside
+   a submenu flyout — which has room in every mode — keep showing. These rules
+   must stay after §2 — the second selector ties the base button rule on
+   specificity and wins on source order alone. */
 
-:is(#editingToolbarModalBar:not(.top), #editingToolbarPopoverBar) button.editingToolbar-Divider-Line {
+:is(#editingToolbarModalBar:not(.top), #editingToolbarPopoverBar)>button.editingToolbar-Divider-Line {
   display: none;
 }
 

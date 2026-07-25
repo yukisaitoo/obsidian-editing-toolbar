@@ -1112,7 +1112,7 @@ export function editingToolbarPopover(
       let tip: string | undefined;
       if ("SubmenuCommands" in item) {
         // Build every button into the main bar; overflow is resolved by
-        // measurement after the bar is laid out (see collapseOverflowToFit).
+        // measurement after the bar is laid out (see reflowToolbarOverflow).
         const parentBtn = new ButtonComponent(editingToolbar);
 
         parentBtn.setClass("editingToolbarCommandsubItem" + index);
