@@ -583,19 +583,19 @@ export const DEFAULT_SETTINGS: editingToolbarSettings = {
 
   appearanceByStyle: {
     top: {
-      toolbarBackgroundColor: "var(--background-secondary)",
+      toolbarBackgroundColor: "var(--background-primary)",
       toolbarIconColor: "var(--text-normal)",
       toolbarIconSize: 18,
     },
     following: {
-      toolbarBackgroundColor: "var(--background-secondary)",
+      toolbarBackgroundColor: "var(--background-primary)",
       toolbarIconColor: "var(--text-normal)",
       toolbarIconSize: 18,
     },
   },
 
   // Global appearance defaults: used as the fallback for any empty per-style bucket
-  toolbarBackgroundColor: "var(--background-secondary)",
+  toolbarBackgroundColor: "var(--background-primary)",
   toolbarIconColor: "var(--text-normal)",
   toolbarIconSize: 18,
 };
