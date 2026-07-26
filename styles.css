@@ -823,23 +823,6 @@ button.editingToolbarSettingsButton {
   height: 32px;
 }
 
-/* Highlight ring drawn around the setting the user was just deep-linked to. */
-.setting-item.toolbar-cta {
-  position: relative;
-}
-
-.setting-item.toolbar-cta:after {
-  content: "";
-  position: absolute;
-  top: -10%;
-  left: -2%;
-  width: 104%;
-  height: 120%;
-  outline: 2px solid var(--text-accent);
-  border-radius: 1em;
-  pointer-events: none;
-}
-
 .editing-toolbar-textarea-input {
   width: 100%;
   min-height: 80px;

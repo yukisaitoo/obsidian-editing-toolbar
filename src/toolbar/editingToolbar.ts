@@ -798,8 +798,6 @@ interface ColorPickerButtonConfig {
   // Wired up by createTableCell for click-to-apply
   tableId: string;
   customColorTooltip: string;
-  // CSS selector for the settings element to highlight with a CTA
-  customColorSelector: string;
 }
 
 // Builds a colour-swatch submenu button with a custom-colour shortcut.
@@ -860,15 +858,6 @@ function createColorPickerButton(
         if (tabsContainer) {
           const appearanceTab = tabsContainer.children[0] as HTMLElement;
           appearanceTab?.click();
-
-          setTimeout(() => {
-            const settingEI = app.setting.activeTab?.containerEl.querySelector(
-              config.customColorSelector,
-            );
-            if (settingEI) {
-              settingEI.addClass?.("toolbar-cta");
-            }
-          }, 100);
         }
       }, 200);
     });
@@ -1209,7 +1198,6 @@ export function editingToolbarPopover(
               pickerHtml: colorpicker(plugin),
               tableId: "x-color-picker-table",
               customColorTooltip: strings.customFontColor,
-              customColorSelector: ".custom_font",
             },
           );
         } else if (item.id === "editing-toolbar:change-background-color") {
@@ -1225,7 +1213,6 @@ export function editingToolbarPopover(
               pickerHtml: backcolorpicker(plugin),
               tableId: "x-backgroundcolor-picker-table",
               customColorTooltip: strings.customBackgroundColor,
-              customColorSelector: ".custom_bg",
             },
           );
         } else {
