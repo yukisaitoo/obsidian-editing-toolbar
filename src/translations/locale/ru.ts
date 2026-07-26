@@ -83,13 +83,6 @@ const ui: Partial<Record<keyof typeof en, string>> = {
   fetchRemoteTitle: "Получить заголовок URL",
   fitEditorWidth: "Подогнать под ширину редактора",
   fontColors: "Цвета шрифта",
-  fontColorFormattingBrush:
-    "Кисть форматирования цвета шрифта включена\nНажмите среднюю кнопку мыши или правую кнопку для отключения кисти",
-  backgroundColorFormattingBrush:
-    "Кисть форматирования цвета фона включена\nНажмите среднюю кнопку мыши или правую кнопку для отключения кисти",
-  formatBrush: "Кисть форматирования",
-  formatBrushSelectTextApply:
-    "Кисть форматирования включена!\nВыделите текст, чтобы применить【",
   fullHalfConverter: "Преобразование полуширинных/полноширинных символов",
   general: "Основные",
   icon: "Значок",
@@ -148,8 +141,6 @@ const ui: Partial<Record<keyof typeof en, string>> = {
     "Текст без форматирования скопирован в буфер обмена",
   pleaseEnterUrlFirst: "Сначала введите URL",
   pleaseEnterNewName: "Введите новое название: ",
-  pleaseExecuteFormatCommandSelect:
-    "Сначала выполните команду форматирования или выделите форматированный текст, затем включите кисть форматирования",
   pleasePasteConfigurationDataFirst: "Сначала вставьте данные конфигурации",
   pleaseSelectValidMarkdownTable:
     "Сначала выберите корректную таблицу Markdown",
@@ -225,8 +216,6 @@ const ui: Partial<Record<keyof typeof en, string>> = {
     "ℹ️ Режим обновления объединит импортированные настройки с существующими.",
   overwriteModeReplaceExistingSettings:
     "⚠️ Режим перезаписи заменит существующие настройки импортированными.",
-  format:
-    "】формат\nНажмите правую кнопку мыши, чтобы отключить кисть форматирования",
   setCustomBackground: "🎨 Настроить цвет фона",
   setCustomFontColor: "🖌️ Настроить цвет текста",
 };

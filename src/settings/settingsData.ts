@@ -7,7 +7,6 @@ export interface StyleAppearanceSettings {
   toolbarBackgroundColor?: string;
   toolbarIconColor?: string;
   toolbarIconSize?: number;
-  toolbarBackgroundTransparency?: number;
 }
 
 export interface AppearanceByStyle {
@@ -96,7 +95,6 @@ export type CustomColorKey =
   | `custom_fc${1 | 2 | 3 | 4 | 5}`;
 
 export interface editingToolbarSettings {
-  cMenuWidth: number;
   cMenuFontColor: string;
   cMenuBackgroundColor: string;
   positionStyle: string;
@@ -119,9 +117,6 @@ export interface editingToolbarSettings {
   custom_fc3: string;
   custom_fc4: string;
   custom_fc5: string;
-  formatBrushes: {
-    [key: string]: boolean;
-  };
 
   // Per-style appearance buckets (top/following)
   appearanceByStyle?: AppearanceByStyle;
@@ -130,7 +125,6 @@ export interface editingToolbarSettings {
   toolbarBackgroundColor: string;
   toolbarIconColor: string;
   toolbarIconSize: number;
-  toolbarBackgroundTransparency: number;
 }
 
 export const DEFAULT_TOOLBAR_COMMANDS: Command[] = [
@@ -143,11 +137,6 @@ export const DEFAULT_TOOLBAR_COMMANDS: Command[] = [
     id: "editing-toolbar:editor-redo",
     name: "Redo Edit",
     icon: "redo-glyph",
-  },
-  {
-    id: "editing-toolbar:toggle-format-brush",
-    name: "Format Brush",
-    icon: "paintbrush",
   },
   {
     id: "editing-toolbar:format-eraser",
@@ -570,7 +559,6 @@ export const DEFAULT_SETTINGS: editingToolbarSettings = {
   cMenuVisibility: true,
   cMenuBottomValue: 4.25,
   cMenuNumRows: 12,
-  cMenuWidth: 610,
   cMenuFontColor: "#2DC26B",
   cMenuBackgroundColor: "#d3f8b6",
   custom_bg1: "#FFB78B8C",
@@ -583,26 +571,22 @@ export const DEFAULT_SETTINGS: editingToolbarSettings = {
   custom_fc3: "#245BDB",
   custom_fc4: "#6425D0",
   custom_fc5: "#646A73",
-  formatBrushes: {},
 
   appearanceByStyle: {
     top: {
-      toolbarBackgroundColor: "var(--background-secondary)",
+      toolbarBackgroundColor: "var(--background-primary)",
       toolbarIconColor: "var(--text-normal)",
       toolbarIconSize: 18,
-      toolbarBackgroundTransparency: 100,
     },
     following: {
-      toolbarBackgroundColor: "var(--background-secondary)",
+      toolbarBackgroundColor: "var(--background-primary)",
       toolbarIconColor: "var(--text-normal)",
       toolbarIconSize: 18,
-      toolbarBackgroundTransparency: 100,
     },
   },
 
   // Global appearance defaults: used as the fallback for any empty per-style bucket
-  toolbarBackgroundColor: "var(--background-secondary)",
+  toolbarBackgroundColor: "var(--background-primary)",
   toolbarIconColor: "var(--text-normal)",
   toolbarIconSize: 18,
-  toolbarBackgroundTransparency: 100,
 };

@@ -160,8 +160,6 @@ export class ImportExportModal extends Modal {
       toolbarBackgroundColor: this.plugin.settings.toolbarBackgroundColor,
       toolbarIconColor: this.plugin.settings.toolbarIconColor,
       toolbarIconSize: this.plugin.settings.toolbarIconSize,
-      toolbarBackgroundTransparency:
-        this.plugin.settings.toolbarBackgroundTransparency,
     };
 
     this.validateExportContent(exportContent);
@@ -432,7 +430,6 @@ export class ImportExportModal extends Modal {
       "toolbarBackgroundColor",
       "toolbarIconColor",
       "toolbarIconSize",
-      "toolbarBackgroundTransparency",
     ];
 
     generalSettings.forEach((key) => {

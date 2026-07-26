@@ -18,7 +18,6 @@ const ui: Partial<Record<keyof typeof en, string>> = {
   dedupeLines: "重複行を削除",
   extractBetweenStrings: "指定文字列の間を抽出",
   fontColors: "文字色",
-  formatBrush: "書式のコピー／貼り付け",
   fullHalfConverter: "全角／半角を変換",
   insertBlankLines: "空行を挿入",
   listTable: "リストを表に変換",

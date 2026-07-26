@@ -360,17 +360,6 @@ export class CommandsManager {
     this.registerInsertCommands();
     this.registerHeadingCommands();
     this.registerMappedCommands();
-
-    this.plugin.addCommand({
-      id: "toggle-format-brush",
-      name: "Toggle Format Brush",
-      icon: "paintbrush",
-      editorCallback: (_editor: Editor) => {
-        this.plugin.toggleFormatBrush();
-      },
-    });
-
-    this.trackFormatCommandExecution();
   }
 
   private registerCoreCommands() {
@@ -904,44 +893,6 @@ export class CommandsManager {
               editor.setCursor(curserEnd.line, curserEnd.ch + char);
           }),
       });
-    });
-  }
-
-  private trackFormatCommandExecution() {
-    const formatCommands = [
-      "toggle-bold",
-      "toggle-italics",
-      "toggle-strikethrough",
-      "toggle-highlight",
-      "toggle-code",
-      "toggle-blockquote",
-      "header0-text",
-      "header1-text",
-      "header2-text",
-      "header3-text",
-      "header4-text",
-      "header5-text",
-      "header6-text",
-      "toggle-numbered-list",
-      "toggle-bullet-list",
-      "format-eraser",
-      "indent-list",
-      "undent-list",
-      "change-font-color",
-      "change-background-color",
-      ...Object.keys(this._commandsMap),
-    ];
-
-    formatCommands.forEach((cmdId) => {
-      const originalCommand =
-        this.plugin.app.commands.commands[`editing-toolbar:${cmdId}`];
-      if (originalCommand && originalCommand.callback) {
-        const originalCallback = originalCommand.callback;
-        originalCommand.callback = () => {
-          originalCallback();
-          this.plugin.setLastExecutedCommand(`editing-toolbar:${cmdId}`);
-        };
-      }
     });
   }
 

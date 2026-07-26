@@ -570,35 +570,6 @@ export class EditingToolbarSettingTab extends PluginSettingTab {
             this.triggerRefresh();
           });
       });
-    new Setting(toolbarContainer)
-      .setName(strings.toolbarBackgroundTransparency)
-      .setDesc(strings.setTransparencyToolbarBackground)
-      .addSlider((slider) => {
-        const initialTransparency =
-          appearanceBucket.toolbarBackgroundTransparency ??
-          this.plugin.settings.toolbarBackgroundTransparency;
-
-        slider
-          .setValue(initialTransparency)
-          .setLimits(0, 100, 1)
-          .setDynamicTooltip()
-          .onChange(async (value) => {
-            const activeStyle = this.plugin.positionStyle;
-            const style = this.resolveEditingStyle();
-            const bucket = this.getAppearanceBucket(style);
-            bucket.toolbarBackgroundTransparency = value;
-            if (activeStyle === style) {
-              document.documentElement.style.setProperty(
-                "--editing-toolbar-background-opacity",
-                `${100 - value}%`,
-              );
-            }
-            await this.plugin.saveSettings();
-            // Rebuild settings UI + live toolbar so both pick up the new value
-            this.display();
-            this.triggerRefresh();
-          });
-      });
     const previewContainer = toolbarContainer.createDiv(
       "toolbar-preview-container",
     );
@@ -621,41 +592,10 @@ export class EditingToolbarSettingTab extends PluginSettingTab {
     const previewCommands = [
       { id: "bold", name: "Bold", icon: "bold" },
       { id: "italics", name: "Italics", icon: "italic" },
-      { id: "trikethrough", name: "Strikethrough", icon: "strikethrough" },
+      { id: "strikethrough", name: "Strikethrough", icon: "strikethrough" },
       { id: "code", name: "Code", icon: "code" },
       { id: "blockquote", name: "Blockquote", icon: "quote-glyph" },
       { id: "insert-link", name: "Link", icon: "link" },
-      { id: "left-sidebar", name: "Left sidebar", icon: "lucide-panel-left" },
-      {
-        id: "editor:insert-embed",
-        name: "Add embed",
-        icon: "note-glyph",
-      },
-      {
-        id: "editor:insert-link",
-        name: "Insert markdown link",
-        icon: "link-glyph",
-      },
-      {
-        id: "editor:insert-tag",
-        name: "Add tag",
-        icon: "price-tag-glyph",
-      },
-      {
-        id: "editor:insert-wikilink",
-        name: "Add internal link",
-        icon: "bracket-glyph",
-      },
-      {
-        id: "editor:toggle-code",
-        name: "Code",
-        icon: "code-glyph",
-      },
-      {
-        id: "editor:toggle-blockquote",
-        name: "Blockquote",
-        icon: "lucide-text-quote",
-      },
       {
         id: "editor:toggle-checklist-status",
         name: "Checklist status",
@@ -665,11 +605,6 @@ export class EditingToolbarSettingTab extends PluginSettingTab {
         id: "editor:insert-callout",
         name: "Insert Callout",
         icon: "lucide-quote",
-      },
-      {
-        id: "editor:insert-table",
-        name: "Insert Table",
-        icon: "lucide-table",
       },
     ];
     previewCommands.forEach((item) => {
@@ -682,7 +617,7 @@ export class EditingToolbarSettingTab extends PluginSettingTab {
         setIcon(button.buttonEl, item.icon);
       }
     });
-    // Apply the current style's colours, transparency and icon size to the preview.
+    // Apply the current style's colours and icon size to the preview.
     const bg =
       appearanceBucket.toolbarBackgroundColor ??
       this.plugin.settings.toolbarBackgroundColor;
@@ -693,22 +628,11 @@ export class EditingToolbarSettingTab extends PluginSettingTab {
       appearanceBucket.toolbarIconSize ??
       this.plugin.settings.toolbarIconSize ??
       18;
-    const transparency =
-      appearanceBucket.toolbarBackgroundTransparency ??
-      this.plugin.settings.toolbarBackgroundTransparency ??
-      0;
-
+    // Same custom properties the real toolbar sets on itself, so the preview
+    // grows with the icon size instead of staying pinned to the default box.
     editingToolbar.style.setProperty("--editing-toolbar-background-color", bg);
-    editingToolbar.style.setProperty(
-      "--editing-toolbar-background-opacity",
-      `${100 - transparency}%`,
-    );
-    const iconSvgs = editingToolbar.querySelectorAll<SVGElement>("svg");
-    iconSvgs.forEach((svg) => {
-      svg.style.color = iconColor;
-      svg.style.width = `${size}px`;
-      svg.style.height = `${size}px`;
-    });
+    editingToolbar.style.setProperty("--editing-toolbar-icon-color", iconColor);
+    editingToolbar.style.setProperty("--toolbar-icon-size", `${size}px`);
   }
   private createCommandList(containerEl: HTMLElement): void {
     const commandsToEdit: Command[] = this.getCommandsArrayByType(
@@ -1057,7 +981,6 @@ export class EditingToolbarSettingTab extends PluginSettingTab {
               .setIcon("editingToolbarSub")
               .setTooltip(strings.addSubmenu)
               .setClass("editingToolbarSettingsButton")
-              .setClass("editingToolbarSettingsButtonaddsub")
               .onClick(async () => {
                 const submenuCommand: SubmenuCommand = {
                   id: "SubmenuCommands-" + GenNonDuplicateID(1),
@@ -1085,7 +1008,6 @@ export class EditingToolbarSettingTab extends PluginSettingTab {
               .setIcon("vertical-split")
               .setTooltip(strings.addSeparator)
               .setClass("editingToolbarSettingsButton")
-              .setClass("editingToolbarSettingsButtonaddsub")
               .onClick(async () => {
                 const dividermenu = {
                   id: "editingToolbar-Divider-Line",

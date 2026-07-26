@@ -68,11 +68,6 @@ const ui: Partial<Record<keyof typeof en, string>> = {
   fetchRemoteTitle: "Obter Título Remoto",
   fitEditorWidth: "Ajustar Largura do Editor",
   fontColors: "Cores de Texto",
-  fontColorFormattingBrush: "Pincel de cor da fonte ativado!",
-  backgroundColorFormattingBrush: "Pincel de cor de fundo ativado!",
-  formatBrush: "Pincel de formatação",
-  formatBrushSelectTextApply:
-    "Pincel de formatação ativado! Selecione o texto para aplicar【",
   general: "Geral",
   icon: "Ícone",
   ifImageTurn: "Se for uma imagem, ative",
@@ -112,8 +107,6 @@ const ui: Partial<Record<keyof typeof en, string>> = {
   pasteConfigurationHere: "Colar configuração aqui...",
   pleaseEnterUrlFirst: "Por favor digite uma URL primeiro",
   pleaseEnterNewName: "Por favor, digite um novo nome: ",
-  pleaseExecuteFormatCommandSelect:
-    "Execute um comando de formatação ou selecione um texto já formatado antes de ativar o pincel de formatação.",
   pleasePasteConfigurationDataFirst:
     "Por favor coloque os dados da configuração primeiro",
   pleaseSelectTextFirst: "Por favor selecione o texto primeiro",
@@ -162,8 +155,6 @@ const ui: Partial<Record<keyof typeof en, string>> = {
     "ℹ️ O modo de atualização irá adicionar novos itens e atualizar os existentes com base na configuração importada.",
   overwriteModeReplaceExistingSettings:
     "⚠️ O modo de sobrescrever irá substituir todas as suas configurações atuais com as importadas.",
-  format:
-    "】\nClique com o botão do meio ou direito do mouse para sair do modo de formatação.",
   setCustomBackground: "🎨 Definir Cor de Fundo Personalizada",
   setCustomFontColor: "🖌️ Definir Cor de Texto Personalizada",
 };
