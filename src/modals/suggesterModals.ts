@@ -73,31 +73,6 @@ export class ChooseFromIconList extends FuzzySuggestModal<string> {
   }
 
   async onChooseItem(item: string): Promise<void> {
-    if (item === "Custom") {
-      if (this.customCallback) {
-        new CustomIcon(
-          this.app,
-          this.plugin,
-          { id: this.command.id, name: this.command.name, icon: "" },
-          this.isSubmenuItem,
-          (customIconValue) => {
-            this.customCallback?.(customIconValue);
-          },
-        ).open();
-        return;
-      } else {
-        new CustomIcon(
-          this.app,
-          this.plugin,
-          this.command,
-          this.isSubmenuItem,
-          undefined,
-          this.currentEditingConfig,
-        ).open();
-        return;
-      }
-    }
-
     if (this.customCallback) {
       this.customCallback(item);
       return;
@@ -136,106 +111,6 @@ export class ChooseFromIconList extends FuzzySuggestModal<string> {
     setTimeout(() => {
       dispatchEvent(new Event("editingToolbar-NewCommand"));
     }, 100);
-  }
-}
-
-class CustomIcon extends Modal {
-  plugin: EditingToolbarPlugin;
-  item: Command;
-  isSubmenuItem: boolean;
-  currentEditingConfig: ToolbarStyleKey;
-  submitEnterCallback!: (
-    this: HTMLTextAreaElement,
-    ev: KeyboardEvent,
-  ) => unknown;
-  customCallback: IconSelectCallback | null = null;
-
-  constructor(
-    app: App,
-    plugin: EditingToolbarPlugin,
-    item: Command,
-    isSubmenuItem: boolean,
-    callback?: IconSelectCallback,
-    currentEditingConfig?: ToolbarStyleKey,
-  ) {
-    super(app);
-    this.plugin = plugin;
-    this.item = item;
-    this.isSubmenuItem = isSubmenuItem;
-    this.customCallback = callback || null;
-    this.currentEditingConfig = currentEditingConfig ?? plugin.liveStyle;
-    this.containerEl.addClass("editingToolbar-Modal");
-    this.containerEl.addClass("customicon");
-  }
-
-  onOpen() {
-    const { contentEl } = this;
-    contentEl.createEl("b", { text: strings.enterIconCodeFormatSvg });
-
-    const textComponent = document.createElement("textarea");
-    textComponent.className = "wideInputPromptInputEl";
-    textComponent.placeholder = "";
-    textComponent.value = this.item.icon || "";
-    textComponent.style.width = "100%";
-    textComponent.style.height = "200px";
-    contentEl.appendChild(textComponent);
-
-    textComponent.addEventListener("input", async () => {
-      const value = textComponent.value;
-
-      if (this.customCallback) {
-        this.item.icon = value;
-        return;
-      }
-
-      this.item.icon = value;
-      const currentCommands = this.plugin.getCurrentCommands(
-        this.currentEditingConfig,
-      );
-      const location = findCommandLocation(
-        this.item,
-        this.isSubmenuItem,
-        currentCommands,
-      );
-
-      if (!this.isSubmenuItem) {
-        if (location.index === -1) {
-          currentCommands.push(this.item);
-        } else {
-          currentCommands[location.index].icon = value;
-        }
-      } else {
-        const submenu = currentCommands[location.index]?.SubmenuCommands;
-        if (location.subIndex === -1) {
-          submenu?.push(this.item);
-        } else if (submenu) {
-          submenu[location.subIndex].icon = value;
-        }
-      }
-
-      this.plugin.updateCurrentCommands(
-        currentCommands,
-        this.currentEditingConfig,
-      );
-      await this.plugin.saveSettings();
-    });
-
-    if (this.submitEnterCallback) {
-      textComponent.addEventListener("keydown", this.submitEnterCallback);
-    }
-  }
-
-  onClose() {
-    const { contentEl } = this;
-    contentEl.empty();
-
-    if (this.customCallback) {
-      this.customCallback(this.item.icon || "");
-    } else {
-      setTimeout(() => {
-        dispatchEvent(new Event("editingToolbar-NewCommand"));
-      }, 100);
-    }
   }
 }
 

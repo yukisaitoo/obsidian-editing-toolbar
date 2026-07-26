@@ -63,7 +63,6 @@ export const en = {
   enterPrefix: "Enter prefix",
   enterStartString: "Enter start string",
   enterSuffix: "Enter suffix",
-  enterIconCodeFormatSvg: "Enter the icon code, format as <svg>.... </svg>",
   error: "Error: ",
   export: "Export",
   exportConfiguration: "Export Configuration",

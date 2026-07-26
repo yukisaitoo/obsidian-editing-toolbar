@@ -902,15 +902,15 @@ button.editingToolbarSettingsButton {
    ========================================================================== */
 
 /* The toolbar's own popup modals (resize handle, etc.) float over the note
-   instead of dimming it, so the backdrop is neutralised. The rename and
-   custom-icon modals are excluded — those are ordinary centred dialogs. */
-div.modal-container.editingToolbar-Modal:not(:is(.changename,.customicon)) .modal-bg {
+   instead of dimming it, so the backdrop is neutralised. The rename modal is
+   excluded — that one is an ordinary centred dialog. */
+div.modal-container.editingToolbar-Modal:not(.changename) .modal-bg {
   position: relative;
   background-color: transparent !important;
   backdrop-filter: none !important;
 }
 
-.modal-container.editingToolbar-Modal:not(:is(.changename,.customicon)) .modal {
+.modal-container.editingToolbar-Modal:not(.changename) .modal {
   position: absolute;
   right: 0.5em;
   bottom: 2em;
@@ -930,15 +930,6 @@ div.modal-container.editingToolbar-Modal:not(:is(.changename,.customicon)) .moda
 
 body.theme-dark .modal-container.editingToolbar-Modal .modal input[type='range'] {
   background-color: var(--background-secondary);
-}
-
-@media screen and (min-width: 781px) {
-  .editingToolbar-Modal .wideInputPromptInputEl {
-    width: 40rem;
-    max-width: 100%;
-    height: 20rem;
-    background-color: rgb(var(--mono-rgb-0), 0.8);
-  }
 }
 
 /* --- Import/export modal (ImportExportModal.ts) --------------------------- */

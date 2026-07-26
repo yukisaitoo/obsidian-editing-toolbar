@@ -55,8 +55,6 @@ const ui: Partial<Record<keyof typeof en, string>> = {
     "Habilitar a barra de ferramentas posicionada no topo.",
   enableToolbarAppearsUponText:
     "Habilitar a barra de ferramentas que aparece ao selecionar texto.",
-  enterIconCodeFormatSvg:
-    "Digite o código do ícone, formato como <svg>.... </svg>",
   error: "Erro: ",
   export: "Exportar",
   exportConfiguration: "Exportar Configuração",
@@ -162,7 +160,6 @@ const ui: Partial<Record<keyof typeof en, string>> = {
 export default ui;
 
 export const commandNames: Record<string, string> = {
-  Custom: "Personalizado",
   "All commands": "Todos os Comandos",
   "Following Toolbar": "Barra de Ferramentas Contextual",
 };
