@@ -171,6 +171,7 @@ export class EditingToolbarSettingTab extends PluginSettingTab {
     button
       .setIcon("editingToolbarDelete")
       .setTooltip(tooltip)
+      .setClass("editingToolbarSettingsDelete")
       .onClick(async () => {
         if (button.buttonEl.hasClass("mod-warning")) {
           disarm();

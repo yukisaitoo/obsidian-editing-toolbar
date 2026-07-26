@@ -9,7 +9,7 @@ import {
   debounce,
   setIcon,
 } from "obsidian";
-import { appIcons } from "src/icons/appIcons";
+import { getAppIcons } from "src/icons/appIcons";
 import type EditingToolbarPlugin from "src/plugin/main";
 import type { ToolbarStyleKey } from "src/settings/settingsData";
 import { strings, t } from "src/translations/helper";
@@ -40,25 +40,21 @@ export class ChooseFromIconList extends FuzzySuggestModal<string> {
   }
 
   private capitalJoin(string: string): string {
-    const icon = string.split(" ");
-
-    return icon
-      .map((icon) => {
-        return icon[0].toUpperCase() + icon.substring(1);
-      })
+    return string
+      .split(" ")
+      .filter((word) => word.length > 0)
+      .map((word) => word[0].toUpperCase() + word.substring(1))
       .join(" ");
   }
 
   getItems(): string[] {
-    return appIcons;
+    return getAppIcons();
   }
 
   getItemText(item: string): string {
     return this.capitalJoin(
       item
-        .replace("feather-", "")
-        .replace("remix-", "")
-        .replace("bx-", "")
+        .replace(/^lucide-/, "")
         .replace(/([A-Z])/g, " $1")
         .trim()
         .replace(/-/gi, " "),

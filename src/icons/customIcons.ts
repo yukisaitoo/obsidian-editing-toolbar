@@ -24,6 +24,7 @@ const internalIcons: Record<string, string> = {
 };
 
 export const pickerIconNames = Object.keys(pickerIcons);
+export const internalIconNames = Object.keys(internalIcons);
 
 export default function addIcons() {
   const icons = { ...pickerIcons, ...internalIcons };

@@ -739,7 +739,10 @@ button[class^=editingToolbarCommandsubItem]::after {
 }
 
 .editingToolbarSettingsTabsContainer .editingToolbar-Divider-Line .setting-item-control button:last-child {
-  padding: 0;
+  margin: 0 8px;
+}
+
+.editingToolbarSettingsTabsContainer .editingToolbar-Divider-Line .setting-item-control button:last-child:not(.mod-warning) {
   background-color: transparent !important;
 }
 
