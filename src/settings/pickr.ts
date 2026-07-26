@@ -1,5 +1,7 @@
 import Pickr from "@simonwep/pickr";
 
+import { strings } from "src/translations/helper";
+
 export interface ColorPickrOptions {
   /** Element the swatch button replaces. */
   el: HTMLElement;
@@ -9,6 +11,7 @@ export interface ColorPickrOptions {
   opacity: boolean;
   defaultColor: string;
   onSave(hexColor: string): void;
+  onClear(): void;
 }
 
 export function createColorPickr(options: ColorPickrOptions): Pickr {
@@ -29,14 +32,23 @@ export function createColorPickr(options: ColorPickrOptions): Pickr {
         rgba: false,
         hsla: false,
         input: true,
-        cancel: true,
+        clear: true,
         save: true,
       },
     },
+    i18n: {
+      "btn:clear": strings.reset,
+      "aria:btn:clear": strings.reset,
+    },
   });
 
-  pickr.on("save", (color: Pickr.HSVaColor) => {
-    options.onSave(color.toHEXA().toString());
+  // Pickr fires save(null) alongside clear; only the clear handler acts on it.
+  pickr.on("save", (color: Pickr.HSVaColor | null) => {
+    if (color) options.onSave(color.toHEXA().toString());
+  });
+
+  pickr.on("clear", () => {
+    options.onClear();
   });
 
   return pickr;

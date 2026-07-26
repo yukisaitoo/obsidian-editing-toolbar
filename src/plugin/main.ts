@@ -177,6 +177,14 @@ export default class EditingToolbarPlugin extends Plugin {
   // Ensure per-style appearance buckets exist. Empty buckets fall back to the
   // global appearance fields via getAppearanceValue().
   private initAppearanceStore(): void {
+    // Deep-copy so an unpersisted store doesn't alias DEFAULT_SETTINGS: the
+    // settings tab writes to and deletes from these buckets in place.
+    if (this.settings.appearanceByStyle === DEFAULT_SETTINGS.appearanceByStyle) {
+      this.settings.appearanceByStyle = structuredClone(
+        DEFAULT_SETTINGS.appearanceByStyle,
+      );
+    }
+
     const store = (this.settings.appearanceByStyle ??= {});
     for (const style of POSITION_STYLES) {
       store[style] ??= {};

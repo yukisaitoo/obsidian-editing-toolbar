@@ -1,7 +1,11 @@
 import { Setting } from "obsidian";
 import { ConfirmModal } from "src/modals/ConfirmModal";
 import type { CustomColorKey } from "src/settings/settingsData";
-import { POSITION_STYLES, STYLE_LABELS } from "src/settings/settingsData";
+import {
+  DEFAULT_SETTINGS,
+  POSITION_STYLES,
+  STYLE_LABELS,
+} from "src/settings/settingsData";
 import type { SettingsTabContext } from "src/settings/settingsTab";
 import { strings } from "src/translations/helper";
 
@@ -111,6 +115,11 @@ function renderSwatchRow(
           onSave: (hexColor) => {
             ctx.plugin.settings[settingKey] = hexColor;
             ctx.plugin.saveSettings();
+          },
+          onClear: () => {
+            ctx.plugin.settings[settingKey] = DEFAULT_SETTINGS[settingKey];
+            ctx.plugin.saveSettings();
+            ctx.refresh();
           },
         });
       }

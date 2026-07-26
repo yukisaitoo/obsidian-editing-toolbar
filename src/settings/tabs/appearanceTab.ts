@@ -115,18 +115,36 @@ export function renderAppearanceTab(
   renderPreview(ctx, toolbarContainer, editingStyle);
 }
 
+interface ColorSettingConfig {
+  name: string;
+  desc: string;
+  cls: string;
+  key: "toolbarBackgroundColor" | "toolbarIconColor";
+  cssProperty: string;
+  swatches: string[];
+}
+
+/** Persist a colour the picker resolved to and repaint the settings UI + toolbar. */
+function applyColor(
+  ctx: SettingsTabContext,
+  editingStyle: ToolbarStyleKey,
+  config: ColorSettingConfig,
+  color: string,
+): void {
+  // Only push the global CSS variable when editing the style on screen.
+  if (ctx.plugin.liveStyle === editingStyle) {
+    document.documentElement.style.setProperty(config.cssProperty, color);
+  }
+  ctx.plugin.saveSettings();
+  ctx.refresh();
+  ctx.rebuildToolbar();
+}
+
 function renderColorSetting(
   ctx: SettingsTabContext,
   containerEl: HTMLElement,
   editingStyle: ToolbarStyleKey,
-  config: {
-    name: string;
-    desc: string;
-    cls: string;
-    key: "toolbarBackgroundColor" | "toolbarIconColor";
-    cssProperty: string;
-    swatches: string[];
-  },
+  config: ColorSettingConfig,
 ): void {
   new Setting(containerEl)
     .setName(config.name)
@@ -150,17 +168,20 @@ function renderColorSetting(
         onSave: (hexColor) => {
           getAppearanceBucket(ctx.plugin.settings, editingStyle)[config.key] =
             hexColor;
-
-          // Only push the global CSS variable when editing the style on screen.
-          if (ctx.plugin.liveStyle === editingStyle) {
-            document.documentElement.style.setProperty(
-              config.cssProperty,
-              hexColor,
-            );
-          }
-          ctx.plugin.saveSettings();
-          ctx.refresh();
-          ctx.rebuildToolbar();
+          applyColor(ctx, editingStyle, config, hexColor);
+        },
+        onClear: () => {
+          // Dropping the key from the bucket falls the style back to the global
+          // appearance field, i.e. the theme variable in DEFAULT_SETTINGS.
+          delete getAppearanceBucket(ctx.plugin.settings, editingStyle)[
+            config.key
+          ];
+          applyColor(
+            ctx,
+            editingStyle,
+            config,
+            getAppearanceValue(ctx.plugin.settings, config.key, editingStyle),
+          );
         },
       });
     });

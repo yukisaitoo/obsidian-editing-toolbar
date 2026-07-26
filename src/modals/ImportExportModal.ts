@@ -10,6 +10,7 @@ import {
 import { ConfirmModal } from "src/modals/ConfirmModal";
 import type EditingToolbarPlugin from "src/plugin/main";
 import { strings } from "src/translations/helper";
+
 export class ImportExportModal extends Modal {
   plugin: EditingToolbarPlugin;
   mode: "import" | "export";
