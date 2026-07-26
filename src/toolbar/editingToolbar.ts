@@ -12,11 +12,12 @@ import {
   WorkspaceParentExt,
   WorkspaceWindow,
 } from "obsidian";
+import { MORE_CHEVRON_ICON } from "src/icons/inlineIcons";
 import type EditingToolbarPlugin from "src/plugin/main";
 import {
-  AppearanceByStyle,
-  editingToolbarSettings,
-  StyleAppearanceSettings,
+  applyAppearanceVars,
+  EditingToolbarSettings,
+  POSITION_STYLES,
   ToolbarStyleKey,
 } from "src/settings/settingsData";
 import { strings, t } from "src/translations/helper";
@@ -76,8 +77,6 @@ function getRootSplits(app: App): WorkspaceParentExt[] {
   return rootSplits;
 }
 
-// Detach every toolbar and popover bar found under `root`, emptying each before
-// removing it so no stale child nodes linger.
 function clearToolbarsIn(root: ParentNode) {
   const bars = root.querySelectorAll(
     ".editingToolbarModalBar, .editingToolbarPopoverBar",
@@ -90,34 +89,17 @@ function clearToolbarsIn(root: ParentNode) {
   });
 }
 
-export function resetToolbar(plugin?: EditingToolbarPlugin) {
-  activeDocument = activeWindow.document;
-
-  clearToolbarsIn(activeDocument);
-
-  if (plugin) {
-    plugin.clearToolbarCache();
-  }
-}
-
 export function selfDestruct(plugin: EditingToolbarPlugin) {
   activeDocument = activeWindow.document;
 
-  const rootSplits = getRootSplits(plugin.app);
-
   clearToolbarsIn(activeDocument);
+  getRootSplits(plugin.app).forEach((rootSplit: WorkspaceParentExt) => {
+    if (rootSplit?.containerEl) {
+      clearToolbarsIn(rootSplit.containerEl);
+    }
+  });
 
-  if (rootSplits) {
-    rootSplits.forEach((rootSplit: WorkspaceParentExt) => {
-      if (rootSplit?.containerEl) {
-        clearToolbarsIn(rootSplit.containerEl);
-      }
-    });
-  }
-
-  if (plugin) {
-    plugin.clearToolbarCache();
-  }
+  plugin.clearToolbarCache();
 }
 
 export function getExistingToolbar(
@@ -133,11 +115,7 @@ export function getExistingToolbar(
 
   activeDocument = targetDocument;
 
-  const targetStyle: ToolbarStyleKey =
-    style ||
-    (plugin.positionStyle as ToolbarStyleKey) ||
-    (plugin.settings.positionStyle as ToolbarStyleKey) ||
-    "top";
+  const targetStyle: ToolbarStyleKey = style ?? plugin.liveStyle;
 
   if (targetStyle !== "top") {
     const cached = plugin.getCachedToolbar(targetStyle);
@@ -252,8 +230,6 @@ function applyMenuItemIcon(menuItem: MenuItem, icon: string = "") {
   }
 }
 
-// Render a command's icon onto a toolbar button: raw HTML icons go into the
-// button element, named icons through setIcon. Missing icons fall back to "".
 function applyButtonIcon(btn: ButtonComponent, icon?: string) {
   const iconStr = icon ?? "";
   if (checkHtml(iconStr)) {
@@ -278,7 +254,7 @@ export function closeMoreOverflowPopovers(root?: ParentNode): void {
 
 function syncToolbarVisibilityAfterAction(
   editingToolbar: HTMLElement,
-  settings: editingToolbarSettings,
+  settings: EditingToolbarSettings,
   effectiveStyle: ToolbarStyleKey | string,
   plugin: EditingToolbarPlugin,
 ) {
@@ -419,12 +395,6 @@ export function observeToolbarResize(
   });
   observer.observe(parent);
   plugin.topToolbarResizeObserver = observer;
-}
-
-export function createDiv(selector: string) {
-  const div = createEl("div");
-  div.addClass(selector);
-  return div;
 }
 
 function createTableCell(
@@ -643,7 +613,7 @@ function createMoreMenu(
       if (moreContainer.hasClass(MORE_POPOVER_OPEN_CLASS)) close();
       else open();
     });
-  moreButton.buttonEl.innerHTML = `<svg  width="14" height="14"  version="1.1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" enable-background="new 0 0 1024 1024" xml:space="preserve"><path fill="#666" d="M510.29 14.13 q17.09 -15.07 40.2 -14.07 q23.12 1 39.2 18.08 l334.66 385.92 q25.12 30.15 34.16 66.83 q9.04 36.68 0.5 73.87 q-8.54 37.19 -32.66 67.34 l-335.67 390.94 q-15.07 18.09 -38.69 20.1 q-23.62 2.01 -41.71 -13.07 q-18.08 -15.08 -20.09 -38.19 q-2.01 -23.12 13.06 -41.21 l334.66 -390.94 q11.06 -13.06 11.56 -29.65 q0.5 -16.58 -10.55 -29.64 l-334.67 -386.92 q-15.07 -17.09 -13.56 -40.7 q1.51 -23.62 19.59 -38.7 ZM81.17 14.13 q17.08 -15.07 40.19 -14.07 q23.11 1 39.2 18.08 l334.66 385.92 q25.12 30.15 34.16 66.83 q9.04 36.68 0.5 73.87 q-8.54 37.19 -32.66 67.34 l-335.67 390.94 q-15.07 18.09 -38.69 20.6 q-23.61 2.51 -41.7 -12.57 q-18.09 -15.08 -20.1 -38.69 q-2.01 -23.62 13.06 -41.71 l334.66 -390.94 q11.06 -13.06 11.56 -29.65 q0.5 -16.58 -10.55 -29.64 l-334.66 -386.92 q-15.08 -17.09 -13.57 -40.7 q1.51 -23.62 19.6 -38.7 Z"/></svg>`;
+  moreButton.buttonEl.innerHTML = MORE_CHEVRON_ICON;
   return cMoreMenu;
 }
 
@@ -742,9 +712,7 @@ export function createFollowingBar(
     return;
   }
 
-  // The explicit enable flag is the source of truth; legacy positionStyle-only
-  // configs are migrated into it in loadSettings().
-  if (!plugin.settings.enableFollowingToolbar) return;
+  if (!plugin.isToolbarStyleEnabled("following")) return;
 
   if (!editingToolbarModalBar) {
     editingToolbarPopover(app, plugin, "following", targetDocument);
@@ -882,7 +850,7 @@ function createColorPickerButton(
   app: App,
   plugin: EditingToolbarPlugin,
   editingToolbar: HTMLElement,
-  settings: editingToolbarSettings,
+  settings: EditingToolbarSettings,
   effectiveStyle: ToolbarStyleKey,
   item: Command,
   config: ColorPickerButtonConfig,
@@ -955,19 +923,15 @@ export function editingToolbarPopover(
 
   // If no explicit style is provided, render toolbars for all enabled styles.
   if (!style) {
-    const stylesToRender: ToolbarStyleKey[] = [];
-
-    if (settings.enableTopToolbar) stylesToRender.push("top");
-    if (settings.enableFollowingToolbar) stylesToRender.push("following");
-
-    stylesToRender.forEach((styleKey) => {
+    POSITION_STYLES.filter((styleKey) =>
+      plugin.isToolbarStyleEnabled(styleKey),
+    ).forEach((styleKey) => {
       editingToolbarPopover(app, plugin, styleKey, targetDocument);
     });
-
     return;
   }
 
-  const effectiveStyle: ToolbarStyleKey = style as ToolbarStyleKey;
+  const effectiveStyle = style;
 
   if (!settings.cMenuVisibility) {
     const existingToolbar = getExistingToolbar(
@@ -989,75 +953,28 @@ export function editingToolbarPopover(
     return;
   }
 
-  const appearanceStore = (settings.appearanceByStyle ||
-    {}) as AppearanceByStyle;
-  const appearanceForStyle = (appearanceStore[effectiveStyle] ||
-    {}) as StyleAppearanceSettings;
-
-  const resolvedIconSize =
-    appearanceForStyle.toolbarIconSize ?? plugin.toolbarIconSize ?? 18;
-
-  const resolvedBgColor =
-    appearanceForStyle.toolbarBackgroundColor ??
-    settings.toolbarBackgroundColor;
-
-  const resolvedIconColor =
-    appearanceForStyle.toolbarIconColor ?? settings.toolbarIconColor;
-
   const generateMenu = () => {
     const editingToolbar = createEl("div");
-    if (editingToolbar) {
-      editingToolbar.addClass("editingToolbarModalBar");
-      editingToolbar.setAttribute("data-toolbar-style", effectiveStyle);
-
-      if (effectiveStyle === "top") {
-        editingToolbar.className += " top";
-      } else if (effectiveStyle === "following") {
-        editingToolbar.style.visibility = "hidden";
-      }
-    }
+    editingToolbar.addClass("editingToolbarModalBar");
+    editingToolbar.addClass("editingToolbarDefaultAesthetic");
+    editingToolbar.setAttribute("data-toolbar-style", effectiveStyle);
     editingToolbar.setAttribute("id", "editingToolbarModalBar");
+
+    if (effectiveStyle === "top") {
+      editingToolbar.addClass("top");
+    } else {
+      editingToolbar.style.visibility = "hidden";
+    }
 
     const popoverMenu = createEl("div");
     popoverMenu.addClass("editingToolbarpopover");
     popoverMenu.addClass("editingToolbarPopoverBar");
+    popoverMenu.addClass("editingToolbarDefaultAesthetic");
     popoverMenu.setAttribute("data-toolbar-style", effectiveStyle);
-
     popoverMenu.setAttribute("id", "editingToolbarPopoverBar");
 
-    editingToolbar.addClass("editingToolbarDefaultAesthetic");
-    popoverMenu.addClass("editingToolbarDefaultAesthetic");
-
-    if (resolvedBgColor) {
-      editingToolbar.style.setProperty(
-        "--editing-toolbar-background-color",
-        resolvedBgColor,
-      );
-      popoverMenu.style.setProperty(
-        "--editing-toolbar-background-color",
-        resolvedBgColor,
-      );
-    }
-    if (resolvedIconColor) {
-      editingToolbar.style.setProperty(
-        "--editing-toolbar-icon-color",
-        resolvedIconColor,
-      );
-      popoverMenu.style.setProperty(
-        "--editing-toolbar-icon-color",
-        resolvedIconColor,
-      );
-    }
-    if (resolvedIconSize) {
-      editingToolbar.style.setProperty(
-        "--toolbar-icon-size",
-        `${resolvedIconSize}px`,
-      );
-      popoverMenu.style.setProperty(
-        "--toolbar-icon-size",
-        `${resolvedIconSize}px`,
-      );
-    }
+    applyAppearanceVars(editingToolbar, settings, effectiveStyle);
+    applyAppearanceVars(popoverMenu, settings, effectiveStyle);
 
     if (effectiveStyle === "top") {
       const activeLeaf = app.workspace.activeLeaf;
@@ -1326,7 +1243,7 @@ export function editingToolbarPopover(
       observeToolbarResize(plugin, app, editingToolbar, editingToolbarPopoverBar);
     }
   };
-  if (!plugin.isLoadMobile()) return;
+  if (!plugin.isDesktop()) return;
   const view = app.workspace.getActiveViewOfType(ItemView);
   if (!ViewUtils.isAllowedViewType(view)) return;
 
@@ -1337,35 +1254,12 @@ export function editingToolbarPopover(
     targetDocument,
   );
   if (existingToolbar && effectiveStyle !== "top") {
-    if (!settings.cMenuVisibility) {
-      existingToolbar.style.display = "none";
-    } else if (effectiveStyle === "following") {
-      existingToolbar.style.visibility = "hidden";
-      existingToolbar.style.display = ""; // clear display:none so visibility can take over
-    } else {
-      existingToolbar.style.visibility = "visible";
-      existingToolbar.style.display = "";
-    }
+    // The following bar stays hidden until a selection reveals it; clearing
+    // display lets visibility take over from an earlier display:none.
+    existingToolbar.style.visibility = "hidden";
+    existingToolbar.style.display = "";
 
-    if (resolvedBgColor) {
-      existingToolbar.style.setProperty(
-        "--editing-toolbar-background-color",
-        resolvedBgColor,
-      );
-    }
-    if (resolvedIconColor) {
-      existingToolbar.style.setProperty(
-        "--editing-toolbar-icon-color",
-        resolvedIconColor,
-      );
-    }
-    if (resolvedIconSize) {
-      existingToolbar.style.setProperty(
-        "--toolbar-icon-size",
-        `${resolvedIconSize}px`,
-      );
-    }
-
+    applyAppearanceVars(existingToolbar, settings, effectiveStyle);
     return;
   }
 

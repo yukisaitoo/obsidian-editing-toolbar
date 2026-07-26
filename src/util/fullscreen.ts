@@ -77,7 +77,7 @@ export function fullscreenMode(app: App) {
           document.body.removeChild(node);
           el.appendChild(node);
         } catch (error) {
-          console.log(error instanceof Error ? error.message : String(error));
+          console.error("editing-toolbar: fullscreen reparent failed", error);
         }
       });
     });

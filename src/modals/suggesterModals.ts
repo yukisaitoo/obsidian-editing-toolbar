@@ -1,31 +1,42 @@
-import { App, Command, FuzzyMatch, FuzzySuggestModal, Modal, Notice, TextComponent, debounce, setIcon } from "obsidian";
+import {
+  App,
+  Command,
+  FuzzyMatch,
+  FuzzySuggestModal,
+  Modal,
+  Notice,
+  TextComponent,
+  debounce,
+  setIcon,
+} from "obsidian";
 import { appIcons } from "src/icons/appIcons";
 import type EditingToolbarPlugin from "src/plugin/main";
+import type { ToolbarStyleKey } from "src/settings/settingsData";
 import { strings, t } from "src/translations/helper";
-import { findmenuID } from "src/util/util";
+import { findCommandLocation } from "src/util/util";
 
 type IconSelectCallback = (iconId: string) => void;
 
 export class ChooseFromIconList extends FuzzySuggestModal<string> {
   plugin: EditingToolbarPlugin;
   command: Command;
-  issub: boolean;
-  currentEditingConfig: string;
+  isSubmenuItem: boolean;
+  currentEditingConfig: ToolbarStyleKey;
   customCallback: IconSelectCallback | null = null;
   constructor(
     plugin: EditingToolbarPlugin,
     command: Command,
-    issub: boolean = false,
+    isSubmenuItem: boolean = false,
     callback?: IconSelectCallback,
-    currentEditingConfig?: string
+    currentEditingConfig?: ToolbarStyleKey,
   ) {
     super(plugin.app);
     this.plugin = plugin;
     this.command = command;
-    this.issub = issub;
+    this.isSubmenuItem = isSubmenuItem;
     this.customCallback = callback || null;
     this.setPlaceholder(strings.chooseIcon2);
-    this.currentEditingConfig = currentEditingConfig || "";
+    this.currentEditingConfig = currentEditingConfig ?? plugin.liveStyle;
   }
 
   private capitalJoin(string: string): string {
@@ -50,7 +61,7 @@ export class ChooseFromIconList extends FuzzySuggestModal<string> {
         .replace("bx-", "")
         .replace(/([A-Z])/g, " $1")
         .trim()
-        .replace(/-/gi, " ")
+        .replace(/-/gi, " "),
     );
   }
 
@@ -65,74 +76,94 @@ export class ChooseFromIconList extends FuzzySuggestModal<string> {
     if (item === "Custom") {
       if (this.customCallback) {
         new CustomIcon(
-          this.app, 
-          this.plugin, 
-          { id: this.command.id, name: this.command.name, icon: "" }, 
-          this.issub, 
+          this.app,
+          this.plugin,
+          { id: this.command.id, name: this.command.name, icon: "" },
+          this.isSubmenuItem,
           (customIconValue) => {
             this.customCallback?.(customIconValue);
-          }
+          },
         ).open();
         return;
       } else {
-        new CustomIcon(this.app, this.plugin, this.command, this.issub, undefined, this.currentEditingConfig).open();
+        new CustomIcon(
+          this.app,
+          this.plugin,
+          this.command,
+          this.isSubmenuItem,
+          undefined,
+          this.currentEditingConfig,
+        ).open();
         return;
       }
     }
-    
+
     if (this.customCallback) {
       this.customCallback(item);
       return;
     }
-    
-    const currentCommands = this.plugin.getCurrentCommands(this.currentEditingConfig);
+
+    const currentCommands = this.plugin.getCurrentCommands(
+      this.currentEditingConfig,
+    );
     if (this.command.icon) {
-      const menuID = findmenuID(this.command, this.issub, currentCommands);
-      if (this.issub) {
-        currentCommands[menuID['index']].SubmenuCommands![menuID['subindex']].icon = item;
+      const location = findCommandLocation(
+        this.command,
+        this.isSubmenuItem,
+        currentCommands,
+      );
+      if (this.isSubmenuItem) {
+        currentCommands[location.index].SubmenuCommands![
+          location.subIndex
+        ].icon = item;
       } else {
-        currentCommands[menuID['index']].icon = item;
+        currentCommands[location.index].icon = item;
       }
-      this.plugin.updateCurrentCommands(currentCommands, this.currentEditingConfig);
+      this.plugin.updateCurrentCommands(
+        currentCommands,
+        this.currentEditingConfig,
+      );
     } else {
       this.command.icon = item;
       currentCommands.push(this.command);
-      this.plugin.updateCurrentCommands(currentCommands, this.currentEditingConfig);
+      this.plugin.updateCurrentCommands(
+        currentCommands,
+        this.currentEditingConfig,
+      );
     }
 
     await this.plugin.saveSettings();
     setTimeout(() => {
       dispatchEvent(new Event("editingToolbar-NewCommand"));
     }, 100);
-    console.log(
-      `%cCommand '${this.command.name}' was added to editingToolbar`,
-      "color: Violet"
-    );
   }
 }
 
 class CustomIcon extends Modal {
   plugin: EditingToolbarPlugin;
   item: Command;
-  issub: boolean;
-  currentEditingConfig: string;
-  submitEnterCallback!: (this: HTMLTextAreaElement, ev: KeyboardEvent) => unknown;
+  isSubmenuItem: boolean;
+  currentEditingConfig: ToolbarStyleKey;
+  submitEnterCallback!: (
+    this: HTMLTextAreaElement,
+    ev: KeyboardEvent,
+  ) => unknown;
   customCallback: IconSelectCallback | null = null;
 
   constructor(
-    app: App, 
-    plugin: EditingToolbarPlugin, 
-    item: Command, 
-    issub: boolean,
+    app: App,
+    plugin: EditingToolbarPlugin,
+    item: Command,
+    isSubmenuItem: boolean,
     callback?: IconSelectCallback,
-    currentEditingConfig?: string
+    currentEditingConfig?: ToolbarStyleKey,
   ) {
     super(app);
     this.plugin = plugin;
     this.item = item;
-    this.issub = issub;
+    this.isSubmenuItem = isSubmenuItem;
     this.customCallback = callback || null;
-    this.currentEditingConfig = currentEditingConfig || "";
+    this.currentEditingConfig = currentEditingConfig ?? plugin.liveStyle;
     this.containerEl.addClass("editingToolbar-Modal");
     this.containerEl.addClass("customicon");
   }
@@ -140,53 +171,66 @@ class CustomIcon extends Modal {
   onOpen() {
     const { contentEl } = this;
     contentEl.createEl("b", { text: strings.enterIconCodeFormatSvg });
-    
+
     const textComponent = document.createElement("textarea");
     textComponent.className = "wideInputPromptInputEl";
     textComponent.placeholder = "";
-    textComponent.value = this.item.icon || '';
+    textComponent.value = this.item.icon || "";
     textComponent.style.width = "100%";
     textComponent.style.height = "200px";
     contentEl.appendChild(textComponent);
-    
+
     textComponent.addEventListener("input", async () => {
       const value = textComponent.value;
-      
+
       if (this.customCallback) {
         this.item.icon = value;
         return;
       }
 
       this.item.icon = value;
-      const currentCommands = this.plugin.getCurrentCommands(this.currentEditingConfig);
-      const menuID = findmenuID(this.item, this.issub, currentCommands);
-      
-      if (!this.issub) {
-        const index = menuID['index'];
-        index === -1 
-          ? this.plugin.settings.menuCommands.push(this.item) 
-          : (this.plugin.settings.menuCommands[index].icon = this.item.icon);
+      const currentCommands = this.plugin.getCurrentCommands(
+        this.currentEditingConfig,
+      );
+      const location = findCommandLocation(
+        this.item,
+        this.isSubmenuItem,
+        currentCommands,
+      );
+
+      if (!this.isSubmenuItem) {
+        if (location.index === -1) {
+          currentCommands.push(this.item);
+        } else {
+          currentCommands[location.index].icon = value;
+        }
       } else {
-        const subindex = menuID['subindex'];
-        subindex === -1
-          ? this.plugin.settings.menuCommands[menuID["index"]].SubmenuCommands!.push(this.item)
-          : this.plugin.settings.menuCommands[menuID['index']].SubmenuCommands![subindex].icon = value;
+        const submenu = currentCommands[location.index]?.SubmenuCommands;
+        if (location.subIndex === -1) {
+          submenu?.push(this.item);
+        } else if (submenu) {
+          submenu[location.subIndex].icon = value;
+        }
       }
-      
+
+      this.plugin.updateCurrentCommands(
+        currentCommands,
+        this.currentEditingConfig,
+      );
       await this.plugin.saveSettings();
     });
-    
+
     if (this.submitEnterCallback) {
-      textComponent.addEventListener('keydown', this.submitEnterCallback);
+      textComponent.addEventListener("keydown", this.submitEnterCallback);
     }
   }
-  
+
   onClose() {
     const { contentEl } = this;
     contentEl.empty();
-    
+
     if (this.customCallback) {
-      this.customCallback(this.item.icon || '');
+      this.customCallback(this.item.icon || "");
     } else {
       setTimeout(() => {
         dispatchEvent(new Event("editingToolbar-NewCommand"));
@@ -195,14 +239,16 @@ class CustomIcon extends Modal {
   }
 }
 
-
 export class CommandPicker extends FuzzySuggestModal<Command> {
   command!: Command;
-  currentEditingConfig: string;
-  constructor(private plugin: EditingToolbarPlugin, currentEditingConfig?: string) {
+  currentEditingConfig: ToolbarStyleKey;
+  constructor(
+    private plugin: EditingToolbarPlugin,
+    currentEditingConfig?: ToolbarStyleKey,
+  ) {
     super(plugin.app);
     this.setPlaceholder(strings.chooseCommand);
-    this.currentEditingConfig = currentEditingConfig || "";
+    this.currentEditingConfig = currentEditingConfig ?? plugin.liveStyle;
   }
 
   getItems(): Command[] {
@@ -215,49 +261,58 @@ export class CommandPicker extends FuzzySuggestModal<Command> {
   }
 
   async onChooseItem(item: Command): Promise<void> {
-    
-    const currentCommands = this.plugin.getCurrentCommands(this.currentEditingConfig);
+    const currentCommands = this.plugin.getCurrentCommands(
+      this.currentEditingConfig,
+    );
 
-    const index = currentCommands.findIndex((v) => v.id == item.id);
-
-    if (index > -1)
-    {
+    if (currentCommands.some((v) => v.id === item.id)) {
       new Notice(strings.command2 + t(item.name) + strings.alreadyExists, 3000);
       return;
-    } else {
-      if (item.icon) {
-        currentCommands.push(item);
-        this.plugin.updateCurrentCommands(currentCommands, this.currentEditingConfig);
-        await this.plugin.saveSettings();
-        setTimeout(() => {
-          dispatchEvent(new Event("editingToolbar-NewCommand"));
-        }, 100);
-        console.log(
-          `%cCommand '${item.name}' was added to editingToolbar`,
-          "color: Violet"
-        );
-      } else {
-        new ChooseFromIconList(this.plugin, item, false, undefined, this.currentEditingConfig).open();
-      }
     }
+
+    // A command with no icon needs one picked before it can go on the toolbar;
+    // the icon picker adds it once chosen.
+    if (!item.icon) {
+      new ChooseFromIconList(
+        this.plugin,
+        item,
+        false,
+        undefined,
+        this.currentEditingConfig,
+      ).open();
+      return;
+    }
+
+    currentCommands.push(item);
+    this.plugin.updateCurrentCommands(
+      currentCommands,
+      this.currentEditingConfig,
+    );
+    await this.plugin.saveSettings();
+    setTimeout(() => {
+      dispatchEvent(new Event("editingToolbar-NewCommand"));
+    }, 100);
   }
 }
-
- 
-
 
 export class ChangeCmdname extends Modal {
   plugin: EditingToolbarPlugin;
   item: Command;
-  issub: boolean;
-  currentEditingConfig: string;
+  isSubmenuItem: boolean;
+  currentEditingConfig: ToolbarStyleKey;
   submitEnterCallback!: (this: HTMLInputElement, ev: KeyboardEvent) => unknown;
-  constructor(app: App, plugin: EditingToolbarPlugin, item: Command, issub: boolean, currentEditingConfig?: string) {
+  constructor(
+    app: App,
+    plugin: EditingToolbarPlugin,
+    item: Command,
+    isSubmenuItem: boolean,
+    currentEditingConfig?: ToolbarStyleKey,
+  ) {
     super(plugin.app);
     this.plugin = plugin;
     this.item = item;
-    this.issub = issub;
-    this.currentEditingConfig = currentEditingConfig || "";
+    this.isSubmenuItem = isSubmenuItem;
+    this.currentEditingConfig = currentEditingConfig ?? plugin.liveStyle;
     this.containerEl.addClass("editingToolbar-Modal");
     this.containerEl.addClass("changename");
   }
@@ -266,35 +321,50 @@ export class ChangeCmdname extends Modal {
     contentEl.createEl("b", { text: strings.pleaseEnterNewName });
 
     const textComponent = new TextComponent(contentEl);
-    textComponent.inputEl.classList.add('InputPromptInputEl');
-    textComponent.setPlaceholder("")
-      .setValue(this.item.name ?? '')
-      .onChange(debounce(async (value) => {
-        const currentCommands = this.plugin.getCurrentCommands(this.currentEditingConfig);
-        
-        const menuID = findmenuID(this.item, this.issub, currentCommands)
-        this.item.name = value;
-        if (!this.issub)
-        {
-          const index = menuID['index']
-          if (index === -1) {
-            currentCommands.push(this.item);
-          } else {
-            currentCommands[index].name = this.item.name;
-          }
-        } else {
-          const subindex = menuID['subindex']
-          if (subindex === -1) {
-            currentCommands[menuID["index"]].SubmenuCommands!.push(this.item);
-          } else {
-            currentCommands[menuID['index']].SubmenuCommands![subindex].name = value;
-          }
-        }
-        
-        this.plugin.updateCurrentCommands(currentCommands, this.currentEditingConfig);
-        await this.plugin.saveSettings();
-      }, 100, true))
-      .inputEl.addEventListener('keydown', this.submitEnterCallback);
+    textComponent.inputEl.classList.add("InputPromptInputEl");
+    textComponent
+      .setPlaceholder("")
+      .setValue(this.item.name ?? "")
+      .onChange(
+        debounce(
+          async (value) => {
+            const currentCommands = this.plugin.getCurrentCommands(
+              this.currentEditingConfig,
+            );
+
+            const location = findCommandLocation(
+              this.item,
+              this.isSubmenuItem,
+              currentCommands,
+            );
+            this.item.name = value;
+
+            if (!this.isSubmenuItem) {
+              if (location.index === -1) {
+                currentCommands.push(this.item);
+              } else {
+                currentCommands[location.index].name = value;
+              }
+            } else {
+              const submenu = currentCommands[location.index]?.SubmenuCommands;
+              if (location.subIndex === -1) {
+                submenu?.push(this.item);
+              } else if (submenu) {
+                submenu[location.subIndex].name = value;
+              }
+            }
+
+            this.plugin.updateCurrentCommands(
+              currentCommands,
+              this.currentEditingConfig,
+            );
+            await this.plugin.saveSettings();
+          },
+          100,
+          true,
+        ),
+      )
+      .inputEl.addEventListener("keydown", this.submitEnterCallback);
   }
   onClose() {
     const { contentEl } = this;
@@ -303,4 +373,4 @@ export class ChangeCmdname extends Modal {
       dispatchEvent(new Event("editingToolbar-NewCommand"));
     }, 100);
   }
-};
+}

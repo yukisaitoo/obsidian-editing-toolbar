@@ -14,11 +14,12 @@ import addIcons from "src/icons/customIcons";
 import { InsertLinkModal } from "src/modals/insertLinkModal";
 import type { ToolbarStyleKey } from "src/settings/settingsData";
 import {
-  DEFAULT_FOLLOWING_COMMANDS,
+  applyAppearanceVars,
+  DEFAULT_COMMANDS_BY_STYLE,
   DEFAULT_SETTINGS,
-  DEFAULT_TOOLBAR_COMMANDS,
-  editingToolbarSettings,
-  getAppearanceValue,
+  EditingToolbarSettings,
+  POSITION_STYLES,
+  resolveNextPositionStyle,
 } from "src/settings/settingsData";
 import {
   closeMoreOverflowPopovers,
@@ -32,8 +33,6 @@ import { ViewUtils } from "src/util/viewUtils";
 import { EditingToolbarSettingTab } from "../settings/settingsTab";
 
 let activeDocument: Document;
-
-const STYLE_KEYS: ToolbarStyleKey[] = ["top", "following"];
 
 export interface AdmonitionDefinition {
   type: string;
@@ -56,8 +55,7 @@ interface EditorContextMenuAction {
 const ADMONITION_PLUGIN_ID = "obsidian-admonition";
 
 export default class EditingToolbarPlugin extends Plugin {
-  settings!: editingToolbarSettings;
-  public toolbarIconSize!: number;
+  settings!: EditingToolbarSettings;
   public positionStyle!: string;
 
   // Which style's appearance is being edited in the settings UI
@@ -72,7 +70,6 @@ export default class EditingToolbarPlugin extends Plugin {
   settingTab!: EditingToolbarSettingTab;
 
   private toolbarCache: Map<ToolbarStyleKey, HTMLElement> = new Map();
-  private popoverCache: Map<ToolbarStyleKey, HTMLElement> = new Map();
 
   async onload(): Promise<void> {
     activeDocument = activeWindow.document;
@@ -94,16 +91,16 @@ export default class EditingToolbarPlugin extends Plugin {
         }
       }, 100);
     });
-    this.init_evt(activeDocument);
+    this.registerSelectionEvents(activeDocument);
     this.registerEvent(
       this.app.workspace.on("window-open", (leaf) => {
-        this.init_evt(leaf.doc);
+        this.registerSelectionEvents(leaf.doc);
         setTimeout(() => {
           if (!this.settings.cMenuVisibility) {
             return;
           }
 
-          if (this.isFollowingToolbarActive()) {
+          if (this.isToolbarStyleEnabled("following")) {
             editingToolbarPopover(this.app, this, "following", leaf.doc);
           }
         }, 50);
@@ -114,7 +111,7 @@ export default class EditingToolbarPlugin extends Plugin {
       this.app.workspace.on("active-leaf-change", this.handleEditingToolbar),
     );
     this.registerEvent(
-      this.app.workspace.on("layout-change", this.handleEditingToolbar_layout),
+      this.app.workspace.on("layout-change", this.handleEditingToolbar),
     );
     if (this.settings.cMenuVisibility == true) {
       setTimeout(() => {
@@ -147,23 +144,10 @@ export default class EditingToolbarPlugin extends Plugin {
     );
     addIcons();
     this.positionStyle = this.settings.positionStyle;
-    const activeStyle = this.resolveActiveStyle();
-    this.toolbarIconSize = getAppearanceValue(
+    applyAppearanceVars(
+      activeDocument.documentElement,
       this.settings,
-      "toolbarIconSize",
-      activeStyle,
-    );
-    activeDocument.documentElement.style.setProperty(
-      "--editing-toolbar-background-color",
-      getAppearanceValue(this.settings, "toolbarBackgroundColor", activeStyle),
-    );
-    activeDocument.documentElement.style.setProperty(
-      "--editing-toolbar-icon-color",
-      getAppearanceValue(this.settings, "toolbarIconColor", activeStyle),
-    );
-    activeDocument.documentElement.style.setProperty(
-      "--toolbar-icon-size",
-      `${getAppearanceValue(this.settings, "toolbarIconSize", activeStyle)}px`,
+      this.resolveActiveStyle(),
     );
   }
 
@@ -173,26 +157,19 @@ export default class EditingToolbarPlugin extends Plugin {
 
     for (const key of Object.keys(
       DEFAULT_SETTINGS,
-    ) as (keyof editingToolbarSettings)[]) {
+    ) as (keyof EditingToolbarSettings)[]) {
       if (this.settings[key] === undefined || this.settings[key] === null) {
         (this.settings[key] as unknown) = DEFAULT_SETTINGS[key];
       }
     }
 
-    // Every style keeps its own command list, each with its own fresh-install
-    // default (top gets the full set; following gets a curated inline set). Seed a
-    // list only when it has never been persisted, so a list the user deliberately
-    // cleared stays empty. Deep-copy so the module-level default constants are
-    // never aliased by the persisted command objects.
-    const seedDefaults = {
-      topCommands: DEFAULT_TOOLBAR_COMMANDS,
-      followingCommands: DEFAULT_FOLLOWING_COMMANDS,
-    } as const;
-    for (const key of Object.keys(
-      seedDefaults,
-    ) as (keyof typeof seedDefaults)[]) {
+    // Seed a style's command list only when it has never been persisted, so a
+    // list the user deliberately cleared stays empty. Deep-copy so the module-level
+    // default constants are never aliased by the persisted command objects.
+    for (const style of POSITION_STYLES) {
+      const key = `${style}Commands` as const;
       if (!loadedData || loadedData[key] === undefined) {
-        this.settings[key] = structuredClone(seedDefaults[key]);
+        this.settings[key] = structuredClone(DEFAULT_COMMANDS_BY_STYLE[style]);
       }
     }
   }
@@ -201,23 +178,26 @@ export default class EditingToolbarPlugin extends Plugin {
   // global appearance fields via getAppearanceValue().
   private initAppearanceStore(): void {
     const store = (this.settings.appearanceByStyle ??= {});
-    for (const style of STYLE_KEYS) {
+    for (const style of POSITION_STYLES) {
       store[style] ??= {};
     }
   }
 
-  /**
-   * The toolbar style whose appearance is currently in effect: the style being
-   * edited in settings, else the live position style, else the stored fallback.
-   */
-  public resolveActiveStyle(): ToolbarStyleKey {
-    const raw = (this.appearanceEditStyle ||
-      this.positionStyle ||
-      this.settings.positionStyle ||
-      "top") as string;
-    return STYLE_KEYS.includes(raw as ToolbarStyleKey)
+  /** The toolbar style currently live in the workspace. */
+  public get liveStyle(): ToolbarStyleKey {
+    const raw = this.positionStyle || this.settings.positionStyle;
+    return POSITION_STYLES.includes(raw as ToolbarStyleKey)
       ? (raw as ToolbarStyleKey)
       : "top";
+  }
+
+  /**
+   * The toolbar style whose appearance is currently in effect. While the settings
+   * tab is open this is the style being edited there, which can differ from the
+   * style actually rendered in the workspace.
+   */
+  public resolveActiveStyle(): ToolbarStyleKey {
+    return this.appearanceEditStyle ?? this.liveStyle;
   }
 
   private getPluginCommandId(commandId: string): string {
@@ -342,7 +322,7 @@ export default class EditingToolbarPlugin extends Plugin {
     );
   };
 
-  async tryGetAdmonitionTypes(_retries = 0): Promise<void> {
+  async tryGetAdmonitionTypes(): Promise<void> {
     const admonitionPluginInstance =
       // @ts-expect-error untyped API access
       this.app.plugins?.getPlugin(ADMONITION_PLUGIN_ID);
@@ -371,21 +351,18 @@ export default class EditingToolbarPlugin extends Plugin {
     }
   }
 
-  isLoadMobile() {
-    // Mobile is unsupported: the toolbar never loads there.
+  isDesktop() {
     return !Platform.isMobileApp;
   }
 
   onunload(): void {
     this.app.workspace.off("active-leaf-change", this.handleEditingToolbar);
-    this.app.workspace.off("layout-change", this.handleEditingToolbar_layout);
+    this.app.workspace.off("layout-change", this.handleEditingToolbar);
 
     this.topToolbarResizeObserver?.disconnect();
     this.topToolbarResizeObserver = null;
 
     selfDestruct(this);
-
-    console.log("editingToolbar unloaded");
   }
 
   isView() {
@@ -399,7 +376,7 @@ export default class EditingToolbarPlugin extends Plugin {
     closeMoreOverflowPopovers();
 
     if (!this.settings.cMenuVisibility) {
-      (["top", "following"] as const).forEach((style) => {
+      POSITION_STYLES.forEach((style) => {
         const el = getExistingToolbar(this.app, this, style);
         if (el) el.style.display = "none";
       });
@@ -440,76 +417,42 @@ export default class EditingToolbarPlugin extends Plugin {
 
     // Reading mode hides everything; non-markdown views (Canvas, …) handled below.
     if (isMarkdownView && !inSourceMode) {
-      (["top", "following"] as const).forEach((style) => {
+      POSITION_STYLES.forEach((style) => {
         const el = getExistingToolbar(this.app, this, style);
         if (el) el.style.visibility = "hidden";
       });
       return;
     }
 
-    // The explicit enable flags are the single source of truth. Legacy
-    // positionStyle-only configs are migrated into these flags in
-    // loadSettings(), so we must NOT fall back to positionStyle here:
-    // doing so re-enables a toolbar the user just toggled off (positionStyle
-    // still points at it), which is the "toggle won't turn it off" bug.
-    const topEnabled = this.isTopToolbarActive();
-    const followingEnabled = this.isFollowingToolbarActive();
+    // The enable flags are the single source of truth. Never fall back to
+    // positionStyle here: it still points at a toolbar the user just toggled off,
+    // which is the "toggle won't turn it off" bug.
+    for (const style of POSITION_STYLES) {
+      const existing = getExistingToolbar(this.app, this, style);
 
-    const styles: { key: "top" | "following"; enabled: boolean }[] = [
-      { key: "top", enabled: topEnabled },
-      { key: "following", enabled: followingEnabled },
-    ];
-
-    for (const { key, enabled } of styles) {
-      const existing = getExistingToolbar(this.app, this, key);
-
-      if (!enabled) {
+      if (!this.isToolbarStyleEnabled(style)) {
         if (existing) existing.style.visibility = "hidden";
         continue;
       }
 
       if (!existing) {
-        editingToolbarPopover(this.app, this, key);
+        editingToolbarPopover(this.app, this, style);
       }
 
-      const toolbar = getExistingToolbar(this.app, this, key);
+      const toolbar = getExistingToolbar(this.app, this, style);
       if (!toolbar) continue;
 
-      if (key === "following") {
-        // Following bar stays hidden until a selection reveals it (selection handlers)
-        toolbar.style.visibility = "hidden";
-      } else {
-        toolbar.style.visibility = "visible";
-      }
+      // The following bar stays hidden until a selection reveals it.
+      toolbar.style.visibility = style === "following" ? "hidden" : "visible";
     }
   };
 
-  handleEditingToolbar_layout = () => {
-    this.handleEditingToolbar();
-  };
-
-  getCurrentCommands(style?: string): Command[] {
-    switch (style || this.positionStyle) {
-      case "following":
-        return this.settings.followingCommands;
-      case "top":
-        return this.settings.topCommands;
-      default:
-        return this.settings.menuCommands;
-    }
+  getCurrentCommands(style: ToolbarStyleKey): Command[] {
+    return this.settings[`${style}Commands`];
   }
 
-  updateCurrentCommands(commands: Command[], style?: string): void {
-    switch (style || this.positionStyle) {
-      case "following":
-        this.settings.followingCommands = commands;
-        break;
-      case "top":
-        this.settings.topCommands = commands;
-        break;
-      default:
-        this.settings.menuCommands = commands;
-    }
+  updateCurrentCommands(commands: Command[], style: ToolbarStyleKey): void {
+    this.settings[`${style}Commands`] = commands;
   }
 
   async saveSettings() {
@@ -521,14 +464,14 @@ export default class EditingToolbarPlugin extends Plugin {
   // loadSettings() does, since DEFAULT_SETTINGS keeps them empty.
   async resetSettings(): Promise<void> {
     this.settings = structuredClone(DEFAULT_SETTINGS);
-    this.settings.topCommands = structuredClone(DEFAULT_TOOLBAR_COMMANDS);
-    this.settings.followingCommands = structuredClone(
-      DEFAULT_FOLLOWING_COMMANDS,
-    );
+    for (const style of POSITION_STYLES) {
+      this.settings[`${style}Commands`] = structuredClone(
+        DEFAULT_COMMANDS_BY_STYLE[style],
+      );
+    }
 
     this.initAppearanceStore();
     this.appearanceEditStyle = null;
-    this.toolbarIconSize = this.settings.toolbarIconSize;
 
     await this.saveSettings();
 
@@ -538,11 +481,34 @@ export default class EditingToolbarPlugin extends Plugin {
     this.onPositionStyleChange(this.settings.positionStyle);
   }
 
-  public getCommandsManager(): CommandsManager {
-    return this.commandsManager;
+  /**
+   * Turn a toolbar style on or off: flip its flag, hand the primary style to
+   * whichever style should own it now, persist, and re-evaluate the live bars.
+   */
+  async setToolbarStyleEnabled(
+    style: ToolbarStyleKey,
+    enabled: boolean,
+  ): Promise<void> {
+    const previousStyle = this.positionStyle;
+    this.settings[
+      style === "top" ? "enableTopToolbar" : "enableFollowingToolbar"
+    ] = enabled;
+
+    const nextStyle = resolveNextPositionStyle(
+      this.settings,
+      style,
+      enabled,
+      previousStyle,
+    );
+    if (nextStyle && nextStyle !== previousStyle) {
+      this.onPositionStyleChange(nextStyle);
+    }
+
+    await this.saveSettings();
+    this.handleEditingToolbar();
   }
 
-  init_evt(container: Document) {
+  registerSelectionEvents(container: Document) {
     const debouncedHandleTextSelection = debounce(() => {
       this.handleTextSelection();
     }, 100);
@@ -555,7 +521,7 @@ export default class EditingToolbarPlugin extends Plugin {
         this.registerDomEvent(container, "mouseup", (e2: MouseEvent) => {
           const mouseUpTime = Date.now();
           if (mouseUpTime - mouseDownTime < 300 && e2.button === 1) {
-            this.handleMiddleClickToolbar(e2);
+            this.handleMiddleClickToolbar();
           }
         });
       }
@@ -588,45 +554,23 @@ export default class EditingToolbarPlugin extends Plugin {
     this.toolbarCache.set(style, element);
   }
 
-  public getCachedPopover(style: ToolbarStyleKey): HTMLElement | null {
-    const cached = this.popoverCache.get(style);
-    if (cached && cached.isConnected) {
-      return cached;
-    }
-    if (cached) {
-      this.popoverCache.delete(style);
-    }
-    return null;
-  }
-
-  public setCachedPopover(style: ToolbarStyleKey, element: HTMLElement): void {
-    this.popoverCache.set(style, element);
-  }
-
   public clearToolbarCache(style?: ToolbarStyleKey): void {
     if (style) {
       this.toolbarCache.delete(style);
-      this.popoverCache.delete(style);
     } else {
       this.toolbarCache.clear();
-      this.popoverCache.clear();
     }
   }
 
-  // A toolbar style is active iff its explicit enable flag is on. Legacy
-  // positionStyle-only configs are migrated into these flags in loadSettings(),
-  // so positionStyle must not be consulted here (see handleEditingToolbar).
-  private isTopToolbarActive(): boolean {
-    return this.settings.enableTopToolbar;
+  public isToolbarStyleEnabled(style: ToolbarStyleKey): boolean {
+    return style === "top"
+      ? this.settings.enableTopToolbar
+      : this.settings.enableFollowingToolbar;
   }
 
-  private isFollowingToolbarActive(): boolean {
-    return this.settings.enableFollowingToolbar;
-  }
-
-  private handleMiddleClickToolbar(_e: MouseEvent) {
+  private handleMiddleClickToolbar() {
     const cmEditor = this.commandsManager.getActiveEditor();
-    if (this.isFollowingToolbarActive() && cmEditor?.hasFocus()) {
+    if (this.isToolbarStyleEnabled("following") && cmEditor?.hasFocus()) {
       this.showFollowingToolbar(cmEditor);
     }
   }
@@ -647,7 +591,7 @@ export default class EditingToolbarPlugin extends Plugin {
 
     if (selectionKeys.includes(e.code) || e.shiftKey) {
       this.handleTextSelection();
-    } else if (!e.shiftKey && this.isFollowingToolbarActive()) {
+    } else if (!e.shiftKey && this.isToolbarStyleEnabled("following")) {
       this.hideToolbarIfNotSelected();
     }
   };
@@ -663,7 +607,7 @@ export default class EditingToolbarPlugin extends Plugin {
 
   private registerScrollAndBlurEvents(container: Document) {
     const hideToolbar = this.throttle(() => {
-      if (!this.isFollowingToolbarActive()) return;
+      if (!this.isToolbarStyleEnabled("following")) return;
       this.hideToolbarIfNotSelected(container);
     }, 200);
 
@@ -681,7 +625,7 @@ export default class EditingToolbarPlugin extends Plugin {
       hostDocument ||
         this.getToolbarHostDocument(this.commandsManager.getActiveEditor()),
     );
-    if (followingToolbar && this.isFollowingToolbarActive()) {
+    if (followingToolbar && this.isToolbarStyleEnabled("following")) {
       followingToolbar.style.visibility = "hidden";
     }
   }
@@ -711,10 +655,9 @@ export default class EditingToolbarPlugin extends Plugin {
   }
 
   private showFollowingToolbar(editor: Editor) {
-    if (!this.isFollowingToolbarActive()) return;
+    if (!this.isToolbarStyleEnabled("following")) return;
 
     const targetDocument = this.getToolbarHostDocument(editor);
-
     const followingToolbar = getExistingToolbar(
       this.app,
       this,
@@ -726,11 +669,9 @@ export default class EditingToolbarPlugin extends Plugin {
       followingToolbar.style.visibility = "visible";
       followingToolbar.classList.add("editingToolbarFlex");
       followingToolbar.classList.remove("editingToolbarGrid");
-
-      createFollowingBar(this.app, this, editor, true, targetDocument);
-    } else {
-      createFollowingBar(this.app, this, editor, true, targetDocument);
     }
+
+    createFollowingBar(this.app, this, editor, true, targetDocument);
   }
 
   onPositionStyleChange(newStyle: string): void {
@@ -742,31 +683,9 @@ export default class EditingToolbarPlugin extends Plugin {
     this.settings.positionStyle = newStyle;
 
     const activeStyle = this.resolveActiveStyle();
-    this.toolbarIconSize = getAppearanceValue(
-      this.settings,
-      "toolbarIconSize",
-      activeStyle,
-    );
-
-    // Refresh the global CSS variables from the *active* style's appearance
     const doc = activeDocument ?? document;
-    if (doc && doc.documentElement) {
-      doc.documentElement.style.setProperty(
-        "--editing-toolbar-background-color",
-        getAppearanceValue(
-          this.settings,
-          "toolbarBackgroundColor",
-          activeStyle,
-        ),
-      );
-      doc.documentElement.style.setProperty(
-        "--editing-toolbar-icon-color",
-        getAppearanceValue(this.settings, "toolbarIconColor", activeStyle),
-      );
-      doc.documentElement.style.setProperty(
-        "--toolbar-icon-size",
-        `${getAppearanceValue(this.settings, "toolbarIconSize", activeStyle)}px`,
-      );
+    if (doc?.documentElement) {
+      applyAppearanceVars(doc.documentElement, this.settings, activeStyle);
     }
 
     dispatchEvent(new Event("editingToolbar-NewCommand"));

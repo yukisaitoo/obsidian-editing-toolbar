@@ -115,8 +115,14 @@
   background-color: var(--editing-toolbar-background-color);
 }
 
-#editingToolbarModalBar.editingToolbarDefaultAesthetic {
+#editingToolbarModalBar.editingToolbarDefaultAesthetic.top {
   border-bottom: 1px solid var(--background-modifier-border);
+}
+
+#editingToolbarModalBar.editingToolbarDefaultAesthetic:not(.top) {
+  border: 1px solid var(--background-modifier-border);
+  background-clip: padding-box;
+  box-shadow: var(--shadow-s);
 }
 
 #editingToolbarModalBar.editingToolbarDefaultAesthetic:not(.top) :is(.editingToolbarCommandItem, button[class^=editingToolbarCommandsubItem]) {

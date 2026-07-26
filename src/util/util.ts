@@ -1,6 +1,6 @@
 import { Editor, Command } from "obsidian";
 import { syntaxTree } from '@codemirror/language';
-import { editingToolbarSettings } from "../settings/settingsData";
+import { EditingToolbarSettings } from "../settings/settingsData";
 import { strings } from "../translations/helper";
 
 // Hangul Filler (U+3164): an invisible, non-whitespace character used as a
@@ -13,21 +13,30 @@ export function GenNonDuplicateID(randomLength: number) {
   return idStr + Math.random().toString(36).slice(3, 3 + randomLength);
 }
 
-export function findmenuID(command: Command, issub: boolean, currentCommands: Command[]) {
-  if (issub) {
-    for (let idx = 0; idx < currentCommands.length; idx++) {
-      const item = currentCommands[idx];
-      if ("SubmenuCommands" in item && item.SubmenuCommands) {
-        const subindex = item.SubmenuCommands.findIndex((v) => v.id === command.id);
-        if (subindex >= 0) {
-          return { index: idx, subindex };
-        }
-      }
-    }
-    return { index: -1, subindex: -1 };
+/**
+ * Where a command lives in a toolbar's command list. `subIndex` is -1 for a
+ * top-level command; `index` is -1 when the command is not in the list at all.
+ */
+export function findCommandLocation(
+  command: Command,
+  isSubmenuItem: boolean,
+  currentCommands: Command[]
+): { index: number; subIndex: number } {
+  if (!isSubmenuItem) {
+    return {
+      index: currentCommands.findIndex((v) => v.id === command.id),
+      subIndex: -1,
+    };
   }
 
-  return { index: currentCommands.findIndex((v) => v.id === command.id), subindex: -1 };
+  for (let index = 0; index < currentCommands.length; index++) {
+    const submenu = currentCommands[index].SubmenuCommands;
+    const subIndex = submenu?.findIndex((v) => v.id === command.id) ?? -1;
+    if (subIndex >= 0) {
+      return { index, subIndex };
+    }
+  }
+  return { index: -1, subIndex: -1 };
 }
 
 // A color-picker table is a flat list of rows: a section header, a blank
@@ -65,7 +74,7 @@ function renderColorPicker(tableId: string, colspan: number, rows: PickerRow[]):
 </div>`;
 }
 
-export function colorpicker(plugin: { settings: editingToolbarSettings }) {
+export function colorpicker(plugin: { settings: EditingToolbarSettings }) {
   const s = plugin.settings;
   return renderColorPicker("x-color-picker-table", 10, [
     { header: strings.themeColors },
@@ -84,7 +93,7 @@ export function colorpicker(plugin: { settings: editingToolbarSettings }) {
   ]);
 }
 
-export function backcolorpicker(plugin: { settings: editingToolbarSettings }) {
+export function backcolorpicker(plugin: { settings: EditingToolbarSettings }) {
   const s = plugin.settings;
   return renderColorPicker("x-backgroundcolor-picker-table", 5, [
     { header: strings.translucentColors },
