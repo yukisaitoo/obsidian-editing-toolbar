@@ -79,10 +79,6 @@ export const en = {
   fitEditorWidth: "Fit Editor Width",
   followingToolbar: "Selection",
   fontColors: "Font Colors",
-  fontColorFormattingBrush: "Font-Color formatting brush ON!",
-  backgroundColorFormattingBrush: "Background-Color formatting brush ON!",
-  formatBrush: "Format Brush",
-  formatBrushSelectTextApply: "Format brush ON! Select text to apply【",
   fullHalfConverter: "Full Half Converter",
   general: "General",
   id: "ID",
@@ -138,8 +134,6 @@ export const en = {
   plainTextCopiedClipboard: "Plain text copied to clipboard",
   pleaseEnterUrlFirst: "Please enter a URL first",
   pleaseEnterNewName: "Please enter a new name: ",
-  pleaseExecuteFormatCommandSelect:
-    "Please execute a format command or select format text first, then enable the format brush",
   pleasePasteConfigurationDataFirst: "Please paste configuration data first",
   pleaseSelectValidMarkdownTable: "Please select a valid Markdown table",
   pleaseSelectLinesMergeFirst: "Please select lines to merge first",
@@ -215,7 +209,6 @@ export const en = {
     "ℹ️ Update mode will merge imported settings with existing ones.",
   overwriteModeReplaceExistingSettings:
     "⚠️ Overwrite mode will replace existing settings with imported ones.",
-  format: "】format\nClick the mouse right key to close the formatting-brush",
   setCustomBackground: "🎨 Custom text background colors",
   setCustomBackgroundDesc:
     "User-defined colors for the background color toolbar command.",

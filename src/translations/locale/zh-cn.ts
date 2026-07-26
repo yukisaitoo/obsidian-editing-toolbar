@@ -74,12 +74,6 @@ const ui: Partial<Record<keyof typeof en, string>> = {
   fetchRemoteTitle: "获取URL标题",
   fitEditorWidth: "自适应宽度",
   fontColors: "字体颜色",
-  fontColorFormattingBrush:
-    "字体颜色格式刷开启\n点击鼠标中键或者右键关闭格式刷",
-  backgroundColorFormattingBrush:
-    "背景颜色格式刷开启\n点击鼠标中键或者右键关闭格式刷",
-  formatBrush: "格式刷",
-  formatBrushSelectTextApply: "格式刷已开启\n选中文本应用【",
   fullHalfConverter: "全角半角转换",
   general: "常规",
   icon: "图标",
@@ -130,8 +124,6 @@ const ui: Partial<Record<keyof typeof en, string>> = {
   plainTextCopiedClipboard: "无语法文本已复制到剪贴板",
   pleaseEnterUrlFirst: "请先输入一个URL",
   pleaseEnterNewName: "请输入新名称：",
-  pleaseExecuteFormatCommandSelect:
-    "请先执行一个格式命令或选中带格式的文本，然后启用格式刷",
   pleasePasteConfigurationDataFirst: "请先粘贴配置数据",
   pleaseSelectValidMarkdownTable: "请先选择有效的 Markdown 表格",
   pleaseSelectLinesMergeFirst: "请先选择要合并的行",
@@ -198,7 +190,6 @@ const ui: Partial<Record<keyof typeof en, string>> = {
   updateModeMergeImportedSettings: "ℹ️ 更新模式将合并导入的设置与现有的设置。",
   overwriteModeReplaceExistingSettings:
     "⚠️ 覆盖模式将用导入的配置替换所有设置。",
-  format: "】格式\n点击鼠标右键关闭格式刷",
   setCustomBackground: "🎨 设置自定义背景",
   setCustomFontColor: "🖌️ 设置自定义字体颜色",
 };

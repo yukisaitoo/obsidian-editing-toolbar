@@ -6,7 +6,6 @@ import {
   ItemView,
   Menu,
   MenuItem,
-  Notice,
   setIcon,
   WorkspaceItemExt,
   WorkspaceParent,
@@ -572,10 +571,6 @@ function createMoreMenu(
   return cMoreMenu;
 }
 
-export function quietFormatBrushes(plugin: EditingToolbarPlugin) {
-  plugin.quietAllFormatBrushes();
-}
-
 export function setFormatEraser(plugin: EditingToolbarPlugin, editor: Editor) {
   let selectText = editor.getSelection();
   if (!selectText || selectText.trim() === "") {
@@ -802,15 +797,13 @@ interface ColorPickerButtonConfig {
   pickerHtml: string;
   // Wired up by createTableCell for click-to-apply
   tableId: string;
-  activateFormatBrush: () => void;
-  formatBrushMessage: string;
   customColorTooltip: string;
   // CSS selector for the settings element to highlight with a CTA
   customColorSelector: string;
 }
 
-// Builds a colour-swatch submenu button with format-brush and custom-colour
-// shortcuts. Font- and background-colour share it, differing only via `config`.
+// Builds a colour-swatch submenu button with a custom-colour shortcut.
+// Font- and background-colour share it, differing only via `config`.
 function createColorPickerButton(
   app: App,
   plugin: EditingToolbarPlugin,
@@ -853,15 +846,6 @@ function createColorPickerButton(
   const wrapper = submenu.querySelector(
     ".x-color-picker-wrapper",
   ) as HTMLElement;
-
-  new ButtonComponent(wrapper)
-    .setIcon("paintbrush")
-    .setTooltip(strings.formatBrush, { delay: TOOLTIP_DELAY })
-    .onClick(() => {
-      quietFormatBrushes(plugin);
-      config.activateFormatBrush();
-      plugin.tempNotice = new Notice(config.formatBrushMessage, 0);
-    });
 
   new ButtonComponent(wrapper)
     .setIcon("palette")
@@ -1224,9 +1208,6 @@ export function editingToolbarPopover(
               tooltip: strings.fontColors,
               pickerHtml: colorpicker(plugin),
               tableId: "x-color-picker-table",
-              activateFormatBrush: () =>
-                plugin.setFontColorFormatBrushActive(true),
-              formatBrushMessage: strings.fontColorFormattingBrush,
               customColorTooltip: strings.customFontColor,
               customColorSelector: ".custom_font",
             },
@@ -1243,8 +1224,6 @@ export function editingToolbarPopover(
               tooltip: strings.backgroundColor,
               pickerHtml: backcolorpicker(plugin),
               tableId: "x-backgroundcolor-picker-table",
-              activateFormatBrush: () => plugin.setBgFormatBrushActive(true),
-              formatBrushMessage: strings.backgroundColorFormattingBrush,
               customColorTooltip: strings.customBackgroundColor,
               customColorSelector: ".custom_bg",
             },

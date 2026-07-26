@@ -117,9 +117,6 @@ export interface editingToolbarSettings {
   custom_fc3: string;
   custom_fc4: string;
   custom_fc5: string;
-  formatBrushes: {
-    [key: string]: boolean;
-  };
 
   // Per-style appearance buckets (top/following)
   appearanceByStyle?: AppearanceByStyle;
@@ -140,11 +137,6 @@ export const DEFAULT_TOOLBAR_COMMANDS: Command[] = [
     id: "editing-toolbar:editor-redo",
     name: "Redo Edit",
     icon: "redo-glyph",
-  },
-  {
-    id: "editing-toolbar:toggle-format-brush",
-    name: "Format Brush",
-    icon: "paintbrush",
   },
   {
     id: "editing-toolbar:format-eraser",
@@ -579,7 +571,6 @@ export const DEFAULT_SETTINGS: editingToolbarSettings = {
   custom_fc3: "#245BDB",
   custom_fc4: "#6425D0",
   custom_fc5: "#646A73",
-  formatBrushes: {},
 
   appearanceByStyle: {
     top: {

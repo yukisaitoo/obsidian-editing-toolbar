@@ -6,7 +6,6 @@ import {
   MarkdownFileInfo,
   MarkdownView,
   Menu,
-  Notice,
   Platform,
   Plugin,
 } from "obsidian";
@@ -25,12 +24,9 @@ import {
   createFollowingBar,
   editingToolbarPopover,
   getExistingToolbar,
-  quietFormatBrushes,
   selfDestruct,
-  setFormatEraser,
 } from "src/toolbar/editingToolbar";
 import { strings } from "src/translations/helper";
-import { setBackgroundcolor, setFontcolor } from "src/util/util";
 import { ViewUtils } from "src/util/viewUtils";
 import { EditingToolbarSettingTab } from "../settings/settingsTab";
 
@@ -70,17 +66,7 @@ export default class EditingToolbarPlugin extends Plugin {
   public admonitionDefinitions: Record<string, AdmonitionDefinition> | null =
     null;
 
-  bgFormatBrushActive!: boolean;
-  fontColorFormatBrushActive!: boolean;
-  EN_Text_Format_Brush!: boolean;
-  tempNotice: Notice | null = null;
   topToolbarResizeObserver: ResizeObserver | null = null;
-
-  lastExecutedCommand: string | null = null;
-  formatBrushActive: boolean = false;
-  formatBrushNotice: Notice | null = null;
-  lastCalloutType: string | null = null;
-  lastExecutedCommandName: string | null = null;
 
   settingTab!: EditingToolbarSettingTab;
 
@@ -396,13 +382,6 @@ export default class EditingToolbarPlugin extends Plugin {
     this.topToolbarResizeObserver?.disconnect();
     this.topToolbarResizeObserver = null;
 
-    if (this.formatBrushNotice) {
-      this.formatBrushNotice.hide();
-      this.formatBrushNotice = null;
-    }
-
-    this.quietAllFormatBrushes();
-
     selfDestruct(this);
 
     console.log("editingToolbar unloaded");
@@ -414,11 +393,6 @@ export default class EditingToolbarPlugin extends Plugin {
   }
 
   handleEditingToolbar = () => {
-    // Keep format-brush cursor state in sync with the toolbar state
-    if (!this.formatBrushActive) {
-      activeDocument.body.classList.remove("format-brush-cursor");
-    }
-
     if (!this.settings.cMenuVisibility) {
       (["top", "following"] as const).forEach((style) => {
         const el = getExistingToolbar(this.app, this, style);
@@ -509,19 +483,6 @@ export default class EditingToolbarPlugin extends Plugin {
     this.handleEditingToolbar();
   };
 
-  setBgFormatBrushActive(status: boolean): void {
-    this.bgFormatBrushActive = status;
-  }
-  setFontColorFormatBrushActive(status: boolean): void {
-    this.fontColorFormatBrushActive = status;
-  }
-  setEN_Text_Format_Brush(status: boolean): void {
-    this.EN_Text_Format_Brush = status;
-  }
-  setTempNotice(content: Notice): void {
-    this.tempNotice = content;
-  }
-
   getCurrentCommands(style?: string): Command[] {
     switch (style || this.positionStyle) {
       case "following":
@@ -572,348 +533,11 @@ export default class EditingToolbarPlugin extends Plugin {
     this.onPositionStyleChange(this.settings.positionStyle);
   }
 
-  setLastExecutedCommand(commandId: string): void {
-    this.lastExecutedCommand = commandId;
-
-    const command = this.app.commands.commands[commandId];
-    if (command && command.name) {
-      this.lastExecutedCommandName = command.name;
-    } else {
-      const parts = commandId.split(":");
-      this.lastExecutedCommandName = parts[parts.length - 1].replace(/-/g, " ");
-    }
-  }
-
-  // "Wrap" formats matched against a whole selection; first match wins.
-  private static readonly SELECTION_WRAP_FORMATS: Array<{
-    re: RegExp;
-    command: string;
-    name: string;
-  }> = [
-    { re: /^\*\*.*\*\*$/, command: "editor:toggle-bold", name: "Bold" },
-    { re: /^\*.*\*$/, command: "editor:toggle-italics", name: "Italic" },
-    { re: /^_.*_$/, command: "editor:toggle-italics", name: "Italic" },
-    {
-      re: /^~~.*~~$/,
-      command: "editor:toggle-strikethrough",
-      name: "Strikethrough",
-    },
-    { re: /^==.*==$/, command: "editor:toggle-highlight", name: "Highlight" },
-    { re: /^`.*`$/, command: "editor:toggle-code", name: "Code" },
-    {
-      re: /^<font color=".*">.*<\/font>$/,
-      command: "editing-toolbar:change-font-color",
-      name: "Font Color",
-    },
-    {
-      re: /^<mark style="background:.*">.*<\/mark>$/,
-      command: "editing-toolbar:change-background-color",
-      name: "Background Color",
-    },
-    {
-      re: /^<u>([^<]+)<\/u>$/,
-      command: "editor:toggle-underline",
-      name: "Underline",
-    },
-    {
-      re: /^<center>([^<]+)<\/center>$/,
-      command: "editing-toolbar:center",
-      name: "Center",
-    },
-    {
-      re: /^<p align="left">(.*?)<\/p>$/,
-      command: "editing-toolbar:left",
-      name: "Left Align",
-    },
-    {
-      re: /^<p align="right">(.*?)<\/p>$/,
-      command: "editing-toolbar:right",
-      name: "Right Align",
-    },
-    {
-      re: /^<p align="justify">(.*?)<\/p>$/,
-      command: "editing-toolbar:justify",
-      name: "Justify",
-    },
-    {
-      re: /^<sup>(.*?)<\/sup>$/,
-      command: "editing-toolbar:superscript",
-      name: "Superscript",
-    },
-    {
-      re: /^<sub>(.*?)<\/sub>$/,
-      command: "editing-toolbar:subscript",
-      name: "Subscript",
-    },
-  ];
-
-  // Inline formats scanned around the cursor when nothing is selected.
-  // Order doesn't matter here; the nearest match to the cursor is chosen.
-  private static readonly CURSOR_INLINE_FORMATS: Array<{
-    re: RegExp;
-    command: string;
-    name: string;
-  }> = [
-    {
-      re: /<u>([^<]+)<\/u>/g,
-      command: "editing-toolbar:toggle-underline",
-      name: "Underline",
-    },
-    {
-      re: /<center>([^<]+)<\/center>/g,
-      command: "editing-toolbar:center",
-      name: "Center",
-    },
-    {
-      re: /<p align="left">([^<]+)<\/p>/g,
-      command: "editing-toolbar:left",
-      name: "Left Align",
-    },
-    {
-      re: /<p align="right">([^<]+)<\/p>/g,
-      command: "editing-toolbar:right",
-      name: "Right Align",
-    },
-    {
-      re: /<p align="justify">([^<]+)<\/p>/g,
-      command: "editing-toolbar:justify",
-      name: "Justify",
-    },
-    {
-      re: /<sup>([^<]+)<\/sup>/g,
-      command: "editing-toolbar:superscript",
-      name: "Superscript",
-    },
-    {
-      re: /<sub>([^<]+)<\/sub>/g,
-      command: "editing-toolbar:subscript",
-      name: "Subscript",
-    },
-    { re: /\*\*([^*]+)\*\*/g, command: "editor:toggle-bold", name: "Bold" },
-    {
-      re: /~~([^~]+)~~/g,
-      command: "editor:toggle-strikethrough",
-      name: "Strikethrough",
-    },
-    {
-      re: /==([^=]+)==/g,
-      command: "editor:toggle-highlight",
-      name: "Highlight",
-    },
-    { re: /`([^`]+)`/g, command: "editor:toggle-code", name: "Code" },
-    {
-      re: /<font color="([^"]+)">([^<]+)<\/font>/g,
-      command: "editing-toolbar:change-font-color",
-      name: "Font Color",
-    },
-    {
-      re: /<span style="background:([^"]+)">([^<]+)<\/span>/g,
-      command: "editing-toolbar:change-background-color",
-      name: "Background Color",
-    },
-  ];
-
-  // Returns the heading level (1-6) if the text starts with that many '#'
-  // followed by a space, otherwise 0.
-  private matchLeadingHeading(text: string): number {
-    const headings = [/^# /, /^## /, /^### /, /^#### /, /^##### /, /^###### /];
-    for (let i = 0; i < headings.length; i++) {
-      if (headings[i].test(text)) return i + 1;
-    }
-    return 0;
-  }
-
-  private detectSelectionFormat(
-    selectedText: string,
-  ): { command: string; name: string; calloutType: string } | null {
-    for (const {
-      re,
-      command,
-      name,
-    } of EditingToolbarPlugin.SELECTION_WRAP_FORMATS) {
-      if (re.test(selectedText)) {
-        return { command, name, calloutType: "" };
-      }
-    }
-
-    const calloutMatch = selectedText.match(
-      /^> \[!(note|tip|warning|danger|info|success|question|quote)\]/i,
-    );
-    if (calloutMatch) {
-      const calloutType = calloutMatch[1].toLowerCase();
-      return {
-        command: "editor:insert-callout",
-        name: "Callout-" + calloutType,
-        calloutType,
-      };
-    }
-
-    const headingLevel = this.matchLeadingHeading(selectedText);
-    if (headingLevel > 0) {
-      return {
-        command: `editor:set-heading-${headingLevel}`,
-        name: `Heading ${headingLevel}`,
-        calloutType: "",
-      };
-    }
-
-    return null;
-  }
-
-  private detectCursorFormat(
-    lineText: string,
-    cursorPos: number,
-  ): { command: string; name: string } | null {
-    const foundFormats: Array<{
-      command: string;
-      name: string;
-      distance: number;
-    }> = [];
-
-    for (const {
-      re,
-      command,
-      name,
-    } of EditingToolbarPlugin.CURSOR_INLINE_FORMATS) {
-      let match: RegExpExecArray | null;
-      while ((match = re.exec(lineText)) !== null) {
-        const formatStart = match.index;
-        const formatEnd = match.index + match[0].length;
-        if (cursorPos > formatStart && cursorPos < formatEnd) {
-          foundFormats.push({
-            command,
-            name,
-            distance: Math.min(cursorPos - formatStart, formatEnd - cursorPos),
-          });
-        }
-      }
-    }
-
-    if (foundFormats.length > 0) {
-      foundFormats.sort((a, b) => a.distance - b.distance);
-      return { command: foundFormats[0].command, name: foundFormats[0].name };
-    }
-
-    // Italic uses single * or _ and is only a fallback when nothing else matched.
-    if (/(\*|_)([^*_]+)(\*|_)/.test(lineText)) {
-      return { command: "editor:toggle-italics", name: "Italic" };
-    }
-
-    const headingLevel = this.matchLeadingHeading(lineText);
-    if (headingLevel > 0 && cursorPos > headingLevel - 1) {
-      return {
-        command: `editor:set-heading-${headingLevel}`,
-        name: `Heading ${headingLevel}`,
-      };
-    }
-
-    return null;
-  }
-
-  toggleFormatBrush(): void {
-    const editor = this.commandsManager.getActiveEditor();
-    let detectedFormat = false;
-    let calloutType = "";
-
-    if (editor) {
-      if (editor.somethingSelected()) {
-        const result = this.detectSelectionFormat(editor.getSelection());
-        if (result) {
-          this.lastExecutedCommand = result.command;
-          this.lastExecutedCommandName = result.name;
-          calloutType = result.calloutType;
-          detectedFormat = true;
-        }
-      } else {
-        const cursor = editor.getCursor();
-        const lineText = editor.getLine(cursor.line);
-        const result = this.detectCursorFormat(lineText, cursor.ch);
-        if (result) {
-          this.lastExecutedCommand = result.command;
-          this.lastExecutedCommandName = result.name;
-          detectedFormat = true;
-        }
-      }
-    }
-
-    if (!detectedFormat && !this.lastExecutedCommand) {
-      new Notice(strings.pleaseExecuteFormatCommandSelect);
-      return;
-    }
-
-    this.formatBrushActive = !this.formatBrushActive;
-
-    if (this.formatBrushActive) {
-      activeDocument.body.classList.add("format-brush-cursor");
-      this.fontColorFormatBrushActive = false;
-      this.bgFormatBrushActive = false;
-      this.EN_Text_Format_Brush = false;
-      this.lastCalloutType = calloutType;
-      if (this.formatBrushNotice) this.formatBrushNotice.hide();
-      this.formatBrushNotice = new Notice(
-        strings.formatBrushSelectTextApply +
-          this.lastExecutedCommandName +
-          strings.format,
-        0,
-      );
-    } else {
-      activeDocument.body.classList.remove("format-brush-cursor");
-      if (this.formatBrushNotice) {
-        this.formatBrushNotice.hide();
-        this.formatBrushNotice = null;
-      }
-    }
-  }
-  applyCalloutFormat(editor: Editor, text: string, calloutType: string) {
-    const calloutPrefixRegex =
-      /^> \[!(note|tip|warning|danger|info|success|question|quote)\] ?/i;
-    const cleanedText = text.replace(calloutPrefixRegex, "").trim();
-
-    const lines = cleanedText.split("\n");
-    const processedLines = lines.map((line) => line.replace(/^\s*>\s*/, ""));
-
-    const newText = `> [!${calloutType}]\n> ${processedLines.join("\n> ")}`;
-
-    editor.replaceSelection(newText);
-  }
-  applyFormatBrush(editor: Editor): void {
-    if (!this.lastExecutedCommand || !this.formatBrushActive) return;
-    const command = this.app.commands.commands[this.lastExecutedCommand];
-    if (command && command.callback) {
-      command.callback();
-    }
-    const view = this.app.workspace.getActiveViewOfType(MarkdownView);
-    if (command && command.editorCallback && view) {
-      command.editorCallback(editor, view);
-    }
-  }
-
-  quietAllFormatBrushes(): void {
-    this.fontColorFormatBrushActive = false;
-    this.bgFormatBrushActive = false;
-    this.EN_Text_Format_Brush = false;
-    activeDocument.body.classList.remove("format-brush-cursor");
-    if (this.formatBrushActive) {
-      this.formatBrushActive = false;
-      if (this.formatBrushNotice) {
-        this.formatBrushNotice.hide();
-        this.formatBrushNotice = null;
-      }
-    }
-
-    if (this.tempNotice) {
-      this.tempNotice.hide();
-      this.tempNotice = null;
-    }
-  }
-
   public getCommandsManager(): CommandsManager {
     return this.commandsManager;
   }
 
   init_evt(container: Document) {
-    this.resetFormatBrushStates();
-
     const debouncedHandleTextSelection = debounce(() => {
       this.handleTextSelection();
     }, 100);
@@ -930,8 +554,6 @@ export default class EditingToolbarPlugin extends Plugin {
           }
         });
       }
-
-      this.resetFormatBrushIfActive(container, e);
     });
 
     this.registerDomEvent(container, "mouseup", (e) => {
@@ -943,13 +565,6 @@ export default class EditingToolbarPlugin extends Plugin {
     this.registerDomEvent(container, "keyup", this.handleKeyboardSelection);
 
     this.registerScrollAndBlurEvents(container);
-  }
-
-  private resetFormatBrushStates() {
-    this.fontColorFormatBrushActive = false;
-    this.bgFormatBrushActive = false;
-    this.EN_Text_Format_Brush = false;
-    this.formatBrushActive = false;
   }
 
   public getCachedToolbar(style: ToolbarStyleKey): HTMLElement | null {
@@ -1009,29 +624,6 @@ export default class EditingToolbarPlugin extends Plugin {
     if (this.isFollowingToolbarActive() && cmEditor?.hasFocus()) {
       this.showFollowingToolbar(cmEditor);
     }
-  }
-
-  private resetFormatBrushIfActive(container: Document, e: MouseEvent) {
-    if (e.button === 2 && this.isFormatBrushActive()) {
-      const preventMenu = (ev: MouseEvent) => {
-        ev.preventDefault();
-        ev.stopPropagation();
-        container.removeEventListener("contextmenu", preventMenu, {
-          capture: true,
-        });
-      };
-      container.addEventListener("contextmenu", preventMenu, { capture: true });
-      quietFormatBrushes(this);
-    }
-  }
-
-  private isFormatBrushActive(): boolean {
-    return (
-      this.fontColorFormatBrushActive ||
-      this.bgFormatBrushActive ||
-      this.EN_Text_Format_Brush ||
-      this.formatBrushActive
-    );
   }
 
   private handleKeyboardSelection = (e: KeyboardEvent) => {
@@ -1096,29 +688,9 @@ export default class EditingToolbarPlugin extends Plugin {
     if (!cmEditor?.hasFocus()) return;
 
     if (cmEditor.somethingSelected()) {
-      this.handleSelectedText(cmEditor);
+      this.showFollowingToolbar(cmEditor);
     } else {
       this.hideToolbarIfNotSelected(this.getToolbarHostDocument(cmEditor));
-    }
-  }
-
-  private handleSelectedText(cmEditor: Editor) {
-    if (this.fontColorFormatBrushActive) {
-      setFontcolor(this.settings.cMenuFontColor, cmEditor);
-    } else if (this.bgFormatBrushActive) {
-      setBackgroundcolor(this.settings.cMenuBackgroundColor, cmEditor);
-    } else if (this.EN_Text_Format_Brush) {
-      setFormatEraser(this, cmEditor);
-    } else if (this.formatBrushActive && this.lastCalloutType) {
-      this.applyCalloutFormat(
-        cmEditor,
-        cmEditor.getSelection(),
-        this.lastCalloutType,
-      );
-    } else if (this.formatBrushActive && this.lastExecutedCommand) {
-      this.applyFormatBrush(cmEditor);
-    } else if (this.isFollowingToolbarActive()) {
-      this.showFollowingToolbar(cmEditor);
     }
   }
 
