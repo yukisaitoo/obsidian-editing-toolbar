@@ -32,6 +32,24 @@ let activeDocument: Document;
 
 const TOOLTIP_DELAY = 250;
 
+// Open/closed state for the » overflow popover. It lives in a class (CSS hides
+// the bar with display:none when the class is absent) rather than in an inline
+// visibility, because a hovered submenu flyout inside the popover sets
+// `visibility: visible` on itself and would survive a hidden parent — which is
+// why closing used to leave commands on screen until the pointer moved away.
+const MORE_POPOVER_OPEN_CLASS = "editing-toolbar-more-open";
+
+// Popups that live outside the popover's subtree but logically belong to it:
+// dropdown menus, the pickr colour picker, modals and suggesters all render at
+// the document root, so a click inside them must not count as "clicked away".
+const DETACHED_POPUP_SELECTOR =
+  ".menu, .pcr-app, .modal-container, .suggestion-container";
+
+// Close callback of each currently open » popover, keyed by the popover bar, so
+// closing from outside its » button also takes the dismissal listeners back off
+// the document instead of just dropping the open class.
+const openMorePopoverClosers = new Map<HTMLElement, () => void>();
+
 const viewTypeToSelectorMap: { [key: string]: string } = {
   markdown: ".markdown-source-view",
   canvas: ".canvas-wrapper",
@@ -245,6 +263,19 @@ function applyButtonIcon(btn: ButtonComponent, icon?: string) {
   }
 }
 
+// Close any open » popover. The popover is a sibling of the bar, not a child,
+// so hiding the bar (reading mode, a different view, the visibility toggle)
+// would otherwise leave it floating over the note.
+export function closeMoreOverflowPopovers(root?: ParentNode): void {
+  Array.from(openMorePopoverClosers.values()).forEach((close) => close());
+  // Defensive: a bar rebuilt while open leaves the class on a popover whose
+  // closer is already gone.
+  const scope = root ?? activeWindow.document;
+  scope
+    .querySelectorAll(`.editingToolbarPopoverBar.${MORE_POPOVER_OPEN_CLASS}`)
+    .forEach((el) => el.removeClass(MORE_POPOVER_OPEN_CLASS));
+}
+
 function syncToolbarVisibilityAfterAction(
   editingToolbar: HTMLElement,
   settings: editingToolbarSettings,
@@ -349,7 +380,14 @@ function reflowToolbarOverflow(
     }
   }
 
-  more.style.display = popoverBar.firstElementChild ? "" : "none";
+  const hasOverflow = popoverBar.firstElementChild !== null;
+  more.style.display = hasOverflow ? "" : "none";
+  // The » button just went away (the pane grew) — an open popover would be left
+  // on screen with no way to dismiss it from the bar.
+  if (!hasOverflow) {
+    openMorePopoverClosers.get(popoverBar)?.();
+    popoverBar.removeClass(MORE_POPOVER_OPEN_CLASS);
+  }
 }
 
 // Keep the top toolbar reflowing as its pane resizes, without rebuilding it.
@@ -554,18 +592,56 @@ function createMoreMenu(
   const cMoreMenu = selector.createEl("span");
   cMoreMenu.addClass("more-menu");
   const moreButton = new ButtonComponent(cMoreMenu);
+
+  // Dismissal listeners only exist while the popover is open, so there is
+  // nothing to unregister when the toolbar is torn down: closing (which a stray
+  // click on a detached popover still does) takes them off the document.
+  const ownerDocument = cMoreMenu.ownerDocument;
+
+  const onPointerDown = (evt: PointerEvent) => {
+    const target = evt.target as Node | null;
+    if (!target) return;
+    if (
+      moreContainer.contains(target) ||
+      cMoreMenu.contains(target) || // re-click: the click handler below toggles
+      (target instanceof Element && target.closest(DETACHED_POPUP_SELECTOR))
+    ) {
+      return;
+    }
+    close();
+  };
+
+  const onKeyDown = (evt: KeyboardEvent) => {
+    if (evt.key === "Escape") close();
+  };
+
+  function close() {
+    moreContainer.removeClass(MORE_POPOVER_OPEN_CLASS);
+    ownerDocument.removeEventListener("pointerdown", onPointerDown, true);
+    ownerDocument.removeEventListener("keydown", onKeyDown, true);
+    // A rebuilt bar can hand a second » button the same popover; only retract
+    // the entry if it is still ours.
+    if (openMorePopoverClosers.get(moreContainer) === close) {
+      openMorePopoverClosers.delete(moreContainer);
+    }
+  }
+
+  const open = () => {
+    moreContainer.addClass(MORE_POPOVER_OPEN_CLASS);
+    positionMorePopover(moreButton.buttonEl, moreContainer, toolbarStyle);
+    // Capture phase: a command button that stops propagation must not be able
+    // to strand the popover open.
+    ownerDocument.addEventListener("pointerdown", onPointerDown, true);
+    ownerDocument.addEventListener("keydown", onKeyDown, true);
+    openMorePopoverClosers.set(moreContainer, close);
+  };
+
   moreButton
     .setClass("editingToolbarCommandItem")
     .setTooltip(strings.more, { delay: TOOLTIP_DELAY })
     .onClick(() => {
-      if (moreContainer.style.visibility === "hidden") {
-        moreContainer.style.visibility = "visible";
-        moreContainer.style.height = "32px";
-        positionMorePopover(moreButton.buttonEl, moreContainer, toolbarStyle);
-      } else {
-        moreContainer.style.visibility = "hidden";
-        moreContainer.style.height = "0";
-      }
+      if (moreContainer.hasClass(MORE_POPOVER_OPEN_CLASS)) close();
+      else open();
     });
   moreButton.buttonEl.innerHTML = `<svg  width="14" height="14"  version="1.1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" enable-background="new 0 0 1024 1024" xml:space="preserve"><path fill="#666" d="M510.29 14.13 q17.09 -15.07 40.2 -14.07 q23.12 1 39.2 18.08 l334.66 385.92 q25.12 30.15 34.16 66.83 q9.04 36.68 0.5 73.87 q-8.54 37.19 -32.66 67.34 l-335.67 390.94 q-15.07 18.09 -38.69 20.1 q-23.62 2.01 -41.71 -13.07 q-18.08 -15.08 -20.09 -38.19 q-2.01 -23.12 13.06 -41.21 l334.66 -390.94 q11.06 -13.06 11.56 -29.65 q0.5 -16.58 -10.55 -29.64 l-334.67 -386.92 q-15.07 -17.09 -13.56 -40.7 q1.51 -23.62 19.59 -38.7 ZM81.17 14.13 q17.08 -15.07 40.19 -14.07 q23.11 1 39.2 18.08 l334.66 385.92 q25.12 30.15 34.16 66.83 q9.04 36.68 0.5 73.87 q-8.54 37.19 -32.66 67.34 l-335.67 390.94 q-15.07 18.09 -38.69 20.6 q-23.61 2.51 -41.7 -12.57 q-18.09 -15.08 -20.1 -38.69 q-2.01 -23.62 13.06 -41.71 l334.66 -390.94 q11.06 -13.06 11.56 -29.65 q0.5 -16.58 -10.55 -29.64 l-334.66 -386.92 q-15.08 -17.09 -13.57 -40.7 q1.51 -23.62 19.6 -38.7 Z"/></svg>`;
   return cMoreMenu;
@@ -948,9 +1024,6 @@ export function editingToolbarPopover(
     popoverMenu.setAttribute("data-toolbar-style", effectiveStyle);
 
     popoverMenu.setAttribute("id", "editingToolbarPopoverBar");
-
-    popoverMenu.style.visibility = "hidden";
-    popoverMenu.style.height = "0";
 
     editingToolbar.addClass("editingToolbarDefaultAesthetic");
     popoverMenu.addClass("editingToolbarDefaultAesthetic");

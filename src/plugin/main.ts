@@ -21,6 +21,7 @@ import {
   getAppearanceValue,
 } from "src/settings/settingsData";
 import {
+  closeMoreOverflowPopovers,
   createFollowingBar,
   editingToolbarPopover,
   getExistingToolbar,
@@ -393,6 +394,10 @@ export default class EditingToolbarPlugin extends Plugin {
   }
 
   handleEditingToolbar = () => {
+    // The pane/view changed under it — the overflow popover belongs to the bar
+    // we're about to re-evaluate, so never carry an open one across.
+    closeMoreOverflowPopovers();
+
     if (!this.settings.cMenuVisibility) {
       (["top", "following"] as const).forEach((style) => {
         const el = getExistingToolbar(this.app, this, style);

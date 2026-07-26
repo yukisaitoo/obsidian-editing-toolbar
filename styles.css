@@ -176,12 +176,16 @@
    4. TOOLBAR — overflow popover bar.
    ========================================================================== */
 
+#editingToolbarPopoverBar:not(.editing-toolbar-more-open) {
+  display: none;
+}
+
 #editingToolbarPopoverBar {
   position: absolute;
   right: 0;
   display: inline-flex;
   width: fit-content;
-  height: auto !important;
+  height: auto;
   margin-left: 25px;
   margin-right: 25px;
   overflow: visible;
@@ -246,13 +250,12 @@ button[class^=editingToolbarCommandsubItem]::after {
   right: 0;
 }
 
-/* In following/flex mode the bar floats over the text, so flyouts drop upward. */
-:is(#editingToolbarModalBar, #editingToolbarPopoverBar):not(:is(.top,.editingToolbarFlex)) button[class^=editingToolbarCommandsubItem]:not(.editingToolbarSecond)>.subitem {
+:is(#editingToolbarModalBar, #editingToolbarPopoverBar):not(:is([data-toolbar-style=top],.editingToolbarFlex)) button[class^=editingToolbarCommandsubItem]:not(.editingToolbarSecond)>.subitem {
   bottom: calc(100% + calc(var(--toolbar-icon-size) + 18px));
 }
 
 @media screen and (max-width: 768px) {
-  :is(#editingToolbarModalBar, #editingToolbarPopoverBar):not(:is(.top,.editingToolbarFlex)) button[class^=editingToolbarCommandsubItem]>.subitem {
+  :is(#editingToolbarModalBar, #editingToolbarPopoverBar):not(:is([data-toolbar-style=top],.editingToolbarFlex)) button[class^=editingToolbarCommandsubItem]>.subitem {
     left: 58%;
     transform: translate(-60%, 90%);
   }
@@ -370,7 +373,7 @@ button[class^=editingToolbarCommandsubItem]::after {
   transform: translateX(50px);
 }
 
-:is(#editingToolbarModalBar, #editingToolbarPopoverBar):not(:is(.top,.editingToolbarFlex)) button.editingToolbarCommandsubItem-font-color .x-color-picker-wrapper {
+:is(#editingToolbarModalBar, #editingToolbarPopoverBar):not(:is([data-toolbar-style=top],.editingToolbarFlex)) button.editingToolbarCommandsubItem-font-color .x-color-picker-wrapper {
   top: auto;
   bottom: calc(100% - 2rem);
 }
