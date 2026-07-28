@@ -3,6 +3,7 @@ import { Editor } from "obsidian";
 import {
   CommandPlot,
   CORE_EDITOR_COMMANDS,
+  WRAP_COMMAND_NAMES,
   WRAP_COMMANDS,
 } from "src/commands/commandDefinitions";
 import { BACKGROUND_COLOR_ICON, FONT_COLOR_ICON } from "src/icons/inlineIcons";
@@ -225,7 +226,7 @@ export class CommandsManager {
   private registerCoreCommands() {
     this.plugin.addCommand({
       id: "renumber-ordered-list",
-      name: "Renumber Ordered List",
+      name: "Renumber ordered list",
       editorCallback: (editor: Editor) => {
         void this.executeCommandWithoutBlur(editor, () =>
           renumberSelection(editor),
@@ -234,7 +235,7 @@ export class CommandsManager {
     });
     this.plugin.addCommand({
       id: "hide-show-menu",
-      name: "Hide/Show ",
+      name: "Toggle toolbar",
       icon: "editingToolbar",
       callback: async () => {
         this.plugin.settings.cMenuVisibility =
@@ -255,7 +256,7 @@ export class CommandsManager {
   private registerToolbarToggleCommands() {
     this.plugin.addCommand({
       id: "toggle-top-toolbar",
-      name: "Toggle Top Toolbar",
+      name: "Toggle top toolbar",
       callback: () =>
         this.plugin.setToolbarStyleEnabled(
           "top",
@@ -265,7 +266,7 @@ export class CommandsManager {
 
     this.plugin.addCommand({
       id: "toggle-following-toolbar",
-      name: "Toggle Following Toolbar",
+      name: "Toggle selection toolbar",
       callback: () =>
         this.plugin.setToolbarStyleEnabled(
           "following",
@@ -277,7 +278,7 @@ export class CommandsManager {
   private registerTextToolCommands() {
     this.plugin.addCommand({
       id: "get-plain-text",
-      name: "Get Plain Text",
+      name: "Get plain text",
       editorCallback: (editor: Editor) => {
         TextEnhancement.getPlainText(editor);
       },
@@ -285,7 +286,7 @@ export class CommandsManager {
 
     this.plugin.addCommand({
       id: "insert-blank-lines",
-      name: "Insert Blank Lines",
+      name: "Insert blank lines",
       editorCallback: (editor: Editor) => {
         TextEnhancement.insertBlankLines(editor);
       },
@@ -293,14 +294,14 @@ export class CommandsManager {
 
     this.plugin.addCommand({
       id: "remove-blank-lines",
-      name: "Remove Blank Lines",
+      name: "Remove blank lines",
       editorCallback: (editor) =>
         TextEnhancement.processWhitespace(editor, { removeEmptyLines: true }),
     });
 
     this.plugin.addCommand({
       id: "split-lines",
-      name: "Split Lines",
+      name: "Split lines",
       editorCallback: (editor: Editor) => {
         TextEnhancement.splitLines(editor);
       },
@@ -308,7 +309,7 @@ export class CommandsManager {
 
     this.plugin.addCommand({
       id: "smart-symbols",
-      name: "Full Half Converter",
+      name: "Convert punctuation width",
       editorCallback: (editor: Editor) => {
         TextEnhancement.smartTypography(editor);
       },
@@ -316,14 +317,14 @@ export class CommandsManager {
 
     this.plugin.addCommand({
       id: "dedupe-lines",
-      name: "Dedupe Lines",
+      name: "Dedupe lines",
       editorCallback: (editor) =>
         TextEnhancement.dedupe(editor, { trimBeforeCompare: true }),
     });
 
     this.plugin.addCommand({
       id: "add-wrap",
-      name: "Add Prefix/Suffix",
+      name: "Add prefix/suffix",
       editorCallback: (editor: Editor) => {
         new TextInputModal(
           this.plugin.app,
@@ -357,7 +358,7 @@ export class CommandsManager {
 
     this.plugin.addCommand({
       id: "number-lines",
-      name: "Number Lines (Custom)",
+      name: "Number lines (custom)",
       editorCallback: (editor: Editor) => {
         new TextInputModal(
           this.plugin.app,
@@ -395,7 +396,7 @@ export class CommandsManager {
 
     this.plugin.addCommand({
       id: "remove-whitespace-trim",
-      name: "Trim Line Ends",
+      name: "Trim line ends",
       editorCallback: (editor: Editor) => {
         TextEnhancement.processWhitespace(editor, { trim: true });
       },
@@ -403,7 +404,7 @@ export class CommandsManager {
 
     this.plugin.addCommand({
       id: "remove-whitespace-compress",
-      name: "Shrink Extra Spaces",
+      name: "Shrink extra spaces",
       editorCallback: (editor: Editor) => {
         TextEnhancement.processWhitespace(editor, { compress: true });
       },
@@ -411,7 +412,7 @@ export class CommandsManager {
 
     this.plugin.addCommand({
       id: "remove-whitespace-all",
-      name: "Remove All Whitespace",
+      name: "Remove all whitespace",
       editorCallback: (editor: Editor) => {
         TextEnhancement.processWhitespace(editor, { all: true });
       },
@@ -432,7 +433,7 @@ export class CommandsManager {
     });
     this.plugin.addCommand({
       id: "extract-between",
-      name: "Extract Between Strings",
+      name: "Extract between strings",
       editorCallback: (editor: Editor) => {
         new TextInputModal(
           this.plugin.app,
@@ -493,7 +494,7 @@ export class CommandsManager {
   private registerFormattingCommands() {
     this.plugin.addCommand({
       id: "format-eraser",
-      name: "Format Eraser",
+      name: "Format eraser",
       callback: () =>
         this.runOnEditor((editor) => setFormatEraser(this.plugin, editor)),
       icon: `eraser`,
@@ -501,7 +502,7 @@ export class CommandsManager {
 
     this.plugin.addCommand({
       id: "change-font-color",
-      name: "Change Font Color",
+      name: "Change font color",
       callback: () =>
         this.runOnEditor((editor) =>
           setFontcolor(this.plugin.settings.cMenuFontColor, editor),
@@ -511,7 +512,7 @@ export class CommandsManager {
 
     this.plugin.addCommand({
       id: "change-background-color",
-      name: "Change Background Color",
+      name: "Change background color",
       callback: () =>
         this.runOnEditor((editor) =>
           setBackgroundcolor(this.plugin.settings.cMenuBackgroundColor, editor),
@@ -520,31 +521,31 @@ export class CommandsManager {
     });
     this.plugin.addCommand({
       id: "indent-list",
-      name: "Indent List",
+      name: "Indent list",
       callback: () => this.runOnEditor((editor) => editor.indentList()),
       icon: "indent-glyph",
     });
     this.plugin.addCommand({
       id: "undent-list",
-      name: "Unindent List",
+      name: "Unindent list",
       callback: () => this.runOnEditor((editor) => editor.unindentList()),
       icon: "unindent-glyph",
     });
     this.plugin.addCommand({
       id: "toggle-numbered-list",
-      name: "Numbered List",
+      name: "Toggle ordered list",
       callback: () => this.runOnEditor((editor) => editor.toggleNumberList()),
       icon: "number-list-glyph",
     });
     this.plugin.addCommand({
       id: "toggle-bullet-list",
-      name: "Unordered List",
+      name: "Toggle unordered list",
       callback: () => this.runOnEditor((editor) => editor.toggleBulletList()),
       icon: "bullet-list-glyph",
     });
     this.plugin.addCommand({
       id: "toggle-highlight",
-      name: "Highlight",
+      name: "Toggle highlight",
       callback: () =>
         this.runOnEditor((editor) =>
           editor.toggleMarkdownFormatting("highlight"),
@@ -553,21 +554,21 @@ export class CommandsManager {
     });
     this.plugin.addCommand({
       id: "toggle-bold",
-      name: "Toggle Bold",
+      name: "Toggle bold",
       callback: () =>
         this.runOnEditor((editor) => editor.toggleMarkdownFormatting("bold")),
       icon: "bold-glyph",
     });
     this.plugin.addCommand({
       id: "toggle-italics",
-      name: "Toggle Italics",
+      name: "Toggle italics",
       callback: () =>
         this.runOnEditor((editor) => editor.toggleMarkdownFormatting("italic")),
       icon: "italic-glyph",
     });
     this.plugin.addCommand({
       id: "toggle-strikethrough",
-      name: "Toggle Strikethrough",
+      name: "Toggle strikethrough",
       callback: () =>
         this.runOnEditor((editor) =>
           editor.toggleMarkdownFormatting("strikethrough"),
@@ -576,14 +577,14 @@ export class CommandsManager {
     });
     this.plugin.addCommand({
       id: "toggle-inline-math",
-      name: "Toggle Inline Math",
+      name: "Toggle inline math",
       callback: () =>
         this.runOnEditor((editor) => editor.toggleMarkdownFormatting("math")),
       icon: "lucide-sigma",
     });
     this.plugin.addCommand({
       id: "editor:cycle-list-checklist",
-      name: "Cycle List and Checklist",
+      name: "Cycle list and checklist",
       icon: "lucide-check-square",
       callback: () =>
         this.runOnEditor((editor) => editor.toggleCheckList(true)),
@@ -593,7 +594,7 @@ export class CommandsManager {
   private registerClipboardAndHistoryCommands() {
     this.plugin.addCommand({
       id: "editor-undo",
-      name: "Undo Edit",
+      name: "Undo edit",
       callback: () => {
         this.executeHistoryAction("undo");
       },
@@ -601,7 +602,7 @@ export class CommandsManager {
     });
     this.plugin.addCommand({
       id: "editor-redo",
-      name: "Redo Edit",
+      name: "Redo edit",
       callback: () => {
         this.executeHistoryAction("redo");
       },
@@ -656,7 +657,7 @@ export class CommandsManager {
   private registerInsertCommands() {
     this.plugin.addCommand({
       id: "insert-callout",
-      name: "Insert Callout(Modal)",
+      name: "Insert callout…",
       icon: "lucide-quote",
       callback: () => {
         const modal = new InsertCalloutModal(this.plugin);
@@ -665,7 +666,7 @@ export class CommandsManager {
     });
     this.plugin.addCommand({
       id: "insert-link",
-      name: "Insert Link(Modal)",
+      name: "Insert link…",
       icon: "lucide-link",
       callback: () => {
         const modal = new InsertLinkModal(this.plugin);
@@ -674,7 +675,7 @@ export class CommandsManager {
     });
     this.plugin.addCommand({
       id: "fullscreen-focus",
-      name: "Toggle Fullscreen Focus Mode",
+      name: "Toggle fullscreen focus mode",
       hotkeys: [{ modifiers: ["Mod", "Shift"], key: "F11" }],
       callback: () => {
         return fullscreenMode(this.plugin.app);
@@ -683,7 +684,7 @@ export class CommandsManager {
     });
     this.plugin.addCommand({
       id: "workplace-fullscreen-focus",
-      name: "Toggle Workplace Fullscreen Focus",
+      name: "Toggle workspace fullscreen",
       callback: () => {
         return workplacefullscreenMode(this.plugin.app);
       },
@@ -708,7 +709,7 @@ export class CommandsManager {
     Object.entries(WRAP_COMMANDS).forEach(([name, plot]) => {
       this.plugin.addCommand({
         id: name,
-        name: `Toggle ${name}`,
+        name: WRAP_COMMAND_NAMES[name] ?? `Toggle ${name}`,
         icon: `${name}-glyph`,
         callback: () =>
           this.runOnEditor((editor) => this.applyCommand(plot, editor)),

@@ -176,7 +176,7 @@ function renderCommandRow(
         .onClick(() =>
           insertAfter(ctx, commands, index, style, {
             id: "SubmenuCommands-" + GenNonDuplicateID(1),
-            name: "submenu",
+            name: "Submenu",
             icon: "remix-Filter3Line",
             SubmenuCommands: [],
           }),

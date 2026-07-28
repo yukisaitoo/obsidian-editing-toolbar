@@ -132,7 +132,7 @@ export default class EditingToolbarPlugin extends Plugin {
         (menu: Menu, _url: string, _view: MarkdownView) => {
           menu.addItem((item) =>
             item
-              .setTitle("Edit Link(Modal)")
+              .setTitle("Edit link…")
               .setSection("info")
               .setIcon("link")
               .onClick(() => {

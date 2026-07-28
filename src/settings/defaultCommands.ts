@@ -19,17 +19,17 @@ import {
 export const DEFAULT_TOOLBAR_COMMANDS: Command[] = [
   {
     id: "editing-toolbar:editor-undo",
-    name: "Undo Edit",
+    name: "Undo edit",
     icon: "undo-glyph",
   },
   {
     id: "editing-toolbar:editor-redo",
-    name: "Redo Edit",
+    name: "Redo edit",
     icon: "redo-glyph",
   },
   {
     id: "editing-toolbar:format-eraser",
-    name: "Clear Text Formatting",
+    name: "Clear text formatting",
     icon: "eraser",
   },
   {
@@ -44,7 +44,7 @@ export const DEFAULT_TOOLBAR_COMMANDS: Command[] = [
   },
   {
     id: "SubmenuCommands-header",
-    name: "submenu",
+    name: "Headings",
     icon: "header-n",
     SubmenuCommands: [
       {
@@ -96,106 +96,106 @@ export const DEFAULT_TOOLBAR_COMMANDS: Command[] = [
   },
   {
     id: "SubmenuCommands-text-tools",
-    name: "Text Tools",
+    name: "Text tools",
     icon: "box",
     menuType: "dropdown",
     SubmenuCommands: [
       {
         id: "editing-toolbar:get-plain-text",
-        name: "Get Plain Text",
+        name: "Get plain text",
         icon: "lucide-file-text",
       },
 
       {
         id: "editing-toolbar:smart-symbols",
-        name: "Full Half Converter",
+        name: "Convert punctuation width",
         icon: "lucide-at-sign",
       },
       {
         id: "editingToolbar-Divider-Line",
-        name: "Line Operations",
+        name: "Line operations",
         icon: "vertical-split",
       },
       {
         id: "editing-toolbar:insert-blank-lines",
-        name: "Insert Blank Lines",
+        name: "Insert blank lines",
         icon: "lucide-space",
       },
       {
         id: "editing-toolbar:remove-blank-lines",
-        name: "Remove Blank Lines",
+        name: "Remove blank lines",
         icon: "lucide-minimize-2",
       },
       {
         id: "editing-toolbar:split-lines",
-        name: "Split Lines",
+        name: "Split lines",
         icon: "lucide-split",
       },
       {
         id: "editing-toolbar:merge-lines",
-        name: "Merge Lines",
+        name: "Merge lines",
         icon: "lucide-merge",
       },
       {
         id: "editing-toolbar:dedupe-lines",
-        name: "Dedupe Lines",
+        name: "Dedupe lines",
         icon: "lucide-filter",
       },
       {
         id: "editingToolbar-Divider-Line",
-        name: "Text Processing",
+        name: "Text processing",
         icon: "vertical-split",
       },
       {
         id: "editing-toolbar:add-wrap",
-        name: "Add Prefix/Suffix",
+        name: "Add prefix/suffix",
         icon: "lucide-wrap-text",
       },
       {
         id: "editing-toolbar:number-lines",
-        name: "Number Lines (Custom)",
+        name: "Number lines (custom)",
         icon: "lucide-list-ordered",
       },
       {
         id: "editing-toolbar:remove-whitespace-trim",
-        name: "Trim Line Ends",
+        name: "Trim line ends",
         icon: "lucide-scissors",
       },
       {
         id: "editing-toolbar:remove-whitespace-compress",
-        name: "Shrink Extra Spaces",
+        name: "Shrink extra spaces",
         icon: "lucide-minimize",
       },
       {
         id: "editing-toolbar:remove-whitespace-all",
-        name: "Remove All Whitespace",
+        name: "Remove all whitespace",
         icon: "lucide-eraser",
       },
       {
         id: "editingToolbar-Divider-Line",
-        name: "Advanced Tools",
+        name: "Advanced tools",
         icon: "vertical-split",
       },
       {
         id: "editing-toolbar:list-to-table",
-        name: "List to Table",
+        name: "List to table",
         icon: "lucide-table",
       },
       {
         id: "editing-toolbar:table-to-list",
-        name: "Table to List",
+        name: "Table to list",
         icon: "lucide-list",
       },
       {
         id: "editing-toolbar:extract-between",
-        name: "Extract Between Strings",
+        name: "Extract between strings",
         icon: "lucide-brackets",
       },
     ],
   },
   {
     id: "SubmenuCommands-lucdf3en5",
-    name: "submenu",
+    name: "Edit",
     icon: "edit",
     SubmenuCommands: [
       {
@@ -215,34 +215,34 @@ export const DEFAULT_TOOLBAR_COMMANDS: Command[] = [
       },
       {
         id: "editing-toolbar:editor:swap-line-down",
-        name: "Swap Line Down",
+        name: "Swap line down",
         icon: "lucide-corner-right-down",
       },
       {
         id: "editing-toolbar:editor:swap-line-up",
-        name: "Swap Line Up",
+        name: "Swap line up",
         icon: "lucide-corner-right-up",
       },
     ],
   },
   {
     id: "editing-toolbar:editor:attach-file",
-    name: "Attach File",
+    name: "Attach file",
     icon: "lucide-paperclip",
   },
   {
     id: "editing-toolbar:editor:insert-table",
-    name: "Insert Table",
+    name: "Insert table",
     icon: "lucide-table",
   },
   {
     id: "editing-toolbar:editor:cycle-list-checklist",
-    name: "Cycle List and Checklist",
+    name: "Cycle list and checklist",
     icon: "check-circle",
   },
   {
     id: "SubmenuCommands-luc8efull",
-    name: "submenu",
+    name: "Quotes",
     icon: "message-square",
     SubmenuCommands: [
       {
@@ -259,7 +259,7 @@ export const DEFAULT_TOOLBAR_COMMANDS: Command[] = [
   },
   {
     id: "SubmenuCommands-mdcmder",
-    name: "submenu",
+    name: "Markdown syntax",
     icon: MARKDOWN_SYNTAX_ICON,
     SubmenuCommands: [
       {
@@ -274,12 +274,12 @@ export const DEFAULT_TOOLBAR_COMMANDS: Command[] = [
       },
       {
         id: "editing-toolbar:editor:toggle-code",
-        name: "Inline Code",
+        name: "Inline code",
         icon: "code-glyph",
       },
       {
         id: "editing-toolbar:codeblock",
-        name: "Code Block",
+        name: "Code block",
         icon: "codeblock-glyph",
       },
       {
@@ -299,24 +299,24 @@ export const DEFAULT_TOOLBAR_COMMANDS: Command[] = [
       },
       {
         id: "editing-toolbar:hrline",
-        name: "Horizontal Divider",
+        name: "Horizontal rule",
         icon: HORIZONTAL_RULE_ICON,
       },
       {
         id: "editing-toolbar:toggle-inline-math",
-        name: "Inline Math",
+        name: "Inline math",
         icon: "lucide-sigma",
       },
       {
         id: "editing-toolbar:editor:insert-mathblock",
-        name: "MathBlock",
+        name: "Math block",
         icon: "lucide-sigma-square",
       },
     ],
   },
   {
     id: "SubmenuCommands-list",
-    name: "submenu-list",
+    name: "Lists",
     icon: "bullet-list-glyph",
     SubmenuCommands: [
       {
@@ -326,22 +326,22 @@ export const DEFAULT_TOOLBAR_COMMANDS: Command[] = [
       },
       {
         id: "editing-toolbar:renumber-ordered-list",
-        name: "Renumber Ordered List",
+        name: "Renumber ordered list",
         icon: "list-restart",
       },
       {
         id: "editing-toolbar:toggle-numbered-list",
-        name: "Ordered List",
+        name: "Ordered list",
         icon: ORDERED_LIST_ICON,
       },
       {
         id: "editing-toolbar:toggle-bullet-list",
-        name: "Unordered List",
+        name: "Unordered list",
         icon: UNORDERED_LIST_ICON,
       },
       {
         id: "editing-toolbar:undent-list",
-        name: "Unindent List",
+        name: "Unindent list",
         icon: UNINDENT_LIST_ICON,
       },
       {
@@ -353,50 +353,50 @@ export const DEFAULT_TOOLBAR_COMMANDS: Command[] = [
   },
   {
     id: "SubmenuCommands-aligin",
-    name: "submenu-aligin",
+    name: "Alignment",
     icon: ALIGN_CENTER_ICON,
     SubmenuCommands: [
       {
         id: "editing-toolbar:justify",
-        name: "Justify Text",
+        name: "Justify text",
         icon: JUSTIFY_TEXT_ICON,
       },
       {
         id: "editing-toolbar:left",
-        name: "Align Text Left",
+        name: "Align text left",
         icon: ALIGN_LEFT_ICON,
       },
       {
         id: "editing-toolbar:center",
-        name: "Center Text",
+        name: "Center text",
         icon: ALIGN_CENTER_ICON,
       },
       {
         id: "editing-toolbar:right",
-        name: "Align Text Right",
+        name: "Align text right",
         icon: ALIGN_RIGHT_ICON,
       },
     ],
   },
   {
     id: "editing-toolbar:change-font-color",
-    name: "Change Font Color",
+    name: "Change font color",
     icon: FONT_COLOR_ICON,
   },
   {
     id: "editing-toolbar:change-background-color",
-    name: "Change Background Color",
+    name: "Change background color",
     icon: BACKGROUND_COLOR_ICON,
   },
 
   {
     id: "editing-toolbar:fullscreen-focus",
-    name: "Fullscreen Focus Mode",
+    name: "Fullscreen focus mode",
     icon: "fullscreen",
   },
   {
     id: "editing-toolbar:workplace-fullscreen-focus",
-    name: "Workplace Fullscreen",
+    name: "Workspace fullscreen",
     icon: "exit-fullscreen",
   },
 ];
@@ -429,7 +429,7 @@ export const DEFAULT_FOLLOWING_COMMANDS: Command[] = [
   },
   {
     id: "editing-toolbar:editor:toggle-code",
-    name: "Inline Code",
+    name: "Inline code",
     icon: "code-glyph",
   },
   { id: "editing-toolbar:insert-link", name: "Link", icon: "link-glyph" },

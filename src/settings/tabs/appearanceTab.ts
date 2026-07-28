@@ -29,7 +29,7 @@ const PREVIEW_COMMANDS = [
   { name: "Blockquote", icon: "quote-glyph" },
   { name: "Link", icon: "link" },
   { name: "Checklist status", icon: "checkbox-glyph" },
-  { name: "Insert Callout", icon: "lucide-quote" },
+  { name: "Insert callout", icon: "lucide-quote" },
 ];
 
 const PREVIEW_LAYOUT_CLASS: Record<ToolbarStyleKey, string> = {
