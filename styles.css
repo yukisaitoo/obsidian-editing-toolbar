@@ -186,34 +186,22 @@
   display: none;
 }
 
+/* left/top come from positionMorePopover(), measured off the » button. Fixed
+   rather than absolute on purpose: the bar is inserted into whichever element
+   the view type maps to, and none of those is a guaranteed positioned ancestor,
+   so CSS offsets here would resolve against something arbitrary. */
 #editingToolbarPopoverBar {
-  position: absolute;
-  right: 0;
+  position: fixed;
   display: inline-flex;
   width: fit-content;
   height: auto;
-  margin-left: 25px;
-  margin-right: 25px;
   overflow: visible;
   border-radius: var(--radius-m);
   background-color: var(--editing-toolbar-background-color);
   background-clip: padding-box;
   flex-wrap: wrap;
   align-items: center;
-  transition: all 0.1s linear;
   z-index: var(--layer-popover);
-}
-
-.markdown-source-view.mod-cm6 #editingToolbarPopoverBar {
-  margin-top: calc(var(--toolbar-icon-size) + 20px);
-}
-
-@media screen and (max-width: 768px) {
-  #editingToolbarPopoverBar {
-    left: 15%;
-    right: unset;
-    transform: translateX(-15%);
-  }
 }
 
 /* ==========================================================================
@@ -256,17 +244,6 @@ button[class^=editingToolbarCommandsubItem]::after {
 :is(#editingToolbarModalBar, #editingToolbarPopoverBar) button[class^=editingToolbarCommandsubItem]>.subitem:hover {
   visibility: visible;
   transition: visibility 0.3s linear;
-}
-
-:is(#editingToolbarModalBar, #editingToolbarPopoverBar):not(:is([data-toolbar-style=top],.editingToolbarFlex)) button[class^=editingToolbarCommandsubItem]:not(.editingToolbarSecond)>.subitem {
-  bottom: calc(100% + calc(var(--toolbar-icon-size) + 18px));
-}
-
-@media screen and (max-width: 768px) {
-  :is(#editingToolbarModalBar, #editingToolbarPopoverBar):not(:is([data-toolbar-style=top],.editingToolbarFlex)) button[class^=editingToolbarCommandsubItem]>.subitem {
-    left: 58%;
-    transform: translate(calc(-60% + var(--flyout-shift, 0px)), 90%);
-  }
 }
 
 :is(#editingToolbarModalBar, #editingToolbarPopoverBar) button[class^=editingToolbarCommandsubItem]>.subitem svg {
@@ -326,24 +303,22 @@ button[class^=editingToolbarCommandsubItem]::after {
 
 /* --- Colour picker popover ------------------------------------------------ */
 
+/* Centred on its .subitem. (Was right:-50% + translateX(50%), which only
+   centred because the colour pickers' .subitem collapses to zero width — its
+   sole child is this panel, and this panel is absolute.) */
 .x-color-picker-wrapper {
   position: absolute;
   top: 1.8em;
-  right: -50%;
+  left: 50%;
   width: fit-content;
   min-width: 1px;
   padding: 10px;
-  transform: translateX(50%);
+  transform: translateX(-50%);
   border-radius: var(--radius-s);
   background-color: var(--color-base-10, var(--background-primary));
   box-shadow: 0 8px 10px 1px rgba(0, 0, 0, 0.14);
   font-family: Source Sans Pro, sans-serif;
   font-weight: 400;
-}
-
-:is(#editingToolbarModalBar, #editingToolbarPopoverBar):not(:is([data-toolbar-style=top],.editingToolbarFlex)) button.editingToolbarCommandsubItem-font-color .x-color-picker-wrapper {
-  top: auto;
-  bottom: calc(100% - 2rem);
 }
 
 .x-color-picker-wrapper table.x-color-picker-table:is(#x-color-picker-table, #x-backgroundcolor-picker-table) {
@@ -434,8 +409,10 @@ button[class^=editingToolbarCommandsubItem]::after {
 }
 
 /* Obsidian's editor tooltips default to a z-index below the toolbar, so an
-   autocomplete popup opened under a top-mode bar renders behind it. */
-.cm-tooltip {
+   autocomplete popup opened under a top-mode bar renders behind it. Scoped to
+   panes that actually have the bar — unscoped this reordered every CodeMirror
+   tooltip in the app, including ones this plugin has nothing to do with. */
+.workspace-leaf-content:has(#editingToolbarModalBar.top) .cm-tooltip {
   z-index: 1000;
 }
 
@@ -1008,13 +985,22 @@ body.theme-dark .modal-container.editingToolbar-Modal .modal input[type='range']
    8. EDITOR AND HOST INTEGRATIONS
    ========================================================================== */
 
-/* Inline highlights written by the colour commands: a hex background is always
-   a light swatch, so force dark text; rgba() ones are translucent over the
-   theme background and keep the theme's text colour. */
+/* Fallback for highlights written before setBackgroundcolor() started emitting
+   an explicit `color:` — those marks carry only a background, so the text
+   colour still has to be guessed from it. New marks set colour inline, which
+   wins over these rules.
+
+   rgba() is the translucent swatch set: it composites over the theme
+   background, so the theme's text colour is already right. rgb() is the opaque
+   pastel set — uniformly light, so it needs dark text (it previously matched
+   neither rule and went unreadable in dark themes). Hex is only ever a
+   user-defined custom colour, so "light" is a guess here; that guess is exactly
+   what the write-time calculation replaced. */
 :is(.cm-line, p) :is(mark, span)[style^="background:rgba"] {
   color: var(--text-normal);
 }
 
+:is(.cm-line, p) :is(mark, span)[style^="background:rgb("],
 :is(.cm-line, p) :is(mark, span)[style^="background:#"] {
   color: black;
 }
@@ -1023,51 +1009,6 @@ body.theme-dark .modal-container.editingToolbar-Modal .modal input[type='range']
 
 #editingToolbarModalBar ~ .canvas-controls {
   top: calc(var(--size-4-2) + 50px);
-}
-
-/* --- Excalidraw plugin ---------------------------------------------------- */
-
-#editingToolbarModalBar ~ .excalidraw .FixedSideContainer_side_top {
-  top: 38px !important;
-}
-
-.excalidraw-wrapper #editingToolbarModalBar.top {
-  top: 38px;
-}
-
-.excalidraw-wrapper #editingToolbarPopoverBar {
-  top: 76px;
-}
-
-/* --- Thino plugin --------------------------------------------------------- */
-
-/* Thino's editor pads its own wrapper; the bar has to sit flush against the
-   edge, so the padding moves down onto the inner elements instead. */
-div[data-type="thino_view"] .memo-editor-wrapper:has(#editingToolbarModalBar) {
-  padding-top: 0;
-  padding-left: 0;
-  padding-right: 0;
-}
-
-div[data-type="thino_view"] .memo-editor-wrapper:has(#editingToolbarModalBar) .common-tools-wrapper {
-  padding-left: 16px;
-  padding-right: 16px;
-}
-
-div[data-type="thino_view"] .memo-editor-wrapper #editingToolbarModalBar ~ .cm-editor {
-  padding-top: 38px;
-  padding-bottom: 0px;
-  padding-left: 16px;
-  padding-right: 16px;
-}
-
-div[data-type=thino_view] .common-editor-wrapper .common-editor-inputer:has(#editingToolbarModalBar) {
-  min-height: 118px;
-}
-
-div[data-type=thino_view] #editingToolbarModalBar.top {
-  position: absolute !important;
-  width: 100%;
 }
 
 /* --- Auto-hide-header themes ---------------------------------------------- */
@@ -1087,45 +1028,6 @@ body.auto-hide-header .workspace-tab-header-container + .workspace-tab-container
 body.auto-hide-header .workspace-tab-header-container:hover + .workspace-tab-container .workspace-leaf .workspace-leaf-content>.view-header {
   margin-top: 0;
   transition: all 0.1s linear;
-}
-
-/* --- Mobile --------------------------------------------------------------- */
-
-.is-phone.is-hidden-nav #editingToolbarModalBar.top {
-  margin-top: var(--safe-area-inset-top);
-}
-
-.is-phone:not(.is-hidden-nav) #editingToolbarModalBar.top {
-  margin-top: calc(var(--safe-area-inset-top) + var(--view-header-height));
-}
-
-.is-phone #editingToolbarModalBar.top {
-  margin-right: 0px;
-  padding: 0;
-}
-
-.is-phone #editingToolbarModalBar.top::-webkit-scrollbar {
-  display: none;
-}
-
-.is-phone .markdown-source-view.mod-cm6 #editingToolbarPopoverBar {
-  margin-top: calc(var(--safe-area-inset-top) + var(--view-header-height) + var(--toolbar-icon-size) + 10px);
-}
-
-.is-phone .mod-root .workspace-leaf-content[data-type="markdown"] .view-content:has(.editingToolbarModalBar) {
-  mask-image: none;
-}
-
-.is-mobile.is-hidden-nav .mod-root .workspace-leaf-content[data-type="markdown"]:has(.editingToolbarModalBar) .view-header {
-  display: none;
-}
-
-.is-phone .mod-root .workspace-leaf-content .view-content:has(.editingToolbarModalBar) .markdown-source-view > .cm-editor > .cm-scroller {
-  padding-top: 0px;
-}
-
-.is-phone .mod-root .workspace-leaf-content .view-content:has(.editingToolbarModalBar) .markdown-reading-view > .markdown-preview-view {
-  padding-top: calc(var(--safe-area-inset-top) + var(--view-header-height) + 36px);
 }
 
 /* ==========================================================================

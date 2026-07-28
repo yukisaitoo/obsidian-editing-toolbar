@@ -51,12 +51,15 @@ const DETACHED_POPUP_SELECTOR =
 // the document instead of just dropping the open class.
 const openMorePopoverClosers = new Map<HTMLElement, () => void>();
 
+// Re-anchor callback of each » popover, keyed by the popover bar. The popover is
+// placed by measurement, so a pane resize while it is open has to re-run it.
+const morePopoverRepositioners = new Map<HTMLElement, () => void>();
+
+// Only the view types ViewUtils allows can reach here — anything else bails out
+// of editingToolbarPopover before a bar is built.
 const viewTypeToSelectorMap: { [key: string]: string } = {
   markdown: ".markdown-source-view",
   canvas: ".canvas-wrapper",
-  excalidraw: ".view-header",
-  image: ".image-container",
-  pdf: ".view-content",
 };
 
 function getRootSplits(app: App): WorkspaceParentExt[] {
@@ -392,6 +395,11 @@ export function observeToolbarResize(
       return;
     }
     reflowToolbarOverflow(app, editingToolbar, popoverBar);
+    // The popover is placed by measurement, so a resize while it is open (which
+    // moves the » button it hangs off) leaves it stranded until re-anchored.
+    if (popoverBar.hasClass(MORE_POPOVER_OPEN_CLASS)) {
+      morePopoverRepositioners.get(popoverBar)?.();
+    }
   });
   observer.observe(parent);
   plugin.topToolbarResizeObserver = observer;
@@ -497,28 +505,14 @@ function createMoreMenu(
   const view = app.workspace.getActiveViewOfType(ItemView);
   if (!view || !ViewUtils.isAllowedViewType(view)) return;
 
-  const toolbarStyle = selector.getAttribute("data-toolbar-style");
-
-  const resetMorePopoverPosition = (popoverEl: HTMLElement) => {
-    popoverEl.style.removeProperty("left");
-    popoverEl.style.removeProperty("top");
-    popoverEl.style.removeProperty("right");
-    popoverEl.style.removeProperty("bottom");
-    popoverEl.style.removeProperty("transform");
-    popoverEl.style.removeProperty("margin");
-    popoverEl.style.removeProperty("position");
-  };
-
+  // Placed by measurement off the » button rather than by CSS offsets. The bar
+  // is inserted into whichever element the view type maps to, and none of those
+  // is guaranteed to be a positioned ancestor — a CSS `right: 0` there means
+  // "the right edge of whatever happens to be positioned above it".
   const positionMorePopover = (
     anchorEl: HTMLElement,
     popoverEl: HTMLElement,
-    currentToolbarStyle?: string | null,
   ) => {
-    if (currentToolbarStyle !== "following") {
-      resetMorePopoverPosition(popoverEl);
-      return;
-    }
-
     const ownerWindow = popoverEl.ownerDocument.defaultView ?? window;
     const anchorRect = anchorEl.getBoundingClientRect();
     const popoverWidth = Math.max(popoverEl.offsetWidth, popoverEl.scrollWidth);
@@ -550,13 +544,8 @@ function createMoreMenu(
       );
     }
 
-    popoverEl.style.position = "fixed";
     popoverEl.style.left = `${left}px`;
     popoverEl.style.top = `${top}px`;
-    popoverEl.style.right = "auto";
-    popoverEl.style.bottom = "auto";
-    popoverEl.style.transform = "none";
-    popoverEl.style.margin = "0";
   };
 
   const cMoreMenu = selector.createEl("span");
@@ -596,9 +585,13 @@ function createMoreMenu(
     }
   }
 
+  const reposition = () =>
+    positionMorePopover(moreButton.buttonEl, moreContainer);
+  morePopoverRepositioners.set(moreContainer, reposition);
+
   const open = () => {
     moreContainer.addClass(MORE_POPOVER_OPEN_CLASS);
-    positionMorePopover(moreButton.buttonEl, moreContainer, toolbarStyle);
+    reposition();
     // Capture phase: a command button that stops propagation must not be able
     // to strand the popover open.
     ownerDocument.addEventListener("pointerdown", onPointerDown, true);
@@ -737,7 +730,6 @@ export function createFollowingBar(
 
         if (editingToolbarModalBar.style.visibility === "visible") {
           editingToolbarModalBar.addClass("editingToolbarFlex");
-          editingToolbarModalBar.removeClass("editingToolbarGrid");
 
           positionToolbar(editingToolbarModalBar, editor);
         }
@@ -751,7 +743,6 @@ export function createFollowingBar(
     if (editingToolbarModalBar) {
       editingToolbarModalBar.style.visibility = "visible";
       editingToolbarModalBar.addClass("editingToolbarFlex");
-      editingToolbarModalBar.removeClass("editingToolbarGrid");
     }
   }
 }
@@ -1063,29 +1054,17 @@ export function editingToolbarPopover(
           ? currentleaf?.querySelector<HTMLElement>(".view-content")
           : null;
 
-      if (viewType === "canvas" && canvasToolbarAnchor) {
-        canvasToolbarAnchor.insertAdjacentElement(
-          "beforebegin",
-          editingToolbar,
-        );
-
-        if (!currentleaf?.querySelector("#editingToolbarPopoverBar")) {
-          canvasToolbarAnchor.insertAdjacentElement("beforebegin", popoverMenu);
-        }
+      // Canvas mounts the bar as a sibling before .view-content; everything
+      // else mounts it inside its own target. Either way the popover follows
+      // immediately after the bar.
+      if (canvasToolbarAnchor) {
+        canvasToolbarAnchor.insertAdjacentElement("beforebegin", editingToolbar);
       } else {
-        if (!currentleaf?.querySelector("#editingToolbarPopoverBar")) {
-          if (viewType === "excalidraw") {
-            targetDom.insertAdjacentElement("afterend", popoverMenu);
-          } else {
-            targetDom.insertAdjacentElement("afterbegin", popoverMenu);
-          }
-        }
+        targetDom.insertAdjacentElement("afterbegin", editingToolbar);
+      }
 
-        if (viewType === "excalidraw") {
-          targetDom.insertAdjacentElement("afterend", editingToolbar);
-        } else {
-          targetDom.insertAdjacentElement("afterbegin", editingToolbar);
-        }
+      if (!currentleaf?.querySelector("#editingToolbarPopoverBar")) {
+        editingToolbar.insertAdjacentElement("afterend", popoverMenu);
       }
     } else {
       const workspaceRoot = targetDocument.body?.querySelector(

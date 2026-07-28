@@ -676,7 +676,6 @@ export default class EditingToolbarPlugin extends Plugin {
     if (followingToolbar) {
       followingToolbar.style.visibility = "visible";
       followingToolbar.classList.add("editingToolbarFlex");
-      followingToolbar.classList.remove("editingToolbarGrid");
     }
 
     createFollowingBar(this.app, this, editor, true, targetDocument);

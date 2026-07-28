@@ -193,6 +193,62 @@ export function setFontcolor(color: string, editor: Editor) {
   editor.setSelections(adjustedSelections);
 }
 
+const COLOR_VALUE = String.raw`(?:#[0-9a-fA-F]{3,8}|rgba?\([^)]+\))`;
+// Matches both the style this writes today and the bare `background:…` written
+// before highlights carried an explicit text colour.
+const MARK_STYLE = String.raw`background:${COLOR_VALUE}(?:\s*;\s*color:[^"'>]*)?`;
+const escapeForRegex = (value: string) =>
+  value.replace(/([()[{*+.$^\\|?])/g, "\\$1");
+
+function parseColor(
+  color: string,
+): { r: number; g: number; b: number; a: number } | null {
+  const hex = color.trim().match(/^#([0-9a-fA-F]+)$/);
+  if (hex) {
+    let digits = hex[1];
+    if (digits.length === 3 || digits.length === 4) {
+      digits = digits
+        .split("")
+        .map((d) => d + d)
+        .join("");
+    }
+    if (digits.length !== 6 && digits.length !== 8) return null;
+    return {
+      r: parseInt(digits.slice(0, 2), 16),
+      g: parseInt(digits.slice(2, 4), 16),
+      b: parseInt(digits.slice(4, 6), 16),
+      a: digits.length === 8 ? parseInt(digits.slice(6, 8), 16) / 255 : 1,
+    };
+  }
+
+  const fn = color.trim().match(/^rgba?\(([^)]+)\)$/i);
+  if (!fn) return null;
+  const parts = fn[1]
+    .split(/[,/\s]+/)
+    .filter(Boolean)
+    .map(Number);
+  if (parts.length < 3 || parts.slice(0, 3).some(Number.isNaN)) return null;
+  return {
+    r: parts[0],
+    g: parts[1],
+    b: parts[2],
+    a: parts.length > 3 && !Number.isNaN(parts[3]) ? parts[3] : 1,
+  };
+}
+
+// Highlight backgrounds span three cases the stylesheet used to guess at from
+// the inline-style string: translucent rgba() swatches, opaque rgb() pastels,
+// and the five user-defined hex colours, which can be any lightness at all. A
+// translucent fill composites over the theme background and keeps the theme's
+// text colour; an opaque one needs black or white picked by luminance.
+function highlightTextColor(background: string): string {
+  const rgba = parseColor(background);
+  if (!rgba || rgba.a < 0.5) return "var(--text-normal)";
+  // Rec. 709 luma — the usual cheap stand-in for perceived lightness.
+  const luma = (0.2126 * rgba.r + 0.7152 * rgba.g + 0.0722 * rgba.b) / 255;
+  return luma > 0.5 ? "#000000" : "#ffffff";
+}
+
 export function setBackgroundcolor(color: string, editor: Editor) {
   const selectText = editor.getSelection();
 
@@ -200,30 +256,44 @@ export function setBackgroundcolor(color: string, editor: Editor) {
     return;
   }
 
-  const bgColorRegex = /<mark\s+style=["']?background:(?:#[0-9a-fA-F]{3,6}|rgba?\([^)]+\))["']?>([\s\S]*?)<\/mark>/g;
+  const style = `background:${color};color:${highlightTextColor(color)}`;
+
+  const bgColorRegex = new RegExp(
+    String.raw`<mark\s+style=["']?${MARK_STYLE}["']?>([\s\S]*?)<\/mark>`,
+    "g",
+  );
   const hasColorTag = bgColorRegex.test(selectText);
 
-  const isAlreadyInSameColor = (text: string, targetColor: string): boolean => {
-    const escapedColor = targetColor.replace(/([()[{*+.$^\\|?])/g, '\\$1');
-    const cleanColorRegex = new RegExp(`^<mark\\s+style=["']?background:${escapedColor}["']?>([\\s\\S]+)<\\/mark>$`);
+  const isAlreadyInSameColor = (text: string): boolean => {
+    const cleanColorRegex = new RegExp(
+      `^<mark\\s+style=["']?${escapeForRegex(style)}["']?>([\\s\\S]+)<\\/mark>$`,
+    );
     return cleanColorRegex.test(text.trim());
   };
 
-  if (isAlreadyInSameColor(selectText, color)) {
+  if (isAlreadyInSameColor(selectText)) {
     return;
   }
 
   let finalText;
-  
+
   if (hasColorTag) {
-    finalText = selectText.replace(/(background:)(?:#[0-9a-fA-F]{3,6}|rgba?\([^)]+\))/gi, `$1${color}`);
+    // Replaces the whole declaration pair, not just the background value — a
+    // recolour has to carry the text colour with it.
+    finalText = selectText.replace(
+      new RegExp(
+        String.raw`(<mark\s+style=["']?)${MARK_STYLE}(["']?>)`,
+        "gi",
+      ),
+      `$1${style}$2`,
+    );
   } else {
-    finalText = selectText.split('\n').map(line => 
-      line.trim() ? `<mark style="background:${color}">${line}</mark>` : line
+    finalText = selectText.split('\n').map(line =>
+      line.trim() ? `<mark style="${style}">${line}</mark>` : line
     ).join('\n');
   }
 
-  const tagLength = hasColorTag ? 0 : `<mark style="background:${color}"></mark>`.length;
+  const tagLength = hasColorTag ? 0 : `<mark style="${style}"></mark>`.length;
   const adjustedSelections = adjustSelectionsForTag(editor, tagLength);
 
   editor.replaceSelection(finalText);
