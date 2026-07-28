@@ -227,33 +227,35 @@ button[class^=editingToolbarCommandsubItem]::after {
   margin-top: 6px;
 }
 
+/* Anchors the flyout to its own button. Without this the nearest positioned
+   ancestor is the bar itself, so any explicit left/right on .subitem would be
+   measured against the whole pane. */
+:is(#editingToolbarModalBar, #editingToolbarPopoverBar) button[class^=editingToolbarCommandsubItem] {
+  position: relative;
+}
+
+/* --flyout-shift is set on the button by clampFlyoutToPane() to pull a flyout
+   back inside the pane; 0 (centred under the button) until it needs to move.
+   Only visibility transitions — a transform transition would animate the shift
+   and make the next measurement read a mid-flight position. */
 :is(#editingToolbarModalBar, #editingToolbarPopoverBar) button[class^=editingToolbarCommandsubItem]>.subitem {
   position: absolute;
   display: flex;
-  transform: translateY(105%);
+  transform: translate(var(--flyout-shift, 0px), 105%);
   border: 1px solid var(--background-modifier-border-hover);
   border-radius: var(--radius-m);
   background-color: var(--background-secondary);
   box-shadow: none;
   user-select: none;
   visibility: hidden;
-  transition: all 0.15s linear;
+  transition: visibility 0.15s linear;
   z-index: 1;
 }
 
 :is(#editingToolbarModalBar, #editingToolbarPopoverBar) button[class^=editingToolbarCommandsubItem]:hover>.subitem,
 :is(#editingToolbarModalBar, #editingToolbarPopoverBar) button[class^=editingToolbarCommandsubItem]>.subitem:hover {
   visibility: visible;
-  transition: all 0.3s linear;
-}
-
-/* Flyouts open toward the middle of the bar so they can't run off either edge. */
-:is(#editingToolbarModalBar, #editingToolbarPopoverBar) button[class^=editingToolbarCommandsubItem]:is(:first-child, :nth-child(2))>.subitem {
-  left: 0;
-}
-
-:is(#editingToolbarModalBar, #editingToolbarPopoverBar) button[class^=editingToolbarCommandsubItem]:is(:nth-last-child(1), :nth-last-child(2))>.subitem {
-  right: 0;
+  transition: visibility 0.3s linear;
 }
 
 :is(#editingToolbarModalBar, #editingToolbarPopoverBar):not(:is([data-toolbar-style=top],.editingToolbarFlex)) button[class^=editingToolbarCommandsubItem]:not(.editingToolbarSecond)>.subitem {
@@ -263,7 +265,7 @@ button[class^=editingToolbarCommandsubItem]::after {
 @media screen and (max-width: 768px) {
   :is(#editingToolbarModalBar, #editingToolbarPopoverBar):not(:is([data-toolbar-style=top],.editingToolbarFlex)) button[class^=editingToolbarCommandsubItem]>.subitem {
     left: 58%;
-    transform: translate(-60%, 90%);
+    transform: translate(calc(-60% + var(--flyout-shift, 0px)), 90%);
   }
 }
 
@@ -337,46 +339,6 @@ button[class^=editingToolbarCommandsubItem]::after {
   box-shadow: 0 8px 10px 1px rgba(0, 0, 0, 0.14);
   font-family: Source Sans Pro, sans-serif;
   font-weight: 400;
-}
-
-/* Near an edge of the bar the picker is nudged inward so it stays on screen;
-   the further from the edge, the smaller the nudge. */
-:is(#editingToolbarModalBar, #editingToolbarPopoverBar) button:is(:first-child, :nth-child(2)).editingToolbarCommandsubItem-font-color .x-color-picker-wrapper {
-  left: 0;
-  right: unset;
-  transform: translateX(0);
-}
-
-:is(#editingToolbarModalBar, #editingToolbarPopoverBar) button:nth-child(3).editingToolbarCommandsubItem-font-color .x-color-picker-wrapper {
-  left: -30px;
-  right: unset;
-  transform: translateX(0);
-}
-
-:is(#editingToolbarModalBar, #editingToolbarPopoverBar) button:nth-child(4).editingToolbarCommandsubItem-font-color .x-color-picker-wrapper {
-  left: -50px;
-  right: unset;
-  transform: translateX(0);
-}
-
-:is(#editingToolbarModalBar, #editingToolbarPopoverBar) button:is(:nth-last-child(1), :nth-last-child(2)).editingToolbarCommandsubItem-font-color .x-color-picker-wrapper {
-  right: 0;
-  transform: translateX(0);
-}
-
-:is(#editingToolbarModalBar, #editingToolbarPopoverBar) button:nth-last-child(3).editingToolbarCommandsubItem-font-color .x-color-picker-wrapper {
-  right: 0;
-  transform: translateX(30px);
-}
-
-:is(#editingToolbarModalBar, #editingToolbarPopoverBar) button:nth-last-child(4).editingToolbarCommandsubItem-font-color .x-color-picker-wrapper {
-  right: 0;
-  transform: translateX(40px);
-}
-
-:is(#editingToolbarModalBar, #editingToolbarPopoverBar) button:nth-last-child(5).editingToolbarCommandsubItem-font-color .x-color-picker-wrapper {
-  right: 0;
-  transform: translateX(50px);
 }
 
 :is(#editingToolbarModalBar, #editingToolbarPopoverBar):not(:is([data-toolbar-style=top],.editingToolbarFlex)) button.editingToolbarCommandsubItem-font-color .x-color-picker-wrapper {

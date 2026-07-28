@@ -836,6 +836,55 @@ function calculateTopPosition(
   return topPosition;
 }
 
+const FLYOUT_SHIFT_VAR = "--flyout-shift";
+const FLYOUT_EDGE_MARGIN = 6;
+
+// Flyouts hang off their own button (see the position:relative rule in
+// styles.css), so one near a pane edge can overhang it. Measure where the panel
+// lands and hand the CSS a horizontal offset that pulls it back inside.
+function clampFlyoutToPane(button: HTMLElement): void {
+  const flyout = button.querySelector<HTMLElement>(":scope > .subitem");
+  if (!flyout) return;
+
+  // The colour pickers hang their real panel off a zero-width .subitem, so it
+  // is the panel — not the .subitem box — whose edges have to clear the pane.
+  const panel =
+    flyout.querySelector<HTMLElement>(".x-color-picker-wrapper") ?? flyout;
+
+  // Measure unshifted: nothing here transitions, so this reads back immediately.
+  button.style.removeProperty(FLYOUT_SHIFT_VAR);
+
+  // The bar's parent is the pane (top / overflow popover) or the workspace root
+  // (following), and the more-popover can be positioned as fixed — so cap the
+  // usable span at the window too.
+  const bar = button.closest<HTMLElement>(
+    "#editingToolbarModalBar, #editingToolbarPopoverBar",
+  );
+  const host = bar?.parentElement?.getBoundingClientRect();
+  const win = button.ownerDocument.defaultView ?? window;
+  const min = Math.max(host?.left ?? 0, 0) + FLYOUT_EDGE_MARGIN;
+  const max =
+    Math.min(host?.right ?? win.innerWidth, win.innerWidth) -
+    FLYOUT_EDGE_MARGIN;
+  if (max <= min) return; // pane too narrow to clamp into — leave it centred
+
+  const rect = panel.getBoundingClientRect();
+  let shift = 0;
+  if (rect.right > max) shift = max - rect.right;
+  // Left edge wins if the panel is wider than the pane: overhanging the right
+  // is recoverable by scrolling the popup into view, overhanging the left isn't.
+  if (rect.left + shift < min) shift = min - rect.left;
+
+  if (shift) button.style.setProperty(FLYOUT_SHIFT_VAR, `${shift}px`);
+}
+
+// Hover is what opens a flyout, so re-measure on every enter: the button moves
+// as the pane resizes, as reflow shuffles buttons between the bar and the »
+// popover, and (following style) as the bar tracks the caret.
+function attachFlyoutClamp(button: HTMLElement): void {
+  button.addEventListener("mouseenter", () => clampFlyoutToPane(button));
+}
+
 interface ColorPickerButtonConfig {
   tooltip: string;
   pickerHtml: string;
@@ -905,6 +954,8 @@ function createColorPickerButton(
         }
       }, 200);
     });
+
+  attachFlyoutClamp(button.buttonEl);
 }
 
 export function editingToolbarPopover(
@@ -1172,6 +1223,7 @@ export function editingToolbarPopover(
 
               parentBtn.buttonEl.insertAdjacentElement("afterbegin", submenu);
             });
+            attachFlyoutClamp(parentBtn.buttonEl);
           }
         }
       } else {
