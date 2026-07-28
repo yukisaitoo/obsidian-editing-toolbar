@@ -287,8 +287,6 @@ export const commandNames: Record<string, string> = {
   "Center text": "Выровнять по центру",
   "Change font color": "Изменить цвет текста",
   "Change background color": "Изменить цвет фона",
-  "Fullscreen focus mode": "Полноэкранный режим концентрации",
-  "Workspace fullscreen": "Полноэкранный режим рабочего пространства",
   "Renumber ordered list": "Перенумеровать нумерованный список",
   History: "История",
   "No history": "История пуста",

@@ -17,7 +17,6 @@ import {
 import EditingToolbarPlugin from "src/plugin/main";
 import { selfDestruct, setFormatEraser } from "src/toolbar/editingToolbar";
 import { strings } from "src/translations/helper";
-import { fullscreenMode, workplacefullscreenMode } from "src/util/fullscreen";
 import { TextEnhancement } from "src/util/textEnhancement";
 import { setMenuVisibility } from "src/util/toolbarVisibility";
 import {
@@ -672,24 +671,6 @@ export class CommandsManager {
         const modal = new InsertLinkModal(this.plugin);
         modal.open();
       },
-    });
-    this.plugin.addCommand({
-      id: "fullscreen-focus",
-      name: "Toggle fullscreen focus mode",
-      hotkeys: [{ modifiers: ["Mod", "Shift"], key: "F11" }],
-      callback: () => {
-        return fullscreenMode(this.plugin.app);
-      },
-      icon: "fullscreen",
-    });
-    this.plugin.addCommand({
-      id: "workplace-fullscreen-focus",
-      name: "Toggle workspace fullscreen",
-      callback: () => {
-        return workplacefullscreenMode(this.plugin.app);
-      },
-      hotkeys: [{ modifiers: ["Mod"], key: "F11" }],
-      icon: "remix-SplitCellsHorizontal",
     });
   }
 

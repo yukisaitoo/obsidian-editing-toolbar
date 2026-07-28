@@ -1011,25 +1011,6 @@ body.theme-dark .modal-container.editingToolbar-Modal .modal input[type='range']
   top: calc(var(--size-4-2) + 50px);
 }
 
-/* --- Auto-hide-header themes ---------------------------------------------- */
-
-/* Themes that slide the view header off-screen must not do so while the top
-   bar is mounted, or the bar slides with it. */
-body.auto-hide-header .workspace-tab-header-container + .workspace-tab-container .workspace-leaf .workspace-leaf-content>.view-header {
-  margin-top: -40px;
-  transition: all 0.6s linear;
-}
-
-body.auto-hide-header .workspace-tab-header-container + .workspace-tab-container .workspace-leaf .workspace-leaf-content>.view-header:hover {
-  margin-top: 0;
-  transition: all 0.6s linear;
-}
-
-body.auto-hide-header .workspace-tab-header-container:hover + .workspace-tab-container .workspace-leaf .workspace-leaf-content>.view-header {
-  margin-top: 0;
-  transition: all 0.1s linear;
-}
-
 /* ==========================================================================
    9. VENDORED — Pickr 1.8.4 "nano" theme (@simonwep/pickr/dist/themes/nano.min.css)
    Inlined because the plugin ships styles.css directly to the vault and no

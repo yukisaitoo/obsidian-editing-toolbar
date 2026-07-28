@@ -388,17 +388,6 @@ export const DEFAULT_TOOLBAR_COMMANDS: Command[] = [
     name: "Change background color",
     icon: BACKGROUND_COLOR_ICON,
   },
-
-  {
-    id: "editing-toolbar:fullscreen-focus",
-    name: "Fullscreen focus mode",
-    icon: "fullscreen",
-  },
-  {
-    id: "editing-toolbar:workplace-fullscreen-focus",
-    name: "Workspace fullscreen",
-    icon: "exit-fullscreen",
-  },
 ];
 
 // Pull a command (with its icon) out of the shared default set by id, deep-copied

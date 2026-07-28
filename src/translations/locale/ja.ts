@@ -80,8 +80,6 @@ export const commandNames: Record<string, string> = {
   "Center text": "中央揃え",
   "Change font color": "文字色を変更",
   "Change background color": "背景色を変更",
-  "Fullscreen focus mode": "全画面フォーカスモード",
-  "Workspace fullscreen": "ワークスペースを全画面表示",
   "Renumber ordered list": "番号付きリストを振り直す",
   "Get plain text": "プレーンテキストを取得",
   "Remove blank lines": "空行を削除",

@@ -259,8 +259,6 @@ export const commandNames: Record<string, string> = {
   "Center text": "居中对齐",
   "Change font color": "更改字体颜色",
   "Change background color": "更改背景颜色",
-  "Fullscreen focus mode": "全屏专注模式",
-  "Workspace fullscreen": "工作区全屏",
   "Renumber ordered list": "重新编号有序列表",
   History: "历史记录",
   "No history": "暂无历史记录",
