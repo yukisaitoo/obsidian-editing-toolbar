@@ -11,6 +11,11 @@ import { ConfirmModal } from "src/modals/ConfirmModal";
 import type EditingToolbarPlugin from "src/plugin/main";
 import { strings } from "src/translations/helper";
 
+// Import/export crosses a JSON boundary with no schema: every payload below is
+// whatever the user's file happened to contain.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type JsonPayload = any;
+
 export class ImportExportModal extends Modal {
   plugin: EditingToolbarPlugin;
   mode: "import" | "export";
@@ -135,8 +140,7 @@ export class ImportExportModal extends Modal {
   }
 
   updateExportContent() {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- heterogeneous export payload assembled dynamically
-    const exportContent: any = {
+    const exportContent: JsonPayload = {
       _exportInfo: {
         version: this.plugin.manifest.version,
         exportType: "all",
@@ -167,8 +171,7 @@ export class ImportExportModal extends Modal {
     this.textArea.setValue(JSON.stringify(exportContent, null, 2));
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- validates untyped parsed JSON
-  private validateExportContent(exportContent: any) {
+  private validateExportContent(exportContent: JsonPayload) {
     ["followingCommands", "topCommands"].forEach((key) => {
       if (key in exportContent && !exportContent[key]) {
         exportContent[key] = [];
@@ -319,8 +322,7 @@ export class ImportExportModal extends Modal {
     }
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- untyped external import JSON
-  performOverwriteImport(importData: any) {
+  performOverwriteImport(importData: JsonPayload) {
     this.importGeneralSettings(importData);
 
     if (importData.followingCommands) {
@@ -332,8 +334,7 @@ export class ImportExportModal extends Modal {
     }
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- untyped external import JSON
-  performUpdateImport(importData: any) {
+  performUpdateImport(importData: JsonPayload) {
     this.importGeneralSettings(importData);
 
     if (importData.followingCommands) {
@@ -379,8 +380,7 @@ export class ImportExportModal extends Modal {
 
     return targetArray;
   }
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- untyped external import JSON
-  importGeneralSettings(importData: any) {
+  importGeneralSettings(importData: JsonPayload) {
     const generalSettings = [
       "positionStyle",
       "cMenuNumRows",
@@ -401,8 +401,7 @@ export class ImportExportModal extends Modal {
 
     generalSettings.forEach((key) => {
       if (importData[key] !== undefined) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any -- dynamic settings-key write from imported data
-        (this.plugin.settings as any)[key] = importData[key];
+        (this.plugin.settings as JsonPayload)[key] = importData[key];
       }
     });
   }
@@ -442,8 +441,7 @@ export class ImportExportModal extends Modal {
     fixCommandsInArray(this.plugin.settings.topCommands);
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- untyped backup JSON snapshot
-  restoreBackup(backup: any) {
+  restoreBackup(backup: JsonPayload) {
     this.plugin.settings.positionStyle = backup.positionStyle;
     this.plugin.settings.followingCommands = backup.followingCommands;
     this.plugin.settings.topCommands = backup.topCommands;

@@ -106,7 +106,6 @@ export function renderAppearanceTab(
             );
           }
           await ctx.plugin.saveSettings();
-          // Rebuild settings UI + live toolbar so both pick up the new size
           ctx.refresh();
           ctx.rebuildToolbar();
         });
@@ -124,7 +123,6 @@ interface ColorSettingConfig {
   swatches: string[];
 }
 
-/** Persist a colour the picker resolved to and repaint the settings UI + toolbar. */
 function applyColor(
   ctx: SettingsTabContext,
   editingStyle: ToolbarStyleKey,
@@ -171,8 +169,7 @@ function renderColorSetting(
           applyColor(ctx, editingStyle, config, hexColor);
         },
         onClear: () => {
-          // Dropping the key from the bucket falls the style back to the global
-          // appearance field, i.e. the theme variable in DEFAULT_SETTINGS.
+          // Dropping the key falls the style back to the global appearance field.
           delete getAppearanceBucket(ctx.plugin.settings, editingStyle)[
             config.key
           ];
@@ -218,7 +215,6 @@ function renderPreview(
     setIcon(button.buttonEl, command.icon);
   });
 
-  // Same custom properties the real toolbar sets on itself, so the preview grows
-  // with the icon size instead of staying pinned to the default box.
+  // Same custom properties the real toolbar sets, so the preview tracks the size.
   applyAppearanceVars(previewBar, ctx.plugin.settings, editingStyle);
 }

@@ -3,9 +3,8 @@ import { syntaxTree } from '@codemirror/language';
 import { EditingToolbarSettings } from "../settings/settingsData";
 import { strings } from "../translations/helper";
 
-// Hangul Filler (U+3164): an invisible, non-whitespace character used as a
-// blank spacer line so Obsidian treats an adjacent block as separate from the
-// renumbered list without the gap collapsing.
+// Hangul Filler (U+3164): invisible but non-whitespace, so it spaces a block
+// apart from a renumbered list without the gap collapsing.
 const LIST_SEPARATOR_FILLER = "ㅤ";
 
 export function GenNonDuplicateID(randomLength: number) {
@@ -13,10 +12,8 @@ export function GenNonDuplicateID(randomLength: number) {
   return idStr + Math.random().toString(36).slice(3, 3 + randomLength);
 }
 
-/**
- * Where a command lives in a toolbar's command list. `subIndex` is -1 for a
- * top-level command; `index` is -1 when the command is not in the list at all.
- */
+// `subIndex` is -1 for a top-level command; `index` is -1 when the command is
+// not in the list at all.
 export function findCommandLocation(
   command: Command,
   isSubmenuItem: boolean,
@@ -39,9 +36,8 @@ export function findCommandLocation(
   return { index: -1, subIndex: -1 };
 }
 
-// A color-picker table is a flat list of rows: a section header, a blank
-// spacer, or a row of clickable color swatches. The consuming toolbar reads
-// each swatch's `background-color`, so the header labels below are inert.
+// Rows are a section header, a blank spacer, or clickable swatches. The toolbar
+// reads each swatch's `background-color`, so the header labels are inert.
 type PickerRow =
   | { header: string }
   | { spacer: true }
@@ -132,9 +128,8 @@ export function setHeader(str: string, editor: Editor) {
 }
 
 
-// When a fresh color tag is wrapped around the selection, the head/anchor of
-// each selection must shift by the length of the inserted opening+closing tag
-// so the visual selection still covers the original text.
+// Shift each selection by the inserted tag's length so it still covers the
+// original text.
 function adjustSelectionsForTag(editor: Editor, tagLength: number) {
   return editor.listSelections().map((sel) => {
     const isForward =
@@ -236,10 +231,7 @@ function parseColor(
   };
 }
 
-// Highlight backgrounds span three cases the stylesheet used to guess at from
-// the inline-style string: translucent rgba() swatches, opaque rgb() pastels,
-// and the five user-defined hex colours, which can be any lightness at all. A
-// translucent fill composites over the theme background and keeps the theme's
+// A translucent fill composites over the theme background and keeps the theme's
 // text colour; an opaque one needs black or white picked by luminance.
 function highlightTextColor(background: string): string {
   const rgba = parseColor(background);
@@ -278,8 +270,7 @@ export function setBackgroundcolor(color: string, editor: Editor) {
   let finalText;
 
   if (hasColorTag) {
-    // Replaces the whole declaration pair, not just the background value — a
-    // recolour has to carry the text colour with it.
+    // Replaces the whole declaration pair — a recolour carries the text colour.
     finalText = selectText.replace(
       new RegExp(
         String.raw`(<mark\s+style=["']?)${MARK_STYLE}(["']?>)`,

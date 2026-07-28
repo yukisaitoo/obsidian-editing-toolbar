@@ -10,7 +10,6 @@ export type ToolbarStyleKey = "top" | "following";
 
 export const POSITION_STYLES: ToolbarStyleKey[] = ["top", "following"];
 
-/** User-facing name of each toolbar style. */
 export const STYLE_LABELS: Record<ToolbarStyleKey, string> = {
   top: strings.topToolbar,
   following: strings.followingToolbar,
@@ -26,16 +25,13 @@ export interface AppearanceByStyle {
   [style: string]: StyleAppearanceSettings;
 }
 
-/**
- * Read a per-style appearance value: the value stored in `style`'s bucket, falling
- * back to the global default field on `settings`.
- */
+// Falls back to the global default field when `style`'s bucket omits the key.
 export function getAppearanceValue<K extends keyof StyleAppearanceSettings>(
   settings: EditingToolbarSettings,
   key: K,
   style: string,
 ): NonNullable<StyleAppearanceSettings[K]> {
-  // The global field is always populated from DEFAULT_SETTINGS, so this never resolves undefined.
+  // The global field is always populated from DEFAULT_SETTINGS, so never undefined.
   const bucketValue = settings.appearanceByStyle?.[style]?.[key];
   return (bucketValue ??
     (settings as unknown as StyleAppearanceSettings)[key]) as NonNullable<
@@ -43,10 +39,8 @@ export function getAppearanceValue<K extends keyof StyleAppearanceSettings>(
   >;
 }
 
-/**
- * The writable appearance bucket for `style`, created on demand. Values left out
- * of a bucket fall back to the global fields via getAppearanceValue().
- */
+// Writable bucket for `style`, created on demand. Keys left out of it fall back
+// to the global fields via getAppearanceValue().
 export function getAppearanceBucket(
   settings: EditingToolbarSettings,
   style: string,
@@ -55,11 +49,6 @@ export function getAppearanceBucket(
   return (store[style] ??= {});
 }
 
-/**
- * Push a style's resolved appearance onto an element as the custom properties the
- * toolbar CSS reads. Used for the live bars, the overflow popover, the settings
- * preview, and the document root.
- */
 export function applyAppearanceVars(
   el: HTMLElement,
   settings: EditingToolbarSettings,
@@ -79,15 +68,9 @@ export function applyAppearanceVars(
   );
 }
 
-/**
- * After a position-toolbar toggle, decide which style should become the primary
- * (configured/appearance) style. Returns the style to switch to, or null if the
- * primary style should stay as-is.
- *
- * `enabled` is the toggled style's new on/off state; `prevStyle` is the current
- * primary style. When a style is turned on it becomes primary; when the current
- * primary is turned off, the next enabled style (top → following) takes over.
- */
+// Which style should own "primary" after a toggle, or null to leave it alone.
+// Turning a style on makes it primary; turning the primary off promotes the next
+// enabled style in POSITION_STYLES order.
 export function resolveNextPositionStyle(
   settings: EditingToolbarSettings,
   toggledStyle: ToolbarStyleKey,
@@ -115,7 +98,7 @@ declare module "obsidian" {
   }
 }
 
-/** Keys of the user-defined custom color swatches, all of which hold hex strings. */
+// All hold hex strings.
 export type CustomColorKey =
   | `custom_bg${1 | 2 | 3 | 4 | 5}`
   | `custom_fc${1 | 2 | 3 | 4 | 5}`;

@@ -123,7 +123,6 @@ export class CommandPicker extends FuzzySuggestModal<Command> {
   }
 
   getItems(): Command[] {
-    //@ts-expect-error untyped API access
     return this.app.commands.listCommands();
   }
 
@@ -141,8 +140,7 @@ export class CommandPicker extends FuzzySuggestModal<Command> {
       return;
     }
 
-    // A command with no icon needs one picked before it can go on the toolbar;
-    // the icon picker adds it once chosen.
+    // A command with no icon needs one picked before it can go on the toolbar.
     if (!item.icon) {
       new ChooseFromIconList(
         this.plugin,

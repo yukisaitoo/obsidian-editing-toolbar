@@ -5,8 +5,13 @@ declare module "obsidian" {
     foldManager: FoldManager;
     plugins: Plugins;
     commands: Commands;
+    hotkeyManager: HotkeyManager;
     setting: SettingsManager;
     secretStorage: SecretStorage;
+  }
+
+  interface HotkeyManager {
+    customKeys: Record<string, Hotkey[]>;
   }
 
   interface SecretStorage {
@@ -36,6 +41,7 @@ declare module "obsidian" {
     enabledPlugins: any;
     enablePlugin(pluginId: string): Promise<boolean>;
     disablePlugin(pluginId: string): Promise<void>;
+    getPlugin(pluginId: string): Plugin | null;
   }
 
   interface Commands {
@@ -43,16 +49,30 @@ declare module "obsidian" {
     addCommand(cmd: Command): void;
     removeCommand(cmd: string): void;
     executeCommandById(id: string): boolean;
+    findCommand(id: string): Command | undefined;
+    listCommands(): Command[];
   }
 
   interface MarkdownView {
     onMarkdownFold(): void;
   }
 
+  export interface EditorCoords {
+    top: number;
+    left: number;
+    bottom: number;
+  }
+
   interface Workspace {
+    floatingSplit: WorkspaceParentExt;
     on(
       name: "canvas:node-menu",
       callback: (menu: Menu, node: unknown) => unknown,
+      ctx?: unknown,
+    ): EventRef;
+    on(
+      name: "url-menu",
+      callback: (menu: Menu, url: string, view: MarkdownView) => unknown,
       ctx?: unknown,
     ): EventRef;
   }
@@ -62,6 +82,9 @@ declare module "obsidian" {
     cm: any;
     getScrollerElement: () => HTMLElement;
     containerEl: HTMLElement;
+    coordsAtPos(pos: EditorPosition | number): EditorCoords;
+    // CodeMirror 5 legacy; absent on the CM6 editor, hence optional.
+    cursorCoords?(start: boolean, mode: string): EditorCoords;
     // Undocumented internal editing commands exposed by Obsidian's editor
     indentList(): void;
     unindentList(): void;
@@ -108,10 +131,6 @@ declare module "obsidian" {
     direction: "horizontal" | "vertical";
   }
 
-  export class WorkspaceExt extends Workspace {
-    floatingSplit: WorkspaceParentExt;
-  }
-
   interface View {
     editor: Editor | undefined;
     leaf: WorkspaceLeaf | undefined;
@@ -146,12 +165,9 @@ declare module "obsidian" {
     closeSubmenu(): void;
     isInside(e: HTMLElement): boolean;
     onArrowDown(e: KeyboardEvent): boolean;
-    /** @internal Left arrow moves selection out of the submenu */
     onArrowLeft(e: KeyboardEvent): boolean;
-    /** @internal Right arrow moves selection into the submenu */
     onArrowRight(e: KeyboardEvent): boolean;
     onArrowUp(e: KeyboardEvent): boolean;
-    /** @internal No-op when the selected item is a submenu */
     onEnter(e: KeyboardEvent): boolean;
     onMenuClick(e: MouseEvent): void;
     onMouseOver(e: MouseEvent): boolean;
@@ -191,9 +207,7 @@ declare module "obsidian" {
 
     handleEvent(e: MouseEvent | KeyboardEvent): void;
     removeIcon(): void;
-    /** @deprecated Prefer setChecked directly */
     setActive(active: boolean): this;
-    /** Creates the foldable "Insert"/"Format"/… submenus from the editor right-click menu */
     setSubmenu(): Menu;
     setWarning(warning: boolean): this;
   }

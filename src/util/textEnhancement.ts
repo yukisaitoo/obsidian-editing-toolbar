@@ -2,9 +2,8 @@ import { Editor, Notice } from "obsidian";
 import { strings } from "src/translations/helper";
 
 export class TextEnhancement {
-  // Single gate for selection-backed tools: returns a non-empty selection or
-  // shows the given prompt and returns null. Callers that get a string can
-  // treat it as guaranteed-present.
+  // The single gate for selection-backed tools: a string result is guaranteed
+  // non-empty, otherwise the prompt has already been shown.
   private static requireSelection(
     editor: Editor,
     emptyMessage: string = strings.pleaseSelectTextFirst
@@ -197,8 +196,7 @@ export class TextEnhancement {
     const selection = this.requireSelection(editor);
     if (selection === null) return;
 
-    // Treat the selection as Chinese once at least this fraction of its
-    // characters are CJK; below it, fall back to English typography.
+    // Below this fraction of CJK characters, fall back to English typography.
     const CHINESE_CONTEXT_THRESHOLD = 0.1;
     const cjkRegex = /[\u4e00-\u9fa5]/g;
     const cjkCount = (selection.match(cjkRegex) || []).length;

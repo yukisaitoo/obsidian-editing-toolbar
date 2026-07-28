@@ -58,7 +58,6 @@ export default class EditingToolbarPlugin extends Plugin {
   settings!: EditingToolbarSettings;
   public positionStyle!: string;
 
-  // Which style's appearance is being edited in the settings UI
   public appearanceEditStyle: ToolbarStyleKey | null = null;
 
   commandsManager!: CommandsManager;
@@ -127,7 +126,6 @@ export default class EditingToolbarPlugin extends Plugin {
     );
     this.registerEvent(
       this.app.workspace.on(
-        // @ts-expect-error untyped API access
         "url-menu",
         (menu: Menu, _url: string, _view: MarkdownView) => {
           menu.addItem((item) =>
@@ -163,9 +161,8 @@ export default class EditingToolbarPlugin extends Plugin {
       }
     }
 
-    // Seed a style's command list only when it has never been persisted, so a
-    // list the user deliberately cleared stays empty. Deep-copy so the module-level
-    // default constants are never aliased by the persisted command objects.
+    // Seed only when never persisted, so a list the user cleared stays empty.
+    // Deep-copy so the default constants are never aliased by persisted objects.
     for (const style of POSITION_STYLES) {
       const key = `${style}Commands` as const;
       if (!loadedData || loadedData[key] === undefined) {
@@ -174,11 +171,9 @@ export default class EditingToolbarPlugin extends Plugin {
     }
   }
 
-  // Ensure per-style appearance buckets exist. Empty buckets fall back to the
-  // global appearance fields via getAppearanceValue().
+  // Empty buckets fall back to the global fields via getAppearanceValue().
   private initAppearanceStore(): void {
-    // Deep-copy so an unpersisted store doesn't alias DEFAULT_SETTINGS: the
-    // settings tab writes to and deletes from these buckets in place.
+    // Deep-copy: the settings tab writes to and deletes from these in place.
     if (this.settings.appearanceByStyle === DEFAULT_SETTINGS.appearanceByStyle) {
       this.settings.appearanceByStyle = structuredClone(
         DEFAULT_SETTINGS.appearanceByStyle,
@@ -191,7 +186,6 @@ export default class EditingToolbarPlugin extends Plugin {
     }
   }
 
-  /** The toolbar style currently live in the workspace. */
   public get liveStyle(): ToolbarStyleKey {
     const raw = this.positionStyle || this.settings.positionStyle;
     return POSITION_STYLES.includes(raw as ToolbarStyleKey)
@@ -199,11 +193,8 @@ export default class EditingToolbarPlugin extends Plugin {
       : "top";
   }
 
-  /**
-   * The toolbar style whose appearance is currently in effect. While the settings
-   * tab is open this is the style being edited there, which can differ from the
-   * style actually rendered in the workspace.
-   */
+  // While the settings tab is open this is the style being edited there, which
+  // can differ from the one rendered in the workspace.
   public resolveActiveStyle(): ToolbarStyleKey {
     return this.appearanceEditStyle ?? this.liveStyle;
   }
@@ -332,7 +323,6 @@ export default class EditingToolbarPlugin extends Plugin {
 
   async tryGetAdmonitionTypes(): Promise<void> {
     const admonitionPluginInstance =
-      // @ts-expect-error untyped API access
       this.app.plugins?.getPlugin(ADMONITION_PLUGIN_ID);
     if (admonitionPluginInstance) {
       this.processAdmonitionTypes(admonitionPluginInstance);
@@ -378,9 +368,19 @@ export default class EditingToolbarPlugin extends Plugin {
     return ViewUtils.isAllowedViewType(view);
   }
 
+  // Judged from the main area, not the focused pane: getMostRecentLeaf() skips
+  // sidebars, so clicking one doesn't flicker the bar, while switching the main
+  // pane to a PDF/graph does hide it.
+  private isMainAreaEditable(): boolean {
+    const view = this.app.workspace.getMostRecentLeaf()?.view ?? null;
+    const type = view?.getViewType();
+    return (
+      type === "canvas" ||
+      (type === "markdown" && ViewUtils.isSourceMode(view))
+    );
+  }
+
   handleEditingToolbar = () => {
-    // The pane/view changed under it — the overflow popover belongs to the bar
-    // we're about to re-evaluate, so never carry an open one across.
     closeMoreOverflowPopovers();
 
     if (!this.settings.cMenuVisibility) {
@@ -393,26 +393,12 @@ export default class EditingToolbarPlugin extends Plugin {
 
     const view = this.app.workspace.getActiveViewOfType(ItemView);
 
-    // Focus moved off the note — a sidebar/settings got focus, or the main pane
-    // itself became a non-editor view (PDF, graph, image, base, …). Decide from
-    // the main-area content rather than the focused pane: getMostRecentLeaf()
-    // ignores sidebars, so it still points at the note you're editing when you
-    // just clicked a sidebar, but points at the PDF/graph when the main pane
-    // itself changed. Keep the top bar only while that main content is an
-    // editable note or canvas — so dipping into a sidebar doesn't flicker it,
-    // but reading mode and non-editor views correctly hide it. The
-    // selection-following bar always hides here; it has no selection to track.
+    // Focus moved off the note — into a sidebar, or onto a non-editor view.
     if (!ViewUtils.isAllowedViewType(view)) {
       const following = getExistingToolbar(this.app, this, "following");
       if (following) following.style.visibility = "hidden";
 
-      const mainView = this.app.workspace.getMostRecentLeaf()?.view ?? null;
-      const mainType = mainView?.getViewType();
-      const mainEditable =
-        mainType === "canvas" ||
-        (mainType === "markdown" && ViewUtils.isSourceMode(mainView));
-
-      if (!mainEditable) {
+      if (!this.isMainAreaEditable()) {
         const el = getExistingToolbar(this.app, this, "top");
         if (el) el.style.visibility = "hidden";
       }
@@ -433,8 +419,7 @@ export default class EditingToolbarPlugin extends Plugin {
     }
 
     // The enable flags are the single source of truth. Never fall back to
-    // positionStyle here: it still points at a toolbar the user just toggled off,
-    // which is the "toggle won't turn it off" bug.
+    // positionStyle: it still points at a toolbar the user just toggled off.
     for (const style of POSITION_STYLES) {
       const existing = getExistingToolbar(this.app, this, style);
 
@@ -467,9 +452,8 @@ export default class EditingToolbarPlugin extends Plugin {
     await this.saveData(this.settings);
   }
 
-  // Restore every setting and command list to the shipped defaults, persist, and
-  // rebuild the live toolbars. Seeds the per-style command lists the same way
-  // loadSettings() does, since DEFAULT_SETTINGS keeps them empty.
+  // Seeds the per-style command lists the way loadSettings() does, since
+  // DEFAULT_SETTINGS keeps them empty.
   async resetSettings(): Promise<void> {
     this.settings = structuredClone(DEFAULT_SETTINGS);
     for (const style of POSITION_STYLES) {
@@ -483,16 +467,11 @@ export default class EditingToolbarPlugin extends Plugin {
 
     await this.saveSettings();
 
-    // Tear down existing toolbars, then let onPositionStyleChange re-apply the
-    // global appearance variables and dispatch the rebuild event.
+    // onPositionStyleChange re-applies the appearance vars and fires the rebuild.
     selfDestruct(this);
     this.onPositionStyleChange(this.settings.positionStyle);
   }
 
-  /**
-   * Turn a toolbar style on or off: flip its flag, hand the primary style to
-   * whichever style should own it now, persist, and re-evaluate the live bars.
-   */
   async setToolbarStyleEnabled(
     style: ToolbarStyleKey,
     enabled: boolean,
@@ -682,7 +661,7 @@ export default class EditingToolbarPlugin extends Plugin {
   }
 
   onPositionStyleChange(newStyle: string): void {
-    // Temporarily ignore any "editing style" override while we update the live toolbar
+    // Ignore any "editing style" override while updating the live toolbar.
     const previousEditStyle = this.appearanceEditStyle;
     this.appearanceEditStyle = null;
 
@@ -697,7 +676,6 @@ export default class EditingToolbarPlugin extends Plugin {
 
     dispatchEvent(new Event("editingToolbar-NewCommand"));
 
-    // Restore whatever the settings UI was editing
     this.appearanceEditStyle = previousEditStyle;
   }
 }

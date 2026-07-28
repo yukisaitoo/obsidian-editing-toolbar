@@ -621,10 +621,8 @@ export class InsertLinkModal extends Modal {
       if (previewInput) previewInput.value = previewText;
     }
   }
-  /**
-   * The markdown for the current form state. `text` falls back to the URL when
-   * inserting, but stays empty in the preview so the field reads as unfilled.
-   */
+  // `text` falls back to the URL when inserting, but stays empty in the preview
+  // so the field reads as unfilled.
   private buildMarkdownLink(text: string): string {
     let markdownLink = this.isEmbed ? "!" : "";
     markdownLink += `[${text}`;

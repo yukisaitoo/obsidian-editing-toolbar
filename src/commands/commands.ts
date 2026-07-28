@@ -41,9 +41,8 @@ export class CommandsManager {
     editor.focus();
   };
 
-  // Single validation point for editor-backed commands: resolve the active
-  // editor, bail if there is none, and run the action with focus preserved.
-  // Downstream actions receive a guaranteed-live editor and never re-check.
+  // The single validation point for editor-backed commands: downstream actions
+  // get a guaranteed-live editor and never re-check.
   private runOnEditor = (action: (editor: Editor) => unknown): void => {
     const editor = this.getActiveEditor();
     if (!editor) return;
@@ -88,7 +87,6 @@ export class CommandsManager {
     try {
       activeView.canvas?.wrapperEl?.focus?.({ preventScroll: true });
     } catch {
-      // noop
     }
 
     const invocationCandidates: Array<{
@@ -715,8 +713,7 @@ export class CommandsManager {
     });
   }
 
-  // Obsidian leaves the cursor inside the markup it just inserted for these two;
-  // nudge past it so typing continues after the insertion.
+  // Obsidian leaves the cursor inside the markup it inserts for these two.
   private getCharacterOffset(commandId: string): number {
     switch (commandId) {
       case "editor:insert-tag":

@@ -390,15 +390,13 @@ export const DEFAULT_TOOLBAR_COMMANDS: Command[] = [
   },
 ];
 
-// Pull a command (with its icon) out of the shared default set by id, deep-copied
-// so the following default never aliases the top default's objects.
+// Deep-copied so the following default never aliases the top default's objects.
 const cloneToolbarDefault = (id: string): Command =>
   structuredClone(
     DEFAULT_TOOLBAR_COMMANDS.find((command) => command.id === id)!,
   );
 
-// Curated inline-formatting set: the fresh-install default for the select
-// (following) toolbar, which pops up on a text selection.
+// Fresh-install default for the following toolbar.
 export const DEFAULT_FOLLOWING_COMMANDS: Command[] = [
   { id: "editing-toolbar:toggle-bold", name: "Bold", icon: "bold-glyph" },
   {

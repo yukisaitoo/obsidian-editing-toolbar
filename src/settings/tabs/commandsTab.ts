@@ -15,14 +15,13 @@ import { GenNonDuplicateID } from "src/util/util";
 const DIVIDER_COMMAND_ID = "editingToolbar-Divider-Line";
 const TOP_LEVEL_CONTAINER_CLASS = "editingToolbarSettingsTabsContainer";
 
-// Commands whose submenu is generated at render time (the colour swatch grids),
-// so the settings UI must not offer to edit their children.
+// Submenus generated at render time (the colour grids), so their children are
+// not editable here.
 const GENERATED_SUBMENU_IDS = [
   "editingToolbar-plugin:change-font-color",
   "editingToolbar-plugin:change-background-color",
 ];
 
-/** Drag options shared by the top-level list and every submenu list. */
 const SHARED_SORTABLE_OPTIONS: Sortable.Options = {
   draggable: ".setting-item",
   ghostClass: "sortable-ghost",
@@ -92,8 +91,7 @@ function renderCommandList(
   const commands = ctx.plugin.getCurrentCommands(style);
   const listEl = containerEl.createEl("div", { cls: TOP_LEVEL_CONTAINER_CLASS });
 
-  // Submenus may only receive plain commands, so the top-level list records what
-  // kind of item is in flight for the submenu lists' `put` check below.
+  // Submenus take only plain commands; the `put` checks below read this.
   let draggedItemClass = "";
 
   const save = () => {
@@ -146,7 +144,6 @@ interface RowContext {
   style: ToolbarStyleKey;
 }
 
-/** A plain command: icon, rename, add-submenu, add-separator, delete. */
 function renderCommandRow(
   ctx: SettingsTabContext,
   setting: Setting,
@@ -209,7 +206,6 @@ interface SubmenuRowContext {
   isPlainItemDragging(): boolean;
 }
 
-/** A submenu parent: its own controls plus a nested, droppable child list. */
 function renderSubmenuRow(
   ctx: SettingsTabContext,
   setting: Setting,
@@ -309,7 +305,6 @@ function renderSubmenuRow(
   });
 }
 
-/** The submenu list a cross-list drag started from or landed in. */
 function submenuOf(evt: Sortable.SortableEvent, commands: Command[]) {
   const parentId = evt.target.parentElement?.dataset?.["id"];
   if (!parentId) {

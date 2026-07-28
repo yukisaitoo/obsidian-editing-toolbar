@@ -3,9 +3,7 @@ import Pickr from "@simonwep/pickr";
 import { strings } from "src/translations/helper";
 
 export interface ColorPickrOptions {
-  /** Element the swatch button replaces. */
   el: HTMLElement;
-  /** Element the picker panel is appended to. */
   container: HTMLElement;
   swatches: string[];
   opacity: boolean;

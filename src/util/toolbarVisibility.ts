@@ -3,8 +3,6 @@ import { closeMoreOverflowPopovers } from "src/toolbar/editingToolbar";
 export const setMenuVisibility = (cMenuVisibility: boolean) => {
   const activeDocument = activeWindow.document;
 
-  // The » popover is a sibling of the bar, so hiding the bar alone would leave
-  // it floating over the note.
   if (!cMenuVisibility) closeMoreOverflowPopovers(activeDocument);
 
   const toolbarStyles = ["top", "following"];

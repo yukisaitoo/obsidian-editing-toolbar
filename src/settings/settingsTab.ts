@@ -13,8 +13,7 @@ import { strings } from "src/translations/helper";
 
 const DELETE_CONFIRM_TIMEOUT = 3500;
 
-// Waiting a tick lets a suggester/modal finish writing its change before the
-// toolbar is rebuilt from settings.
+// Lets a suggester/modal finish writing before the toolbar rebuilds.
 const REBUILD_DELAY = 100;
 
 type TabId = "general" | "appearance" | "commands" | "importexport";
@@ -26,21 +25,14 @@ const SETTING_TABS: { id: TabId; name: string; icon: string }[] = [
   { id: "importexport", name: strings.importExport, icon: "lucide-import" },
 ];
 
-/**
- * What a tab renderer is allowed to do: read the plugin, re-render the settings
- * pane, rebuild the live toolbar, and create widgets whose lifetime the shell
- * manages.
- */
 export interface SettingsTabContext {
   app: App;
   plugin: EditingToolbarPlugin;
-  /** Re-render the whole settings pane. */
   refresh(): void;
-  /** Rebuild the live toolbars from the current settings. */
   rebuildToolbar(): void;
-  /** Create a colour picker that the shell destroys on the next render. */
+  // Destroyed by the shell on the next render.
   createPickr(options: ColorPickrOptions): Pickr;
-  /** A delete button that arms on first click and acts on the second. */
+  // Arms on first click, acts on the second.
   createDeleteButton(
     button: ButtonComponent,
     onDelete: () => Promise<void>,

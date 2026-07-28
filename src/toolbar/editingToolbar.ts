@@ -3,6 +3,7 @@ import {
   ButtonComponent,
   Command,
   Editor,
+  EditorCoords,
   ItemView,
   Menu,
   MenuItem,
@@ -33,30 +34,25 @@ let activeDocument: Document;
 
 const TOOLTIP_DELAY = 250;
 
-// Open/closed state for the » overflow popover. It lives in a class (CSS hides
-// the bar with display:none when the class is absent) rather than in an inline
-// visibility, because a hovered submenu flyout inside the popover sets
-// `visibility: visible` on itself and would survive a hidden parent — which is
-// why closing used to leave commands on screen until the pointer moved away.
+// A class, not inline visibility: a hovered flyout inside the popover sets its
+// own `visibility: visible` and would survive a hidden parent.
 const MORE_POPOVER_OPEN_CLASS = "editing-toolbar-more-open";
 
-// Popups that live outside the popover's subtree but logically belong to it:
-// dropdown menus, the pickr colour picker, modals and suggesters all render at
-// the document root, so a click inside them must not count as "clicked away".
+// Menus, pickers, modals and suggesters render at the document root but belong
+// to the popover, so a click inside them must not count as "clicked away".
 const DETACHED_POPUP_SELECTOR =
   ".menu, .pcr-app, .modal-container, .suggestion-container";
 
-// Close callback of each currently open » popover, keyed by the popover bar, so
-// closing from outside its » button also takes the dismissal listeners back off
-// the document instead of just dropping the open class.
+// Close callback of each currently OPEN » popover, keyed by the popover bar.
+// Registered on open, not on create: the bar is reused across rebuilds while the
+// » button is recreated, so a create-time entry would outlive its own listeners.
 const openMorePopoverClosers = new Map<HTMLElement, () => void>();
 
-// Re-anchor callback of each » popover, keyed by the popover bar. The popover is
-// placed by measurement, so a pane resize while it is open has to re-run it.
+// Re-anchor callback of each currently OPEN » popover, keyed by the popover bar.
+// Placed by measurement, so a pane resize while it is open has to re-run it.
 const morePopoverRepositioners = new Map<HTMLElement, () => void>();
 
-// Only the view types ViewUtils allows can reach here — anything else bails out
-// of editingToolbarPopover before a bar is built.
+// Only ViewUtils-allowed view types reach here; others bail out earlier.
 const viewTypeToSelectorMap: { [key: string]: string } = {
   markdown: ".markdown-source-view",
   canvas: ".canvas-wrapper",
@@ -69,8 +65,7 @@ function getRootSplits(app: App): WorkspaceParentExt[] {
     app.workspace.rootSplit as WorkspaceParent as WorkspaceParentExt,
   );
 
-  // @ts-expect-error floatingSplit is undocumented
-  const floatingSplit = app.workspace.floatingSplit as WorkspaceParentExt;
+  const floatingSplit = app.workspace.floatingSplit;
   floatingSplit?.children.forEach((child: WorkspaceItemExt) => {
     if (child instanceof WorkspaceWindow) {
       rootSplits.push(child as unknown as WorkspaceParentExt);
@@ -165,7 +160,6 @@ function setHilite(keys: any, how: string) {
 }
 
 function getHotkey(app: App, cmdId: string, highlight = false) {
-  // @ts-expect-error untyped API access
   const arr = app.commands.findCommand(cmdId);
   const hi = highlight ? "*" : "";
   if (arr) {
@@ -175,7 +169,6 @@ function getHotkey(app: App, cmdId: string, highlight = false) {
           [getNestedObject(arr.hotkeys, [0, "key"])],
         ]
       : undefined;
-    // @ts-expect-error untyped API access
     const ck = app.hotkeyManager.customKeys[arr.id];
     const hotkeys = ck
       ? [
@@ -187,20 +180,17 @@ function getHotkey(app: App, cmdId: string, highlight = false) {
   } else return "–";
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any -- uses undocumented editor coord methods (cursorCoords/coordsAtPos)
-const getCoords = (editor: any) => {
+const getCoords = (editor: Editor) => {
   const cursorFrom = editor.getCursor("head");
   if (editor.getCursor("head").ch !== editor.getCursor("from").ch)
     cursorFrom.ch = Math.max(0, cursorFrom.ch - 1);
 
-  let coords: { top: number; left: number; bottom: number } | undefined;
-  if (editor.cursorCoords) coords = editor.cursorCoords(true, "window");
-  else if (editor.coordsAtPos) {
-    const offset = editor.posToOffset(cursorFrom);
-    coords = editor.cm.coordsAtPos?.(offset) ?? editor.coordsAtPos(offset);
-  } else return;
+  if (editor.cursorCoords) return editor.cursorCoords(true, "window");
+  if (!editor.coordsAtPos) return undefined;
 
-  return coords;
+  const offset = editor.posToOffset(cursorFrom);
+  return (editor.cm.coordsAtPos?.(offset) ??
+    editor.coordsAtPos(offset)) as EditorCoords;
 };
 
 export function checkHtml(htmlStr: string) {
@@ -242,13 +232,11 @@ function applyButtonIcon(btn: ButtonComponent, icon?: string) {
   }
 }
 
-// Close any open » popover. The popover is a sibling of the bar, not a child,
-// so hiding the bar (reading mode, a different view, the visibility toggle)
-// would otherwise leave it floating over the note.
+// The » popover is a sibling of the bar, not a child, so hiding the bar (reading
+// mode, a different view, the visibility toggle) would leave it over the note.
 export function closeMoreOverflowPopovers(root?: ParentNode): void {
   Array.from(openMorePopoverClosers.values()).forEach((close) => close());
-  // Defensive: a bar rebuilt while open leaves the class on a popover whose
-  // closer is already gone.
+  // A bar rebuilt while open leaves the class on a popover whose closer is gone.
   const scope = root ?? activeWindow.document;
   scope
     .querySelectorAll(`.editingToolbarPopoverBar.${MORE_POPOVER_OPEN_CLASS}`)
@@ -275,17 +263,12 @@ function syncToolbarVisibilityAfterAction(
   }
 }
 
-// Reflow the toolbar to the current pane width by shuffling buttons between the
-// bar and the "more" (») popover — moving overflow out when it's too narrow and
-// pulling buttons back in when there's room again. This is a pure DOM move (no
-// teardown/rebuild), so it's cheap enough to run live on every resize frame.
+// Shuffle buttons between the bar and the » popover to fit the pane. A pure DOM
+// move, cheap enough to run on every resize frame.
 //
-// It measures real laid-out geometry rather than estimating from icon-size /
-// padding constants, so it stays correct for any button count and any CSS.
-// Available room = the pane's content width (the bar's containing block), NOT
-// the bar's own box, which can shrink-to-fit its content and never report
-// overflow. Needed width = the rendered span of the visible buttons, which
-// captures the real gaps/padding the browser applied.
+// Measures laid-out geometry rather than estimating from icon-size constants.
+// Available room is the PANE's width, not the bar's — the bar shrink-to-fits its
+// content and so never reports overflow.
 function reflowToolbarOverflow(
   app: App,
   editingToolbar: HTMLElement,
@@ -307,8 +290,7 @@ function reflowToolbarOverflow(
   }
   if (available <= 0) return; // not laid out yet — a later resize tick retries
 
-  // The » button is kept as the last child of the bar and toggled via display,
-  // so a hidden one contributes no width. Everything else is a real button.
+  // » is the last child and toggled via display, so a hidden one adds no width.
   const moreOf = (): HTMLElement | null =>
     editingToolbar.querySelector<HTMLElement>(":scope > .more-menu");
   const visibleSpan = (): number => {
@@ -331,9 +313,8 @@ function reflowToolbarOverflow(
   const more = moreOf() ?? createMoreMenu(app, editingToolbar, popoverBar);
   if (!more) return; // view not allowed / no host
 
-  // Expansion: pull buttons back from the popover while they still fit. The »
-  // only costs width while the popover keeps at least one item, so drop it from
-  // the measurement when the button we're testing would empty the popover.
+  // Expansion: pull buttons back while they fit. » only costs width while the
+  // popover keeps an item, so drop it when the candidate would empty it.
   while (popoverBar.firstElementChild) {
     more.style.display = popoverBar.childElementCount === 1 ? "none" : "";
     const candidate = popoverBar.firstElementChild as HTMLElement;
@@ -361,18 +342,15 @@ function reflowToolbarOverflow(
 
   const hasOverflow = popoverBar.firstElementChild !== null;
   more.style.display = hasOverflow ? "" : "none";
-  // The » button just went away (the pane grew) — an open popover would be left
-  // on screen with no way to dismiss it from the bar.
+  // » just went away (the pane grew); an open popover would have no dismiss button.
   if (!hasOverflow) {
     openMorePopoverClosers.get(popoverBar)?.();
     popoverBar.removeClass(MORE_POPOVER_OPEN_CLASS);
   }
 }
 
-// Keep the top toolbar reflowing as its pane resizes, without rebuilding it.
-// Observe the PANE (parent), not the bar — moving buttons changes the bar's
-// size, so observing the bar would feed back into itself; the pane's width is
-// unaffected by our moves, so there's no observer loop.
+// Observe the PANE, not the bar: moving buttons resizes the bar, so observing it
+// would feed back into itself.
 export function observeToolbarResize(
   plugin: EditingToolbarPlugin,
   app: App,
@@ -395,8 +373,7 @@ export function observeToolbarResize(
       return;
     }
     reflowToolbarOverflow(app, editingToolbar, popoverBar);
-    // The popover is placed by measurement, so a resize while it is open (which
-    // moves the » button it hangs off) leaves it stranded until re-anchored.
+    // Placed by measurement, so a resize moves the » it hangs off.
     if (popoverBar.hasClass(MORE_POPOVER_OPEN_CLASS)) {
       morePopoverRepositioners.get(popoverBar)?.();
     }
@@ -415,9 +392,8 @@ function createTableCell(
 
   const container =
     root || (getExistingToolbar(app, plugin) as HTMLElement | null);
-  const tab = container?.querySelector("#" + el);
+  const tab = container?.querySelector<HTMLTableElement>("#" + el);
   if (tab) {
-    // @ts-expect-error untyped API access
     const rows = tab.rows;
     const rlen = rows.length;
     for (let i = 1; i < rlen; i++) {
@@ -497,6 +473,23 @@ function setColorHex(color: string) {
   return color;
 }
 
+// Viewport-space box that anything hanging off a toolbar has to stay inside:
+// the bar's host pane, capped at the window. The pane is a hard boundary, not a
+// preference — Obsidian gives `.workspace-leaf` `contain: strict` and
+// `overflow: hidden`, so for the top bar anything placed outside the pane is
+// simply clipped away, and clamping to the window alone would "place" popovers
+// where they cannot be seen.
+function toolbarHostBounds(bar: HTMLElement | null, margin: number) {
+  const win = bar?.ownerDocument.defaultView ?? window;
+  const host = bar?.parentElement?.getBoundingClientRect();
+  return {
+    left: Math.max(host?.left ?? 0, 0) + margin,
+    right: Math.min(host?.right ?? win.innerWidth, win.innerWidth) - margin,
+    top: Math.max(host?.top ?? 0, 0) + margin,
+    bottom: Math.min(host?.bottom ?? win.innerHeight, win.innerHeight) - margin,
+  };
+}
+
 function createMoreMenu(
   app: App,
   selector: HTMLElement,
@@ -505,56 +498,63 @@ function createMoreMenu(
   const view = app.workspace.getActiveViewOfType(ItemView);
   if (!view || !ViewUtils.isAllowedViewType(view)) return;
 
-  // Placed by measurement off the » button rather than by CSS offsets. The bar
-  // is inserted into whichever element the view type maps to, and none of those
-  // is guaranteed to be a positioned ancestor — a CSS `right: 0` there means
-  // "the right edge of whatever happens to be positioned above it".
+  // Measured off the » button rather than positioned by CSS: the bar's host
+  // varies by view type, so a CSS offset here would resolve against whichever
+  // ancestor happens to supply the containing block — which differs per style.
   const positionMorePopover = (
     anchorEl: HTMLElement,
     popoverEl: HTMLElement,
   ) => {
-    const ownerWindow = popoverEl.ownerDocument.defaultView ?? window;
-    const anchorRect = anchorEl.getBoundingClientRect();
-    const popoverWidth = Math.max(popoverEl.offsetWidth, popoverEl.scrollWidth);
-    const popoverHeight = Math.max(
-      popoverEl.offsetHeight,
-      popoverEl.scrollHeight,
-    );
     const horizontalPadding = 12;
     const verticalGap = 8;
-    const maxLeft = Math.max(
-      horizontalPadding,
-      ownerWindow.innerWidth - popoverWidth - horizontalPadding,
-    );
+
+    // Measure from a known origin. The bar is `width: fit-content`, so a left
+    // offset left over from the previous open eats into the width available to
+    // it — measuring over that reads back an already-collapsed box and places
+    // the next open further out again, until it is off the pane entirely.
+    popoverEl.style.left = "0px";
+    popoverEl.style.top = "0px";
+
+    // One rect answers both questions. Its position: `position: fixed` does not
+    // mean "relative to the viewport" here — the top bar lives inside
+    // `.workspace-leaf`, whose `contain: strict` makes it the containing block
+    // for its own fixed descendants — so rather than guess which ancestor
+    // supplies it, read where offset 0,0 lands and convert against that below.
+    // Its size: the border box, which is what the placement wants. NOT
+    // scrollWidth/scrollHeight — the popover is `overflow: visible` and every
+    // submenu button hangs a `visibility: hidden` (so still laid out) `.subitem`
+    // flyout off itself, and those count as layout overflow. Measuring them
+    // reported a few hundred phantom pixels of width, and since the popover is
+    // right-aligned to the » button, every one of them shoved it further left.
+    const origin = popoverEl.getBoundingClientRect();
+    const popoverWidth = origin.width;
+    const popoverHeight = origin.height;
+
+    const anchorRect = anchorEl.getBoundingClientRect();
+    const bounds = toolbarHostBounds(popoverEl, horizontalPadding);
+    const maxLeft = Math.max(bounds.left, bounds.right - popoverWidth);
 
     let left = anchorRect.right - popoverWidth;
     if (popoverWidth <= 0) {
       left = anchorRect.left;
     }
-    left = Math.min(Math.max(left, horizontalPadding), maxLeft);
+    left = Math.min(Math.max(left, bounds.left), maxLeft);
 
     let top = anchorRect.bottom + verticalGap;
-    if (
-      popoverHeight > 0 &&
-      top + popoverHeight > ownerWindow.innerHeight - horizontalPadding
-    ) {
-      top = Math.max(
-        horizontalPadding,
-        anchorRect.top - popoverHeight - verticalGap,
-      );
+    if (popoverHeight > 0 && top + popoverHeight > bounds.bottom) {
+      top = Math.max(bounds.top, anchorRect.top - popoverHeight - verticalGap);
     }
 
-    popoverEl.style.left = `${left}px`;
-    popoverEl.style.top = `${top}px`;
+    popoverEl.style.left = `${left - origin.left}px`;
+    popoverEl.style.top = `${top - origin.top}px`;
   };
 
   const cMoreMenu = selector.createEl("span");
   cMoreMenu.addClass("more-menu");
   const moreButton = new ButtonComponent(cMoreMenu);
 
-  // Dismissal listeners only exist while the popover is open, so there is
-  // nothing to unregister when the toolbar is torn down: closing (which a stray
-  // click on a detached popover still does) takes them off the document.
+  // Dismissal listeners exist only while the popover is open, so teardown has
+  // nothing to unregister — closing always takes them back off the document.
   const ownerDocument = cMoreMenu.ownerDocument;
 
   const onPointerDown = (evt: PointerEvent) => {
@@ -579,15 +579,17 @@ function createMoreMenu(
     ownerDocument.removeEventListener("pointerdown", onPointerDown, true);
     ownerDocument.removeEventListener("keydown", onKeyDown, true);
     // A rebuilt bar can hand a second » button the same popover; only retract
-    // the entry if it is still ours.
+    // the entries if they are still ours.
     if (openMorePopoverClosers.get(moreContainer) === close) {
       openMorePopoverClosers.delete(moreContainer);
+    }
+    if (morePopoverRepositioners.get(moreContainer) === reposition) {
+      morePopoverRepositioners.delete(moreContainer);
     }
   }
 
   const reposition = () =>
     positionMorePopover(moreButton.buttonEl, moreContainer);
-  morePopoverRepositioners.set(moreContainer, reposition);
 
   const open = () => {
     moreContainer.addClass(MORE_POPOVER_OPEN_CLASS);
@@ -597,6 +599,10 @@ function createMoreMenu(
     ownerDocument.addEventListener("pointerdown", onPointerDown, true);
     ownerDocument.addEventListener("keydown", onKeyDown, true);
     openMorePopoverClosers.set(moreContainer, close);
+    // Registered on open, not on create: only an open popover is ever
+    // re-anchored, so a create-time entry would just accumulate one detached
+    // popover bar per toolbar rebuild.
+    morePopoverRepositioners.set(moreContainer, reposition);
   };
 
   moreButton
@@ -757,7 +763,6 @@ function positionToolbar(toolbar: HTMLElement, editor: Editor) {
     toolbar.ownerDocument.defaultView?.innerWidth ?? window.innerWidth;
 
   const from = editor.getCursor("from");
-  //@ts-expect-error untyped API access
   const coords = editor.coordsAtPos(from);
 
   const sideDockWidth =
@@ -798,7 +803,6 @@ function calculateTopPosition(
 ) {
   const from = editor.getCursor("from");
   const to = editor.getCursor("to");
-  //@ts-expect-error untyped API access
   const coordsTO = editor.coordsAtPos(to);
 
   const isSingleLineSelection = from.line === to.line;
@@ -830,9 +834,8 @@ function calculateTopPosition(
 const FLYOUT_SHIFT_VAR = "--flyout-shift";
 const FLYOUT_EDGE_MARGIN = 6;
 
-// Flyouts hang off their own button (see the position:relative rule in
-// styles.css), so one near a pane edge can overhang it. Measure where the panel
-// lands and hand the CSS a horizontal offset that pulls it back inside.
+// Flyouts hang off their own button, so one near a pane edge can overhang it.
+// Hand the CSS a horizontal offset that pulls it back inside.
 function clampFlyoutToPane(button: HTMLElement): void {
   const flyout = button.querySelector<HTMLElement>(":scope > .subitem");
   if (!flyout) return;
@@ -845,33 +848,24 @@ function clampFlyoutToPane(button: HTMLElement): void {
   // Measure unshifted: nothing here transitions, so this reads back immediately.
   button.style.removeProperty(FLYOUT_SHIFT_VAR);
 
-  // The bar's parent is the pane (top / overflow popover) or the workspace root
-  // (following), and the more-popover can be positioned as fixed — so cap the
-  // usable span at the window too.
   const bar = button.closest<HTMLElement>(
     "#editingToolbarModalBar, #editingToolbarPopoverBar",
   );
-  const host = bar?.parentElement?.getBoundingClientRect();
-  const win = button.ownerDocument.defaultView ?? window;
-  const min = Math.max(host?.left ?? 0, 0) + FLYOUT_EDGE_MARGIN;
-  const max =
-    Math.min(host?.right ?? win.innerWidth, win.innerWidth) -
-    FLYOUT_EDGE_MARGIN;
+  const { left: min, right: max } = toolbarHostBounds(bar, FLYOUT_EDGE_MARGIN);
   if (max <= min) return; // pane too narrow to clamp into — leave it centred
 
   const rect = panel.getBoundingClientRect();
   let shift = 0;
   if (rect.right > max) shift = max - rect.right;
-  // Left edge wins if the panel is wider than the pane: overhanging the right
-  // is recoverable by scrolling the popup into view, overhanging the left isn't.
+  // Left edge wins when the panel is wider than the pane — a right overhang can
+  // be scrolled into view, a left one can't.
   if (rect.left + shift < min) shift = min - rect.left;
 
   if (shift) button.style.setProperty(FLYOUT_SHIFT_VAR, `${shift}px`);
 }
 
-// Hover is what opens a flyout, so re-measure on every enter: the button moves
-// as the pane resizes, as reflow shuffles buttons between the bar and the »
-// popover, and (following style) as the bar tracks the caret.
+// Re-measure on every enter: the button moves with pane resizes, overflow
+// reflow, and (following style) the caret.
 function attachFlyoutClamp(button: HTMLElement): void {
   button.addEventListener("mouseenter", () => clampFlyoutToPane(button));
 }
@@ -884,8 +878,7 @@ interface ColorPickerButtonConfig {
   customColorTooltip: string;
 }
 
-// Builds a colour-swatch submenu button with a custom-colour shortcut.
-// Font- and background-colour share it, differing only via `config`.
+// Shared by font- and background-colour, which differ only via `config`.
 function createColorPickerButton(
   app: App,
   plugin: EditingToolbarPlugin,
@@ -963,7 +956,6 @@ export function editingToolbarPopover(
 
   activeDocument = targetDocument;
 
-  // If no explicit style is provided, render toolbars for all enabled styles.
   if (!style) {
     POSITION_STYLES.filter((styleKey) =>
       plugin.isToolbarStyleEnabled(styleKey),
@@ -1054,9 +1046,8 @@ export function editingToolbarPopover(
           ? currentleaf?.querySelector<HTMLElement>(".view-content")
           : null;
 
-      // Canvas mounts the bar as a sibling before .view-content; everything
-      // else mounts it inside its own target. Either way the popover follows
-      // immediately after the bar.
+      // Canvas mounts the bar as a sibling before .view-content; everything else
+      // mounts it inside its own target.
       if (canvasToolbarAnchor) {
         canvasToolbarAnchor.insertAdjacentElement("beforebegin", editingToolbar);
       } else {
@@ -1104,8 +1095,7 @@ export function editingToolbarPopover(
     currentCommands.forEach((item, index) => {
       let tip: string | undefined;
       if ("SubmenuCommands" in item) {
-        // Build every button into the main bar; overflow is resolved by
-        // measurement after the bar is laid out (see reflowToolbarOverflow).
+        // All buttons go in the main bar; reflowToolbarOverflow sorts out overflow.
         const parentBtn = new ButtonComponent(editingToolbar);
 
         parentBtn.setClass("editingToolbarCommandsubItem" + index);
@@ -1193,9 +1183,6 @@ export function editingToolbarPopover(
                   subBtn.buttonEl.setAttribute("aria-label-position", "top");
               }
               if (subitem.id === "editingToolbar-Divider-Line") {
-                // The tooltip set above already resolves to the plain label for
-                // dividers (getHotkey returns "–" for non-commands), so no extra
-                // aria-label override is needed here.
                 subBtn.setClass("editingToolbar-Divider-Line");
               }
               applyButtonIcon(subBtn, subitem.icon);
@@ -1267,8 +1254,7 @@ export function editingToolbarPopover(
       }
     });
 
-    // Initial fit (synchronous, no flash), then keep it reflowing live as the
-    // pane resizes — top style only; the following/menu bars wrap instead.
+    // Top style only; the following/menu bars wrap instead of overflowing.
     reflowToolbarOverflow(app, editingToolbar, editingToolbarPopoverBar);
     if (effectiveStyle === "top") {
       observeToolbarResize(plugin, app, editingToolbar, editingToolbarPopoverBar);
@@ -1285,8 +1271,7 @@ export function editingToolbarPopover(
     targetDocument,
   );
   if (existingToolbar && effectiveStyle !== "top") {
-    // The following bar stays hidden until a selection reveals it; clearing
-    // display lets visibility take over from an earlier display:none.
+    // Clearing display lets visibility take over from an earlier display:none.
     existingToolbar.style.visibility = "hidden";
     existingToolbar.style.display = "";
 

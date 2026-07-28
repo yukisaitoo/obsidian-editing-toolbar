@@ -1,6 +1,5 @@
 import type { Command } from "obsidian";
 
-/** A prefix/suffix pair applied around the selection, plus where to leave the cursor. */
 export type CommandPlot = {
   char: number;
   line: number;
@@ -9,7 +8,6 @@ export type CommandPlot = {
   islinehead: boolean;
 };
 
-/** Formatting commands that work by wrapping the selection in fixed markup. */
 export const WRAP_COMMANDS: Record<string, CommandPlot> = {
   hrline: {
     char: 5,
@@ -76,7 +74,6 @@ export const WRAP_COMMANDS: Record<string, CommandPlot> = {
   },
 };
 
-/** Display names for the WRAP_COMMANDS keys, which are ids and not readable on their own. */
 export const WRAP_COMMAND_NAMES: Record<string, string> = {
   hrline: "Insert horizontal rule",
   justify: "Justify text",
@@ -89,10 +86,8 @@ export const WRAP_COMMAND_NAMES: Record<string, string> = {
   codeblock: "Toggle code block",
 };
 
-/**
- * Obsidian's own editor commands that the toolbar re-registers under its own ids,
- * so they can carry a toolbar icon and a cursor-offset fixup.
- */
+// Re-registered under the toolbar's own ids so they can carry an icon and a
+// cursor-offset fixup.
 export const CORE_EDITOR_COMMANDS: Command[] = [
   {
     id: "editor:insert-embed",

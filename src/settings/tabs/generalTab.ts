@@ -83,7 +83,7 @@ export function renderGeneralTab(
     });
 }
 
-/** Five colour pickers backed by the `custom_bg*` / `custom_fc*` settings keys. */
+// Backed by the `custom_bg*` / `custom_fc*` settings keys.
 function renderSwatchRow(
   ctx: SettingsTabContext,
   containerEl: HTMLElement,
