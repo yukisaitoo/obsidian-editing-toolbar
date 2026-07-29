@@ -165,7 +165,6 @@ export class ChangeCmdname extends Modal {
   item: Command;
   isSubmenuItem: boolean;
   currentEditingConfig: ToolbarStyleKey;
-  submitEnterCallback!: (this: HTMLInputElement, ev: KeyboardEvent) => unknown;
   constructor(
     app: App,
     plugin: EditingToolbarPlugin,
@@ -181,55 +180,65 @@ export class ChangeCmdname extends Modal {
     this.containerEl.addClass("editingToolbar-Modal");
     this.containerEl.addClass("changename");
   }
+  private async commitName(value: string): Promise<void> {
+    const currentCommands = this.plugin.getCurrentCommands(
+      this.currentEditingConfig,
+    );
+
+    const location = findCommandLocation(
+      this.item,
+      this.isSubmenuItem,
+      currentCommands,
+    );
+    this.item.name = value;
+
+    if (!this.isSubmenuItem) {
+      if (location.index === -1) {
+        currentCommands.push(this.item);
+      } else {
+        currentCommands[location.index].name = value;
+      }
+    } else {
+      const submenu = currentCommands[location.index]?.SubmenuCommands;
+      if (location.subIndex === -1) {
+        submenu?.push(this.item);
+      } else if (submenu) {
+        submenu[location.subIndex].name = value;
+      }
+    }
+
+    this.plugin.updateCurrentCommands(
+      currentCommands,
+      this.currentEditingConfig,
+    );
+    await this.plugin.saveSettings();
+  }
+
   onOpen() {
     const { contentEl } = this;
     contentEl.createEl("b", { text: strings.pleaseEnterNewName });
+
+    const debouncedCommit = debounce(
+      (value: string) => void this.commitName(value),
+      100,
+      true,
+    );
 
     const textComponent = new TextComponent(contentEl);
     textComponent.inputEl.classList.add("InputPromptInputEl");
     textComponent
       .setPlaceholder("")
       .setValue(this.item.name ?? "")
-      .onChange(
-        debounce(
-          async (value) => {
-            const currentCommands = this.plugin.getCurrentCommands(
-              this.currentEditingConfig,
-            );
+      .onChange(debouncedCommit);
 
-            const location = findCommandLocation(
-              this.item,
-              this.isSubmenuItem,
-              currentCommands,
-            );
-            this.item.name = value;
-
-            if (!this.isSubmenuItem) {
-              if (location.index === -1) {
-                currentCommands.push(this.item);
-              } else {
-                currentCommands[location.index].name = value;
-              }
-            } else {
-              const submenu = currentCommands[location.index]?.SubmenuCommands;
-              if (location.subIndex === -1) {
-                submenu?.push(this.item);
-              } else if (submenu) {
-                submenu[location.subIndex].name = value;
-              }
-            }
-
-            this.plugin.updateCurrentCommands(
-              currentCommands,
-              this.currentEditingConfig,
-            );
-            await this.plugin.saveSettings();
-          },
-          100,
-          true,
-        ),
-      )
-      .inputEl.addEventListener("keydown", this.submitEnterCallback);
+    textComponent.inputEl.addEventListener("keydown", async (ev) => {
+      // isComposing guards IME users, whose confirm-Enter must not close the modal.
+      if (ev.key !== "Enter" || ev.isComposing) return;
+      ev.preventDefault();
+      debouncedCommit.cancel();
+      await this.commitName(textComponent.inputEl.value);
+      this.close();
+    });
   }
   onClose() {
     const { contentEl } = this;

@@ -380,6 +380,11 @@ export default class EditingToolbarPlugin extends Plugin {
     closeMoreOverflowPopovers();
 
     for (const style of POSITION_STYLES) {
+      if (style === "following") {
+        updateFollowingBar(this.app, this, null);
+        continue;
+      }
+
       const state = resolveToolbarState(this, style);
       const bar =
         state === "visible"

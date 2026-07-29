@@ -5,9 +5,9 @@ import {
   ChooseFromIconList,
   CommandPicker,
 } from "src/modals/suggesterModals";
-import type { SettingsTabContext } from "src/settings/settingsTab";
 import type { ToolbarStyleKey } from "src/settings/settingsData";
 import { POSITION_STYLES, STYLE_LABELS } from "src/settings/settingsData";
+import type { SettingsTabContext } from "src/settings/settingsTab";
 import { checkHtml } from "src/toolbar/toolbarDom";
 import { strings, t } from "src/translations/helper";
 import { GenNonDuplicateID } from "src/util/util";
@@ -89,7 +89,9 @@ function renderCommandList(
   style: ToolbarStyleKey,
 ): void {
   const commands = ctx.plugin.getCurrentCommands(style);
-  const listEl = containerEl.createEl("div", { cls: TOP_LEVEL_CONTAINER_CLASS });
+  const listEl = containerEl.createEl("div", {
+    cls: TOP_LEVEL_CONTAINER_CLASS,
+  });
 
   // Submenus take only plain commands; the `put` checks below read this.
   let draggedItemClass = "";
@@ -159,12 +161,15 @@ function renderCommandRow(
     setting.setClass(DIVIDER_COMMAND_ID);
   }
 
-  setting
-    .setClass("editingToolbarCommandItem")
-    .setName(t(command.name))
-    .addButton((renameButton) =>
+  setting.setClass("editingToolbarCommandItem").setName(t(command.name));
+
+  if (command.id === DIVIDER_COMMAND_ID) {
+    setting.addButton((renameButton) =>
       configureRenameButton(ctx, renameButton, command, false, style),
-    )
+    );
+  }
+
+  setting
     .addButton((addSubmenu) => {
       addSubmenu
         .setIcon("editingToolbarSub")
@@ -236,7 +241,9 @@ function renderSubmenuRow(
           ctx.rebuildToolbar();
           new Notice(
             `${strings.menuTypeChanged}: ${
-              value === "dropdown" ? strings.dropdownMenu : strings.buttonSubmenu
+              value === "dropdown"
+                ? strings.dropdownMenu
+                : strings.buttonSubmenu
             }`,
           );
         });
@@ -285,23 +292,27 @@ function renderSubmenuRow(
   });
 
   command.SubmenuCommands!.forEach((subCommand) => {
-    new Setting(subListEl)
+    const subSetting = new Setting(subListEl)
       .setClass("editingToolbarCommandItem")
       .addButton((iconButton) =>
         configureIconButton(ctx, iconButton, subCommand, true, style),
       )
-      .setName(t(subCommand.name))
-      .addButton((renameButton) =>
+      .setName(t(subCommand.name));
+
+    if (subCommand.id === DIVIDER_COMMAND_ID) {
+      subSetting.addButton((renameButton) =>
         configureRenameButton(ctx, renameButton, subCommand, true, style),
-      )
-      .addButton((deleteButton) =>
-        ctx.createDeleteButton(deleteButton, async () => {
-          command.SubmenuCommands!.remove(subCommand);
-          await ctx.plugin.saveSettings();
-          ctx.refresh();
-          ctx.rebuildToolbar();
-        }),
       );
+    }
+
+    subSetting.addButton((deleteButton) =>
+      ctx.createDeleteButton(deleteButton, async () => {
+        command.SubmenuCommands!.remove(subCommand);
+        await ctx.plugin.saveSettings();
+        ctx.refresh();
+        ctx.rebuildToolbar();
+      }),
+    );
   });
 }
 

@@ -14,7 +14,8 @@ export function updateFollowingBar(
   plugin: EditingToolbarPlugin,
   editor: Editor | null,
 ): void {
-  const doc = resolveToolbarDocument(app, editor);
+  const target = editor ?? plugin.commandsManager.getActiveEditor();
+  const doc = resolveToolbarDocument(app, target);
   const state = resolveToolbarState(plugin, "following");
 
   const bar =
@@ -24,8 +25,8 @@ export function updateFollowingBar(
   if (!bar) return;
 
   applyToolbarState(bar, state);
-  if (state === "visible" && editor) {
-    positionFollowingBar(bar, editor, doc);
+  if (state === "visible" && target) {
+    positionFollowingBar(bar, target, doc);
   }
 }
 

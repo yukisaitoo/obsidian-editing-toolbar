@@ -14,6 +14,7 @@ import {
 } from "src/toolbar/morePopover";
 import { renderToolbarCommands } from "src/toolbar/toolbarCommands";
 import { resolveToolbarDocument, windowOf } from "src/toolbar/toolbarHost";
+import { applyToolbarState } from "src/toolbar/toolbarVisibility";
 import { ViewUtils } from "src/util/viewUtils";
 
 const BAR_SELECTOR = ".editingToolbarModalBar";
@@ -152,6 +153,13 @@ function mountBars(
   const bar = createBarEl(doc, "editingToolbarModalBar", style);
   bar.setAttribute("id", "editingToolbarModalBar");
   bar.addClass(style === "top" ? "top" : "editingToolbarFlex");
+
+  // A following bar is absolutely positioned but has no offsets until
+  // positionFollowingBar runs, so mounting it visible parks it at its CSS
+  // origin — the pane's top-left corner. Start hidden and let the caller's
+  // applyToolbarState reveal it once it has been anchored. The top bar is in
+  // normal flow and needs no such deferral.
+  if (style !== "top") applyToolbarState(bar, "hidden");
 
   const popoverBar = createBarEl(doc, "editingToolbarPopoverBar", style);
   popoverBar.addClass("editingToolbarpopover");
