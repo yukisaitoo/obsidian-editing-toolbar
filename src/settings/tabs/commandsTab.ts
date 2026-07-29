@@ -19,13 +19,6 @@ import {
 
 const TOP_LEVEL_CONTAINER_CLASS = "editingToolbarSettingsTabsContainer";
 
-// Submenus generated at render time (the colour grids), so their children are
-// not editable here.
-const GENERATED_SUBMENU_IDS = [
-  "editingToolbar-plugin:change-font-color",
-  "editingToolbar-plugin:change-background-color",
-];
-
 const SHARED_SORTABLE_OPTIONS: Sortable.Options = {
   draggable: ".setting-item",
   ghostClass: "sortable-ghost",
@@ -258,8 +251,6 @@ function renderSubmenuRow(
         removeCommand(ctx, commands, command, style),
       ),
     );
-
-  if (GENERATED_SUBMENU_IDS.includes(command.id)) return;
 
   const subListEl = setting.settingEl.createEl("div", {
     cls: "editingToolbarSettingsTabsContainer_sub",

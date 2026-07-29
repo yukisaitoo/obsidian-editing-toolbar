@@ -112,7 +112,6 @@ export interface EditingToolbarSettings {
   enableTopToolbar: boolean;
   enableFollowingToolbar: boolean;
   cMenuVisibility: boolean;
-  cMenuNumRows: number;
   custom_bg1: string;
   custom_bg2: string;
   custom_bg3: string;
@@ -142,7 +141,6 @@ export const DEFAULT_SETTINGS: EditingToolbarSettings = {
   enableTopToolbar: true,
   enableFollowingToolbar: false,
   cMenuVisibility: true,
-  cMenuNumRows: 12,
   cMenuFontColor: "#2DC26B",
   cMenuBackgroundColor: "#d3f8b6",
   custom_bg1: "#FFB78B8C",
