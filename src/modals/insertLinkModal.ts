@@ -27,6 +27,17 @@ import {
 import EditingToolbarPlugin from "src/plugin/main";
 import { strings } from "src/translations/helper";
 
+/** Resource paths carry a `?<mtime>` cache-buster the markdown target lacks. */
+const stripQuery = (src: string): string => src.split("?")[0];
+
+function safeDecode(value: string): string {
+  try {
+    return decodeURIComponent(value);
+  } catch {
+    return value;
+  }
+}
+
 export class InsertLinkModal extends Modal {
   private linkText: string = "";
   private linkUrl: string = "";
@@ -87,7 +98,7 @@ export class InsertLinkModal extends Modal {
       this.linkText = link.text;
       this.linkUrl = link.url;
       this.linkAlias = link.title || "";
-      this.isEmbed = false;
+      this.setEmbed(false);
       this.splitAround(text, linkSpan);
       return;
     }
@@ -123,12 +134,19 @@ export class InsertLinkModal extends Modal {
 
   private setEmbed(value: boolean): void {
     this.isEmbed = value;
-    if (!this.embedToggle) return;
-    this.embedToggle.setValue(value);
-    const sizeEl = this.contentEl.querySelector<HTMLElement>(
-      ".image-size-setting",
-    );
-    if (sizeEl) sizeEl.style.display = value ? "block" : "none";
+    if (this.embedToggle) this.embedToggle.setValue(value);
+    this.syncImageSizeRow();
+  }
+
+  /**
+   * The size row only applies to embeds. CSS owns the visible display value so
+   * the three callers cannot disagree about it; the row is a `.setting-item`,
+   * which Obsidian lays out as a flex row.
+   */
+  private syncImageSizeRow(): void {
+    this.contentEl
+      .querySelector(".image-size-setting")
+      ?.toggleClass("is-hidden", !this.isEmbed);
   }
 
   private async loadFromClipboard(): Promise<void> {
@@ -140,7 +158,7 @@ export class InsertLinkModal extends Modal {
       this.linkText = link.text;
       this.linkUrl = link.url;
       this.linkAlias = link.title || "";
-      this.isEmbed = false;
+      this.setEmbed(false);
     } else if (fallback) {
       this.linkText = this.linkText || fallback.title;
       this.linkUrl = fallback.url;
@@ -282,11 +300,7 @@ export class InsertLinkModal extends Modal {
     this.embedToggle = new ToggleComponent(embedSetting.controlEl);
     this.embedToggle.setValue(this.isEmbed).onChange((value) => {
       this.isEmbed = value;
-      const imageSizeEl = contentEl.querySelector(".image-size-setting");
-      if (imageSizeEl) {
-        (imageSizeEl as HTMLElement).style.display = value ? "flex" : "none";
-      }
-
+      this.syncImageSizeRow();
       this.updateHeader();
     });
 
@@ -342,7 +356,7 @@ export class InsertLinkModal extends Modal {
         });
     });
 
-    imageSizeSetting.settingEl.style.display = this.isEmbed ? "block" : "none";
+    this.syncImageSizeRow();
 
     new Setting(contentEl)
       .setName(strings.insertNewLine)
@@ -378,8 +392,7 @@ export class InsertLinkModal extends Modal {
           .setButtonText(strings.insert)
           .setCta()
           .onClick(() => {
-            this.insertLink();
-            this.close();
+            if (this.insertLink()) this.close();
           });
         this.insertButton = btn.buttonEl;
       })
@@ -419,43 +432,21 @@ export class InsertLinkModal extends Modal {
     const viewHeight = containerEl.offsetHeight;
     const maxHeight = Math.floor(viewHeight / 2);
 
-    if (view.getMode() === "preview" || view.getMode() === "source") {
-      const imgEls = editorEl.querySelectorAll("img");
-      if (imgEls.length > 0) {
-        let targetImg: HTMLImageElement | null = null;
-        if (this.linkUrl) {
-          // for...of (not forEach) so TS tracks the assignment and keeps
-          // targetImg typed as HTMLImageElement | null rather than never.
-          for (const img of Array.from(imgEls)) {
-            if (
-              img.src === this.linkUrl &&
-              img.complete &&
-              img.naturalWidth > 0
-            ) {
-              targetImg = img;
-            }
-          }
-        }
+    const targetImg = this.findRenderedImage(editorEl);
+    if (targetImg) {
+      const naturalWidth = targetImg.naturalWidth;
+      const naturalHeight = targetImg.naturalHeight;
+      const aspectRatio = naturalWidth / naturalHeight;
 
-        if (targetImg) {
-          const naturalWidth = targetImg.naturalWidth;
-          const naturalHeight = targetImg.naturalHeight;
-          const aspectRatio = naturalWidth / naturalHeight;
+      let adjustedWidth = Math.min(naturalWidth, Math.floor(editorWidth * 0.65));
+      let adjustedHeight = Math.floor(adjustedWidth / aspectRatio);
 
-          let adjustedWidth = Math.min(
-            naturalWidth,
-            Math.floor(editorWidth * 0.65),
-          );
-          let adjustedHeight = Math.floor(adjustedWidth / aspectRatio);
-
-          if (adjustedHeight > maxHeight) {
-            adjustedHeight = maxHeight;
-            adjustedWidth = Math.floor(adjustedHeight * aspectRatio);
-          }
-
-          return { width: adjustedWidth, height: adjustedHeight };
-        }
+      if (adjustedHeight > maxHeight) {
+        adjustedHeight = maxHeight;
+        adjustedWidth = Math.floor(adjustedHeight * aspectRatio);
       }
+
+      return { width: adjustedWidth, height: adjustedHeight };
     }
 
     const defaultAspectRatio = 4 / 3;
@@ -466,6 +457,41 @@ export class InsertLinkModal extends Modal {
     );
 
     return { width: adjustedWidth, height: null };
+  }
+
+  /** The first loaded, on-screen `<img>` for the current url, if there is one. */
+  private findRenderedImage(editorEl: HTMLElement): HTMLImageElement | null {
+    const resolved = this.resolveImageSrc();
+    if (!resolved) return null;
+
+    const target = stripQuery(resolved);
+    for (const img of Array.from(editorEl.querySelectorAll("img"))) {
+      if (
+        stripQuery(img.src) === target &&
+        img.complete &&
+        img.naturalWidth > 0
+      ) {
+        return img;
+      }
+    }
+    return null;
+  }
+
+  /**
+   * `img.src` is always fully resolved — `app://<id>/<abs-path>?<mtime>` for a
+   * vault file — while `linkUrl` holds the raw markdown target, so the link has
+   * to be resolved the same way or vault images never match and every one of
+   * them falls back to the default aspect ratio below.
+   */
+  private resolveImageSrc(): string | null {
+    if (!this.linkUrl) return null;
+    if (/^[a-zA-Z][a-zA-Z\d+\-.]*:\/\//.test(this.linkUrl)) return this.linkUrl;
+
+    const file = this.app.metadataCache.getFirstLinkpathDest(
+      safeDecode(this.linkUrl),
+      this.app.workspace.getActiveFile()?.path ?? "",
+    );
+    return file ? this.app.vault.getResourcePath(file) : null;
   }
 
   private validateUrl(url: string) {
@@ -484,13 +510,15 @@ export class InsertLinkModal extends Modal {
     return true;
   }
 
-  private insertLink() {
+  /** False when the modal should stay open so the url error stays readable. */
+  private insertLink(): boolean {
     if (!this.validateUrl(this.linkUrl)) {
-      return;
+      return false;
     }
 
     const editor = this.plugin.commandsManager.getActiveEditor();
-    if (!editor) return;
+    // Nothing the user can fix from in here, so let the modal close.
+    if (!editor) return true;
 
     const markdownLink = this.buildMarkdownLink(this.linkText || this.linkUrl);
 
@@ -544,6 +572,8 @@ export class InsertLinkModal extends Modal {
       }
       editor.focus();
     }, 0);
+
+    return true;
   }
 
   private updateUI() {
@@ -568,12 +598,6 @@ export class InsertLinkModal extends Modal {
       this.linkAliasInput.setValue(this.linkAlias);
     }
 
-    const aliasSettingEl = this.contentEl.querySelector(
-      ".setting-item:nth-child(2)",
-    );
-    if (aliasSettingEl) {
-      (aliasSettingEl as HTMLElement).style.display = "flex";
-    }
     this.updateHeader();
   }
 }

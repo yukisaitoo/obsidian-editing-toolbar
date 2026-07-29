@@ -20,12 +20,15 @@ export interface ParsedImage extends ParsedLink {
   height?: string;
 }
 
-const MARKDOWN_LINK =
-  /\[([^\]]+)\]\(([a-zA-Z]+:\/\/[^\s)]+)(?:\s+["']([^"']*)["'])?\)/;
+// Deliberately scheme-agnostic: `[docs](notes/foo.md)` is as much a link as
+// `[docs](https://x.com)`, and requiring `scheme://` here made vault-relative
+// links fall through to the parseMixedContent guesswork.
+const MARKDOWN_LINK = /\[([^\]]+)\]\(([^\s)]+)(?:\s+["']([^"']*)["'])?\)/;
 const MARKDOWN_IMAGE =
   /!\[(.*?)(?:\|(\d+)(?:x(\d+))?)?\]\(\s*([^\s)]+)(?:\s+["']([^"']*)["'])?\s*\)/;
-const ANY_MARKDOWN_LINK =
-  /(!)?\[([^\]]+)\]\(([^\s)]+)(?:\s+["']([^"']*)["'])?\)/g;
+// MARKDOWN_LINK with the embed `!` as group 1, derived so the two cannot drift
+// apart on what a url may look like. Groups: 1 `!`, 2 text, 3 url, 4 title.
+const ANY_MARKDOWN_LINK = new RegExp(`(!)?${MARKDOWN_LINK.source}`, "g");
 const BARE_URL =
   /(?:^|\s)([a-zA-Z][a-zA-Z\d+\-.]*:\/\/\S+|\S+\.[a-zA-Z]{2,}(?:\/\S*)?)/g;
 const IMAGE_EXTENSION = /\.(jpg|jpeg|png|gif|webp|bmp)$/i;
@@ -78,7 +81,6 @@ export function matchLinkInLine(
   const overlaps = (from: number, to: number) =>
     startPos <= to && endPos >= from;
 
-  ANY_MARKDOWN_LINK.lastIndex = 0;
   for (const match of line.matchAll(ANY_MARKDOWN_LINK)) {
     const from = match.index;
     const to = from + match[0].length;
@@ -195,6 +197,10 @@ const PATH_LIKE = [
   /^[a-zA-Z]:\\/,
   /^\/[^/]/,
   /^[a-zA-Z]+:\/\//,
+  // Vault-relative targets, which carry no leading `./`: `notes/foo.md` and
+  // `attachments/x.png`, or a bare file in the vault root like `foo.md`.
+  /^[^/\s]+\/\S+$/,
+  /^[^/\s]+\.[a-zA-Z\d]+$/,
 ];
 
 export function isValidUrl(url: string): boolean {

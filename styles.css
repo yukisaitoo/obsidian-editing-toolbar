@@ -948,6 +948,10 @@ body.theme-dark .modal-container.editingToolbar-Modal .modal input[type='range']
   color: var(--text-muted);
 }
 
+.insert-link-modal .image-size-setting.is-hidden {
+  display: none;
+}
+
 .insert-link-modal .preview-setting {
   display: block;
 }
