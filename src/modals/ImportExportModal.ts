@@ -9,12 +9,44 @@ import {
 } from "obsidian";
 import { ConfirmModal } from "src/modals/ConfirmModal";
 import type EditingToolbarPlugin from "src/plugin/main";
+import type {
+  EditingToolbarSettings,
+  StyleAppearanceSettings,
+} from "src/settings/settingsData";
+import { POSITION_STYLES } from "src/settings/settingsData";
 import { strings } from "src/translations/helper";
 
 // Import/export crosses a JSON boundary with no schema: every payload below is
 // whatever the user's file happened to contain.
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type JsonPayload = any;
+
+// Every flat setting the payload carries. The per-style appearance buckets are
+// nested, so they travel separately via importAppearance().
+const GENERAL_SETTING_KEYS: (keyof EditingToolbarSettings)[] = [
+  "positionStyle",
+  "enableTopToolbar",
+  "enableFollowingToolbar",
+  "cMenuVisibility",
+  "cMenuFontColor",
+  "cMenuBackgroundColor",
+  "custom_bg1",
+  "custom_bg2",
+  "custom_bg3",
+  "custom_bg4",
+  "custom_bg5",
+  "custom_fc1",
+  "custom_fc2",
+  "custom_fc3",
+  "custom_fc4",
+  "custom_fc5",
+];
+
+const APPEARANCE_KEYS: (keyof StyleAppearanceSettings)[] = [
+  "toolbarBackgroundColor",
+  "toolbarIconColor",
+  "toolbarIconSize",
+];
 
 export class ImportExportModal extends Modal {
   plugin: EditingToolbarPlugin;
@@ -140,6 +172,8 @@ export class ImportExportModal extends Modal {
   }
 
   updateExportContent() {
+    const settings = this.plugin.settings;
+
     const exportContent: JsonPayload = {
       _exportInfo: {
         version: this.plugin.manifest.version,
@@ -147,46 +181,22 @@ export class ImportExportModal extends Modal {
         exportTime: new Date().toISOString(),
         pluginId: this.plugin.manifest.id,
       },
-      followingCommands: this.plugin.settings.followingCommands || [],
-      topCommands: this.plugin.settings.topCommands || [],
-      positionStyle: this.plugin.settings.positionStyle,
-      cMenuNumRows: this.plugin.settings.cMenuNumRows,
-      custom_bg1: this.plugin.settings.custom_bg1,
-      custom_bg2: this.plugin.settings.custom_bg2,
-      custom_bg3: this.plugin.settings.custom_bg3,
-      custom_bg4: this.plugin.settings.custom_bg4,
-      custom_bg5: this.plugin.settings.custom_bg5,
-      custom_fc1: this.plugin.settings.custom_fc1,
-      custom_fc2: this.plugin.settings.custom_fc2,
-      custom_fc3: this.plugin.settings.custom_fc3,
-      custom_fc4: this.plugin.settings.custom_fc4,
-      custom_fc5: this.plugin.settings.custom_fc5,
-      toolbarBackgroundColor: this.plugin.settings.toolbarBackgroundColor,
-      toolbarIconColor: this.plugin.settings.toolbarIconColor,
-      toolbarIconSize: this.plugin.settings.toolbarIconSize,
+      followingCommands: settings.followingCommands ?? [],
+      topCommands: settings.topCommands ?? [],
+      // The real appearance state. The global toolbar* fields are only a fallback
+      // for cleared buckets and no UI ever writes them, so they stay out.
+      appearanceByStyle: settings.appearanceByStyle ?? {},
     };
 
-    this.validateExportContent(exportContent);
-
-    this.textArea.setValue(JSON.stringify(exportContent, null, 2));
-  }
-
-  private validateExportContent(exportContent: JsonPayload) {
-    ["followingCommands", "topCommands"].forEach((key) => {
-      if (key in exportContent && !exportContent[key]) {
-        exportContent[key] = [];
-      }
+    GENERAL_SETTING_KEYS.forEach((key) => {
+      exportContent[key] = settings[key];
     });
 
-    if ("positionStyle" in exportContent && !exportContent.positionStyle) {
+    if (!exportContent.positionStyle) {
       exportContent.positionStyle = "top";
     }
-    if (
-      "cMenuNumRows" in exportContent &&
-      exportContent.cMenuNumRows === undefined
-    ) {
-      exportContent.cMenuNumRows = 1;
-    }
+
+    this.textArea.setValue(JSON.stringify(exportContent, null, 2));
   }
 
   async importConfiguration() {
@@ -209,23 +219,26 @@ export class ImportExportModal extends Modal {
       const containsGeneralSettings = "positionStyle" in importData;
       const positionStyle = importData.positionStyle;
 
+      // Reject non-array command lists here, before anything is mutated — the
+      // import path below assumes it can iterate them.
+      if (
+        (containsFollowingCommands &&
+          !Array.isArray(importData.followingCommands)) ||
+        (containsTopCommands && !Array.isArray(importData.topCommands))
+      ) {
+        new Notice(strings.invalidImportDataFormat);
+        return;
+      }
+
       const hasFollowingCommands =
-        containsFollowingCommands &&
-        Array.isArray(importData.followingCommands) &&
-        importData.followingCommands.length > 0;
+        containsFollowingCommands && importData.followingCommands.length > 0;
       const hasTopCommands =
-        containsTopCommands &&
-        Array.isArray(importData.topCommands) &&
-        importData.topCommands.length > 0;
+        containsTopCommands && importData.topCommands.length > 0;
 
       const emptyFollowingCommands =
-        containsFollowingCommands &&
-        (!Array.isArray(importData.followingCommands) ||
-          importData.followingCommands.length === 0);
+        containsFollowingCommands && importData.followingCommands.length === 0;
       const emptyTopCommands =
-        containsTopCommands &&
-        (!Array.isArray(importData.topCommands) ||
-          importData.topCommands.length === 0);
+        containsTopCommands && importData.topCommands.length === 0;
 
       let importSummary = strings.import3 + "\n";
 
@@ -285,11 +298,7 @@ export class ImportExportModal extends Modal {
         message: importSummary + "\n" + strings.doWantContinue,
         confirmWarning: true,
         onConfirm: async () => {
-          const backup = {
-            positionStyle: this.plugin.settings.positionStyle,
-            followingCommands: [...this.plugin.settings.followingCommands],
-            topCommands: [...this.plugin.settings.topCommands],
-          };
+          const backup = this.snapshotSettings();
 
           try {
             if (this.importMode === "overwrite") {
@@ -302,14 +311,25 @@ export class ImportExportModal extends Modal {
 
             await this.plugin.saveSettings();
 
-            this.plugin.rebuildToolbars();
+            // Syncs the runtime position style before rebuilding, so an imported
+            // positionStyle takes effect without a reload.
+            this.plugin.onPositionStyleChange(
+              this.plugin.settings.positionStyle,
+            );
 
             new Notice(strings.configurationImportedSuccessfully);
-            this.close();
           } catch (error) {
-            this.restoreBackup(backup);
-            throw error;
+            // ConfirmModal awaits this callback without a catch, so rethrowing
+            // would strand the user with silently half-imported settings.
+            this.plugin.settings = backup;
+            console.error("Import error: ", error);
+            new Notice(
+              strings.error +
+                " " +
+                (error instanceof Error ? error.message : String(error)),
+            );
           }
+          this.close();
         },
       });
     } catch (error) {
@@ -320,6 +340,14 @@ export class ImportExportModal extends Modal {
           (error instanceof Error ? error.message : String(error)),
       );
     }
+  }
+
+  // Rollback snapshot. Not structuredClone: CommandPicker stores live Obsidian
+  // Command objects, whose callbacks would throw DataCloneError. A JSON round
+  // trip drops them, which is exactly what saveSettings() persists anyway — the
+  // toolbar dispatches by command id, never through a stored callback.
+  private snapshotSettings(): EditingToolbarSettings {
+    return JSON.parse(JSON.stringify(this.plugin.settings));
   }
 
   performOverwriteImport(importData: JsonPayload) {
@@ -381,29 +409,38 @@ export class ImportExportModal extends Modal {
     return targetArray;
   }
   importGeneralSettings(importData: JsonPayload) {
-    const generalSettings = [
-      "positionStyle",
-      "cMenuNumRows",
-      "custom_bg1",
-      "custom_bg2",
-      "custom_bg3",
-      "custom_bg4",
-      "custom_bg5",
-      "custom_fc1",
-      "custom_fc2",
-      "custom_fc3",
-      "custom_fc4",
-      "custom_fc5",
-      "toolbarBackgroundColor",
-      "toolbarIconColor",
-      "toolbarIconSize",
-    ];
-
-    generalSettings.forEach((key) => {
+    GENERAL_SETTING_KEYS.forEach((key) => {
       if (importData[key] !== undefined) {
         (this.plugin.settings as JsonPayload)[key] = importData[key];
       }
     });
+
+    this.importAppearance(importData.appearanceByStyle);
+  }
+
+  // Overwrite replaces a style's bucket outright, so a swatch the payload cleared
+  // stays cleared; update merges the payload's keys over what's already there.
+  // Styles and keys the plugin doesn't know about are ignored.
+  private importAppearance(imported: JsonPayload) {
+    if (!imported || typeof imported !== "object") return;
+
+    const store = (this.plugin.settings.appearanceByStyle ??= {});
+
+    for (const style of POSITION_STYLES) {
+      const source = imported[style];
+      if (!source || typeof source !== "object") continue;
+
+      const bucket: StyleAppearanceSettings =
+        this.importMode === "overwrite" ? {} : (store[style] ??= {});
+
+      APPEARANCE_KEYS.forEach((key) => {
+        if (source[key] !== undefined) {
+          (bucket as JsonPayload)[key] = source[key];
+        }
+      });
+
+      store[style] = bucket;
+    }
   }
 
   fixImportedCommandIds() {
@@ -439,12 +476,6 @@ export class ImportExportModal extends Modal {
 
     fixCommandsInArray(this.plugin.settings.followingCommands);
     fixCommandsInArray(this.plugin.settings.topCommands);
-  }
-
-  restoreBackup(backup: JsonPayload) {
-    this.plugin.settings.positionStyle = backup.positionStyle;
-    this.plugin.settings.followingCommands = backup.followingCommands;
-    this.plugin.settings.topCommands = backup.topCommands;
   }
 
   onClose() {
