@@ -38,9 +38,9 @@ export function getExistingToolbar(
 
   if (style === "top") {
     return (
-      app.workspace.activeLeaf?.view.containerEl?.querySelector<HTMLElement>(
-        selector,
-      ) ?? null
+      app.workspace
+        .getActiveViewOfType(ItemView)
+        ?.containerEl?.querySelector<HTMLElement>(selector) ?? null
     );
   }
 
@@ -170,7 +170,7 @@ function mountBars(
 
   const mounted =
     style === "top"
-      ? mountInActiveLeaf(app, bar, popoverBar)
+      ? mountInActiveView(app, bar, popoverBar)
       : mountInWorkspaceRoot(doc, bar, popoverBar);
 
   return mounted ? { bar, popoverBar } : null;
@@ -188,16 +188,16 @@ function createBarEl(
   return el;
 }
 
-function mountInActiveLeaf(
+function mountInActiveView(
   app: App,
   bar: HTMLElement,
   popoverBar: HTMLElement,
 ): boolean {
-  const leaf = app.workspace.activeLeaf;
-  const container = leaf?.view.containerEl;
-  if (!container) return false;
+  const view = app.workspace.getActiveViewOfType(ItemView);
+  const container = view?.containerEl;
+  if (!view || !container) return false;
 
-  const viewType = leaf!.view.getViewType();
+  const viewType = view.getViewType();
 
   // Canvas has no scrollable source view to sit inside, so the bar mounts as a
   // sibling above .view-content instead of within it.

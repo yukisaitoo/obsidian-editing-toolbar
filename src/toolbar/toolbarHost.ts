@@ -1,4 +1,4 @@
-import { App, Editor } from "obsidian";
+import { App, Editor, ItemView } from "obsidian";
 
 // Every toolbar lookup, mount and measurement has to agree on which Document it
 // is working in — a note popped out into its own window has its own.
@@ -9,7 +9,7 @@ export function resolveToolbarDocument(
   return (
     editor?.cm?.dom?.ownerDocument ||
     editor?.cm?.contentDOM?.ownerDocument ||
-    app.workspace.activeLeaf?.view?.containerEl?.ownerDocument ||
+    app.workspace.getActiveViewOfType(ItemView)?.containerEl?.ownerDocument ||
     activeWindow.document
   );
 }

@@ -1,4 +1,4 @@
-import { Editor } from "obsidian";
+import { Editor, ItemView } from "obsidian";
 
 import { CommandPlot } from "src/commands/commandDefinitions";
 import { registerClipboardAndHistoryCommands } from "src/commands/registrars/clipboard";
@@ -40,7 +40,7 @@ export class CommandsManager {
   public getActiveEditor(): Editor | null {
     return (
       this.plugin.app.workspace?.activeEditor?.editor ??
-      this.plugin.app.workspace.activeLeaf?.view?.editor ??
+      this.plugin.app.workspace.getActiveViewOfType(ItemView)?.editor ??
       null
     );
   }
@@ -103,7 +103,7 @@ export class CommandsManager {
   }
 
   private getActiveCanvasView(): CanvasView | null {
-    const active = this.plugin.app.workspace.activeLeaf?.view;
+    const active = this.plugin.app.workspace.getActiveViewOfType(ItemView);
     if (active?.getViewType?.() === "canvas") return active;
 
     const leaves = this.plugin.app.workspace.getLeavesOfType?.("canvas") ?? [];
