@@ -13,17 +13,11 @@ export function applyToolbarState(el: HTMLElement, state: ToolbarState): void {
   el.toggleClass(HIDDEN_CLASS, state === "hidden");
 }
 
-export interface VisibilityOverrides {
-  /** Defaults to the live editor's selection. */
-  hasSelection?: boolean;
-}
-
 // The one place that decides whether a toolbar shows. Every caller applies this
 // result rather than reasoning about its own case.
 export function resolveToolbarState(
   plugin: EditingToolbarPlugin,
   style: ToolbarStyleKey,
-  overrides: VisibilityOverrides = {},
 ): ToolbarState {
   if (!plugin.settings.cMenuVisibility) return "hidden";
   if (!plugin.isToolbarStyleEnabled(style)) return "hidden";
@@ -41,8 +35,7 @@ export function resolveToolbarState(
   // Canvas has no text selection to follow, so the bar just stays up there.
   if (style === "following" && view?.getViewType() === "markdown") {
     const hasSelection =
-      overrides.hasSelection ??
-      (plugin.commandsManager.getActiveEditor()?.somethingSelected() || false);
+      plugin.commandsManager.getActiveEditor()?.somethingSelected() ?? false;
     return hasSelection ? "visible" : "hidden";
   }
 

@@ -457,24 +457,8 @@ export default class EditingToolbarPlugin extends Plugin {
       this.handleTextSelection();
     }, 100);
 
-    this.registerDomEvent(container, "mousedown", (e: MouseEvent) => {
-      if (!this.isView() || !this.commandsManager.getActiveEditor()) return;
-
-      const mouseDownTime = Date.now();
-      if (e.button === 1) {
-        this.registerDomEvent(container, "mouseup", (e2: MouseEvent) => {
-          const mouseUpTime = Date.now();
-          if (mouseUpTime - mouseDownTime < 300 && e2.button === 1) {
-            this.handleMiddleClickToolbar();
-          }
-        });
-      }
-    });
-
-    this.registerDomEvent(container, "mouseup", (e) => {
-      if (e.button !== 1) {
-        debouncedHandleTextSelection();
-      }
+    this.registerDomEvent(container, "mouseup", () => {
+      debouncedHandleTextSelection();
     });
 
     this.registerDomEvent(container, "keyup", this.handleKeyboardSelection);
@@ -510,14 +494,6 @@ export default class EditingToolbarPlugin extends Plugin {
     return style === "top"
       ? this.settings.enableTopToolbar
       : this.settings.enableFollowingToolbar;
-  }
-
-  /** Middle-click summons the bar even without a selection. */
-  private handleMiddleClickToolbar() {
-    const editor = this.commandsManager.getActiveEditor();
-    if (editor?.hasFocus()) {
-      updateFollowingBar(this.app, this, editor, true);
-    }
   }
 
   private handleKeyboardSelection = (e: KeyboardEvent) => {

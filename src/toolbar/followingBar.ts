@@ -8,20 +8,14 @@ import {
   resolveToolbarState,
 } from "src/toolbar/toolbarVisibility";
 
-/**
- * Shows or hides the selection-following bar and re-anchors it to the caret.
- * `forceShow` covers the middle-click summon, which has no selection.
- */
+/** Shows or hides the selection-following bar and re-anchors it to the caret. */
 export function updateFollowingBar(
   app: App,
   plugin: EditingToolbarPlugin,
   editor: Editor | null,
-  forceShow = false,
 ): void {
   const doc = resolveToolbarDocument(app, editor);
-  const state = resolveToolbarState(plugin, "following", {
-    hasSelection: forceShow || (editor?.somethingSelected() ?? false),
-  });
+  const state = resolveToolbarState(plugin, "following");
 
   const bar =
     state === "visible"
