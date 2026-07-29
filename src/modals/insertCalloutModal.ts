@@ -1,6 +1,9 @@
 import { DropdownComponent, Modal, Platform, Setting, setIcon } from "obsidian";
 import EditingToolbarPlugin from "src/plugin/main";
 import { strings } from "src/translations/helper";
+
+const SEPARATOR_VALUE = "---separator---";
+
 interface BuiltInCalloutType {
   type: string;
   aliases: string[];
@@ -216,19 +219,26 @@ export class InsertCalloutModal extends Modal {
         const admonitions = this.allCalloutOptions.filter(
           (opt) => opt.isAdmonition,
         );
-        if (builtIns.length > 0 && admonitions.length > 0) {
-          // DropdownComponent has no <optgroup>; fake a separator with a disabled option
-          dropdown.addOption("---separator---", "---- Admonitions ----");
-          const separatorOption =
+        // DropdownComponent has no <optgroup>; fake a separator with a disabled
+        // option so keyboard navigation skips over it.
+        const addSeparator = (label: string) => {
+          dropdown.addOption(SEPARATOR_VALUE, label);
+          const option =
             dropdown.selectEl.options[dropdown.selectEl.options.length - 1];
-          if (separatorOption) {
-            separatorOption.disabled = true;
+          if (option) {
+            option.disabled = true;
           }
+        };
+        const needsSeparators = builtIns.length > 0 && admonitions.length > 0;
+        if (needsSeparators) {
+          addSeparator("---- Admonitions ----");
         }
         admonitions.forEach((opt) => {
           dropdown.addOption(opt.type, `${opt.label} (Admonition)`);
         });
-        dropdown.addOption("---separator---", "---- Default ----");
+        if (needsSeparators) {
+          addSeparator("---- Default ----");
+        }
         builtIns.forEach((opt) => {
           dropdown.addOption(opt.type, opt.label);
         });
@@ -240,8 +250,8 @@ export class InsertCalloutModal extends Modal {
         }
         dropdown.setValue(this.type);
         dropdown.onChange((value) => {
-          if (value === "---separator---") {
-            // Separator isn't selectable — revert to the last valid type
+          if (value === SEPARATOR_VALUE) {
+            // Separators are disabled, but revert defensively just in case
             dropdown.setValue(this.type);
             return;
           }
