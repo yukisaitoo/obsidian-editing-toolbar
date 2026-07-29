@@ -307,8 +307,6 @@ export class ImportExportModal extends Modal {
               this.performUpdateImport(importData);
             }
 
-            this.fixImportedCommandIds();
-
             await this.plugin.saveSettings();
 
             // Syncs the runtime position style before rebuilding, so an imported
@@ -441,41 +439,6 @@ export class ImportExportModal extends Modal {
 
       store[style] = bucket;
     }
-  }
-
-  fixImportedCommandIds() {
-    const commandMappings: { [key: string]: string } = {
-      "editor:toggle-numbered-list": "editing-toolbar:toggle-numbered-list",
-      "editor:toggle-bullet-list": "editing-toolbar:toggle-bullet-list",
-      "editor:toggle-highlight": "editing-toolbar:toggle-highlight",
-      "toggle-highlight": "editing-toolbar:toggle-highlight",
-      "editing-toolbar:editor:toggle-bold": "editing-toolbar:toggle-bold",
-      "editing-toolbar:editor:toggle-italics": "editing-toolbar:toggle-italics",
-      "editing-toolbar:editor:toggle-strikethrough":
-        "editing-toolbar:toggle-strikethrough",
-      "editing-toolbar:editor:toggle-inline-math":
-        "editing-toolbar:toggle-inline-math",
-      "editing-toolbar:editor:insert-callout": "editing-toolbar:insert-callout",
-      "editing-toolbar:editor:insert-link": "editing-toolbar:insert-link",
-      "cMenuToolbar-Divider-Line": "editingToolbar-Divider-Line",
-    };
-
-    const fixCommandsInArray = (commands: Command[]) => {
-      if (!commands || !Array.isArray(commands)) return;
-
-      commands.forEach((cmd) => {
-        if (cmd.id && commandMappings[cmd.id]) {
-          cmd.id = commandMappings[cmd.id];
-        }
-
-        if (cmd.SubmenuCommands && Array.isArray(cmd.SubmenuCommands)) {
-          fixCommandsInArray(cmd.SubmenuCommands);
-        }
-      });
-    };
-
-    fixCommandsInArray(this.plugin.settings.followingCommands);
-    fixCommandsInArray(this.plugin.settings.topCommands);
   }
 
   onClose() {

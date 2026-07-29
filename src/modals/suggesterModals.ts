@@ -83,6 +83,10 @@ export class ChooseFromIconList extends FuzzySuggestModal<string> {
         this.isSubmenuItem,
         currentCommands,
       );
+      // A command that is no longer in the list has nothing to write to, so
+      // treat the pick as a no-op rather than indexing with -1.
+      if (location.index === -1) return;
+
       if (this.isSubmenuItem) {
         currentCommands[location.index].SubmenuCommands![
           location.subIndex

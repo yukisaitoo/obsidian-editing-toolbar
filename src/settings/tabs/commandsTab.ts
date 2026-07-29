@@ -10,9 +10,13 @@ import { POSITION_STYLES, STYLE_LABELS } from "src/settings/settingsData";
 import type { SettingsTabContext } from "src/settings/settingsTab";
 import { checkHtml } from "src/toolbar/toolbarDom";
 import { strings, t } from "src/translations/helper";
-import { GenNonDuplicateID } from "src/util/util";
+import {
+  DIVIDER_COMMAND_ID,
+  GenNonDuplicateID,
+  isDivider,
+  newDividerId,
+} from "src/util/util";
 
-const DIVIDER_COMMAND_ID = "editingToolbar-Divider-Line";
 const TOP_LEVEL_CONTAINER_CLASS = "editingToolbarSettingsTabsContainer";
 
 // Submenus generated at render time (the colour grids), so their children are
@@ -157,13 +161,13 @@ function renderCommandRow(
     configureIconButton(ctx, iconButton, command, false, style),
   );
 
-  if (command.id === DIVIDER_COMMAND_ID) {
+  if (isDivider(command.id)) {
     setting.setClass(DIVIDER_COMMAND_ID);
   }
 
   setting.setClass("editingToolbarCommandItem").setName(t(command.name));
 
-  if (command.id === DIVIDER_COMMAND_ID) {
+  if (isDivider(command.id)) {
     setting.addButton((renameButton) =>
       configureRenameButton(ctx, renameButton, command, false, style),
     );
@@ -191,7 +195,7 @@ function renderCommandRow(
         .setClass("editingToolbarSettingsButton")
         .onClick(() =>
           insertAfter(ctx, commands, index, style, {
-            id: DIVIDER_COMMAND_ID,
+            id: newDividerId(),
             name: strings.verticalSplit,
             icon: "vertical-split",
           }),
@@ -299,7 +303,7 @@ function renderSubmenuRow(
       )
       .setName(t(subCommand.name));
 
-    if (subCommand.id === DIVIDER_COMMAND_ID) {
+    if (isDivider(subCommand.id)) {
       subSetting.addButton((renameButton) =>
         configureRenameButton(ctx, renameButton, subCommand, true, style),
       );

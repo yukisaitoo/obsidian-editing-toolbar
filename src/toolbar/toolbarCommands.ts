@@ -18,8 +18,7 @@ import {
   resolveToolbarState,
 } from "src/toolbar/toolbarVisibility";
 import { t } from "src/translations/helper";
-
-const DIVIDER_ID = "editingToolbar-Divider-Line";
+import { DIVIDER_COMMAND_ID, isDivider } from "src/util/util";
 
 interface RenderContext {
   app: App;
@@ -59,7 +58,7 @@ function renderPlainButton(ctx: RenderContext, item: Command) {
 
   button.setClass("editingToolbarCommandItem");
   applyTooltipPosition(ctx, button);
-  if (item.id === DIVIDER_ID) button.setClass(DIVIDER_ID);
+  if (isDivider(item.id)) button.setClass(DIVIDER_COMMAND_ID);
   applyButtonIcon(button, item.icon);
 }
 
@@ -75,7 +74,7 @@ function renderDropdown(ctx: RenderContext, item: Command, index: number) {
     const menu = new Menu();
 
     item.SubmenuCommands?.forEach((subitem) => {
-      if (subitem.id === DIVIDER_ID) {
+      if (isDivider(subitem.id)) {
         menu.addSeparator();
         menu.addItem((menuItem) => {
           menuItem.setTitle(t(subitem.name)).setDisabled(true);
@@ -114,7 +113,7 @@ function renderFlyout(ctx: RenderContext, item: Command, index: number) {
       .onClick(() => runCommand(ctx, subitem.id));
 
     applyTooltipPosition(ctx, subBtn);
-    if (subitem.id === DIVIDER_ID) subBtn.setClass(DIVIDER_ID);
+    if (isDivider(subitem.id)) subBtn.setClass(DIVIDER_COMMAND_ID);
     applyButtonIcon(subBtn, subitem.icon);
   });
 

@@ -112,7 +112,7 @@ export const DEFAULT_TOOLBAR_COMMANDS: Command[] = [
         icon: "lucide-at-sign",
       },
       {
-        id: "editingToolbar-Divider-Line",
+        id: "editingToolbar-Divider-Line-line-ops",
         name: "Line operations",
         icon: "vertical-split",
       },
@@ -142,7 +142,7 @@ export const DEFAULT_TOOLBAR_COMMANDS: Command[] = [
         icon: "lucide-filter",
       },
       {
-        id: "editingToolbar-Divider-Line",
+        id: "editingToolbar-Divider-Line-text-processing",
         name: "Text processing",
         icon: "vertical-split",
       },
@@ -172,7 +172,7 @@ export const DEFAULT_TOOLBAR_COMMANDS: Command[] = [
         icon: "lucide-eraser",
       },
       {
-        id: "editingToolbar-Divider-Line",
+        id: "editingToolbar-Divider-Line-advanced",
         name: "Advanced tools",
         icon: "vertical-split",
       },

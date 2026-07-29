@@ -12,6 +12,18 @@ export function GenNonDuplicateID(randomLength: number) {
   return idStr + Math.random().toString(36).slice(3, 3 + randomLength);
 }
 
+export const DIVIDER_COMMAND_ID = "editingToolbar-Divider-Line";
+
+// Dividers are looked up by id like any other command, so every one carries its
+// own id under a shared prefix. DIVIDER_COMMAND_ID itself is only the CSS class.
+export function isDivider(id: string): boolean {
+  return id.startsWith(DIVIDER_COMMAND_ID);
+}
+
+export function newDividerId(): string {
+  return `${DIVIDER_COMMAND_ID}-${GenNonDuplicateID(4)}`;
+}
+
 // `subIndex` is -1 for a top-level command; `index` is -1 when the command is
 // not in the list at all.
 export function findCommandLocation(
