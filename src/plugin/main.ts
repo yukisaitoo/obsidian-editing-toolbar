@@ -175,7 +175,9 @@ export default class EditingToolbarPlugin extends Plugin {
   // Empty buckets fall back to the global fields via getAppearanceValue().
   private initAppearanceStore(): void {
     // Deep-copy: the settings tab writes to and deletes from these in place.
-    if (this.settings.appearanceByStyle === DEFAULT_SETTINGS.appearanceByStyle) {
+    if (
+      this.settings.appearanceByStyle === DEFAULT_SETTINGS.appearanceByStyle
+    ) {
       this.settings.appearanceByStyle = structuredClone(
         DEFAULT_SETTINGS.appearanceByStyle,
       );
@@ -463,7 +465,7 @@ export default class EditingToolbarPlugin extends Plugin {
 
     this.registerDomEvent(container, "keyup", this.handleKeyboardSelection);
 
-    this.registerScrollAndBlurEvents(container);
+    this.registerScrollEvents(container);
   }
 
   public getCachedToolbar(style: ToolbarStyleKey): HTMLElement | null {
@@ -504,16 +506,13 @@ export default class EditingToolbarPlugin extends Plugin {
     }
   };
 
-  private registerScrollAndBlurEvents(container: Document) {
+  private registerScrollEvents(container: Document) {
     const hideOnScroll = throttle(
       () => hideFollowingBar(this.app, this, container),
       200,
     );
 
     this.registerDomEvent(container, "wheel", hideOnScroll);
-    this.registerDomEvent(container, "blur", () =>
-      hideFollowingBar(this.app, this, container),
-    );
   }
 
   private handleTextSelection() {
