@@ -13,6 +13,12 @@
    #editingToolbarPopoverBar). Mode-specific overrides follow in §3/§4.
    ========================================================================== */
 
+/* The only way a bar is hidden. `display` is reserved for choosing its layout
+   (grid / flex / top), so hiding must not touch it. */
+#editingToolbarModalBar.is-hidden {
+  visibility: hidden;
+}
+
 #editingToolbarModalBar {
   position: absolute;
   display: grid;
@@ -456,14 +462,6 @@ button[class^=editingToolbarCommandsubItem]::after {
   justify-content: space-between;
 }
 
-.editing-toolbar-title-container {
-  flex-shrink: 0;
-}
-
-.editing-toolbar-title {
-  margin: 0;
-}
-
 .editing-toolbar-content {
   padding: 0 8px;
 }
@@ -481,12 +479,6 @@ button[class^=editingToolbarCommandsubItem]::after {
 
 /* Must stay after the base rules above — same specificity, wins on order. */
 @media screen and (max-width: 1024px) {
-  .editing-toolbar-header {
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-  }
-
   .editing-toolbar-tabs .editing-toolbar-tab:not(.active)>span {
     display: none;
   }

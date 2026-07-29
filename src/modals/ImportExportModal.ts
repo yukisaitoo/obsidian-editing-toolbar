@@ -302,7 +302,7 @@ export class ImportExportModal extends Modal {
 
             await this.plugin.saveSettings();
 
-            dispatchEvent(new Event("editingToolbar-NewCommand"));
+            this.plugin.rebuildToolbars();
 
             new Notice(strings.configurationImportedSuccessfully);
             this.close();

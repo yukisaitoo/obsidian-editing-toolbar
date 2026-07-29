@@ -104,9 +104,7 @@ export class ChooseFromIconList extends FuzzySuggestModal<string> {
     }
 
     await this.plugin.saveSettings();
-    setTimeout(() => {
-      dispatchEvent(new Event("editingToolbar-NewCommand"));
-    }, 100);
+    this.plugin.rebuildToolbars();
   }
 }
 
@@ -158,9 +156,7 @@ export class CommandPicker extends FuzzySuggestModal<Command> {
       this.currentEditingConfig,
     );
     await this.plugin.saveSettings();
-    setTimeout(() => {
-      dispatchEvent(new Event("editingToolbar-NewCommand"));
-    }, 100);
+    this.plugin.rebuildToolbars();
   }
 }
 
@@ -238,8 +234,6 @@ export class ChangeCmdname extends Modal {
   onClose() {
     const { contentEl } = this;
     contentEl.empty();
-    setTimeout(() => {
-      dispatchEvent(new Event("editingToolbar-NewCommand"));
-    }, 100);
+    this.plugin.rebuildToolbars();
   }
 }

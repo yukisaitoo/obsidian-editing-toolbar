@@ -21,18 +21,20 @@ import {
   POSITION_STYLES,
   resolveNextPositionStyle,
 } from "src/settings/settingsData";
+import { hideFollowingBar, updateFollowingBar } from "src/toolbar/followingBar";
+import { closeMoreOverflowPopovers } from "src/toolbar/morePopover";
 import {
-  closeMoreOverflowPopovers,
-  createFollowingBar,
-  editingToolbarPopover,
+  ensureToolbar,
   getExistingToolbar,
   selfDestruct,
-} from "src/toolbar/editingToolbar";
+} from "src/toolbar/toolbarBuilder";
+import {
+  applyToolbarState,
+  resolveToolbarState,
+} from "src/toolbar/toolbarVisibility";
 import { strings } from "src/translations/helper";
 import { ViewUtils } from "src/util/viewUtils";
 import { EditingToolbarSettingTab } from "../settings/settingsTab";
-
-let activeDocument: Document;
 
 export interface AdmonitionDefinition {
   type: string;
@@ -54,6 +56,19 @@ interface EditorContextMenuAction {
 
 const ADMONITION_PLUGIN_ID = "obsidian-admonition";
 
+const SELECTION_KEYS = new Set([
+  "ArrowUp",
+  "ArrowDown",
+  "ArrowLeft",
+  "ArrowRight",
+  "Home",
+  "End",
+  "PageUp",
+  "PageDown",
+  "ShiftLeft",
+  "ShiftRight",
+]);
+
 export default class EditingToolbarPlugin extends Plugin {
   settings!: EditingToolbarSettings;
   public positionStyle!: string;
@@ -69,10 +84,9 @@ export default class EditingToolbarPlugin extends Plugin {
   settingTab!: EditingToolbarSettingTab;
 
   private toolbarCache: Map<ToolbarStyleKey, HTMLElement> = new Map();
+  private rebuildListeners = new Set<() => void>();
 
   async onload(): Promise<void> {
-    activeDocument = activeWindow.document;
-
     await this.loadSettings();
 
     this.initAppearanceStore();
@@ -82,27 +96,12 @@ export default class EditingToolbarPlugin extends Plugin {
 
     this.commandsManager = new CommandsManager(this);
     this.commandsManager.registerCommands();
-    this.app.workspace.onLayoutReady(() => {
-      // Delay lets Settings Search finish scanning tabs before we apply visibility
-      setTimeout(() => {
-        if (!this.settings.cMenuVisibility) {
-          this.handleEditingToolbar();
-        }
-      }, 100);
-    });
-    this.registerSelectionEvents(activeDocument);
+
+    this.registerSelectionEvents(activeWindow.document);
     this.registerEvent(
       this.app.workspace.on("window-open", (leaf) => {
         this.registerSelectionEvents(leaf.doc);
-        setTimeout(() => {
-          if (!this.settings.cMenuVisibility) {
-            return;
-          }
-
-          if (this.isToolbarStyleEnabled("following")) {
-            editingToolbarPopover(this.app, this, "following", leaf.doc);
-          }
-        }, 50);
+        ensureToolbar(this.app, this, "following", leaf.doc);
       }),
     );
 
@@ -112,11 +111,7 @@ export default class EditingToolbarPlugin extends Plugin {
     this.registerEvent(
       this.app.workspace.on("layout-change", this.handleEditingToolbar),
     );
-    if (this.settings.cMenuVisibility == true) {
-      setTimeout(() => {
-        dispatchEvent(new Event("editingToolbar-NewCommand"));
-      }, 100);
-    }
+    this.app.workspace.onLayoutReady(() => this.rebuildToolbars());
     this.app.workspace.onLayoutReady(async () => {
       await this.tryGetAdmonitionTypes();
     });
@@ -142,10 +137,16 @@ export default class EditingToolbarPlugin extends Plugin {
     );
     addIcons();
     this.positionStyle = this.settings.positionStyle;
+    this.applyRootAppearanceVars();
+  }
+
+  // Document-level fallback for anything outside a bar. Always the live style —
+  // the settings tab's "style being edited" only governs its own preview.
+  private applyRootAppearanceVars(): void {
     applyAppearanceVars(
-      activeDocument.documentElement,
+      activeWindow.document.documentElement,
       this.settings,
-      this.resolveActiveStyle(),
+      this.liveStyle,
     );
   }
 
@@ -368,77 +369,36 @@ export default class EditingToolbarPlugin extends Plugin {
     return ViewUtils.isAllowedViewType(view);
   }
 
-  // Judged from the main area, not the focused pane: getMostRecentLeaf() skips
-  // sidebars, so clicking one doesn't flicker the bar, while switching the main
-  // pane to a PDF/graph does hide it.
-  private isMainAreaEditable(): boolean {
-    const view = this.app.workspace.getMostRecentLeaf()?.view ?? null;
-    const type = view?.getViewType();
-    return (
-      type === "canvas" ||
-      (type === "markdown" && ViewUtils.isSourceMode(view))
-    );
-  }
-
+  /**
+   * Re-syncs every toolbar with what resolveToolbarState says it should be.
+   * Safe to call as often as the workspace fires events — it builds only what is
+   * missing and never has an opinion of its own about visibility.
+   */
   handleEditingToolbar = () => {
     closeMoreOverflowPopovers();
 
-    if (!this.settings.cMenuVisibility) {
-      POSITION_STYLES.forEach((style) => {
-        const el = getExistingToolbar(this.app, this, style);
-        if (el) el.style.display = "none";
-      });
-      return;
-    }
-
-    const view = this.app.workspace.getActiveViewOfType(ItemView);
-
-    // Focus moved off the note — into a sidebar, or onto a non-editor view.
-    if (!ViewUtils.isAllowedViewType(view)) {
-      const following = getExistingToolbar(this.app, this, "following");
-      if (following) following.style.visibility = "hidden";
-
-      if (!this.isMainAreaEditable()) {
-        const el = getExistingToolbar(this.app, this, "top");
-        if (el) el.style.visibility = "hidden";
-      }
-      return;
-    }
-
-    const viewType = view?.getViewType();
-    const isMarkdownView = viewType === "markdown";
-    const inSourceMode = isMarkdownView && ViewUtils.isSourceMode(view);
-
-    // Reading mode hides everything; non-markdown views (Canvas, …) handled below.
-    if (isMarkdownView && !inSourceMode) {
-      POSITION_STYLES.forEach((style) => {
-        const el = getExistingToolbar(this.app, this, style);
-        if (el) el.style.visibility = "hidden";
-      });
-      return;
-    }
-
-    // The enable flags are the single source of truth. Never fall back to
-    // positionStyle: it still points at a toolbar the user just toggled off.
     for (const style of POSITION_STYLES) {
-      const existing = getExistingToolbar(this.app, this, style);
-
-      if (!this.isToolbarStyleEnabled(style)) {
-        if (existing) existing.style.visibility = "hidden";
-        continue;
-      }
-
-      if (!existing) {
-        editingToolbarPopover(this.app, this, style);
-      }
-
-      const toolbar = getExistingToolbar(this.app, this, style);
-      if (!toolbar) continue;
-
-      // The following bar stays hidden until a selection reveals it.
-      toolbar.style.visibility = style === "following" ? "hidden" : "visible";
+      const state = resolveToolbarState(this, style);
+      const bar =
+        state === "visible"
+          ? ensureToolbar(this.app, this, style)
+          : getExistingToolbar(this.app, this, style);
+      if (bar) applyToolbarState(bar, state);
     }
   };
+
+  /** Tears every bar down and builds them again — for command or appearance edits. */
+  rebuildToolbars(): void {
+    selfDestruct(this);
+    this.applyRootAppearanceVars();
+    this.handleEditingToolbar();
+    this.rebuildListeners.forEach((listener) => listener());
+  }
+
+  onRebuild(listener: () => void): () => void {
+    this.rebuildListeners.add(listener);
+    return () => this.rebuildListeners.delete(listener);
+  }
 
   getCurrentCommands(style: ToolbarStyleKey): Command[] {
     return this.settings[`${style}Commands`];
@@ -466,9 +426,6 @@ export default class EditingToolbarPlugin extends Plugin {
     this.appearanceEditStyle = null;
 
     await this.saveSettings();
-
-    // onPositionStyleChange re-applies the appearance vars and fires the rebuild.
-    selfDestruct(this);
     this.onPositionStyleChange(this.settings.positionStyle);
   }
 
@@ -555,127 +512,53 @@ export default class EditingToolbarPlugin extends Plugin {
       : this.settings.enableFollowingToolbar;
   }
 
+  /** Middle-click summons the bar even without a selection. */
   private handleMiddleClickToolbar() {
-    const cmEditor = this.commandsManager.getActiveEditor();
-    if (this.isToolbarStyleEnabled("following") && cmEditor?.hasFocus()) {
-      this.showFollowingToolbar(cmEditor);
+    const editor = this.commandsManager.getActiveEditor();
+    if (editor?.hasFocus()) {
+      updateFollowingBar(this.app, this, editor, true);
     }
   }
 
   private handleKeyboardSelection = (e: KeyboardEvent) => {
-    const selectionKeys = [
-      "ArrowUp",
-      "ArrowDown",
-      "ArrowLeft",
-      "ArrowRight",
-      "Home",
-      "End",
-      "PageUp",
-      "PageDown",
-      "ShiftLeft",
-      "ShiftRight",
-    ];
-
-    if (selectionKeys.includes(e.code) || e.shiftKey) {
+    if (SELECTION_KEYS.has(e.code) || e.shiftKey) {
       this.handleTextSelection();
-    } else if (!e.shiftKey && this.isToolbarStyleEnabled("following")) {
-      this.hideToolbarIfNotSelected();
+    } else {
+      hideFollowingBar(this.app, this);
     }
   };
 
-  private getToolbarHostDocument(editor?: Editor | null): Document {
-    return (
-      editor?.cm?.dom?.ownerDocument ||
-      editor?.cm?.contentDOM?.ownerDocument ||
-      this.app.workspace.activeLeaf?.view?.containerEl?.ownerDocument ||
-      activeWindow.document
-    );
-  }
-
   private registerScrollAndBlurEvents(container: Document) {
-    const hideToolbar = this.throttle(() => {
-      if (!this.isToolbarStyleEnabled("following")) return;
-      this.hideToolbarIfNotSelected(container);
-    }, 200);
-
-    this.registerDomEvent(container, "wheel", hideToolbar);
-    this.registerDomEvent(container, "blur", () => {
-      this.hideToolbarIfNotSelected(container);
-    });
-  }
-
-  private hideToolbarIfNotSelected(hostDocument?: Document) {
-    const followingToolbar = getExistingToolbar(
-      this.app,
-      this,
-      "following",
-      hostDocument ||
-        this.getToolbarHostDocument(this.commandsManager.getActiveEditor()),
+    const hideOnScroll = throttle(
+      () => hideFollowingBar(this.app, this, container),
+      200,
     );
-    if (followingToolbar && this.isToolbarStyleEnabled("following")) {
-      followingToolbar.style.visibility = "hidden";
-    }
+
+    this.registerDomEvent(container, "wheel", hideOnScroll);
+    this.registerDomEvent(container, "blur", () =>
+      hideFollowingBar(this.app, this, container),
+    );
   }
 
   private handleTextSelection() {
-    if (!this.isView()) return;
-
-    const cmEditor = this.commandsManager.getActiveEditor();
-    if (!cmEditor?.hasFocus()) return;
-
-    if (cmEditor.somethingSelected()) {
-      this.showFollowingToolbar(cmEditor);
-    } else {
-      this.hideToolbarIfNotSelected(this.getToolbarHostDocument(cmEditor));
-    }
-  }
-
-  private throttle(func: () => void, limit: number = 100): () => void {
-    let inThrottle = false;
-    return () => {
-      if (!inThrottle) {
-        func();
-        inThrottle = true;
-        setTimeout(() => (inThrottle = false), limit);
-      }
-    };
-  }
-
-  private showFollowingToolbar(editor: Editor) {
-    if (!this.isToolbarStyleEnabled("following")) return;
-
-    const targetDocument = this.getToolbarHostDocument(editor);
-    const followingToolbar = getExistingToolbar(
-      this.app,
-      this,
-      "following",
-      targetDocument,
-    );
-
-    if (followingToolbar) {
-      followingToolbar.style.visibility = "visible";
-      followingToolbar.classList.add("editingToolbarFlex");
-    }
-
-    createFollowingBar(this.app, this, editor, true, targetDocument);
+    const editor = this.commandsManager.getActiveEditor();
+    if (!this.isView() || !editor?.hasFocus()) return;
+    updateFollowingBar(this.app, this, editor);
   }
 
   onPositionStyleChange(newStyle: string): void {
-    // Ignore any "editing style" override while updating the live toolbar.
-    const previousEditStyle = this.appearanceEditStyle;
-    this.appearanceEditStyle = null;
-
     this.positionStyle = newStyle;
     this.settings.positionStyle = newStyle;
-
-    const activeStyle = this.resolveActiveStyle();
-    const doc = activeDocument ?? document;
-    if (doc?.documentElement) {
-      applyAppearanceVars(doc.documentElement, this.settings, activeStyle);
-    }
-
-    dispatchEvent(new Event("editingToolbar-NewCommand"));
-
-    this.appearanceEditStyle = previousEditStyle;
+    this.rebuildToolbars();
   }
+}
+
+function throttle(func: () => void, limit: number): () => void {
+  let inThrottle = false;
+  return () => {
+    if (inThrottle) return;
+    func();
+    inThrottle = true;
+    setTimeout(() => (inThrottle = false), limit);
+  };
 }

@@ -1,110 +1,31 @@
 import {
   Editor,
-  EditorPosition,
   MarkdownView,
   Modal,
   Notice,
   Platform,
-  requestUrl,
   setIcon,
   Setting,
   TextComponent,
   ToggleComponent,
 } from "obsidian";
+import {
+  fetchRemoteTitle,
+  readClipboardLink,
+} from "src/modals/link/linkClipboard";
+import {
+  expandSelectionToLink,
+  findLinkAtCursor,
+  findLinkSpan,
+  formatTargetText,
+  isValidUrl,
+  LinkTarget,
+  parseMarkdownImageLink,
+  parseMarkdownLink,
+  parseMixedContent,
+} from "src/modals/link/linkParsing";
 import EditingToolbarPlugin from "src/plugin/main";
 import { strings } from "src/translations/helper";
-
-interface ClipboardItems {
-  [key: string]: string;
-}
-
-interface LinkTarget {
-  isImage: boolean;
-  text: string;
-  url: string;
-  title: string;
-  from: EditorPosition;
-  to: EditorPosition;
-}
-
-class UrlTitleFetcher {
-  private static htmlTitlePattern = /<title>([^<]*)<\/title>/im;
-  private static wxTitlePattern =
-    /<meta property="og:title" content="([^<]*)" \/>/im;
-
-  private static isValidUrl(url: string): boolean {
-    try {
-      new URL(url);
-      return true;
-    } catch {
-      return false;
-    }
-  }
-
-  private static parseTitle(url: string, body: string): string {
-    const patterns = [
-      url.includes("mp.weixin.qq.com") ? this.wxTitlePattern : null,
-      this.htmlTitlePattern,
-      /<title [^>]*>(.*?)<\/title>/i,
-      /<meta name="title" content="([^<]*)" \/>/im,
-    ].filter((p): p is RegExp => p !== null);
-
-    for (const pattern of patterns) {
-      const match = body.match(pattern);
-      if (match && typeof match[1] === "string") {
-        return match[1].trim();
-      }
-    }
-
-    throw new Error("Unable to parse the title tag");
-  }
-
-  public static getFallbackTitle(url: string): string {
-    const pathMatch = url.match(/[^/\\]+$/);
-    if (pathMatch) {
-      return pathMatch[0]
-        .replace(/\.[^/.]+$/, "")
-        .replace(/[-_]/g, " ")
-        .trim();
-    }
-    return url;
-  }
-
-  public static async fetchRemoteTitle(url: string): Promise<string> {
-    if (!this.isValidUrl(url) || !url.match(/^https?:\/\//)) {
-      return this.getFallbackTitle(url);
-    }
-
-    try {
-      const response = await requestUrl({
-        url,
-        method: "GET",
-        headers: {
-          "User-Agent":
-            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
-        },
-        throw: true,
-      });
-
-      if (response.status !== 200) {
-        throw new Error(`Status code ${response.status}`);
-      }
-
-      const html = response.text;
-      const title = this.parseTitle(url, html);
-
-      if (!title || title.length > 100) {
-        return this.getFallbackTitle(url);
-      }
-
-      return title;
-    } catch (error) {
-      console.error(`Failed to fetch title for ${url}:`, error);
-
-      return this.getFallbackTitle(url);
-    }
-  }
-}
 
 export class InsertLinkModal extends Modal {
   private linkText: string = "";
@@ -129,486 +50,103 @@ export class InsertLinkModal extends Modal {
     super(plugin.app);
 
     const editor = this.plugin.commandsManager.getActiveEditor();
-    if (editor) {
-      const selectedText = editor.getSelection() || "";
-      if (selectedText) {
-        this.handleSelectedText(editor, selectedText);
-      } else {
-        this.handleCursorPosition(editor);
-      }
-    } else {
-      this.parseClipboard();
+    if (!editor) {
+      void this.loadFromClipboard();
+    } else if (editor.getSelection()) {
+      this.adoptTarget(editor, expandSelectionToLink(editor)) ||
+        this.parseSelectedText(editor.getSelection());
+    } else if (!this.adoptTarget(editor, findLinkAtCursor(editor, editor.getCursor()))) {
+      void this.loadFromClipboard();
     }
 
     this.updateHeader();
   }
 
-  private handleSelectedText(editor: Editor, selectedText: string) {
-    const target = this.tryExpandSelection(editor, selectedText);
-    if (target) {
-      const expandedText = this.formatTargetText(target);
-      editor.setSelection(target.from, target.to);
-      this.selectedText = expandedText;
-      this.parseSelectedText(expandedText);
-    } else {
-      this.selectedText = selectedText;
-      this.parseSelectedText(selectedText);
-    }
-  }
-
-  private handleCursorPosition(editor: Editor) {
-    const cursor = editor.getCursor();
-    const target = this.findLinkAtCursor(editor, cursor);
-    if (target) {
-      const formattedText = this.formatTargetText(target);
-      editor.setSelection(target.from, target.to);
-      this.selectedText = formattedText;
-      this.parseSelectedText(formattedText);
-    } else {
-      this.parseClipboard();
-    }
-  }
-
-  private tryExpandSelection(
-    editor: Editor,
-    _selectedText: string,
-  ): LinkTarget | null {
-    const cursorFrom = editor.getCursor("from");
-    const line = editor.getLine(cursorFrom.line);
-    const selectionStart = cursorFrom.ch;
-    const selectionEnd = editor.getCursor("to").ch;
-
-    return this.matchLinkInLine(
-      line,
-      selectionStart,
-      selectionEnd,
-      cursorFrom.line,
-    );
-  }
-
-  private findLinkAtCursor(
-    editor: Editor,
-    cursor: EditorPosition,
-  ): LinkTarget | null {
-    const line = editor.getLine(cursor.line);
-    const cursorPosInLine = cursor.ch;
-
-    return this.matchLinkInLine(
-      line,
-      cursorPosInLine,
-      cursorPosInLine,
-      cursor.line,
-    );
-  }
-
-  private matchLinkInLine(
-    line: string,
-    startPos: number,
-    endPos: number,
-    lineNumber: number,
-  ): LinkTarget | null {
-    const markdownRegex =
-      /(!)?\[([^\]]+)\]\(([^\s)]+)(?:\s+["']([^"']*)["'])?\)/g;
-    let match;
-
-    while ((match = markdownRegex.exec(line)) !== null) {
-      const isImage = !!match[1];
-      const linkStart = match.index;
-      const linkEnd = match.index + match[0].length;
-      const text = match[2];
-      const url = match[3];
-      const quotedTitle = match[4] || "";
-
-      if (startPos <= linkEnd && endPos >= linkStart) {
-        return {
-          isImage,
-          text,
-          url,
-          title: quotedTitle,
-          from: { line: lineNumber, ch: linkStart },
-          to: { line: lineNumber, ch: linkEnd },
-        };
-      }
-    }
-
-    const urlRegex =
-      /(?:^|\s)([a-zA-Z][a-zA-Z\d+\-.]*:\/\/\S+|\S+\.[a-zA-Z]{2,}(?:\/\S*)?)/g;
-
-    while ((match = urlRegex.exec(line)) !== null) {
-      const url = match[1];
-      const linkStart = match.index + (match[0].startsWith(" ") ? 1 : 0);
-      const linkEnd = linkStart + url.length;
-
-      if (startPos <= linkEnd && endPos >= linkStart) {
-        return {
-          isImage: /\.(jpg|jpeg|png|gif|webp|bmp)$/i.test(url),
-          text: url,
-          url,
-          title: "",
-          from: { line: lineNumber, ch: linkStart },
-          to: { line: lineNumber, ch: linkEnd },
-        };
-      }
-    }
-
-    return null;
-  }
-
-  private formatTargetText(target: LinkTarget): string {
-    if (target.isImage) {
-      return `![${target.text}](${target.url}${target.title ? ` "${target.title}"` : ""})`;
-    }
-    return target.title
-      ? `[${target.text}](${target.url} "${target.title}")`
-      : `[${target.text}](${target.url})`;
+  /** Selects the whole link the cursor sits in, so editing replaces it cleanly. */
+  private adoptTarget(editor: Editor, target: LinkTarget | null): boolean {
+    if (!target) return false;
+    const text = formatTargetText(target);
+    editor.setSelection(target.from, target.to);
+    this.selectedText = text;
+    this.parseSelectedText(text);
+    return true;
   }
 
   private parseSelectedText(text: string) {
-    const imglinkMatch = text.match(/!\[.*?\]\(.*?\)/);
-    if (imglinkMatch) {
-      const imglinkIndex = imglinkMatch.index ?? 0;
-      const prefixText = text.substring(0, imglinkIndex);
-      const suffixText = text.substring(imglinkIndex + imglinkMatch[0].length);
-      const imageMatch = this.parseMarkdownImageLink(text);
-      if (imageMatch) {
-        this.linkText = imageMatch.title;
-        this.linkUrl = imageMatch.url;
-        this.linkAlias = imageMatch.quotedTitle || "";
-        this.imageWidth = imageMatch.width || "";
-        this.imageHeight = imageMatch.height || "";
-        this.isEmbed = true;
-        this.prefixText = prefixText;
-        this.suffixText = suffixText;
-        return;
-      }
+    const imageSpan = findLinkSpan(text, "image");
+    const image = imageSpan && parseMarkdownImageLink(imageSpan.source);
+    if (image) {
+      this.applyImage(image);
+      this.splitAround(text, imageSpan);
+      return;
     }
 
-    const linkMatch = text.match(
-      /\[([^\]]+)\]\(([a-zA-Z]+:\/\/[^\s)]+)(?:\s+["']([^"']*)["'])?\)/,
-    );
-    if (linkMatch) {
-      const linkPart = linkMatch[0];
-      const linkIndex = linkMatch.index ?? 0;
-      const prefixText = text.substring(0, linkIndex);
-      const suffixText = text.substring(linkIndex + linkPart.length);
-      const parsedLink = this.parseMarkdownLink(linkPart);
-
-      if (parsedLink) {
-        this.linkText = parsedLink.text;
-        this.linkUrl = parsedLink.url;
-        this.linkAlias = parsedLink.title || "";
-        this.isEmbed = false;
-      }
-
-      this.prefixText = prefixText;
-      this.suffixText = suffixText;
-    } else {
-      const parsed = this.parseMixedContent(text);
-      if (parsed) {
-        this.linkText = parsed.title;
-        this.linkUrl = parsed.url;
-      }
+    const linkSpan = findLinkSpan(text, "link");
+    const link = linkSpan && parseMarkdownLink(linkSpan.source);
+    if (link) {
+      this.linkText = link.text;
+      this.linkUrl = link.url;
+      this.linkAlias = link.title || "";
+      this.isEmbed = false;
+      this.splitAround(text, linkSpan);
+      return;
     }
+
+    const parsed = parseMixedContent(text);
+    this.linkText = parsed.title;
+    this.linkUrl = parsed.url;
   }
 
-  private parseMixedContent(
-    content: string,
-  ): { title: string; url: string } | null {
-    const titleUrlPattern = /^(.*?)\s*((?:https?:\/\/|www\.)\S+)$/i;
-
-    const markdownPattern = /^\[(.*?)\]\((.*?)\)$/;
-
-    const htmlPattern = /<a[^>]+href=["']([^"']+)["'][^>]*>([^<]+)<\/a>/i;
-
-    let match;
-
-    if ((match = content.match(markdownPattern))) {
-      return {
-        title: match[1].trim(),
-        url: match[2].trim(),
-      };
-    }
-
-    if ((match = content.match(htmlPattern))) {
-      return {
-        title: match[2].trim(),
-        url: match[1].trim(),
-      };
-    }
-
-    if ((match = content.match(titleUrlPattern)) && match[1].trim()) {
-      return {
-        title: match[1].trim(),
-        url: match[2].trim(),
-      };
-    }
-
-    if (this.isValidUrl(content.trim())) {
-      return {
-        title: this.extractTitleFromUrl(content.trim()),
-        url: content.trim(),
-      };
-    }
-
-    return {
-      title: content.trim(),
-      url: "",
-    };
+  /** Text either side of the link is preserved and re-emitted on insert. */
+  private splitAround(
+    text: string,
+    span: { start: number; length: number },
+  ): void {
+    this.prefixText = text.substring(0, span.start);
+    this.suffixText = text.substring(span.start + span.length);
   }
 
-  private extractTitleFromUrl(url: string): string {
-    const specialProtocolMatch = url.match(/^([a-zA-Z]+):\/\/(.+)$/);
-    if (specialProtocolMatch) {
-      const [, protocol, path] = specialProtocolMatch;
-      const segments = path.split(/[/\\]/);
-      const lastSegment = segments[segments.length - 1];
-      if (lastSegment) {
-        return decodeURIComponent(lastSegment).trim();
-      }
-      return protocol.toUpperCase();
-    }
-
-    const wikiLinkMatch = url.match(/^\[\[(.*?)\]\]$/);
-    if (wikiLinkMatch) {
-      return wikiLinkMatch[1];
-    }
-
-    const pathMatch = url.match(/[^/\\]+$/);
-    if (pathMatch) {
-      return pathMatch[0]
-        .replace(/\.[^/.]+$/, "")
-        .replace(/[-_]/g, " ")
-        .trim();
-    }
-
-    return url;
-  }
-
-  private isValidUrl(url: string): boolean {
-    if (!url || url.includes("\n") || /\s/.test(url)) {
-      return false;
-    }
-
-    const specialProtocols = [
-      "obsidian://",
-      "zotero://",
-      "evernote://",
-      "notion://",
-      "bear://",
-      "things://",
-      "drafts://",
-      "x-devonthink-item://",
-      "file://",
-      "ftp://",
-      "ftps://",
-      "http://",
-      "https://",
-      "tel:",
-      "mailto:",
-    ];
-
-    if (specialProtocols.some((protocol) => url.startsWith(protocol))) {
-      return true;
-    }
-
-    if (url.match(/^\[\[.*?\]\]$/)) {
-      return true;
-    }
-
-    if (
-      url.match(/^[./\\]/) ||
-      url.match(/^[a-zA-Z]:\\/) ||
-      url.match(/^\/[^/]/) ||
-      url.match(/^[a-zA-Z]+:\/\//)
-    ) {
-      return true;
-    }
-
-    try {
-      new URL(url);
-      return true;
-    } catch {
-      return false;
-    }
-  }
-
-  private parseMarkdownImageLink(markdown: string): {
-    title: string;
-    url: string;
-    width?: string;
-    height?: string;
-    quotedTitle?: string;
-  } | null {
-    const imageRegex =
-      /!\[(.*?)(?:\|(\d+)(?:x(\d+))?)?\]\(\s*([^\s)]+)(?:\s+["']([^"']*)["'])?\s*\)/;
-    const match = markdown.match(imageRegex);
-
-    if (match) {
-      const [, title, width, height, url, quotedTitle] = match;
-      this.isEmbed = true;
-      if (this.embedToggle) {
-        this.embedToggle.setValue(true);
-        const imageSizeEl = this.contentEl.querySelector(".image-size-setting");
-        if (imageSizeEl) {
-          (imageSizeEl as HTMLElement).style.display = "block";
-        }
-      }
-
-      return {
-        title: title.trim(),
-        url: url.trim(),
-        width: width,
-        height: height,
-        quotedTitle: quotedTitle?.trim(),
-      };
-    }
-    return null;
-  }
-
-  private parseMarkdownLink(markdown: string): {
+  private applyImage(image: {
     text: string;
     url: string;
     title?: string;
-  } | null {
-    const linkRegex =
-      /\[([^\]]+)\]\(([a-zA-Z]+:\/\/[^\s)]+)(?:\s+["']([^"']*)["'])?\)/;
-    const match = markdown.match(linkRegex);
-
-    if (match) {
-      const [, text, url, title] = match;
-      return {
-        text: text.trim(),
-        url: url.trim(),
-        title: title?.trim(),
-      };
-    }
-    return null;
+    width?: string;
+    height?: string;
+  }): void {
+    this.linkText = image.text;
+    this.linkUrl = image.url;
+    this.linkAlias = image.title || "";
+    this.imageWidth = image.width || "";
+    this.imageHeight = image.height || "";
+    this.setEmbed(true);
   }
 
-  private async parseClipboard() {
-    try {
-      const clipboardItems = await this.readClipboard();
-
-      const plainText = clipboardItems["text/plain"];
-      if (plainText) {
-        const imageMatch = this.parseMarkdownImageLink(plainText);
-
-        if (imageMatch) {
-          this.linkText = imageMatch.title;
-          this.linkUrl = imageMatch.url;
-          this.linkAlias = imageMatch.quotedTitle || "";
-          if (imageMatch.width || imageMatch.height) {
-            this.isEmbed = true;
-            this.imageWidth = imageMatch.width || "";
-            this.imageHeight = imageMatch.height || "";
-          }
-          this.updateUI();
-          return;
-        }
-
-        const linkMatch = this.parseMarkdownLink(plainText);
-        if (linkMatch) {
-          this.linkText = linkMatch.text;
-          this.linkUrl = linkMatch.url;
-          this.linkAlias = linkMatch.title || "";
-          this.isEmbed = false;
-          this.updateUI();
-          return;
-        }
-      }
-
-      if (clipboardItems["text/html"]) {
-        const parsed = this.parseHtmlContent(clipboardItems["text/html"]);
-        if (parsed) {
-          this.linkText = this.linkText || parsed.title;
-          this.linkUrl = parsed.url;
-        }
-      } else if (clipboardItems["text/markdown"]) {
-        const parsed = this.parseMarkdownContent(
-          clipboardItems["text/markdown"],
-        );
-        if (parsed) {
-          this.linkText = this.linkText || parsed.title;
-          this.linkUrl = parsed.url;
-        }
-      } else if (clipboardItems["text/plain"]) {
-        const parsed = this.parseMixedContent(clipboardItems["text/plain"]);
-        if (parsed) {
-          this.linkText = this.linkText || parsed.title;
-          this.linkUrl = parsed.url;
-        }
-      }
-
-      this.updateUI();
-    } catch (e) {
-      console.error("Failed to read clipboard:", e);
-    }
+  private setEmbed(value: boolean): void {
+    this.isEmbed = value;
+    if (!this.embedToggle) return;
+    this.embedToggle.setValue(value);
+    const sizeEl = this.contentEl.querySelector<HTMLElement>(
+      ".image-size-setting",
+    );
+    if (sizeEl) sizeEl.style.display = value ? "block" : "none";
   }
 
-  private async readClipboard(): Promise<ClipboardItems> {
-    const items: ClipboardItems = {};
+  private async loadFromClipboard(): Promise<void> {
+    const { image, link, fallback } = await readClipboardLink();
 
-    try {
-      const clipboardItems = await navigator.clipboard.read();
-
-      for (const clipboardItem of clipboardItems) {
-        const types = clipboardItem.types;
-
-        for (const type of types) {
-          if (
-            type === "text/html" ||
-            type === "text/plain" ||
-            type === "text/markdown"
-          ) {
-            const blob = await clipboardItem.getType(type);
-            items[type] = await blob.text();
-          }
-        }
-      }
-    } catch {
-      try {
-        const text = await navigator.clipboard.readText();
-        items["text/plain"] = text;
-      } catch (e) {
-        console.error("Failed to read clipboard:", e);
-      }
+    if (image) {
+      this.applyImage(image);
+    } else if (link) {
+      this.linkText = link.text;
+      this.linkUrl = link.url;
+      this.linkAlias = link.title || "";
+      this.isEmbed = false;
+    } else if (fallback) {
+      this.linkText = this.linkText || fallback.title;
+      this.linkUrl = fallback.url;
     }
 
-    return items;
-  }
-
-  private parseHtmlContent(
-    html: string,
-  ): { title: string; url: string } | null {
-    const parser = new DOMParser();
-    const doc = parser.parseFromString(html, "text/html");
-
-    const linkElement = doc.querySelector("a");
-    if (linkElement) {
-      return {
-        title: linkElement.textContent?.trim() || "",
-        url: linkElement.href,
-      };
-    }
-
-    const text = doc.body.textContent || "";
-    return this.parseMixedContent(text);
-  }
-
-  private parseMarkdownContent(
-    markdown: string,
-  ): { title: string; url: string } | null {
-    const markdownLinkRegex = /\[([^\]]+)\]\(([^)]+)\)/;
-    const match = markdown.match(markdownLinkRegex);
-
-    if (match) {
-      return {
-        title: match[1].trim(),
-        url: match[2].trim(),
-      };
-    }
-
-    return this.parseMixedContent(markdown);
+    this.updateUI();
   }
 
   onOpen() {
@@ -676,7 +214,7 @@ export class InsertLinkModal extends Modal {
           if (this.linkUrl) {
             btn.setDisabled(true);
             btn.setIcon("lucide-loader");
-            const title = await this.fetchRemoteTitle(this.linkUrl);
+            const title = await fetchRemoteTitle(this.linkUrl);
             btn.setIcon("lucide-globe");
             btn.setDisabled(false);
             this.linkText = title;
@@ -728,7 +266,7 @@ export class InsertLinkModal extends Modal {
           .setIcon("lucide-clipboard")
           .setTooltip(strings.pasteParse)
           .onClick(async () => {
-            await this.parseClipboard();
+            await this.loadFromClipboard();
             this.updateHeader();
           });
       });
@@ -864,10 +402,6 @@ export class InsertLinkModal extends Modal {
     }, 10);
   }
 
-  private async fetchRemoteTitle(url: string): Promise<string> {
-    return UrlTitleFetcher.fetchRemoteTitle(url);
-  }
-
   private getImageDimensions(): {
     width: number;
     height: number | null;
@@ -940,7 +474,7 @@ export class InsertLinkModal extends Modal {
       return true;
     }
 
-    if (!this.isValidUrl(url)) {
+    if (!isValidUrl(url)) {
       this.urlErrorMsg.textContent = strings.urlFormatError;
       this.urlErrorMsg.style.display = "block";
       return false;

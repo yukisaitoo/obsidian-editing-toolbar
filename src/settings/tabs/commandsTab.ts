@@ -8,7 +8,7 @@ import {
 import type { SettingsTabContext } from "src/settings/settingsTab";
 import type { ToolbarStyleKey } from "src/settings/settingsData";
 import { POSITION_STYLES, STYLE_LABELS } from "src/settings/settingsData";
-import { checkHtml } from "src/toolbar/editingToolbar";
+import { checkHtml } from "src/toolbar/toolbarDom";
 import { strings, t } from "src/translations/helper";
 import { GenNonDuplicateID } from "src/util/util";
 

@@ -8,7 +8,6 @@ import { renderAppearanceTab } from "src/settings/tabs/appearanceTab";
 import { renderCommandsTab } from "src/settings/tabs/commandsTab";
 import { renderGeneralTab } from "src/settings/tabs/generalTab";
 import { renderImportExportTab } from "src/settings/tabs/importExportTab";
-import { editingToolbarPopover, selfDestruct } from "src/toolbar/editingToolbar";
 import { strings } from "src/translations/helper";
 
 const DELETE_CONFIRM_TIMEOUT = 3500;
@@ -51,16 +50,8 @@ export class EditingToolbarSettingTab extends PluginSettingTab {
     this.plugin = plugin;
     this.commandStyle = plugin.liveStyle;
 
-    const handleNewCommand = () => {
-      selfDestruct(this.plugin);
-      editingToolbarPopover(app, this.plugin);
-      this.display();
-    };
-
-    window.addEventListener("editingToolbar-NewCommand", handleNewCommand);
-    this.plugin.register(() =>
-      window.removeEventListener("editingToolbar-NewCommand", handleNewCommand),
-    );
+    // A rebuild re-renders this pane too, so its previews match the live bars.
+    this.plugin.register(this.plugin.onRebuild(() => this.display()));
   }
 
   display(): void {
@@ -70,17 +61,10 @@ export class EditingToolbarSettingTab extends PluginSettingTab {
     containerEl.empty();
     containerEl.addClass("editing-toolbar-settings");
 
-    containerEl
-      .createEl("div", { cls: "editing-toolbar-header" })
-      .createEl("div", { cls: "editing-toolbar-title-container" })
-      .createEl("h1", {
-        text: "Obsidian Editing Toolbar: " + this.plugin.manifest.version,
-        cls: "editing-toolbar-title",
-      });
-
     const tabContainer = containerEl.createEl("div", {
       cls: "editing-toolbar-tabs",
     });
+
     SETTING_TABS.forEach((tab) => {
       const tabButton = tabContainer.createEl("div", {
         cls: `editing-toolbar-tab ${this.activeTab === tab.id ? "active" : ""}`,
@@ -142,9 +126,7 @@ export class EditingToolbarSettingTab extends PluginSettingTab {
   }
 
   private rebuildToolbar(): void {
-    setTimeout(() => {
-      dispatchEvent(new Event("editingToolbar-NewCommand"));
-    }, REBUILD_DELAY);
+    setTimeout(() => this.plugin.rebuildToolbars(), REBUILD_DELAY);
   }
 
   private createDeleteButton(
