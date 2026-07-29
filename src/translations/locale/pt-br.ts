@@ -51,7 +51,6 @@ const ui: Partial<Record<keyof typeof en, string>> = {
   delete: "Deletar",
   doWantContinue: "Deseja continuar?",
   editingToolbarCommands: "Comandos da Barra de Ferramentas",
-  embedContent: "Conteúdo Embutido",
   enableToolbarPositionedTop:
     "Habilitar a barra de ferramentas posicionada no topo.",
   enableToolbarAppearsUponText:
@@ -64,15 +63,9 @@ const ui: Partial<Record<keyof typeof en, string>> = {
   exportGenerateJsonConfigurationCan:
     "Exportar: Gerar uma configuração em formato JSON para salvar ou compartilhar.",
   failedCopyConfiguration: "Falha ao copiar configuração",
-  fetchRemoteTitle: "Obter Título Remoto",
-  fitEditorWidth: "Ajustar Largura do Editor",
   fontColors: "Cores de Texto",
   general: "Geral",
   icon: "Ícone",
-  ifImageTurn: "Se for uma imagem, ative",
-  imageHeight: "Altura da Imagem",
-  imageSize: "Tamanho da Imagem",
-  imageWidth: "Largura da Imagem",
   import: "Importar",
   importConfiguration: "Configuração de Importação",
   importMode: "Modo de Importação",
@@ -84,12 +77,7 @@ const ui: Partial<Record<keyof typeof en, string>> = {
   inputContent: "Digite o conteúdo",
   inputTitle: "Digite o título",
   insert: "Inserir",
-  insertNewLine: "Inserir Nova Linha",
-  insertLinkNextLine: "Inserir um link na próxima linha",
   invalidImportDataFormat: "Formato de dados de importação inválido",
-  linkText: "Texto do Link",
-  linkTitleOptional: "Título do Link (opcional)",
-  linkUrl: "URL do Link",
   loading: "Carregando...",
   more: "Mais",
   updateFollowingStyleCommands: "Atualizar Comandos de Estilo Contextual",
@@ -102,9 +90,7 @@ const ui: Partial<Record<keyof typeof en, string>> = {
   overwriteImport: "Sobrescrever Importação",
   overwriteModeReplaceSettingsImported:
     "Modo de Sobrescrever (Substituir configurações com as importadas)",
-  pasteParse: "Colar e Analisar",
   pasteConfigurationHere: "Colar configuração aqui...",
-  pleaseEnterUrlFirst: "Por favor digite uma URL primeiro",
   pleaseEnterNewName: "Por favor, digite um novo nome: ",
   pleasePasteConfigurationDataFirst:
     "Por favor coloque os dados da configuração primeiro",
@@ -133,7 +119,6 @@ const ui: Partial<Record<keyof typeof en, string>> = {
     "Visualização da barra de ferramentas (com uma configuração de comandos hipotética).",
   toolbarSettings: "Configurações da Barra de Ferramentas",
   topToolbar: "Barra de Ferramentas de Topo",
-  urlFormatError: "Erro de Formato de URL",
   updateImport: "Atualizar Importação",
   updateMainMenuCommands: "Atualizar Comandos do Menu Principal",
   updateModeAddNewItems:

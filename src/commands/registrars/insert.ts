@@ -5,7 +5,6 @@ import {
 } from "src/commands/commandDefinitions";
 import type { Registrar } from "src/commands/registrars/types";
 import { InsertCalloutModal } from "src/modals/insertCalloutModal";
-import { InsertLinkModal } from "src/modals/insertLinkModal";
 
 // Obsidian leaves the cursor inside the markup it inserts for these two.
 const CURSOR_OFFSETS: Record<string, number> = {
@@ -23,13 +22,6 @@ export const registerInsertCommands: Registrar = ({
     name: "Insert callout…",
     icon: "lucide-quote",
     callback: () => new InsertCalloutModal(plugin).open(),
-  });
-
-  plugin.addCommand({
-    id: "insert-link",
-    name: "Insert link…",
-    icon: "lucide-link",
-    callback: () => new InsertLinkModal(plugin).open(),
   });
 
   Object.entries(WRAP_COMMANDS).forEach(([name, plot]) => {

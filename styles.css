@@ -933,37 +933,6 @@ body.theme-dark .modal-container.editingToolbar-Modal .modal input[type='range']
   color: rgb(var(--callout-color));
 }
 
-/* --- Insert-link modal ---------------------------------------------------- */
-
-.insert-link-modal .setting-item {
-  border-top: none;
-}
-
-.insert-link-modal input {
-  width: 100%;
-}
-
-.modal .insert-link-modal-title {
-  font-size: 12px;
-  color: var(--text-muted);
-}
-
-.insert-link-modal .image-size-setting.is-hidden {
-  display: none;
-}
-
-.insert-link-modal .preview-setting {
-  display: block;
-}
-
-.insert-link-modal .preview-setting input {
-  width: 100%;
-  border: none;
-  background-color: transparent;
-  color: var(--text-muted);
-  font-size: 12px;
-}
-
 /* --- Confirm modal -------------------------------------------------------- */
 
 .confirm-modal .confirm-modal-buttons {

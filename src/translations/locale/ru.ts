@@ -59,7 +59,6 @@ const ui: Partial<Record<keyof typeof en, string>> = {
   doWantContinue: "Вы хотите продолжить?",
   dropdownMenu: "Выпадающее меню",
   editingToolbarCommands: "Команды панели инструментов",
-  embedContent: "Встроенное содержимое",
   enableToolbarPositionedTop:
     "Включить панель инструментов в верхней части окна.",
   enableToolbarAppearsUponText:
@@ -80,16 +79,10 @@ const ui: Partial<Record<keyof typeof en, string>> = {
   extracted: "Извлечено",
   extractionFailed: "Не удалось выполнить извлечение",
   failedCopyConfiguration: "Не удалось скопировать конфигурацию",
-  fetchRemoteTitle: "Получить заголовок URL",
-  fitEditorWidth: "Подогнать под ширину редактора",
   fontColors: "Цвета шрифта",
   fullHalfConverter: "Преобразование полуширинных/полноширинных символов",
   general: "Основные",
   icon: "Значок",
-  ifImageTurn: "Если это изображение, включите опцию",
-  imageHeight: "Высота изображения",
-  imageSize: "Размер изображения",
-  imageWidth: "Ширина изображения",
   import: "Импорт",
   importConfiguration: "Импорт конфигурации",
   importMode: "Режим импорта",
@@ -102,13 +95,8 @@ const ui: Partial<Record<keyof typeof en, string>> = {
   inputTitle: "Введите заголовок",
   insert: "Вставить",
   insertBlankLines: "Вставить пустые строки",
-  insertNewLine: "Вставить новую строку",
-  insertLinkNextLine: "Вставить ссылку на следующей строке",
   invalidImportDataFormat: "Неверный формат импортируемых данных",
   item: "Элемент",
-  linkText: "Текст ссылки",
-  linkTitleOptional: "Заголовок ссылки (необязательно)",
-  linkUrl: "URL ссылки",
   listPatternDetectedAutoSplit:
     "Обнаружен шаблон списка, выполнено автоматическое разделение",
   listTable: "Список в таблицу",
@@ -135,11 +123,9 @@ const ui: Partial<Record<keyof typeof en, string>> = {
   overwriteImport: "Импорт с заменой",
   overwriteModeReplaceSettingsImported:
     "Режим перезаписи (заменить настройки импортированными)",
-  pasteParse: "Вставить и обработать",
   pasteConfigurationHere: "Вставьте конфигурацию сюда...",
   plainTextCopiedClipboard:
     "Текст без форматирования скопирован в буфер обмена",
-  pleaseEnterUrlFirst: "Сначала введите URL",
   pleaseEnterNewName: "Введите новое название: ",
   pleasePasteConfigurationDataFirst: "Сначала вставьте данные конфигурации",
   pleaseSelectValidMarkdownTable:
@@ -191,7 +177,6 @@ const ui: Partial<Record<keyof typeof en, string>> = {
   toolbarSettings: "Настройки панели инструментов",
   topToolbar: "Верхняя панель инструментов",
   trimLineEnds: "Удалить пробелы в начале и конце строк",
-  urlFormatError: "Неверный формат URL",
   updateImport: "Импорт с обновлением",
   updateMainMenuCommands: "Обновить команды главного меню",
   updateModeAddNewItems:

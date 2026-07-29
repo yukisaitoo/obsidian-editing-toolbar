@@ -12,7 +12,6 @@ import {
 import { CommandsManager } from "src/commands/commands";
 import addIcons from "src/icons/customIcons";
 import type { AdmonitionDefinition } from "src/modals/callout/calloutTypes";
-import { InsertLinkModal } from "src/modals/insertLinkModal";
 import type { ToolbarStyleKey } from "src/settings/settingsData";
 import {
   applyAppearanceVars,
@@ -108,22 +107,6 @@ export default class EditingToolbarPlugin extends Plugin {
 
     this.registerEvent(
       this.app.workspace.on("editor-menu", this.handleEditorContextMenu),
-    );
-    this.registerEvent(
-      this.app.workspace.on(
-        "url-menu",
-        (menu: Menu, _url: string, _view: MarkdownView) => {
-          menu.addItem((item) =>
-            item
-              .setTitle("Edit link…")
-              .setSection("info")
-              .setIcon("link")
-              .onClick(() => {
-                new InsertLinkModal(this).open();
-              }),
-          );
-        },
-      ),
     );
     addIcons();
     this.positionStyle = this.settings.positionStyle;

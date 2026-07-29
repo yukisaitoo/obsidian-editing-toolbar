@@ -293,11 +293,6 @@ export const DEFAULT_TOOLBAR_COMMANDS: Command[] = [
         icon: "note-glyph",
       },
       {
-        id: "editing-toolbar:insert-link",
-        name: "Link",
-        icon: "link-glyph",
-      },
-      {
         id: "editing-toolbar:hrline",
         name: "Horizontal rule",
         icon: HORIZONTAL_RULE_ICON,
@@ -419,7 +414,6 @@ export const DEFAULT_FOLLOWING_COMMANDS: Command[] = [
     name: "Inline code",
     icon: "code-glyph",
   },
-  { id: "editing-toolbar:insert-link", name: "Link", icon: "link-glyph" },
   cloneToolbarDefault("editing-toolbar:change-font-color"),
   cloneToolbarDefault("editing-toolbar:change-background-color"),
 ];
