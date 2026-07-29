@@ -621,10 +621,10 @@ button[class^=editingToolbarCommandsubItem]::after {
   border: 2px dashed rgba(var(--interactive-accent-rgb), 0.5);
 }
 
-/* TODO: user-facing copy; the rest of the plugin routes strings through
-   src/translations, this one can't be translated. */
+/* Copy comes from src/translations via the custom property, set in
+   settings/tabs/commandsTab.ts. The fallback only shows if that never ran. */
 .editingToolbarSettingsTabsContainer .editingToolbarSettingsTabsContainer_sub:empty::before {
-  content: "✖️Drag it here";
+  content: var(--editing-toolbar-drag-hint, "✖️");
   margin: auto;
   font-size: 12px;
 }

@@ -52,6 +52,7 @@ export const en = {
   detectedCodeEnglishContextConverted:
     "Detected code/English context: converted to half-width symbols",
   doWantContinue: "Do you want to continue?",
+  dragCommandsHere: "Drag it here",
   dropdownMenu: "Dropdown Menu",
   editingToolbarCommands: "Editing Toolbar Commands",
   embedContent: "Embed Content",

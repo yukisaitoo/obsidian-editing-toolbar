@@ -37,13 +37,13 @@ export const registerFormattingCommands: Registrar = ({
 
   add("format-eraser", "Format eraser", "eraser", setFormatEraser);
   add("change-font-color", "Change font color", FONT_COLOR_ICON, (editor) =>
-    setFontcolor(plugin.settings.cMenuFontColor, editor),
+    setFontcolor(plugin.settings.lastFontColor, editor),
   );
   add(
     "change-background-color",
     "Change background color",
     BACKGROUND_COLOR_ICON,
-    (editor) => setBackgroundcolor(plugin.settings.cMenuBackgroundColor, editor),
+    (editor) => setBackgroundcolor(plugin.settings.lastHighlightColor, editor),
   );
 
   LIST_ACTIONS.forEach(({ id, name, icon, run }) => add(id, name, icon, run));

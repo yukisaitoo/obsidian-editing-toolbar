@@ -1,5 +1,5 @@
 import type { Registrar } from "src/commands/registrars/types";
-import { renumberSelection } from "src/util/util";
+import { renumberSelection } from "src/util/text/renumber";
 
 export const registerCoreCommands: Registrar = ({ plugin, runOnEditor }) => {
   plugin.addCommand({
@@ -13,7 +13,7 @@ export const registerCoreCommands: Registrar = ({ plugin, runOnEditor }) => {
     name: "Toggle toolbar",
     icon: "editingToolbar",
     callback: async () => {
-      plugin.settings.cMenuVisibility = !plugin.settings.cMenuVisibility;
+      plugin.settings.toolbarVisible = !plugin.settings.toolbarVisible;
       await plugin.saveSettings();
       plugin.rebuildToolbars();
     },

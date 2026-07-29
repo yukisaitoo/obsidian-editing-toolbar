@@ -27,9 +27,9 @@ const GENERAL_SETTING_KEYS: (keyof EditingToolbarSettings)[] = [
   "positionStyle",
   "enableTopToolbar",
   "enableFollowingToolbar",
-  "cMenuVisibility",
-  "cMenuFontColor",
-  "cMenuBackgroundColor",
+  "toolbarVisible",
+  "lastFontColor",
+  "lastHighlightColor",
   "custom_bg1",
   "custom_bg2",
   "custom_bg3",
@@ -240,43 +240,6 @@ export class ImportExportModal extends Modal {
       const emptyTopCommands =
         containsTopCommands && importData.topCommands.length === 0;
 
-      let importSummary = strings.import3 + "\n";
-
-      if (containsGeneralSettings)
-        importSummary += "• " + strings.updateGeneralSettings + "\n";
-      if (hasFollowingCommands)
-        importSummary +=
-          "• " +
-          strings.updateFollowingStyleCommands +
-          " (" +
-          importData.followingCommands.length +
-          " " +
-          ")\n";
-      if (hasTopCommands)
-        importSummary +=
-          "• " +
-          strings.updateTopStyleCommands +
-          " (" +
-          importData.topCommands.length +
-          " " +
-          ")\n";
-      if (this.importMode === "overwrite") {
-        if (emptyFollowingCommands)
-          importSummary +=
-            "• " + strings.clearAllFollowingStyleCommands + " ⚠️\n";
-        if (emptyTopCommands)
-          importSummary += "• " + strings.clearAllTopStyleCommands + " ⚠️\n";
-      }
-
-      if (positionStyle) {
-        importSummary +=
-          "• " +
-          strings.setPositionStyle +
-          " " +
-          this.getPositionStyleName(positionStyle) +
-          "\n";
-      }
-
       if (
         !hasFollowingCommands &&
         !hasTopCommands &&
@@ -288,14 +251,41 @@ export class ImportExportModal extends Modal {
         return;
       }
 
-      if (this.importMode === "overwrite") {
-        importSummary += "\n" + strings.overwriteModeReplaceExistingSettings;
-      } else {
-        importSummary += "\n" + strings.updateModeMergeImportedSettings;
+      const isOverwrite = this.importMode === "overwrite";
+      const summary = [strings.import3];
+
+      if (containsGeneralSettings) {
+        summary.push(`• ${strings.updateGeneralSettings}`);
+      }
+      if (hasFollowingCommands) {
+        const count = importData.followingCommands.length;
+        summary.push(`• ${strings.updateFollowingStyleCommands} (${count})`);
+      }
+      if (hasTopCommands) {
+        const count = importData.topCommands.length;
+        summary.push(`• ${strings.updateTopStyleCommands} (${count})`);
+      }
+      if (isOverwrite && emptyFollowingCommands) {
+        summary.push(`• ${strings.clearAllFollowingStyleCommands} ⚠️`);
+      }
+      if (isOverwrite && emptyTopCommands) {
+        summary.push(`• ${strings.clearAllTopStyleCommands} ⚠️`);
+      }
+      if (positionStyle) {
+        const name = this.getPositionStyleName(positionStyle);
+        summary.push(`• ${strings.setPositionStyle} ${name}`);
       }
 
+      summary.push(
+        "",
+        isOverwrite
+          ? strings.overwriteModeReplaceExistingSettings
+          : strings.updateModeMergeImportedSettings,
+        strings.doWantContinue,
+      );
+
       ConfirmModal.show(this.app, {
-        message: importSummary + "\n" + strings.doWantContinue,
+        message: summary.join("\n"),
         confirmWarning: true,
         onConfirm: async () => {
           const backup = this.snapshotSettings();
@@ -377,34 +367,30 @@ export class ImportExportModal extends Modal {
       );
     }
   }
-  private updateCommandArray(targetArray: Command[], sourceArray: Command[]) {
-    if (!targetArray) {
-      return sourceArray.slice();
-    }
+  // Merges `sourceArray` into `targetArray` in place: known ids are replaced,
+  // new ones appended. Submenus recurse, so a submenu the payload does not
+  // mention keeps the entries it already had.
+  private updateCommandArray(
+    targetArray: Command[],
+    sourceArray: Command[],
+  ): void {
+    for (const imported of sourceArray) {
+      const index = targetArray.findIndex((cmd) => cmd.id === imported.id);
+      if (index < 0) {
+        targetArray.push(imported);
+        continue;
+      }
 
-    sourceArray.forEach((importedCommand: Command) => {
-      const existingCommandIndex = targetArray.findIndex(
-        (cmd) => cmd.id === importedCommand.id,
-      );
-
-      if (existingCommandIndex >= 0) {
-        targetArray[existingCommandIndex] = importedCommand;
+      const existingSubmenu = targetArray[index].SubmenuCommands;
+      if (existingSubmenu && imported.SubmenuCommands) {
+        // Merge into the existing submenu before it is overwritten below —
+        // assigning first would leave both sides pointing at the same array.
+        this.updateCommandArray(existingSubmenu, imported.SubmenuCommands);
+        targetArray[index] = { ...imported, SubmenuCommands: existingSubmenu };
       } else {
-        targetArray.push(importedCommand);
+        targetArray[index] = imported;
       }
-
-      if (
-        importedCommand.SubmenuCommands &&
-        targetArray[existingCommandIndex]?.SubmenuCommands
-      ) {
-        this.updateCommandArray(
-          targetArray[existingCommandIndex].SubmenuCommands!,
-          importedCommand.SubmenuCommands,
-        );
-      }
-    });
-
-    return targetArray;
+    }
   }
   importGeneralSettings(importData: JsonPayload) {
     GENERAL_SETTING_KEYS.forEach((key) => {

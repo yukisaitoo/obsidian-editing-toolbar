@@ -1,29 +1,11 @@
 import { DropdownComponent, Modal, Platform, Setting, setIcon } from "obsidian";
+import type { CalloutTypeInfo } from "src/modals/callout/calloutTypes";
+import { buildCalloutOptions } from "src/modals/callout/calloutTypes";
 import EditingToolbarPlugin from "src/plugin/main";
 import { strings } from "src/translations/helper";
 
 const SEPARATOR_VALUE = "---separator---";
 
-interface BuiltInCalloutType {
-  type: string;
-  aliases: string[];
-  icon: string;
-  label: string;
-  color: string;
-}
-interface AdmonitionIconDefinition {
-  name: string;
-  type: string; // 'default' means Admonition handles it
-  svg?: string;
-}
-interface CombinedCalloutTypeInfo {
-  type: string; // e.g. 'note', 'ad-warning'
-  label: string;
-  icon: string | AdmonitionIconDefinition;
-  color: string;
-  isAdmonition: boolean;
-  sourcePlugin?: string;
-}
 export class InsertCalloutModal extends Modal {
   public type: string = "note";
   public title: string = "";
@@ -31,112 +13,15 @@ export class InsertCalloutModal extends Modal {
   public collapse: "none" | "open" | "closed" = "none";
   private insertButton!: HTMLElement;
   private contentTextArea!: HTMLTextAreaElement;
-  private allCalloutOptions: CombinedCalloutTypeInfo[] = [];
+  private allCalloutOptions: CalloutTypeInfo[] = [];
   private iconContainerEl!: HTMLElement;
-  private readonly builtInCalloutTypes: Array<BuiltInCalloutType> = [
-    {
-      type: "note",
-      aliases: [],
-      icon: "lucide-pencil",
-      label: "Note",
-      color: "var(--callout-default)",
-    },
-    {
-      type: "abstract",
-      aliases: ["summary", "tldr"],
-      icon: "lucide-clipboard-list",
-      label: "Abstract",
-      color: "var(--callout-summary)",
-    },
-    {
-      type: "info",
-      aliases: [],
-      icon: "lucide-info",
-      label: "Info",
-      color: "var(--callout-info)",
-    },
-    {
-      type: "todo",
-      aliases: [],
-      icon: "lucide-check-circle-2",
-      label: "Todo",
-      color: "var(--callout-todo)",
-    },
-    {
-      type: "important",
-      aliases: [],
-      icon: "lucide-flame",
-      label: "Important",
-      color: "var(--callout-important)",
-    },
-    {
-      type: "tip",
-      aliases: ["hint"],
-      icon: "lucide-flame",
-      label: "Tip",
-      color: "var(--callout-tip)",
-    },
-    {
-      type: "success",
-      aliases: ["check", "done"],
-      icon: "lucide-check",
-      label: "Success",
-      color: "var(--callout-success)",
-    },
-    {
-      type: "question",
-      aliases: ["help", "faq"],
-      icon: "lucide-help-circle",
-      label: "Question",
-      color: "var(--callout-question)",
-    },
-    {
-      type: "warning",
-      aliases: ["caution", "attention"],
-      icon: "lucide-alert-triangle",
-      label: "Warning",
-      color: "var(--callout-warning)",
-    },
-    {
-      type: "failure",
-      aliases: ["fail", "missing"],
-      icon: "lucide-x",
-      label: "Failure",
-      color: "var(--callout-fail)",
-    },
-    {
-      type: "danger",
-      aliases: ["error"],
-      icon: "lucide-zap",
-      label: "Danger",
-      color: "var(--callout-error)",
-    },
-    {
-      type: "bug",
-      aliases: [],
-      icon: "lucide-bug",
-      label: "Bug",
-      color: "var(--callout-bug)",
-    },
-    {
-      type: "example",
-      aliases: [],
-      icon: "lucide-list",
-      label: "Example",
-      color: "var(--callout-example)",
-    },
-    {
-      type: "quote",
-      aliases: ["cite"],
-      icon: "lucide-quote",
-      label: "Quote",
-      color: "var(--callout-quote)",
-    },
-  ];
+
   constructor(private plugin: EditingToolbarPlugin) {
     super(plugin.app);
     this.containerEl.addClass("insert-callout-modal");
-    this.prepareCalloutOptions();
+    this.allCalloutOptions = buildCalloutOptions(
+      this.plugin.admonitionDefinitions ?? undefined,
+    );
     const editor = this.plugin.commandsManager.getActiveEditor();
     if (editor) {
       const selectedText = editor.getSelection();
@@ -151,51 +36,11 @@ export class InsertCalloutModal extends Modal {
           : "note";
     }
   }
-  private prepareCalloutOptions() {
-    this.builtInCalloutTypes.forEach((bt) => {
-      this.allCalloutOptions.push({
-        type: bt.type,
-        label: bt.label,
-        icon: bt.icon,
-        color: bt.color,
-        isAdmonition: false,
-      });
-      bt.aliases.forEach((alias) => {
-        this.allCalloutOptions.push({
-          type: alias,
-          label: `${bt.label} (${alias})`,
-          icon: bt.icon,
-          color: bt.color,
-          isAdmonition: false,
-        });
-      });
-    });
-    if (this.plugin.admonitionDefinitions) {
-      const admonitionTypes = Object.values(this.plugin.admonitionDefinitions);
-      if (admonitionTypes.length > 0) {
-        admonitionTypes.forEach((ad) => {
-          // Avoid duplicates if a built-in type has the same name
-          if (!this.allCalloutOptions.some((opt) => opt.type === ad.type)) {
-            this.allCalloutOptions.push({
-              type: ad.type,
-              label:
-                ad.title || ad.type.charAt(0).toUpperCase() + ad.type.slice(1),
-              icon: ad.icon,
-              color: `rgb(${ad.color})`, // Admonition stores colour as "R,G,B"
-              isAdmonition: true,
-              sourcePlugin: "Admonition",
-            });
-          }
-        });
-      }
-    }
-  }
-
   onOpen() {
     this.display();
   }
 
-  private async display() {
+  private display() {
     const { contentEl } = this;
     contentEl.empty();
 
@@ -242,12 +87,6 @@ export class InsertCalloutModal extends Modal {
         builtIns.forEach((opt) => {
           dropdown.addOption(opt.type, opt.label);
         });
-        if (!this.allCalloutOptions.some((opt) => opt.type === this.type)) {
-          this.type =
-            this.allCalloutOptions.length > 0
-              ? this.allCalloutOptions[0].type
-              : "note";
-        }
         dropdown.setValue(this.type);
         dropdown.onChange((value) => {
           if (value === SEPARATOR_VALUE) {
@@ -335,39 +174,43 @@ export class InsertCalloutModal extends Modal {
   }
   private updateIconAndColor(iconContainer: HTMLElement, typeKey: string) {
     if (!iconContainer) return;
-    const typeInfo = this.allCalloutOptions.find((t) => t.type === typeKey);
     iconContainer.empty();
-    if (typeInfo) {
-      if (typeInfo.isAdmonition) {
-        const adIcon = typeInfo.icon as AdmonitionIconDefinition;
-        if (adIcon.type === "custom" && adIcon.svg) {
-          iconContainer.innerHTML = adIcon.svg;
-          const svgEl = iconContainer.querySelector("svg");
-          if (svgEl) {
-            svgEl.style.fill = typeInfo.color;
-            svgEl.style.width = "var(--icon-size)";
-            svgEl.style.height = "var(--icon-size)";
-          }
-        } else if (adIcon.name.startsWith("lucide-")) {
-          setIcon(iconContainer, adIcon.name);
-          iconContainer.style.setProperty("--callout-color", typeInfo.color);
-        } else if (adIcon.type === "default") {
-          setIcon(iconContainer, adIcon.name); // may not be a valid IconName
-          iconContainer.style.setProperty("--callout-color", typeInfo.color);
-        } else {
-          // Unhandled Admonition icon type → placeholder
-          setIcon(iconContainer, "lucide-box");
-          iconContainer.style.setProperty("--callout-color", typeInfo.color);
-        }
-      } else {
-        setIcon(iconContainer, typeInfo.icon as string);
-        iconContainer.style.setProperty("--callout-color", typeInfo.color);
-      }
-    } else {
+
+    const typeInfo = this.allCalloutOptions.find((t) => t.type === typeKey);
+    if (!typeInfo) {
       // Shouldn't happen if the dropdown is in sync with allCalloutOptions
       setIcon(iconContainer, "lucide-alert-circle");
       iconContainer.style.removeProperty("--callout-color");
+      return;
     }
+
+    iconContainer.style.setProperty("--callout-color", typeInfo.color);
+    const icon = typeInfo.icon;
+
+    if (typeof icon === "string") {
+      setIcon(iconContainer, icon);
+      return;
+    }
+
+    // Admonition's inline SVG has no currentColor to inherit, so it is filled
+    // directly rather than through --callout-color.
+    if (icon.type === "custom" && icon.svg) {
+      iconContainer.style.removeProperty("--callout-color");
+      iconContainer.innerHTML = icon.svg;
+      const svgEl = iconContainer.querySelector("svg");
+      if (svgEl) {
+        svgEl.style.fill = typeInfo.color;
+        svgEl.style.width = "var(--icon-size)";
+        svgEl.style.height = "var(--icon-size)";
+      }
+      return;
+    }
+
+    // A 'default' name is Admonition's own and may not be a valid lucide id;
+    // anything else (font-awesome, etc.) gets a placeholder instead.
+    const renderable =
+      icon.name?.startsWith("lucide-") || icon.type === "default";
+    setIcon(iconContainer, renderable ? icon.name : "lucide-box");
   }
 
   private insertCallout() {

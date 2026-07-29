@@ -21,7 +21,7 @@ interface PickerVariant {
   tableId: string;
   iconId: string;
   html: (plugin: EditingToolbarPlugin) => string;
-  settingsKey: "cMenuFontColor" | "cMenuBackgroundColor";
+  settingsKey: "lastFontColor" | "lastHighlightColor";
   apply: typeof setFontcolor;
 }
 
@@ -32,7 +32,7 @@ const VARIANTS: Record<string, PickerVariant> = {
     tableId: "x-color-picker-table",
     iconId: "change-font-color-icon",
     html: colorpicker,
-    settingsKey: "cMenuFontColor",
+    settingsKey: "lastFontColor",
     apply: setFontcolor,
   },
   "editing-toolbar:change-background-color": {
@@ -41,7 +41,7 @@ const VARIANTS: Record<string, PickerVariant> = {
     tableId: "x-backgroundcolor-picker-table",
     iconId: "change-background-color-icon",
     html: backcolorpicker,
-    settingsKey: "cMenuBackgroundColor",
+    settingsKey: "lastHighlightColor",
     apply: setBackgroundcolor,
   },
 };
@@ -123,13 +123,13 @@ function wireSwatches(
 
 export function syncColorIcons(
   doc: Document,
-  settings: { cMenuFontColor: string; cMenuBackgroundColor: string },
+  settings: { lastFontColor: string; lastHighlightColor: string },
 ): void {
-  paintColorIcons(doc, "change-font-color-icon", settings.cMenuFontColor);
+  paintColorIcons(doc, "change-font-color-icon", settings.lastFontColor);
   paintColorIcons(
     doc,
     "change-background-color-icon",
-    settings.cMenuBackgroundColor,
+    settings.lastHighlightColor,
   );
 }
 

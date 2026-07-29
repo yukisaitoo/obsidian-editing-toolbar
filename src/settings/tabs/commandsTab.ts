@@ -256,6 +256,14 @@ function renderSubmenuRow(
     cls: "editingToolbarSettingsTabsContainer_sub",
   });
 
+  // The empty-state hint is a CSS ::before, which cannot reach the translation
+  // table, so the copy is handed to it as a custom property. JSON.stringify
+  // produces the quoted-and-escaped string `content` expects.
+  subListEl.style.setProperty(
+    "--editing-toolbar-drag-hint",
+    JSON.stringify(`✖️${strings.dragCommandsHere}`),
+  );
+
   Sortable.create(subListEl, {
     ...SHARED_SORTABLE_OPTIONS,
     animation: 150,

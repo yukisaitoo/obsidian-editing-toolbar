@@ -3,6 +3,7 @@
 import type { en } from "../en";
 
 const ui: Partial<Record<keyof typeof en, string>> = {
+  dragCommandsHere: "Перетащите сюда",
   add: "Добавить",
   addCommand: "Добавить команду",
   addPrefixSuffix: "Добавить префикс/суффикс",

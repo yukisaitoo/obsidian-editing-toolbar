@@ -19,7 +19,7 @@ export function resolveToolbarState(
   plugin: EditingToolbarPlugin,
   style: ToolbarStyleKey,
 ): ToolbarState {
-  if (!plugin.settings.cMenuVisibility) return "hidden";
+  if (!plugin.settings.toolbarVisible) return "hidden";
   if (!plugin.isToolbarStyleEnabled(style)) return "hidden";
 
   const view = plugin.app.workspace.getActiveViewOfType(ItemView);

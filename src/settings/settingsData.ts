@@ -104,14 +104,14 @@ export type CustomColorKey =
   | `custom_fc${1 | 2 | 3 | 4 | 5}`;
 
 export interface EditingToolbarSettings {
-  cMenuFontColor: string;
-  cMenuBackgroundColor: string;
+  lastFontColor: string;
+  lastHighlightColor: string;
   positionStyle: string;
   followingCommands: Command[];
   topCommands: Command[];
   enableTopToolbar: boolean;
   enableFollowingToolbar: boolean;
-  cMenuVisibility: boolean;
+  toolbarVisible: boolean;
   custom_bg1: string;
   custom_bg2: string;
   custom_bg3: string;
@@ -140,9 +140,9 @@ export const DEFAULT_SETTINGS: EditingToolbarSettings = {
   topCommands: [],
   enableTopToolbar: true,
   enableFollowingToolbar: false,
-  cMenuVisibility: true,
-  cMenuFontColor: "#2DC26B",
-  cMenuBackgroundColor: "#d3f8b6",
+  toolbarVisible: true,
+  lastFontColor: "#2DC26B",
+  lastHighlightColor: "#d3f8b6",
   custom_bg1: "#FFB78B8C",
   custom_bg2: "#CDF4698C",
   custom_bg3: "#A0CCF68C",

@@ -10,11 +10,6 @@ export interface IWrapInputResult {
   suffix: string;
 }
 
-export interface IExtractColumnResult {
-  delimiter: string;
-  column: string;
-}
-
 export interface IExtractBetweenResult {
   start: string;
   end: string;

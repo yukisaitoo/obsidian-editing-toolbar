@@ -1,6 +1,5 @@
 import {
   Editor,
-  MarkdownView,
   Modal,
   Notice,
   Platform,
@@ -9,6 +8,7 @@ import {
   TextComponent,
   ToggleComponent,
 } from "obsidian";
+import { measureImageDimensions } from "src/modals/link/imageSizing";
 import {
   fetchRemoteTitle,
   readClipboardLink,
@@ -17,6 +17,7 @@ import {
   expandSelectionToLink,
   findLinkAtCursor,
   findLinkSpan,
+  formatMarkdownLink,
   formatTargetText,
   isValidUrl,
   LinkTarget,
@@ -26,17 +27,6 @@ import {
 } from "src/modals/link/linkParsing";
 import EditingToolbarPlugin from "src/plugin/main";
 import { strings } from "src/translations/helper";
-
-/** Resource paths carry a `?<mtime>` cache-buster the markdown target lacks. */
-const stripQuery = (src: string): string => src.split("?")[0];
-
-function safeDecode(value: string): string {
-  try {
-    return decodeURIComponent(value);
-  } catch {
-    return value;
-  }
-}
 
 export class InsertLinkModal extends Modal {
   private linkText: string = "";
@@ -70,7 +60,7 @@ export class InsertLinkModal extends Modal {
       void this.loadFromClipboard();
     }
 
-    this.updateHeader();
+    this.updatePreview();
   }
 
   /** Selects the whole link the cursor sits in, so editing replaces it cleanly. */
@@ -170,7 +160,7 @@ export class InsertLinkModal extends Modal {
   onOpen() {
     this.display();
   }
-  private updateHeader() {
+  private updatePreview() {
     const previewText = this.getPreviewText();
     if (this.previewSetting) {
       const previewInput = this.previewSetting.controlEl.querySelector("input");
@@ -180,34 +170,21 @@ export class InsertLinkModal extends Modal {
   // `text` falls back to the URL when inserting, but stays empty in the preview
   // so the field reads as unfilled.
   private buildMarkdownLink(text: string): string {
-    let markdownLink = this.isEmbed ? "!" : "";
-    markdownLink += `[${text}`;
-
-    if (this.isEmbed && (this.imageWidth || this.imageHeight)) {
-      markdownLink += "|";
-      if (this.imageWidth && this.imageHeight) {
-        markdownLink += `${this.imageWidth}x${this.imageHeight}`;
-      } else if (this.imageWidth) {
-        markdownLink += this.imageWidth;
-      } else {
-        markdownLink += `x${this.imageHeight}`;
-      }
-    }
-
-    markdownLink += `](${this.linkUrl}`;
-
-    if (this.linkAlias) {
-      markdownLink += ` "${this.linkAlias}"`;
-    }
-
-    return markdownLink + ")";
+    return formatMarkdownLink({
+      text,
+      url: this.linkUrl,
+      title: this.linkAlias,
+      isEmbed: this.isEmbed,
+      width: this.imageWidth,
+      height: this.imageHeight,
+    });
   }
 
   private getPreviewText(): string {
     return this.buildMarkdownLink(this.linkText || "");
   }
 
-  private async display() {
+  private display() {
     const { contentEl } = this;
 
     contentEl.empty();
@@ -237,7 +214,7 @@ export class InsertLinkModal extends Modal {
             btn.setDisabled(false);
             this.linkText = title;
             this.linkTextInput.setValue(title);
-            this.updateHeader();
+            this.updatePreview();
           } else {
             new Notice(strings.pleaseEnterUrlFirst);
           }
@@ -250,7 +227,7 @@ export class InsertLinkModal extends Modal {
         .setValue(this.linkText)
         .onChange((value) => {
           this.linkText = value;
-          this.updateHeader();
+          this.updatePreview();
         });
     });
 
@@ -261,7 +238,7 @@ export class InsertLinkModal extends Modal {
         .setValue(this.linkAlias)
         .onChange((value) => {
           this.linkAlias = value;
-          this.updateHeader();
+          this.updatePreview();
         });
     });
 
@@ -276,7 +253,7 @@ export class InsertLinkModal extends Modal {
           .onChange((value) => {
             this.linkUrl = value.trim();
             this.validateUrl(this.linkUrl);
-            this.updateHeader();
+            this.updatePreview();
           });
       })
       .addButton((btn) => {
@@ -285,7 +262,7 @@ export class InsertLinkModal extends Modal {
           .setTooltip(strings.pasteParse)
           .onClick(async () => {
             await this.loadFromClipboard();
-            this.updateHeader();
+            this.updatePreview();
           });
       });
 
@@ -301,7 +278,7 @@ export class InsertLinkModal extends Modal {
     this.embedToggle.setValue(this.isEmbed).onChange((value) => {
       this.isEmbed = value;
       this.syncImageSizeRow();
-      this.updateHeader();
+      this.updatePreview();
     });
 
     const imageSizeSetting = new Setting(contentEl).addButton((btn) => {
@@ -309,7 +286,7 @@ export class InsertLinkModal extends Modal {
         .setIcon("lucide-maximize")
         .setTooltip(strings.fitEditorWidth)
         .onClick(() => {
-          const dimensions = this.getImageDimensions();
+          const dimensions = measureImageDimensions(this.app, this.linkUrl);
           if (dimensions) {
             this.imageWidth = dimensions.width.toString();
             this.imageHeight = dimensions.height?.toString() ?? "";
@@ -321,7 +298,7 @@ export class InsertLinkModal extends Modal {
                 this.imageHeight,
               );
             }
-            this.updateHeader();
+            this.updatePreview();
           }
         });
     });
@@ -336,7 +313,7 @@ export class InsertLinkModal extends Modal {
           .onChange((value) => {
             this.imageWidth = value.replace(/[^\d]/g, "");
             text.setValue(this.imageWidth);
-            this.updateHeader();
+            this.updatePreview();
           });
       });
 
@@ -352,7 +329,7 @@ export class InsertLinkModal extends Modal {
         .onChange((value) => {
           this.imageHeight = value.replace(/[^\d]/g, "");
           text.setValue(this.imageHeight);
-          this.updateHeader();
+          this.updatePreview();
         });
     });
 
@@ -364,7 +341,7 @@ export class InsertLinkModal extends Modal {
       .addToggle((toggle) => {
         toggle.setValue(this.insertNewLine).onChange((value) => {
           this.insertNewLine = value;
-          this.updateHeader();
+          this.updatePreview();
         });
       });
 
@@ -402,96 +379,16 @@ export class InsertLinkModal extends Modal {
         }),
       );
 
+    // Land on the first field still needing input, or the alias when the link
+    // came in complete.
     setTimeout(() => {
-      if (!this.linkText && !this.linkUrl) {
-        this.linkTextInput.inputEl.focus();
-      } else if (!this.linkText && this.linkUrl) {
-        this.linkTextInput.inputEl.focus();
-      } else if (this.linkText && !this.linkUrl) {
-        this.linkUrlInput.inputEl.focus();
-      } else {
-        this.linkAliasInput.inputEl.focus();
-      }
+      const nextEmpty = !this.linkText
+        ? this.linkTextInput
+        : !this.linkUrl
+          ? this.linkUrlInput
+          : this.linkAliasInput;
+      nextEmpty.inputEl.focus();
     }, 10);
-  }
-
-  private getImageDimensions(): {
-    width: number;
-    height: number | null;
-  } | null {
-    const view = this.app.workspace.getActiveViewOfType(MarkdownView);
-    if (!view) return null;
-
-    const editorEl = view.contentEl.querySelector(
-      ".markdown-source-view .cm-content",
-    ) as HTMLElement;
-    const containerEl = view.contentEl as HTMLElement;
-    if (!editorEl || !containerEl) return null;
-
-    const editorWidth = editorEl.offsetWidth;
-    const viewHeight = containerEl.offsetHeight;
-    const maxHeight = Math.floor(viewHeight / 2);
-
-    const targetImg = this.findRenderedImage(editorEl);
-    if (targetImg) {
-      const naturalWidth = targetImg.naturalWidth;
-      const naturalHeight = targetImg.naturalHeight;
-      const aspectRatio = naturalWidth / naturalHeight;
-
-      let adjustedWidth = Math.min(naturalWidth, Math.floor(editorWidth * 0.65));
-      let adjustedHeight = Math.floor(adjustedWidth / aspectRatio);
-
-      if (adjustedHeight > maxHeight) {
-        adjustedHeight = maxHeight;
-        adjustedWidth = Math.floor(adjustedHeight * aspectRatio);
-      }
-
-      return { width: adjustedWidth, height: adjustedHeight };
-    }
-
-    const defaultAspectRatio = 4 / 3;
-    const heightLimitedWidth = Math.floor(maxHeight * defaultAspectRatio);
-    const adjustedWidth = Math.min(
-      Math.floor(editorWidth * 0.65),
-      heightLimitedWidth,
-    );
-
-    return { width: adjustedWidth, height: null };
-  }
-
-  /** The first loaded, on-screen `<img>` for the current url, if there is one. */
-  private findRenderedImage(editorEl: HTMLElement): HTMLImageElement | null {
-    const resolved = this.resolveImageSrc();
-    if (!resolved) return null;
-
-    const target = stripQuery(resolved);
-    for (const img of Array.from(editorEl.querySelectorAll("img"))) {
-      if (
-        stripQuery(img.src) === target &&
-        img.complete &&
-        img.naturalWidth > 0
-      ) {
-        return img;
-      }
-    }
-    return null;
-  }
-
-  /**
-   * `img.src` is always fully resolved — `app://<id>/<abs-path>?<mtime>` for a
-   * vault file — while `linkUrl` holds the raw markdown target, so the link has
-   * to be resolved the same way or vault images never match and every one of
-   * them falls back to the default aspect ratio below.
-   */
-  private resolveImageSrc(): string | null {
-    if (!this.linkUrl) return null;
-    if (/^[a-zA-Z][a-zA-Z\d+\-.]*:\/\//.test(this.linkUrl)) return this.linkUrl;
-
-    const file = this.app.metadataCache.getFirstLinkpathDest(
-      safeDecode(this.linkUrl),
-      this.app.workspace.getActiveFile()?.path ?? "",
-    );
-    return file ? this.app.vault.getResourcePath(file) : null;
   }
 
   private validateUrl(url: string) {
@@ -598,6 +495,6 @@ export class InsertLinkModal extends Modal {
       this.linkAliasInput.setValue(this.linkAlias);
     }
 
-    this.updateHeader();
+    this.updatePreview();
   }
 }

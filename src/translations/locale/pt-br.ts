@@ -3,6 +3,7 @@
 import type { en } from "../en";
 
 const ui: Partial<Record<keyof typeof en, string>> = {
+  dragCommandsHere: "Arraste aqui",
   add: "Adicionar",
   addCommand: "Adicionar Comando",
   addSeparator: "Adicionar Separador",

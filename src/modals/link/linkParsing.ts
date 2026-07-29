@@ -61,6 +61,31 @@ export function parseMarkdownImageLink(markdown: string): ParsedImage | null {
   return { text: text.trim(), url: url.trim(), title: title?.trim(), width, height };
 }
 
+export interface LinkParts {
+  text: string;
+  url: string;
+  title?: string;
+  isEmbed?: boolean;
+  /** Obsidian's `|WxH` embed size hint. Ignored unless `isEmbed`. */
+  width?: string;
+  height?: string;
+}
+
+/** Inverse of parseMarkdownLink / parseMarkdownImageLink. */
+export function formatMarkdownLink(parts: LinkParts): string {
+  const size = parts.isEmbed ? formatSizeHint(parts.width, parts.height) : "";
+  const title = parts.title ? ` "${parts.title}"` : "";
+  const bang = parts.isEmbed ? "!" : "";
+  return `${bang}[${parts.text}${size}](${parts.url}${title})`;
+}
+
+function formatSizeHint(width?: string, height?: string): string {
+  if (width && height) return `|${width}x${height}`;
+  if (width) return `|${width}`;
+  if (height) return `|x${height}`;
+  return "";
+}
+
 /** Renders a target back to markdown, round-tripping what was matched. */
 export function formatTargetText(target: LinkTarget): string {
   const bang = target.isImage ? "!" : "";

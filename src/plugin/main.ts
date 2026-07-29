@@ -11,6 +11,7 @@ import {
 } from "obsidian";
 import { CommandsManager } from "src/commands/commands";
 import addIcons from "src/icons/customIcons";
+import type { AdmonitionDefinition } from "src/modals/callout/calloutTypes";
 import { InsertLinkModal } from "src/modals/insertLinkModal";
 import type { ToolbarStyleKey } from "src/settings/settingsData";
 import {
@@ -35,17 +36,6 @@ import {
 import { strings } from "src/translations/helper";
 import { ViewUtils } from "src/util/viewUtils";
 import { EditingToolbarSettingTab } from "../settings/settingsTab";
-
-export interface AdmonitionDefinition {
-  type: string;
-  title?: string;
-  icon: string;
-  color: string;
-  command: boolean;
-  injectColor?: boolean;
-  noTitle: boolean;
-  copy?: boolean;
-}
 
 interface EditorContextMenuAction {
   title: string;

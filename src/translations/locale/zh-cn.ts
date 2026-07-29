@@ -3,6 +3,7 @@
 import type { en } from "../en";
 
 const ui: Partial<Record<keyof typeof en, string>> = {
+  dragCommandsHere: "拖拽到此处",
   add: "添加",
   addCommand: "添加命令",
   addPrefixSuffix: "添加前后缀",
