@@ -1,6 +1,7 @@
 import { ButtonComponent } from "obsidian";
 import { MORE_CHEVRON_ICON } from "src/icons/inlineIcons";
 import { anchorPopoverToButton } from "src/toolbar/geometry";
+import { POPOVER_SELECTOR } from "src/toolbar/toolbarDom";
 import { strings } from "src/translations/helper";
 
 // A class rather than inline visibility: a hovered flyout inside the popover sets
@@ -112,6 +113,6 @@ export function closeMoreOverflowPopovers(root?: ParentNode): void {
   openPopovers.forEach((popover) => popover.close());
   // A bar rebuilt while open leaves the class on a popover whose instance is gone.
   (root ?? activeWindow.document)
-    .querySelectorAll(`.editingToolbarPopoverBar.${OPEN_CLASS}`)
+    .querySelectorAll(`${POPOVER_SELECTOR}.${OPEN_CLASS}`)
     .forEach((el) => el.removeClass(OPEN_CLASS));
 }

@@ -11,6 +11,7 @@
 //     themselves, which inflate scroll size by hundreds of phantom pixels.
 
 import { Editor } from "obsidian";
+import { BAR_SELECTOR, POPOVER_SELECTOR } from "src/toolbar/toolbarDom";
 import { windowOf } from "src/toolbar/toolbarHost";
 
 const FLYOUT_SHIFT_VAR = "--flyout-shift";
@@ -74,7 +75,7 @@ function clampFlyoutToPane(button: HTMLElement): void {
   button.style.removeProperty(FLYOUT_SHIFT_VAR);
 
   const bar = button.closest<HTMLElement>(
-    "#editingToolbarModalBar, #editingToolbarPopoverBar",
+    `${BAR_SELECTOR}, ${POPOVER_SELECTOR}`,
   );
   const { left: min, right: max } = paneRelativeBounds(bar, FLYOUT_EDGE_MARGIN);
   if (max <= min) return;

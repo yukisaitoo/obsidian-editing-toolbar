@@ -60,7 +60,6 @@ const SELECTION_KEYS = new Set([
 
 export default class EditingToolbarPlugin extends Plugin {
   settings!: EditingToolbarSettings;
-  public positionStyle!: string;
 
   public appearanceEditStyle: ToolbarStyleKey | null = null;
 
@@ -109,7 +108,6 @@ export default class EditingToolbarPlugin extends Plugin {
       this.app.workspace.on("editor-menu", this.handleEditorContextMenu),
     );
     addIcons();
-    this.positionStyle = this.settings.positionStyle;
     this.applyRootAppearanceVars();
   }
 
@@ -163,7 +161,7 @@ export default class EditingToolbarPlugin extends Plugin {
   }
 
   public get liveStyle(): ToolbarStyleKey {
-    const raw = this.positionStyle || this.settings.positionStyle;
+    const raw = this.settings.positionStyle;
     return POSITION_STYLES.includes(raw as ToolbarStyleKey)
       ? (raw as ToolbarStyleKey)
       : "top";
@@ -406,14 +404,14 @@ export default class EditingToolbarPlugin extends Plugin {
     this.appearanceEditStyle = null;
 
     await this.saveSettings();
-    this.onPositionStyleChange(this.settings.positionStyle);
+    this.rebuildToolbars();
   }
 
   async setToolbarStyleEnabled(
     style: ToolbarStyleKey,
     enabled: boolean,
   ): Promise<void> {
-    const previousStyle = this.positionStyle;
+    const previousStyle = this.settings.positionStyle;
     this.settings[
       style === "top" ? "enableTopToolbar" : "enableFollowingToolbar"
     ] = enabled;
@@ -499,8 +497,7 @@ export default class EditingToolbarPlugin extends Plugin {
     updateFollowingBar(this.app, this, editor);
   }
 
-  onPositionStyleChange(newStyle: string): void {
-    this.positionStyle = newStyle;
+  private onPositionStyleChange(newStyle: string): void {
     this.settings.positionStyle = newStyle;
     this.rebuildToolbars();
   }

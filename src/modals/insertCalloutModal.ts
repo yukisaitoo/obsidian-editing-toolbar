@@ -137,14 +137,9 @@ export class InsertCalloutModal extends Modal {
       this.contentTextArea = text.inputEl;
     });
 
-    const shortcutHint = contentEl.createDiv("shortcut-hint");
-    shortcutHint.setText(
-      `${Platform.isMacOS ? "⌘" : "Ctrl"} + Enter ${strings.insert2}`,
-    );
-    shortcutHint.style.textAlign = "right";
-    shortcutHint.style.fontSize = "0.8em";
-    shortcutHint.style.opacity = "0.7";
-    shortcutHint.style.marginTop = "5px";
+    contentEl
+      .createDiv("shortcut-hint")
+      .setText(`${Platform.isMacOS ? "⌘" : "Ctrl"} + Enter ${strings.insert2}`);
 
     new Setting(contentEl)
       .addButton((btn) => {

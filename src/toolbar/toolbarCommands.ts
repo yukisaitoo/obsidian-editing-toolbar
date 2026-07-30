@@ -65,7 +65,6 @@ function renderPlainButton(ctx: RenderContext, item: Command) {
 function renderDropdown(ctx: RenderContext, item: Command, index: number) {
   const parent = new ButtonComponent(ctx.bar);
   parent.setClass("editingToolbarCommandsubItem" + index);
-  parent.setClass("editingToolbarDropdownButton");
   applyTooltipPosition(ctx, parent);
   applyButtonIcon(parent, item.icon);
   parent.setTooltip(tooltipFor(ctx.app, item), { delay: TOOLTIP_DELAY });

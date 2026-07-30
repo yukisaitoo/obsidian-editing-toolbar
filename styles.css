@@ -9,21 +9,28 @@
 }
 
 /* ==========================================================================
-   2. TOOLBAR — shared base (both #editingToolbarModalBar and
-   #editingToolbarPopoverBar). Mode-specific overrides follow in §3/§4.
+   2. TOOLBAR — shared base. Two hooks are in play throughout §2-§5:
+
+     .editing-toolbar-bar        chrome only. Worn by the real bar AND by the
+                                 settings preview, which is a plain div in
+                                 normal flow.
+     .editingToolbarModalBar     a LIVE bar in the workspace. Also what every JS
+     .editingToolbarPopoverBar   lifecycle query matches, so the preview must
+                                 never wear it. Anything that would misplace a
+                                 static preview — position, stacking, hiding —
+                                 belongs here rather than on the shared class.
+
+   Mode-specific overrides follow in §3/§4.
    ========================================================================== */
 
 /* The only way a bar is hidden. `display` is reserved for choosing its layout
    (grid / flex / top), so hiding must not touch it. */
-#editingToolbarModalBar.is-hidden {
+.editingToolbarModalBar.is-hidden {
   visibility: hidden;
 }
 
-#editingToolbarModalBar {
-  position: absolute;
+.editing-toolbar-bar {
   display: grid;
-  width: auto;
-  height: auto;
   min-width: fit-content;
   border: none;
   border-radius: var(--radius-m);
@@ -33,19 +40,38 @@
   justify-content: space-around;
   user-select: none;
   transition: 100ms cubic-bezier(0.92, -0.53, 0.65, 1.21);
+}
+
+/* Live bars float over the note; §3 puts top mode back into the pane's flow. */
+.editingToolbarModalBar {
+  position: absolute;
   z-index: var(--layer-modal);
+}
+
+/* Obsidian's app.css sizes every direct child of the root split:
+   `.workspace-split.mod-vertical > * { height: 100%; width: 0; flex: 1 0 0 }`
+   at 0-2-0. Both non-top bars mount there, so their own box has to out-specify
+   that or the bar inflates to the full pane height — which in turn makes
+   followingBarTop() reject the slot above the selection and drop the bar
+   underneath it. The `#id` selectors this file used to carry won this by
+   accident; classes have to say it. `fit-content` suits both: the modal bar
+   shrink-wraps via min-width anyway, and it restores the popover's own value. */
+.workspace-split.mod-vertical > :is(.editingToolbarModalBar, .editingToolbarPopoverBar) {
+  height: auto;
+  width: fit-content;
+  flex: none;
 }
 
 /* Following mode re-anchors the bar on every cursor move; animating that
    makes it visibly lag the caret. */
-#editingToolbarModalBar[data-toolbar-style="following"] {
+.editingToolbarModalBar[data-toolbar-style="following"] {
   transition: none !important;
 }
 
 /* The selection bar shrink-wraps its buttons, so it needs its own padding to
    keep icons off the edge — the top bar gets that from its taller box and
    centred layout. Height stays auto so it grows with the icon size. */
-#editingToolbarModalBar.editingToolbarFlex {
+.editing-toolbar-bar.editingToolbarFlex {
   display: flex;
   padding: 4px 6px;
   gap: 4px;
@@ -53,12 +79,12 @@
 }
 
 /* Spacing comes from the container's gap here, not per-button margins. */
-#editingToolbarModalBar.editingToolbarFlex :is(.editingToolbarCommandItem, button[class^=editingToolbarCommandsubItem]) {
+.editing-toolbar-bar.editingToolbarFlex :is(.editingToolbarCommandItem, button[class^=editingToolbarCommandsubItem]) {
   min-width: 20px;
   margin: auto 0;
 }
 
-#editingToolbarModalBar .editingToolbarCommandItem {
+.editing-toolbar-bar .editingToolbarCommandItem {
   position: relative;
   display: flex;
   height: auto;
@@ -77,7 +103,7 @@
 /* Button chrome shared by both bars. Dividers deliberately match here too, so
    they inherit border/box-shadow resets; §5 narrows their box afterwards and
    relies on source order to win (equal specificity). */
-:is(#editingToolbarModalBar, #editingToolbarPopoverBar) :is(.editingToolbarCommandItem, button[class^=editingToolbarCommandsubItem]) {
+:is(.editing-toolbar-bar, .editingToolbarPopoverBar) :is(.editingToolbarCommandItem, button[class^=editingToolbarCommandsubItem]) {
   display: inline-flex;
   /* Grows with the icon so large sizes push the bar taller rather than
      spilling out of a fixed box. 28px is the default size's height. */
@@ -98,16 +124,16 @@
   contain: none;
 }
 
-#editingToolbarPopoverBar :is(.editingToolbarCommandItem, button[class^=editingToolbarCommandsubItem]) {
+.editingToolbarPopoverBar :is(.editingToolbarCommandItem, button[class^=editingToolbarCommandsubItem]) {
   transition: all 0.2s linear;
 }
 
-:is(#editingToolbarModalBar, #editingToolbarPopoverBar) button[class^=editingToolbarCommandsubItem]>.subitem button:hover,
-:is(#editingToolbarModalBar, #editingToolbarPopoverBar) button[class^=editingToolbarCommand]:hover {
+:is(.editing-toolbar-bar, .editingToolbarPopoverBar) button[class^=editingToolbarCommandsubItem]>.subitem button:hover,
+:is(.editing-toolbar-bar, .editingToolbarPopoverBar) button[class^=editingToolbarCommand]:hover {
   background-color: var(--background-modifier-hover) !important;
 }
 
-#editingToolbarModalBar .more-menu {
+.editing-toolbar-bar .more-menu {
   display: flex;
   height: max(28px, calc(var(--toolbar-icon-size) + 10px));
   box-shadow: none;
@@ -121,21 +147,21 @@
   background-color: var(--editing-toolbar-background-color);
 }
 
-#editingToolbarModalBar.editingToolbarDefaultAesthetic.top {
+.editing-toolbar-bar.editingToolbarDefaultAesthetic.top {
   border-bottom: 1px solid var(--background-modifier-border);
 }
 
-#editingToolbarModalBar.editingToolbarDefaultAesthetic:not(.top) {
+.editing-toolbar-bar.editingToolbarDefaultAesthetic:not(.top) {
   border: 1px solid var(--background-modifier-border);
   background-clip: padding-box;
   box-shadow: var(--shadow-s);
 }
 
-#editingToolbarModalBar.editingToolbarDefaultAesthetic:not(.top) :is(.editingToolbarCommandItem, button[class^=editingToolbarCommandsubItem]) {
+.editing-toolbar-bar.editingToolbarDefaultAesthetic:not(.top) :is(.editingToolbarCommandItem, button[class^=editingToolbarCommandsubItem]) {
   min-height: max(28px, calc(var(--toolbar-icon-size) + 10px));
 }
 
-#editingToolbarModalBar.editingToolbarDefaultAesthetic:not(.top) button[class^=editingToolbarCommandsubItem] {
+.editing-toolbar-bar.editingToolbarDefaultAesthetic:not(.top) button[class^=editingToolbarCommandsubItem] {
   margin: auto;
   padding: 6px;
   border: none;
@@ -145,9 +171,9 @@
 }
 
 /* Toolbar icons honor the configured icon colour and size. */
-:is(#editingToolbarModalBar, #editingToolbarPopoverBar).editingToolbarDefaultAesthetic .editingToolbarCommandItem svg,
-:is(#editingToolbarModalBar, #editingToolbarPopoverBar).editingToolbarDefaultAesthetic button[class^=editingToolbarCommandsubItem] svg,
-:is(#editingToolbarModalBar, #editingToolbarPopoverBar).editingToolbarDefaultAesthetic button[class^=editingToolbarCommandsubItem]>.subitem svg {
+:is(.editing-toolbar-bar, .editingToolbarPopoverBar).editingToolbarDefaultAesthetic .editingToolbarCommandItem svg,
+:is(.editing-toolbar-bar, .editingToolbarPopoverBar).editingToolbarDefaultAesthetic button[class^=editingToolbarCommandsubItem] svg,
+:is(.editing-toolbar-bar, .editingToolbarPopoverBar).editingToolbarDefaultAesthetic button[class^=editingToolbarCommandsubItem]>.subitem svg {
   color: var(--editing-toolbar-icon-color);
   width: var(--toolbar-icon-size);
   height: var(--toolbar-icon-size);
@@ -155,7 +181,7 @@
   max-height: var(--toolbar-icon-size);
 }
 
-.workspace-tabs.mod-stacked .workspace-tab-header:not(.is-active)+.workspace-leaf #editingToolbarModalBar {
+.workspace-tabs.mod-stacked .workspace-tab-header:not(.is-active)+.workspace-leaf .editingToolbarModalBar {
   opacity: 0;
 }
 
@@ -163,7 +189,7 @@
    3. TOOLBAR — top mode. Must stay after §2 (overrides the base bar).
    ========================================================================== */
 
-#editingToolbarModalBar.top {
+.editing-toolbar-bar.top {
   position: relative;
   display: flex;
   height: calc(var(--toolbar-icon-size) + 18px);
@@ -188,7 +214,7 @@
    4. TOOLBAR — overflow popover bar.
    ========================================================================== */
 
-#editingToolbarPopoverBar:not(.editing-toolbar-more-open) {
+.editingToolbarPopoverBar:not(.editing-toolbar-more-open) {
   display: none;
 }
 
@@ -196,7 +222,7 @@
    rather than absolute on purpose: the bar is inserted into whichever element
    the view type maps to, and none of those is a guaranteed positioned ancestor,
    so CSS offsets here would resolve against something arbitrary. */
-#editingToolbarPopoverBar {
+.editingToolbarPopoverBar {
   position: fixed;
   display: inline-flex;
   width: fit-content;
@@ -224,7 +250,7 @@ button[class^=editingToolbarCommandsubItem]::after {
 /* Anchors the flyout to its own button. Without this the nearest positioned
    ancestor is the bar itself, so any explicit left/right on .subitem would be
    measured against the whole pane. */
-:is(#editingToolbarModalBar, #editingToolbarPopoverBar) button[class^=editingToolbarCommandsubItem] {
+:is(.editing-toolbar-bar, .editingToolbarPopoverBar) button[class^=editingToolbarCommandsubItem] {
   position: relative;
 }
 
@@ -232,7 +258,7 @@ button[class^=editingToolbarCommandsubItem]::after {
    back inside the pane; 0 (centred under the button) until it needs to move.
    Only visibility transitions — a transform transition would animate the shift
    and make the next measurement read a mid-flight position. */
-:is(#editingToolbarModalBar, #editingToolbarPopoverBar) button[class^=editingToolbarCommandsubItem]>.subitem {
+:is(.editing-toolbar-bar, .editingToolbarPopoverBar) button[class^=editingToolbarCommandsubItem]>.subitem {
   position: absolute;
   display: flex;
   transform: translate(var(--flyout-shift, 0px), 105%);
@@ -246,18 +272,18 @@ button[class^=editingToolbarCommandsubItem]::after {
   z-index: 1;
 }
 
-:is(#editingToolbarModalBar, #editingToolbarPopoverBar) button[class^=editingToolbarCommandsubItem]:hover>.subitem,
-:is(#editingToolbarModalBar, #editingToolbarPopoverBar) button[class^=editingToolbarCommandsubItem]>.subitem:hover {
+:is(.editing-toolbar-bar, .editingToolbarPopoverBar) button[class^=editingToolbarCommandsubItem]:hover>.subitem,
+:is(.editing-toolbar-bar, .editingToolbarPopoverBar) button[class^=editingToolbarCommandsubItem]>.subitem:hover {
   visibility: visible;
   transition: visibility 0.3s linear;
 }
 
-:is(#editingToolbarModalBar, #editingToolbarPopoverBar) button[class^=editingToolbarCommandsubItem]>.subitem svg {
+:is(.editing-toolbar-bar, .editingToolbarPopoverBar) button[class^=editingToolbarCommandsubItem]>.subitem svg {
   max-width: 1.3em;
   max-height: 1.3em;
 }
 
-:is(#editingToolbarModalBar, #editingToolbarPopoverBar) button[class^=editingToolbarCommandsubItem]>.subitem button.menu-item:not(.editingToolbar-Divider-Line) {
+:is(.editing-toolbar-bar, .editingToolbarPopoverBar) button[class^=editingToolbarCommandsubItem]>.subitem button.menu-item:not(.editingToolbar-Divider-Line) {
   display: inline-flex;
   background-color: transparent;
   box-shadow: none;
@@ -265,7 +291,7 @@ button[class^=editingToolbarCommandsubItem]::after {
   align-items: center;
 }
 
-:is(#editingToolbarModalBar, #editingToolbarPopoverBar) button[class^=editingToolbarCommandsubItem]>.subitem .menu-item {
+:is(.editing-toolbar-bar, .editingToolbarPopoverBar) button[class^=editingToolbarCommandsubItem]>.subitem .menu-item {
   margin-left: 2px;
   margin-right: 2px;
   padding: 6px 8px;
@@ -282,11 +308,11 @@ button[class^=editingToolbarCommandsubItem]::after {
    must stay after §2 — the second selector ties the base button rule on
    specificity and wins on source order alone. */
 
-:is(#editingToolbarModalBar:not(.top), #editingToolbarPopoverBar)>button.editingToolbar-Divider-Line {
+:is(.editing-toolbar-bar:not(.top), .editingToolbarPopoverBar)>button.editingToolbar-Divider-Line {
   display: none;
 }
 
-:is(#editingToolbarModalBar, #editingToolbarPopoverBar) button.editingToolbar-Divider-Line {
+:is(.editing-toolbar-bar, .editingToolbarPopoverBar) button.editingToolbar-Divider-Line {
   display: inline-flex;
   width: 0.6px;
   min-width: unset;
@@ -299,11 +325,11 @@ button[class^=editingToolbarCommandsubItem]::after {
   align-self: center;
 }
 
-.theme-dark :is(#editingToolbarModalBar, #editingToolbarPopoverBar) button.editingToolbar-Divider-Line {
+.theme-dark :is(.editing-toolbar-bar, .editingToolbarPopoverBar) button.editingToolbar-Divider-Line {
   background-color: #4f4f5188;
 }
 
-:is(#editingToolbarModalBar, #editingToolbarPopoverBar) button.editingToolbar-Divider-Line svg {
+:is(.editing-toolbar-bar, .editingToolbarPopoverBar) button.editingToolbar-Divider-Line svg {
   display: none;
 }
 
@@ -418,7 +444,7 @@ button[class^=editingToolbarCommandsubItem]::after {
    autocomplete popup opened under a top-mode bar renders behind it. Scoped to
    panes that actually have the bar — unscoped this reordered every CodeMirror
    tooltip in the app, including ones this plugin has nothing to do with. */
-.workspace-leaf-content:has(#editingToolbarModalBar.top) .cm-tooltip {
+.workspace-leaf-content:has(.editingToolbarModalBar.top) .cm-tooltip {
   z-index: 1000;
 }
 
@@ -452,14 +478,6 @@ button[class^=editingToolbarCommandsubItem]::after {
 .editing-toolbar-tab.active {
   border-bottom-color: var(--text-accent);
   color: var(--text-accent);
-}
-
-.editing-toolbar-header {
-  display: flex;
-  margin-bottom: 24px;
-  padding: 0 8px;
-  align-items: center;
-  justify-content: space-between;
 }
 
 .editing-toolbar-content {
@@ -755,15 +773,15 @@ button.editingToolbarSettingsButton {
   outline: none;
 }
 
-.setting-item:is(.custom_bg, .custom_font) .pickr-container {
-  position: relative;
+/* Both settings tabs build this same container, so layout keys off the container
+   rather than each row's class (`.custom_bg`/`.custom_font` in the General tab,
+   `.toolbar_background`/`.toolbar_icon` in Appearance) — an enumeration new rows
+   kept falling out of. No sizing here: Pickr replaces the `div.picker` it is
+   handed with its own `div.pickr`, so the swatch box comes from the vendored
+   `.pcr-button` in §9. */
+.setting-item .pickr-container {
   display: flex;
   gap: 8px;
-}
-
-.setting-item:is(.custom_bg, .custom_font) .pickr-container .picker {
-  width: 32px;
-  height: 32px;
 }
 
 .editing-toolbar-textarea-input {
@@ -786,17 +804,11 @@ button.editingToolbarSettingsButton {
   padding: 15px;
 }
 
-/* The preview reuses the real toolbar element, which JS hides by default. */
-.toolbar-preview-container #editingToolbarModalBar {
-  position: relative;
-  visibility: visible !important;
-}
-
 /* The real selection/floating bars are absolutely positioned, so they shrink to
    fit their buttons. In the settings pane the preview is in normal flow, where
    it would otherwise stretch to the full pane width and let the bar's
    space-around fan the buttons out. Top mode is meant to span its pane. */
-.toolbar-preview-container #editingToolbarModalBar:not(.top) {
+.editing-toolbar-preview:not(.top) {
   width: fit-content;
 }
 
@@ -933,6 +945,13 @@ body.theme-dark .modal-container.editingToolbar-Modal .modal input[type='range']
   color: rgb(var(--callout-color));
 }
 
+.insert-callout-modal .shortcut-hint {
+  margin-top: 5px;
+  font-size: 0.8em;
+  text-align: right;
+  opacity: 0.7;
+}
+
 /* --- Confirm modal -------------------------------------------------------- */
 
 .confirm-modal .confirm-modal-buttons {
@@ -972,7 +991,7 @@ body.theme-dark .modal-container.editingToolbar-Modal .modal input[type='range']
 
 /* --- Obsidian canvas ------------------------------------------------------ */
 
-#editingToolbarModalBar ~ .canvas-controls {
+.editingToolbarModalBar ~ .canvas-controls {
   top: calc(var(--size-4-2) + 50px);
 }
 

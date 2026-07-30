@@ -13,12 +13,14 @@ import {
   morePopoverFor,
 } from "src/toolbar/morePopover";
 import { renderToolbarCommands } from "src/toolbar/toolbarCommands";
+import {
+  BAR_SELECTOR,
+  POPOVER_SELECTOR,
+  SHARED_BAR_CLASS,
+} from "src/toolbar/toolbarDom";
 import { resolveToolbarDocument, windowOf } from "src/toolbar/toolbarHost";
 import { applyToolbarState } from "src/toolbar/toolbarVisibility";
 import { ViewUtils } from "src/util/viewUtils";
-
-const BAR_SELECTOR = ".editingToolbarModalBar";
-const POPOVER_SELECTOR = ".editingToolbarPopoverBar";
 
 // The top bar lives inside the active leaf, so each pane owns one and it is found
 // by walking that leaf. Every other style has one bar per window, worth caching.
@@ -151,7 +153,7 @@ function mountBars(
   doc: Document,
 ): MountedBars | null {
   const bar = createBarEl(doc, "editingToolbarModalBar", style);
-  bar.setAttribute("id", "editingToolbarModalBar");
+  bar.addClass(SHARED_BAR_CLASS);
   bar.addClass(style === "top" ? "top" : "editingToolbarFlex");
 
   // A following bar is absolutely positioned but has no offsets until
@@ -162,8 +164,6 @@ function mountBars(
   if (style !== "top") applyToolbarState(bar, "hidden");
 
   const popoverBar = createBarEl(doc, "editingToolbarPopoverBar", style);
-  popoverBar.addClass("editingToolbarpopover");
-  popoverBar.setAttribute("id", "editingToolbarPopoverBar");
 
   applyAppearanceVars(bar, settings, style);
   applyAppearanceVars(popoverBar, settings, style);

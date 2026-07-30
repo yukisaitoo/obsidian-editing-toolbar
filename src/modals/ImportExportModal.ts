@@ -77,7 +77,6 @@ export class ImportExportModal extends Modal {
         this.mode === "import"
           ? strings.importConfiguration
           : strings.exportConfiguration,
-      cls: "import-export-title",
     });
 
     if (this.mode === "export") {
@@ -299,11 +298,9 @@ export class ImportExportModal extends Modal {
 
             await this.plugin.saveSettings();
 
-            // Syncs the runtime position style before rebuilding, so an imported
-            // positionStyle takes effect without a reload.
-            this.plugin.onPositionStyleChange(
-              this.plugin.settings.positionStyle,
-            );
+            // Rebuilds every bar so an imported positionStyle takes effect
+            // without a reload.
+            this.plugin.rebuildToolbars();
 
             new Notice(strings.configurationImportedSuccessfully);
           } catch (error) {

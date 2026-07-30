@@ -106,6 +106,10 @@ export class EditingToolbarSettingTab extends PluginSettingTab {
 
   hide(): void {
     this.destroyPickrs();
+    // The style being edited must not outlive the pane, or resolveActiveStyle()
+    // keeps reporting it and the workspace renders one style while everything
+    // else reasons about another.
+    this.plugin.appearanceEditStyle = null;
     this.rebuildToolbar();
   }
 
@@ -145,7 +149,6 @@ export class EditingToolbarSettingTab extends PluginSettingTab {
     button
       .setIcon("editingToolbarDelete")
       .setTooltip(tooltip)
-      .setClass("editingToolbarSettingsDelete")
       .onClick(async () => {
         if (button.buttonEl.hasClass("mod-warning")) {
           disarm();

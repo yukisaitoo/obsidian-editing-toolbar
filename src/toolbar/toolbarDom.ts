@@ -2,6 +2,15 @@ import { App, ButtonComponent, MenuItem, setIcon } from "obsidian";
 
 export const TOOLTIP_DELAY = 250;
 
+// Two separate hooks on purpose. SHARED_BAR_CLASS is styling only, and the
+// settings preview wears it too so it inherits the real bar's chrome. The
+// selectors below mark a *live* bar and are what every lifecycle query matches —
+// the preview must never carry them, or selfDestruct() would sweep it away on
+// every rebuild.
+export const SHARED_BAR_CLASS = "editing-toolbar-bar";
+export const BAR_SELECTOR = ".editingToolbarModalBar";
+export const POPOVER_SELECTOR = ".editingToolbarPopoverBar";
+
 /** Icons are either a Lucide/Obsidian icon name or a raw SVG string. */
 export function checkHtml(htmlStr: string): boolean {
   return /<[^>]+>/g.test(htmlStr);

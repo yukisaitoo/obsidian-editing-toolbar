@@ -8,6 +8,7 @@ import {
   STYLE_LABELS,
 } from "src/settings/settingsData";
 import type { SettingsTabContext } from "src/settings/settingsTab";
+import { SHARED_BAR_CLASS } from "src/toolbar/toolbarDom";
 import { strings, t } from "src/translations/helper";
 
 const BACKGROUND_SWATCHES = [
@@ -57,7 +58,9 @@ export function renderAppearanceTab(
         ctx.plugin.appearanceEditStyle = style;
         ctx.plugin.settings.positionStyle = style;
         await ctx.plugin.saveSettings();
-        ctx.refresh();
+        // Rebuilding is what swaps the workspace over to the new style; it also
+        // re-renders this pane, so the preview follows without a refresh() here.
+        ctx.rebuildToolbar();
       });
     });
 
@@ -106,7 +109,6 @@ export function renderAppearanceTab(
             );
           }
           await ctx.plugin.saveSettings();
-          ctx.refresh();
           ctx.rebuildToolbar();
         });
     });
@@ -133,8 +135,10 @@ function applyColor(
   if (ctx.plugin.liveStyle === editingStyle) {
     document.documentElement.style.setProperty(config.cssProperty, color);
   }
-  ctx.plugin.saveSettings();
-  ctx.refresh();
+  void ctx.plugin.saveSettings();
+  // Deliberately no refresh() alongside this: we are inside a Pickr callback, and
+  // a synchronous re-render would destroyAndRemove() the very instance still
+  // dispatching. The rebuild re-renders this pane on a timer instead.
   ctx.rebuildToolbar();
 }
 
@@ -189,28 +193,25 @@ function renderPreview(
   containerEl: HTMLElement,
   editingStyle: ToolbarStyleKey,
 ): void {
-  const previewContainer = containerEl.createDiv("toolbar-preview-container");
-  previewContainer.addClass("toolbar-preview-section");
+  const previewContainer = containerEl.createDiv("toolbar-preview-section");
   previewContainer.createEl("h3", {
     text: strings.toolbarPreviewHypotheticalCommandConfigurati,
     cls: "toolbar-preview-label",
   });
 
-  const wrapper = previewContainer.createDiv();
-  wrapper.addClass("preview-toolbar-wrapper");
-  wrapper.addClass(`preview-${editingStyle}`);
+  const wrapper = previewContainer.createDiv("preview-toolbar-wrapper");
 
   const previewBar = wrapper.createDiv();
   previewBar.addClass("editing-toolbar-preview");
-  previewBar.addClass(`preview-${editingStyle}`);
   previewBar.addClass("editingToolbarDefaultAesthetic");
   previewBar.addClass(PREVIEW_LAYOUT_CLASS[editingStyle]);
-  previewBar.setAttribute("id", "editingToolbarModalBar");
+  // Borrows the real bar's chrome without the live-instance class, so the
+  // toolbar lifecycle (selfDestruct, getExistingToolbar) can never see it.
+  previewBar.addClass(SHARED_BAR_CLASS);
 
   PREVIEW_COMMANDS.forEach((command) => {
     const button = new ButtonComponent(previewBar);
     button.setClass("editingToolbarCommandItem");
-    button.buttonEl.addClass("preview-button");
     button.setTooltip(t(command.name));
     setIcon(button.buttonEl, command.icon);
   });
