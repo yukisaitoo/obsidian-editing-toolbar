@@ -101,8 +101,8 @@ function renumberLines(
   const firstLine = separateFromPreviousList(editor, startLine);
 
   const result = needsSeparationBefore(editor, firstLine)
-    ? ["", LIST_SEPARATOR_FILLER, ...renumber(lines)]
-    : renumber(lines);
+    ? ["", LIST_SEPARATOR_FILLER, ...renumberOrderedItems(lines)]
+    : renumberOrderedItems(lines);
 
   const lastLine = firstLine + lines.length - 1;
   editor.replaceRange(
@@ -144,22 +144,37 @@ function needsSeparationBefore(editor: Editor, startLine: number): boolean {
   return previous !== "" && !previous.includes(LIST_SEPARATOR_FILLER);
 }
 
-function renumber(lines: string[]): string[] {
-  const numberByIndent: Record<number, number> = {};
+// Exported for tests: this is the whole numbering rule, and it is pure.
+export function renumberOrderedItems(lines: string[]): string[] {
+  let numberByIndent: Record<number, number> = {};
   let previousIndent = -1;
 
   return lines.map((line) => {
     const item = parseOrderedItem(line);
     if (!item) {
+      // A non-item line ends the list; nothing below it continues these counts.
+      numberByIndent = {};
       previousIndent = -1;
       return line;
     }
 
     const indent = item.indent.length;
-    numberByIndent[indent] =
-      indent === previousIndent ? (numberByIndent[indent] ?? 1) + 1 : 1;
-    previousIndent = indent;
 
+    if (indent > previousIndent) {
+      // Deeper than the line above: the start of a fresh sub-list.
+      numberByIndent[indent] = 1;
+    } else {
+      // Same depth continues its run; shallower resumes the count this level
+      // already held, which is what makes `2.` follow `1.` across a sub-list.
+      numberByIndent[indent] = (numberByIndent[indent] ?? 0) + 1;
+      // Any sub-list deeper than here has ended, so its counter must not leak
+      // into the next one at that depth.
+      for (const key of Object.keys(numberByIndent)) {
+        if (Number(key) > indent) delete numberByIndent[Number(key)];
+      }
+    }
+
+    previousIndent = indent;
     return `${item.indent}${numberByIndent[indent]}. ${item.body}`;
   });
 }

@@ -1,5 +1,11 @@
 import Pickr from "@simonwep/pickr";
-import { App, ButtonComponent, PluginSettingTab, setIcon } from "obsidian";
+import {
+  App,
+  ButtonComponent,
+  debounce,
+  PluginSettingTab,
+  setIcon,
+} from "obsidian";
 import type EditingToolbarPlugin from "src/plugin/main";
 import type { ColorPickrOptions } from "src/settings/pickr";
 import { createColorPickr } from "src/settings/pickr";
@@ -12,7 +18,9 @@ import { strings } from "src/translations/helper";
 
 const DELETE_CONFIRM_TIMEOUT = 3500;
 
-// Lets a suggester/modal finish writing before the toolbar rebuilds.
+// Lets a suggester/modal finish writing before the toolbar rebuilds. Debounced,
+// not a bare timer: a slider fires onChange once per step, and every rebuild tears
+// down all bars and re-renders this pane — including the slider being dragged.
 const REBUILD_DELAY = 100;
 
 type TabId = "general" | "appearance" | "commands" | "importexport";
@@ -51,6 +59,11 @@ export class EditingToolbarSettingTab extends PluginSettingTab {
 
     // A rebuild re-renders this pane too, so its previews match the live bars.
     this.plugin.register(this.plugin.onRebuild(() => this.display()));
+  }
+
+  setActiveTab(tab: TabId): void {
+    this.activeTab = tab;
+    this.display();
   }
 
   display(): void {
@@ -127,9 +140,12 @@ export class EditingToolbarSettingTab extends PluginSettingTab {
     };
   }
 
-  private rebuildToolbar(): void {
-    setTimeout(() => this.plugin.rebuildToolbars(), REBUILD_DELAY);
-  }
+  // `resetTimer` on: a burst of changes collapses into one rebuild after the last.
+  private readonly rebuildToolbar = debounce(
+    () => this.plugin.rebuildToolbars(),
+    REBUILD_DELAY,
+    true,
+  );
 
   private createDeleteButton(
     button: ButtonComponent,

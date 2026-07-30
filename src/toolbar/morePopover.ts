@@ -1,7 +1,7 @@
 import { ButtonComponent } from "obsidian";
 import { MORE_CHEVRON_ICON } from "src/icons/inlineIcons";
 import { anchorPopoverToButton } from "src/toolbar/geometry";
-import { POPOVER_SELECTOR } from "src/toolbar/toolbarDom";
+import { POPOVER_SELECTOR, TOOLTIP_DELAY } from "src/toolbar/toolbarDom";
 import { strings } from "src/translations/helper";
 
 // A class rather than inline visibility: a hovered flyout inside the popover sets
@@ -12,8 +12,6 @@ const OPEN_CLASS = "editing-toolbar-more-open";
 // the popover, so a click inside them is not a click away.
 const DETACHED_POPUP_SELECTOR =
   ".menu, .pcr-app, .modal-container, .suggestion-container";
-
-const TOOLTIP_DELAY = 250;
 
 // One live popover per popover bar. The bar outlives the » button across rebuilds,
 // so keying on the bar is what lets a rebuild retire the old instance.

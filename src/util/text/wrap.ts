@@ -1,6 +1,6 @@
 import { Editor, Notice } from "obsidian";
-import { strings } from "src/translations/helper";
-import { requireSelection } from "src/util/text/selection";
+import { format, strings } from "src/translations/helper";
+import { replaceDocument, requireSelection } from "src/util/text/selection";
 
 export function addWrap(
   editor: Editor,
@@ -23,7 +23,7 @@ export function addWrap(
   if (useSelection) {
     editor.replaceSelection(result);
   } else {
-    editor.setValue(result);
+    replaceDocument(editor, result);
   }
   new Notice(strings.prefixSuffixAdded);
 }
@@ -38,8 +38,8 @@ export function extractBetween(
     return;
   }
 
-  const text = editor.getValue();
-  if (!text) return;
+  const text = requireSelection(editor);
+  if (text === null) return;
 
   try {
     const pattern = new RegExp(
@@ -55,8 +55,8 @@ export function extractBetween(
       return;
     }
 
-    editor.setValue(matches.join("\n"));
-    new Notice(`${strings.extracted} ${matches.length} ${strings.matches}`);
+    editor.replaceSelection(matches.join("\n"));
+    new Notice(format(strings.extractedMatches, { count: matches.length }));
   } catch {
     new Notice(strings.extractionFailed);
   }
@@ -122,7 +122,7 @@ export function smartTypography(editor: Editor): void {
   result = rules.reduce((acc, [from, to]) => acc.replace(from, to), result);
 
   placeholders.forEach((value, index) => {
-    result = result.replace(`__PROTECTED_${index}__`, value);
+    result = result.replace(`__PROTECTED_${index}__`, () => value);
   });
 
   editor.replaceSelection(result);

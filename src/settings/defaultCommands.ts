@@ -15,30 +15,31 @@ import {
   UNORDERED_LIST_ICON,
   WIKILINK_ICON,
 } from "src/icons/inlineIcons";
+import { ownCommand } from "src/plugin/pluginId";
 
 export const DEFAULT_TOOLBAR_COMMANDS: Command[] = [
   {
-    id: "editing-toolbar:editor-undo",
+    id: ownCommand("editor-undo"),
     name: "Undo edit",
     icon: "undo-glyph",
   },
   {
-    id: "editing-toolbar:editor-redo",
+    id: ownCommand("editor-redo"),
     name: "Redo edit",
     icon: "redo-glyph",
   },
   {
-    id: "editing-toolbar:format-eraser",
+    id: ownCommand("format-eraser"),
     name: "Clear text formatting",
     icon: "eraser",
   },
   {
-    id: "editing-toolbar:header2-text",
+    id: ownCommand("header2-text"),
     name: "Header 2",
     icon: "header-2",
   },
   {
-    id: "editing-toolbar:header3-text",
+    id: ownCommand("header3-text"),
     name: "Header 3",
     icon: "header-3",
   },
@@ -48,49 +49,49 @@ export const DEFAULT_TOOLBAR_COMMANDS: Command[] = [
     icon: "header-n",
     SubmenuCommands: [
       {
-        id: "editing-toolbar:header1-text",
+        id: ownCommand("header1-text"),
         name: "Header 1",
         icon: "header-1",
       },
       {
-        id: "editing-toolbar:header4-text",
+        id: ownCommand("header4-text"),
         name: "Header 4",
         icon: "header-4",
       },
       {
-        id: "editing-toolbar:header5-text",
+        id: ownCommand("header5-text"),
         name: "Header 5",
         icon: "header-5",
       },
       {
-        id: "editing-toolbar:header6-text",
+        id: ownCommand("header6-text"),
         name: "Header 6",
         icon: "header-6",
       },
     ],
   },
   {
-    id: "editing-toolbar:toggle-bold",
+    id: ownCommand("toggle-bold"),
     name: "Bold",
     icon: "bold-glyph",
   },
   {
-    id: "editing-toolbar:toggle-italics",
+    id: ownCommand("toggle-italics"),
     name: "Italic",
     icon: "italic-glyph",
   },
   {
-    id: "editing-toolbar:toggle-strikethrough",
+    id: ownCommand("toggle-strikethrough"),
     name: "Strikethrough",
     icon: "strikethrough-glyph",
   },
   {
-    id: "editing-toolbar:underline",
+    id: ownCommand("underline"),
     name: "Underline",
     icon: "underline-glyph",
   },
   {
-    id: "editing-toolbar:toggle-highlight",
+    id: ownCommand("toggle-highlight"),
     name: "Highlight",
     icon: "highlight-glyph",
   },
@@ -101,13 +102,13 @@ export const DEFAULT_TOOLBAR_COMMANDS: Command[] = [
     menuType: "dropdown",
     SubmenuCommands: [
       {
-        id: "editing-toolbar:get-plain-text",
+        id: ownCommand("get-plain-text"),
         name: "Get plain text",
         icon: "lucide-file-text",
       },
 
       {
-        id: "editing-toolbar:smart-symbols",
+        id: ownCommand("smart-symbols"),
         name: "Convert punctuation width",
         icon: "lucide-at-sign",
       },
@@ -117,27 +118,27 @@ export const DEFAULT_TOOLBAR_COMMANDS: Command[] = [
         icon: "vertical-split",
       },
       {
-        id: "editing-toolbar:insert-blank-lines",
+        id: ownCommand("insert-blank-lines"),
         name: "Insert blank lines",
         icon: "lucide-space",
       },
       {
-        id: "editing-toolbar:remove-blank-lines",
+        id: ownCommand("remove-blank-lines"),
         name: "Remove blank lines",
         icon: "lucide-minimize-2",
       },
       {
-        id: "editing-toolbar:split-lines",
+        id: ownCommand("split-lines"),
         name: "Split lines",
         icon: "lucide-split",
       },
       {
-        id: "editing-toolbar:merge-lines",
+        id: ownCommand("merge-lines"),
         name: "Merge lines",
         icon: "lucide-merge",
       },
       {
-        id: "editing-toolbar:dedupe-lines",
+        id: ownCommand("dedupe-lines"),
         name: "Dedupe lines",
         icon: "lucide-filter",
       },
@@ -147,27 +148,27 @@ export const DEFAULT_TOOLBAR_COMMANDS: Command[] = [
         icon: "vertical-split",
       },
       {
-        id: "editing-toolbar:add-wrap",
+        id: ownCommand("add-wrap"),
         name: "Add prefix/suffix",
         icon: "lucide-wrap-text",
       },
       {
-        id: "editing-toolbar:number-lines",
+        id: ownCommand("number-lines"),
         name: "Number lines (custom)",
         icon: "lucide-list-ordered",
       },
       {
-        id: "editing-toolbar:remove-whitespace-trim",
+        id: ownCommand("remove-whitespace-trim"),
         name: "Trim line ends",
         icon: "lucide-scissors",
       },
       {
-        id: "editing-toolbar:remove-whitespace-compress",
+        id: ownCommand("remove-whitespace-compress"),
         name: "Shrink extra spaces",
         icon: "lucide-minimize",
       },
       {
-        id: "editing-toolbar:remove-whitespace-all",
+        id: ownCommand("remove-whitespace-all"),
         name: "Remove all whitespace",
         icon: "lucide-eraser",
       },
@@ -177,17 +178,17 @@ export const DEFAULT_TOOLBAR_COMMANDS: Command[] = [
         icon: "vertical-split",
       },
       {
-        id: "editing-toolbar:list-to-table",
+        id: ownCommand("list-to-table"),
         name: "List to table",
         icon: "lucide-table",
       },
       {
-        id: "editing-toolbar:table-to-list",
+        id: ownCommand("table-to-list"),
         name: "Table to list",
         icon: "lucide-list",
       },
       {
-        id: "editing-toolbar:extract-between",
+        id: ownCommand("extract-between"),
         name: "Extract between strings",
         icon: "lucide-brackets",
       },
@@ -199,44 +200,44 @@ export const DEFAULT_TOOLBAR_COMMANDS: Command[] = [
     icon: "edit",
     SubmenuCommands: [
       {
-        id: "editing-toolbar:editor-cut",
+        id: ownCommand("editor-cut"),
         name: "Cut",
         icon: "lucide-scissors",
       },
       {
-        id: "editing-toolbar:editor-copy",
+        id: ownCommand("editor-copy"),
         name: "Copy",
         icon: "lucide-copy",
       },
       {
-        id: "editing-toolbar:editor-paste",
+        id: ownCommand("editor-paste"),
         name: "Paste",
         icon: "lucide-clipboard-type",
       },
       {
-        id: "editing-toolbar:editor:swap-line-down",
+        id: ownCommand("editor:swap-line-down"),
         name: "Swap line down",
         icon: "lucide-corner-right-down",
       },
       {
-        id: "editing-toolbar:editor:swap-line-up",
+        id: ownCommand("editor:swap-line-up"),
         name: "Swap line up",
         icon: "lucide-corner-right-up",
       },
     ],
   },
   {
-    id: "editing-toolbar:editor:attach-file",
+    id: ownCommand("editor:attach-file"),
     name: "Attach file",
     icon: "lucide-paperclip",
   },
   {
-    id: "editing-toolbar:editor:insert-table",
+    id: ownCommand("editor:insert-table"),
     name: "Insert table",
     icon: "lucide-table",
   },
   {
-    id: "editing-toolbar:editor:cycle-list-checklist",
+    id: ownCommand("editor:cycle-list-checklist"),
     name: "Cycle list and checklist",
     icon: "check-circle",
   },
@@ -246,12 +247,12 @@ export const DEFAULT_TOOLBAR_COMMANDS: Command[] = [
     icon: "message-square",
     SubmenuCommands: [
       {
-        id: "editing-toolbar:editor:toggle-blockquote",
+        id: ownCommand("editor:toggle-blockquote"),
         name: "Blockquote",
         icon: "lucide-text-quote",
       },
       {
-        id: "editing-toolbar:insert-callout",
+        id: ownCommand("insert-callout"),
         name: "Callout",
         icon: "lucide-quote",
       },
@@ -263,47 +264,47 @@ export const DEFAULT_TOOLBAR_COMMANDS: Command[] = [
     icon: MARKDOWN_SYNTAX_ICON,
     SubmenuCommands: [
       {
-        id: "editing-toolbar:superscript",
+        id: ownCommand("superscript"),
         name: "Superscript",
         icon: "superscript-glyph",
       },
       {
-        id: "editing-toolbar:subscript",
+        id: ownCommand("subscript"),
         name: "Subscript",
         icon: "subscript-glyph",
       },
       {
-        id: "editing-toolbar:editor:toggle-code",
+        id: ownCommand("editor:toggle-code"),
         name: "Inline code",
         icon: "code-glyph",
       },
       {
-        id: "editing-toolbar:codeblock",
+        id: ownCommand("codeblock"),
         name: "Code block",
         icon: "codeblock-glyph",
       },
       {
-        id: "editing-toolbar:editor:insert-wikilink",
+        id: ownCommand("editor:insert-wikilink"),
         name: "Wikilink",
         icon: WIKILINK_ICON,
       },
       {
-        id: "editing-toolbar:editor:insert-embed",
+        id: ownCommand("editor:insert-embed"),
         name: "Embed",
         icon: "note-glyph",
       },
       {
-        id: "editing-toolbar:hrline",
+        id: ownCommand("hrline"),
         name: "Horizontal rule",
         icon: HORIZONTAL_RULE_ICON,
       },
       {
-        id: "editing-toolbar:toggle-inline-math",
+        id: ownCommand("toggle-inline-math"),
         name: "Inline math",
         icon: "lucide-sigma",
       },
       {
-        id: "editing-toolbar:editor:insert-mathblock",
+        id: ownCommand("editor:insert-mathblock"),
         name: "Math block",
         icon: "lucide-sigma-square",
       },
@@ -315,32 +316,32 @@ export const DEFAULT_TOOLBAR_COMMANDS: Command[] = [
     icon: "bullet-list-glyph",
     SubmenuCommands: [
       {
-        id: "editing-toolbar:editor:toggle-checklist-status",
+        id: ownCommand("editor:toggle-checklist-status"),
         name: "Checklist",
         icon: "checkbox-glyph",
       },
       {
-        id: "editing-toolbar:renumber-ordered-list",
+        id: ownCommand("renumber-ordered-list"),
         name: "Renumber ordered list",
         icon: "list-restart",
       },
       {
-        id: "editing-toolbar:toggle-numbered-list",
+        id: ownCommand("toggle-numbered-list"),
         name: "Ordered list",
         icon: ORDERED_LIST_ICON,
       },
       {
-        id: "editing-toolbar:toggle-bullet-list",
+        id: ownCommand("toggle-bullet-list"),
         name: "Unordered list",
         icon: UNORDERED_LIST_ICON,
       },
       {
-        id: "editing-toolbar:undent-list",
+        id: ownCommand("undent-list"),
         name: "Unindent list",
         icon: UNINDENT_LIST_ICON,
       },
       {
-        id: "editing-toolbar:indent-list",
+        id: ownCommand("indent-list"),
         name: "Indent list",
         icon: INDENT_LIST_ICON,
       },
@@ -352,34 +353,34 @@ export const DEFAULT_TOOLBAR_COMMANDS: Command[] = [
     icon: ALIGN_CENTER_ICON,
     SubmenuCommands: [
       {
-        id: "editing-toolbar:justify",
+        id: ownCommand("justify"),
         name: "Justify text",
         icon: JUSTIFY_TEXT_ICON,
       },
       {
-        id: "editing-toolbar:left",
+        id: ownCommand("left"),
         name: "Align text left",
         icon: ALIGN_LEFT_ICON,
       },
       {
-        id: "editing-toolbar:center",
+        id: ownCommand("center"),
         name: "Center text",
         icon: ALIGN_CENTER_ICON,
       },
       {
-        id: "editing-toolbar:right",
+        id: ownCommand("right"),
         name: "Align text right",
         icon: ALIGN_RIGHT_ICON,
       },
     ],
   },
   {
-    id: "editing-toolbar:change-font-color",
+    id: ownCommand("change-font-color"),
     name: "Change font color",
     icon: FONT_COLOR_ICON,
   },
   {
-    id: "editing-toolbar:change-background-color",
+    id: ownCommand("change-background-color"),
     name: "Change background color",
     icon: BACKGROUND_COLOR_ICON,
   },
@@ -392,27 +393,27 @@ const cloneToolbarDefault = (id: string): Command =>
   );
 
 export const DEFAULT_FOLLOWING_COMMANDS: Command[] = [
-  { id: "editing-toolbar:toggle-bold", name: "Bold", icon: "bold-glyph" },
+  { id: ownCommand("toggle-bold"), name: "Bold", icon: "bold-glyph" },
   {
-    id: "editing-toolbar:toggle-italics",
+    id: ownCommand("toggle-italics"),
     name: "Italic",
     icon: "italic-glyph",
   },
   {
-    id: "editing-toolbar:toggle-strikethrough",
+    id: ownCommand("toggle-strikethrough"),
     name: "Strikethrough",
     icon: "strikethrough-glyph",
   },
   {
-    id: "editing-toolbar:toggle-highlight",
+    id: ownCommand("toggle-highlight"),
     name: "Highlight",
     icon: "highlight-glyph",
   },
   {
-    id: "editing-toolbar:editor:toggle-code",
+    id: ownCommand("editor:toggle-code"),
     name: "Inline code",
     icon: "code-glyph",
   },
-  cloneToolbarDefault("editing-toolbar:change-font-color"),
-  cloneToolbarDefault("editing-toolbar:change-background-color"),
+  cloneToolbarDefault(ownCommand("change-font-color")),
+  cloneToolbarDefault(ownCommand("change-background-color")),
 ];

@@ -39,11 +39,18 @@ export const registerInsertCommands: Registrar = ({
       name: command.name,
       icon: command.icon,
       callback: () =>
-        runOnEditor(async (editor) => {
+        runOnEditor((editor) => {
           const cursorEnd = editor.getCursor("to");
-          await plugin.app.commands.executeCommandById(command.id);
+          plugin.app.commands.executeCommandById(command.id);
+
           const offset = CURSOR_OFFSETS[command.id] ?? 0;
-          if (offset) editor.setCursor(cursorEnd.line, cursorEnd.ch + offset);
+          if (!offset) return;
+
+          // Deferred by one microtask on purpose: the core command has only just
+          // written its markup, and setCursor has to land after that edit.
+          return Promise.resolve().then(() =>
+            editor.setCursor(cursorEnd.line, cursorEnd.ch + offset),
+          );
         }),
     });
   });

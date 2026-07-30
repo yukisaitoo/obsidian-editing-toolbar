@@ -14,7 +14,7 @@ const ui: Partial<Record<keyof typeof en, string>> = {
   clearAllFollowingStyleCommands:
     "Limpar todos os Comandos de Estilo Contextual",
   clearAllTopStyleCommands: "Limpar todos os Comandos de Estilo de Topo",
-  currentlyEditingCommands: "Atualmente editando comandos para",
+  editingCommandsFor: 'Atualmente editando comandos para a configuração "{style}"',
   backgroundColor: "Cor de Fundo",
   calloutType: "Tipo de Callout",
   cancel: "Cancelar",
@@ -107,7 +107,7 @@ const ui: Partial<Record<keyof typeof en, string>> = {
     "Definir o tamanho do ícone da barra de ferramentas (px); padrão: 18px",
   settings: "Configurações",
   suffix: "Sufixo",
-  command2: "O comando",
+  commandAlreadyExists: "O comando {name} já existe",
   import3: "Esta importação irá:",
   title: "Título",
   toolbarBackgroundColor: "Cor de Fundo da Barra de Ferramentas",
@@ -132,8 +132,6 @@ const ui: Partial<Record<keyof typeof en, string>> = {
     "Aviso: O modo de sobrescrever irá substituir todas as suas configurações atuais com as importadas.",
   warningUpdateModeAddNew:
     "Aviso: O modo de atualização irá adicionar novos itens e atualizar os existentes com base na configuração importada.",
-  alreadyExists: "já existe",
-  configuration: "configuração",
   insert2: "para inserir",
   updateModeMergeImportedSettings:
     "ℹ️ O modo de atualização irá adicionar novos itens e atualizar os existentes com base na configuração importada.",

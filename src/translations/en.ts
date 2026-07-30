@@ -9,7 +9,7 @@ export const en = {
   appearance: "Appearance",
   clearAllFollowingStyleCommands: "Clear all Selection Commands",
   clearAllTopStyleCommands: "Clear all Top Commands",
-  currentlyEditingCommands: "Currently editing commands for",
+  editingCommandsFor: 'Currently editing commands for "{style}" configuration',
   backgroundColor: "Background color",
   buttonSubmenu: "Button Submenu",
   calloutType: "Callout Type",
@@ -45,7 +45,7 @@ export const en = {
   themeColors: "Theme Colors",
   translucentColors: "Translucent Colors",
   dedupeLines: "Dedupe lines",
-  deduplicationCompletedRemaining: "Deduplication completed, remaining",
+  dedupeCompleted: "Deduplication completed, {count} lines remaining",
   delete: "Delete",
   detectedChineseContextConvertedFull:
     "Detected Chinese context: converted to full-width symbols",
@@ -71,7 +71,7 @@ export const en = {
   exportGenerateJsonConfigurationCan:
     "Export: Generate a JSON configuration that you can save or share.",
   extractBetweenStrings: "Extract between strings",
-  extracted: "Extracted",
+  extractedMatches: "Extracted {count} matches",
   extractionFailed: "Extraction failed",
   failedCopyConfiguration: "Failed to copy configuration",
   followingToolbar: "Selection",
@@ -102,6 +102,8 @@ export const en = {
   mergeCompleted: "Merge completed",
   merged: "Merged with",
   more: "More",
+  splitCompleted: "Split completed",
+  splitOn: "Split on",
   matchesFound: "No matches found",
   obviousSeparatorListPatternDetected:
     "No obvious separator or list pattern detected",
@@ -158,7 +160,7 @@ export const en = {
   tableConvertedMultiLevelList: "Table converted to multi-level list",
   tableList: "Table to list",
   textTools: "Text tools",
-  command2: "The command",
+  commandAlreadyExists: "The command {name} already exists",
   import3: "This import will:",
   title: "Title",
   toolbarBackgroundColor: "Toolbar Background Color",
@@ -184,11 +186,7 @@ export const en = {
   warningUpdateModeAddNew:
     "Warning: Update mode will add new items and update existing ones.",
   whitespaceCleaningCompleted: "Whitespace cleaning completed",
-  alreadyExists: "already exists",
-  configuration: "configuration",
   eGCommaPipeArrow: "e.g., comma, pipe, arrow",
-  lines: "lines",
-  matches: "matches",
   insert2: "to insert",
   updateModeMergeImportedSettings:
     "ℹ️ Update mode will merge imported settings with existing ones.",

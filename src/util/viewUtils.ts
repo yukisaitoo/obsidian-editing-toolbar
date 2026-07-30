@@ -1,17 +1,14 @@
-import { View } from 'obsidian';
+import { View } from "obsidian";
 
-const DEFAULT_ALLOWED_VIEW_TYPES = ['markdown', 'canvas'];
+const DEFAULT_ALLOWED_VIEW_TYPES = ["markdown", "canvas"];
 
-export class ViewUtils {
-  static isAllowedViewType(view: View | null, allowedTypes?: string[]): boolean {
-    if (!view) return false;
+export function isAllowedViewType(
+  view: View | null,
+  allowedTypes: string[] = DEFAULT_ALLOWED_VIEW_TYPES,
+): boolean {
+  return view ? allowedTypes.includes(view.getViewType()) : false;
+}
 
-    const types = allowedTypes || DEFAULT_ALLOWED_VIEW_TYPES;
-    return types.includes(view.getViewType());
-  }
-
-  static isSourceMode(view: View | null): boolean {
-    if (!view) return false;
-    return view.getMode() === 'source';
-  }
+export function isSourceMode(view: View | null): boolean {
+  return view?.getMode() === "source";
 }

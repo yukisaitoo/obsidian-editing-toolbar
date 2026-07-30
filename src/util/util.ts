@@ -19,6 +19,23 @@ export function newDividerId(): string {
   return `${DIVIDER_COMMAND_ID}-${GenNonDuplicateID(4)}`;
 }
 
+// `app.commands.listCommands()` hands back the LIVE registry objects. Storing one
+// in settings means a later rename or icon change writes straight through to
+// Obsidian's command palette, so everything entering settings is copied to plain
+// data first. It also drops the `callback`s that would break structuredClone.
+export function toStoredCommand(command: Command): Command {
+  const stored: Command = {
+    id: command.id,
+    name: command.name,
+    icon: command.icon,
+  };
+  if (command.menuType) stored.menuType = command.menuType;
+  if (command.SubmenuCommands) {
+    stored.SubmenuCommands = command.SubmenuCommands.map(toStoredCommand);
+  }
+  return stored;
+}
+
 // `subIndex` is -1 for a top-level command, `index` -1 when it is not in the list.
 export function findCommandLocation(
   command: Command,
@@ -48,36 +65,53 @@ type PickerRow =
   | { spacer: true }
   | { colors: string[] };
 
-function renderColorPicker(tableId: string, colspan: number, rows: PickerRow[]): string {
-  const body = rows
-    .map((row) => {
-      if ("header" in row) {
-        return `<tr><th colspan="${colspan}" class="ui-widget-content">${row.header}</th></tr>`;
-      }
-      if ("spacer" in row) {
-        return `<tr><th colspan="${colspan}"></th></tr>`;
-      }
-      const cells = row.colors
-        .map((color) => `<td style="background-color:${color}"><span></span></td>`)
-        .join("");
-      return `<tr>${cells}</tr>`;
-    })
-    .join("\n    ");
+// Built as DOM rather than an HTML string: the custom swatches are settings values,
+// and settings arrive from Import as unvalidated JSON. Assigning a colour through
+// `style.backgroundColor` makes an unparseable one render as no colour, which
+// wireSwatches already skips — an interpolated string would make it markup.
+function renderColorPicker(
+  parent: HTMLElement,
+  tableId: string,
+  colspan: number,
+  rows: PickerRow[],
+): void {
+  const wrapper = parent.createDiv({ cls: "x-color-picker-wrapper" });
+  const table = wrapper
+    .createDiv({ cls: "x-color-picker" })
+    .createEl("table", { cls: "x-color-picker-table", attr: { id: tableId } });
+  const body = table.createEl("tbody");
 
-  return `<div class='x-color-picker-wrapper'>
-<div class='x-color-picker'>
-  <table class="x-color-picker-table" id='${tableId}'>
-    <tbody>
-    ${body}
-    </tbody>
-  </table>
-</div>
-</div>`;
+  for (const row of rows) {
+    const tr = body.createEl("tr");
+
+    if ("header" in row) {
+      tr.createEl("th", {
+        cls: "ui-widget-content",
+        text: row.header,
+        attr: { colspan },
+      });
+      continue;
+    }
+
+    if ("spacer" in row) {
+      tr.createEl("th", { attr: { colspan } });
+      continue;
+    }
+
+    for (const color of row.colors) {
+      const cell = tr.createEl("td");
+      cell.style.backgroundColor = color;
+      cell.createEl("span");
+    }
+  }
 }
 
-export function colorpicker(plugin: { settings: EditingToolbarSettings }) {
+export function colorpicker(
+  parent: HTMLElement,
+  plugin: { settings: EditingToolbarSettings },
+): void {
   const s = plugin.settings;
-  return renderColorPicker("x-color-picker-table", 10, [
+  renderColorPicker(parent, "x-color-picker-table", 10, [
     { header: strings.themeColors },
     { colors: ["#ffffff", "#000000", "#eeece1", "#1f497d", "#4f81bd", "#c0504d", "#9bbb59", "#8064a2", "#4bacc6", "#f79646"] },
     { spacer: true },
@@ -94,9 +128,12 @@ export function colorpicker(plugin: { settings: EditingToolbarSettings }) {
   ]);
 }
 
-export function backcolorpicker(plugin: { settings: EditingToolbarSettings }) {
+export function backcolorpicker(
+  parent: HTMLElement,
+  plugin: { settings: EditingToolbarSettings },
+): void {
   const s = plugin.settings;
-  return renderColorPicker("x-backgroundcolor-picker-table", 5, [
+  renderColorPicker(parent, "x-backgroundcolor-picker-table", 5, [
     { header: strings.translucentColors },
     { colors: ["rgba(140, 140, 140, 0.12)", "rgba(92, 92, 92, 0.2)", "rgba(163, 67, 31, 0.2)", "rgba(240, 107, 5, 0.2)", "rgba(240, 200, 0, 0.2)"] },
     { colors: ["rgba(3, 135, 102, 0.2)", "rgba(3, 135, 102, 0.2)", "rgba(5, 117, 197, 0.2)", "rgba(74, 82, 199, 0.2)", "rgba(136, 49, 204, 0.2)"] },
@@ -199,9 +236,16 @@ const MARK_STYLE = String.raw`background:${COLOR_VALUE}(?:\s*;\s*color:[^"'>]*)?
 const escapeForRegex = (value: string) =>
   value.replace(/([()[{*+.$^\\|?])/g, "\\$1");
 
-function parseColor(
-  color: string,
-): { r: number; g: number; b: number; a: number } | null {
+export interface Rgba {
+  r: number;
+  g: number;
+  b: number;
+  a: number;
+}
+
+// Accepts `#rgb`, `#rgba`, `#rrggbb`, `#rrggbbaa`, `rgb()` and `rgba()`. Anything
+// else (a `var()`, a named colour) returns null for the caller to pass through.
+export function parseColor(color: string): Rgba | null {
   const hex = color.trim().match(/^#([0-9a-fA-F]+)$/);
   if (hex) {
     let digits = hex[1];
@@ -233,6 +277,21 @@ function parseColor(
     b: parts[2],
     a: parts.length > 3 && !Number.isNaN(parts[3]) ? parts[3] : 1,
   };
+}
+
+// Serialises back to hex, keeping alpha as the 8-digit form. Colours that
+// parseColor does not understand are returned untouched.
+export function toHexColor(color: string): string {
+  const rgba = parseColor(color);
+  if (!rgba) return color;
+
+  const channel = (value: number) =>
+    Math.max(0, Math.min(255, Math.round(value)))
+      .toString(16)
+      .padStart(2, "0");
+
+  const rgb = `#${channel(rgba.r)}${channel(rgba.g)}${channel(rgba.b)}`;
+  return rgba.a >= 1 ? rgb : `${rgb}${channel(rgba.a * 255)}`;
 }
 
 // A translucent fill composites over the theme background and keeps the theme's

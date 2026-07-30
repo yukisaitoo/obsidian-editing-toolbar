@@ -8,13 +8,15 @@ import {
   resolveToolbarState,
 } from "src/toolbar/toolbarVisibility";
 
+// `hostDocument` pins the window to act on; without it the active editor decides.
 export function updateFollowingBar(
   app: App,
   plugin: EditingToolbarPlugin,
   editor: Editor | null,
+  hostDocument?: Document,
 ): void {
   const target = editor ?? plugin.commandsManager.getActiveEditor();
-  const doc = resolveToolbarDocument(app, target);
+  const doc = hostDocument ?? resolveToolbarDocument(app, target);
   const state = resolveToolbarState(plugin, "following");
 
   const bar =

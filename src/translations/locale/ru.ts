@@ -14,7 +14,7 @@ const ui: Partial<Record<keyof typeof en, string>> = {
   appearance: "Внешний вид",
   clearAllFollowingStyleCommands: "Очистить все команды стиля следования",
   clearAllTopStyleCommands: "Очистить все команды верхнего стиля",
-  currentlyEditingCommands: "Сейчас редактируются команды для",
+  editingCommandsFor: 'Сейчас редактируются команды для конфигурации "{style}"',
   backgroundColor: "Цвет фона",
   buttonSubmenu: "Подменю кнопки",
   calloutType: "Тип Callout",
@@ -50,7 +50,7 @@ const ui: Partial<Record<keyof typeof en, string>> = {
   translucentColors: "Полупрозрачные цвета",
   highlighterColors: "Цвета маркера",
   dedupeLines: "Удалить дубликаты строк",
-  deduplicationCompletedRemaining: "Удаление дубликатов завершено, осталось",
+  dedupeCompleted: "Удаление дубликатов завершено, осталось {count} строк",
   delete: "Удалить",
   detectedChineseContextConvertedFull:
     "Обнаружен китайский контекст: символы преобразованы в полноширинные",
@@ -76,7 +76,7 @@ const ui: Partial<Record<keyof typeof en, string>> = {
   exportGenerateJsonConfigurationCan:
     "Экспорт: создаёт JSON-конфигурацию, которую можно сохранить или отправить другим.",
   extractBetweenStrings: "Извлечь текст между строками",
-  extracted: "Извлечено",
+  extractedMatches: "Извлечено {count} совпадений",
   extractionFailed: "Не удалось выполнить извлечение",
   failedCopyConfiguration: "Не удалось скопировать конфигурацию",
   fontColors: "Цвета шрифта",
@@ -164,7 +164,7 @@ const ui: Partial<Record<keyof typeof en, string>> = {
   tableConvertedMultiLevelList: "Таблица преобразована в многоуровневый список",
   tableList: "Таблицу в список",
   textTools: "Текстовые инструменты",
-  command2: "Команда",
+  commandAlreadyExists: "Команда {name} уже существует",
   import3: "Этот импорт выполнит:",
   title: "Заголовок",
   toolbarBackgroundColor: "Цвет фона панели инструментов",
@@ -191,11 +191,7 @@ const ui: Partial<Record<keyof typeof en, string>> = {
   warningUpdateModeAddNew:
     "Предупреждение: режим обновления добавит новые элементы и обновит существующие.",
   whitespaceCleaningCompleted: "Очистка пробельных символов завершена",
-  alreadyExists: "уже существует",
-  configuration: "конфигурация",
   eGCommaPipeArrow: "например: , или | или →",
-  lines: "строк",
-  matches: "совпадений",
   insert2: "вставить",
   updateModeMergeImportedSettings:
     "ℹ️ Режим обновления объединит импортированные настройки с существующими.",

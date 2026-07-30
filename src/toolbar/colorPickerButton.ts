@@ -1,5 +1,10 @@
-import { App, ButtonComponent, Command } from "obsidian";
+import { App, ButtonComponent, Command, Editor } from "obsidian";
+import {
+  BACKGROUND_COLOR_ICON_CLASS,
+  FONT_COLOR_ICON_CLASS,
+} from "src/icons/inlineIcons";
 import type EditingToolbarPlugin from "src/plugin/main";
+import { ownCommand, PLUGIN_ID } from "src/plugin/pluginId";
 import type { ToolbarStyleKey } from "src/settings/settingsData";
 import { attachFlyoutClamp } from "src/toolbar/geometry";
 import { applyButtonIcon, TOOLTIP_DELAY } from "src/toolbar/toolbarDom";
@@ -13,34 +18,35 @@ import {
   colorpicker,
   setBackgroundcolor,
   setFontcolor,
+  toHexColor,
 } from "src/util/util";
 
 interface PickerVariant {
   tooltip: string;
   customTooltip: string;
   tableId: string;
-  iconId: string;
-  html: (plugin: EditingToolbarPlugin) => string;
+  iconClass: string;
+  render: (parent: HTMLElement, plugin: EditingToolbarPlugin) => void;
   settingsKey: "lastFontColor" | "lastHighlightColor";
-  apply: typeof setFontcolor;
+  apply: (color: string, editor: Editor) => void;
 }
 
 const VARIANTS: Record<string, PickerVariant> = {
-  "editing-toolbar:change-font-color": {
+  [ownCommand("change-font-color")]: {
     tooltip: strings.fontColors,
     customTooltip: strings.customFontColor,
     tableId: "x-color-picker-table",
-    iconId: "change-font-color-icon",
-    html: colorpicker,
+    iconClass: FONT_COLOR_ICON_CLASS,
+    render: colorpicker,
     settingsKey: "lastFontColor",
     apply: setFontcolor,
   },
-  "editing-toolbar:change-background-color": {
+  [ownCommand("change-background-color")]: {
     tooltip: strings.backgroundColor,
     customTooltip: strings.customBackgroundColor,
     tableId: "x-backgroundcolor-picker-table",
-    iconId: "change-background-color-icon",
-    html: backcolorpicker,
+    iconClass: BACKGROUND_COLOR_ICON_CLASS,
+    render: backcolorpicker,
     settingsKey: "lastHighlightColor",
     apply: setBackgroundcolor,
   },
@@ -74,7 +80,7 @@ export function createColorPickerButton(
 
   const submenu = createEl("div");
   submenu.addClass("subitem");
-  submenu.innerHTML = variant.html(plugin);
+  variant.render(submenu, plugin);
   button.buttonEl.insertAdjacentElement("afterbegin", submenu);
 
   wireSwatches(plugin, submenu, variant);
@@ -84,7 +90,7 @@ export function createColorPickerButton(
     new ButtonComponent(wrapper)
       .setIcon("palette")
       .setTooltip(variant.customTooltip, { delay: TOOLTIP_DELAY })
-      .onClick(() => openAppearanceSettings(app));
+      .onClick(() => openCustomColorSettings(app, plugin));
   }
 
   attachFlyoutClamp(button.buttonEl);
@@ -98,79 +104,59 @@ function wireSwatches(
   const table = root.querySelector<HTMLTableElement>(`#${variant.tableId}`);
   if (!table) return;
 
-  Array.from(table.rows)
-    .slice(1)
-    .forEach((row) => {
-      Array.from(row.cells).forEach((cell) => {
-        cell.onclick = (event: MouseEvent) => {
-          event.preventDefault();
-          event.stopPropagation();
+  // Every cell, header rows included: a header `th` carries no background colour,
+  // so the `!raw` guard below already skips it.
+  for (const row of Array.from(table.rows)) {
+    for (const cell of Array.from(row.cells)) {
+      cell.addEventListener("click", (event) => {
+        event.preventDefault();
+        event.stopPropagation();
 
-          const editor = plugin.commandsManager.getActiveEditor();
-          const raw = (event.currentTarget as HTMLElement).style.backgroundColor;
-          if (!editor || !raw) return;
+        const editor = plugin.commandsManager.getActiveEditor();
+        const raw = cell.style.backgroundColor;
+        if (!editor || !raw) return;
 
-          const color = toHex(raw);
-          plugin.settings[variant.settingsKey] = color;
-          variant.apply(color, editor);
-          paintColorIcons(cell.ownerDocument, variant.iconId, color);
-          void plugin.saveSettings();
-        };
+        const color = toHexColor(raw);
+        plugin.settings[variant.settingsKey] = color;
+        variant.apply(color, editor);
+        paintColorIcons(cell.ownerDocument, variant.iconClass, color);
+        void plugin.saveSettings();
       });
-    });
+    }
+  }
 }
 
 export function syncColorIcons(
   doc: Document,
   settings: { lastFontColor: string; lastHighlightColor: string },
 ): void {
-  paintColorIcons(doc, "change-font-color-icon", settings.lastFontColor);
+  paintColorIcons(doc, FONT_COLOR_ICON_CLASS, settings.lastFontColor);
   paintColorIcons(
     doc,
-    "change-background-color-icon",
+    BACKGROUND_COLOR_ICON_CLASS,
     settings.lastHighlightColor,
   );
 }
 
-function paintColorIcons(doc: Document, iconId: string, color: string): void {
+// Every live bar has its own copy of the icon, so this paints all of them.
+function paintColorIcons(
+  doc: Document,
+  iconClass: string,
+  color: string,
+): void {
   doc
-    .querySelectorAll<HTMLElement>(`#${iconId}`)
+    .querySelectorAll<HTMLElement>(`.${iconClass}`)
     .forEach((el) => (el.style.fill = color));
 }
 
-function openAppearanceSettings(app: App): void {
+// The custom swatches this button edits live on the General tab. Straight there by
+// id — no timer, and no dependence on it happening to be the first tab.
+function openCustomColorSettings(
+  app: App,
+  plugin: EditingToolbarPlugin,
+): void {
   app.setting.open();
-  app.setting.openTabById("editing-toolbar");
-  setTimeout(() => {
-    const tabs = app.setting.activeTab?.containerEl.querySelector(
-      ".editing-toolbar-tabs",
-    );
-    (tabs?.children[0] as HTMLElement | undefined)?.click();
-  }, 200);
+  app.setting.openTabById(PLUGIN_ID);
+  plugin.settingTab.setActiveTab("general");
 }
 
-function toHex(color: string): string {
-  const rgb = color.match(/\d+/g);
-  if (/^rgba?\(/i.test(color) && rgb && rgb.length >= 3) {
-    return (
-      "#" +
-      rgb
-        .slice(0, 3)
-        .map((n) => Number(n).toString(16).padStart(2, "0"))
-        .join("")
-    );
-  }
-
-  const short = color.match(/^#([0-9a-fA-F]{3})$/);
-  if (short) {
-    return (
-      "#" +
-      short[1]
-        .split("")
-        .map((d) => d + d)
-        .join("")
-    );
-  }
-
-  return color;
-}

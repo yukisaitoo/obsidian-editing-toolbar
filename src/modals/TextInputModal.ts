@@ -5,16 +5,6 @@ interface ITextInputResult {
   [key: string]: string;
 }
 
-export interface IWrapInputResult {
-  prefix: string;
-  suffix: string;
-}
-
-export interface IExtractBetweenResult {
-  start: string;
-  end: string;
-}
-
 interface ITextInputField {
   key: string;
   label: string;

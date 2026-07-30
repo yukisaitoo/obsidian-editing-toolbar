@@ -12,8 +12,8 @@ import {
 import { getAppIcons } from "src/icons/appIcons";
 import type EditingToolbarPlugin from "src/plugin/main";
 import type { ToolbarStyleKey } from "src/settings/settingsData";
-import { strings, t } from "src/translations/helper";
-import { findCommandLocation } from "src/util/util";
+import { format, strings, t } from "src/translations/helper";
+import { findCommandLocation, toStoredCommand } from "src/util/util";
 
 type IconSelectCallback = (iconId: string) => void;
 
@@ -98,8 +98,7 @@ export class ChooseFromIconList extends FuzzySuggestModal<string> {
         this.currentEditingConfig,
       );
     } else {
-      this.command.icon = item;
-      currentCommands.push(this.command);
+      currentCommands.push(toStoredCommand({ ...this.command, icon: item }));
       this.plugin.updateCurrentCommands(
         currentCommands,
         this.currentEditingConfig,
@@ -137,7 +136,10 @@ export class CommandPicker extends FuzzySuggestModal<Command> {
     );
 
     if (currentCommands.some((v) => v.id === item.id)) {
-      new Notice(strings.command2 + t(item.name) + strings.alreadyExists, 3000);
+      new Notice(
+        format(strings.commandAlreadyExists, { name: t(item.name) }),
+        3000,
+      );
       return;
     }
 
@@ -152,7 +154,7 @@ export class CommandPicker extends FuzzySuggestModal<Command> {
       return;
     }
 
-    currentCommands.push(item);
+    currentCommands.push(toStoredCommand(item));
     this.plugin.updateCurrentCommands(
       currentCommands,
       this.currentEditingConfig,
@@ -192,18 +194,20 @@ export class ChangeCmdname extends Modal {
       this.isSubmenuItem,
       currentCommands,
     );
-    this.item.name = value;
 
+    // The rename is written to the entry in the list, never to `this.item` — for a
+    // command just picked from the palette those are the same live object, and
+    // mutating it would rename the palette entry too.
     if (!this.isSubmenuItem) {
       if (location.index === -1) {
-        currentCommands.push(this.item);
+        currentCommands.push(toStoredCommand({ ...this.item, name: value }));
       } else {
         currentCommands[location.index].name = value;
       }
     } else {
       const submenu = currentCommands[location.index]?.SubmenuCommands;
       if (location.subIndex === -1) {
-        submenu?.push(this.item);
+        submenu?.push(toStoredCommand({ ...this.item, name: value }));
       } else if (submenu) {
         submenu[location.subIndex].name = value;
       }

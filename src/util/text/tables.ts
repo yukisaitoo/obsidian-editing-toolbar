@@ -22,32 +22,39 @@ export function convertListToTableMultiDim(editor: Editor): void {
 }
 
 export function convertTableToList(editor: Editor): void {
-  const selection = selectSurroundingTable(editor);
+  const selection = selectTableAroundCursor(editor);
   if (!selection?.includes("|")) {
     new Notice(strings.pleaseSelectValidMarkdownTable);
     return;
   }
 
-  const result: string[] = [];
-  for (const line of selection.split(/\r?\n/)) {
-    if (line.match(/^\s*\|?[\s\-:|]+\|?\s*$/) || line.trim() === "") continue;
+  const rows = selection
+    .split(/\r?\n/)
+    .filter((line) => line.trim() !== "" && !isDelimiterRow(line));
 
-    line
-      .trim()
-      .replace(/^\|/, "")
-      .replace(/\|$/, "")
-      .split("|")
-      .map((cell) => cell.trim())
-      .forEach((cell, index) => {
-        if (!cell || cell === strings.item || cell.startsWith(strings.content)) {
-          return;
-        }
-        result.push(`${"  ".repeat(index)}- ${cell}`);
-      });
-  }
+  const result: string[] = [];
+  rows.slice(1).forEach((line) => {
+    splitRow(line).forEach((cell, index) => {
+      if (cell) result.push(`${"  ".repeat(index)}- ${cell}`);
+    });
+  });
 
   editor.replaceSelection(result.join("\n"));
   new Notice(strings.tableConvertedMultiLevelList);
+}
+
+/** The `|---|:--:|` row that separates a table's header from its body. */
+function isDelimiterRow(line: string): boolean {
+  return /^\s*\|?[\s\-:|]+\|?\s*$/.test(line) && line.includes("-");
+}
+
+function splitRow(line: string): string[] {
+  return line
+    .trim()
+    .replace(/^\|/, "")
+    .replace(/\|$/, "")
+    .split("|")
+    .map((cell) => cell.trim());
 }
 
 function detectIndentWidth(lines: string[]): number {
@@ -59,7 +66,9 @@ function detectIndentWidth(lines: string[]): number {
 }
 
 function levelOf(indent: string, tabSize: number): number {
-  return Math.round(indent.replace(/\t/g, " ".repeat(tabSize)).length / tabSize);
+  return Math.round(
+    indent.replace(/\t/g, " ".repeat(tabSize)).length / tabSize,
+  );
 }
 
 function deepestLevel(lines: string[], tabSize: number): number {
@@ -96,7 +105,9 @@ function collectRows(lines: string[], tabSize: number, maxLevel: number) {
         if (currentRow.length) rows.push([...currentRow]);
         currentRow = [content, ""];
       } else {
-        currentRow[1] = currentRow[1] ? currentRow[1] + "<br>" + content : content;
+        currentRow[1] = currentRow[1]
+          ? currentRow[1] + "<br>" + content
+          : content;
       }
       continue;
     }
@@ -159,7 +170,7 @@ function renderTable(
   return needsGap ? `\n${table}` : table;
 }
 
-function selectSurroundingTable(editor: Editor): string | null {
+function selectTableAroundCursor(editor: Editor): string | null {
   const selection = editor.getSelection();
   if (selection?.includes("|")) return selection;
 

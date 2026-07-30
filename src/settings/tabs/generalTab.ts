@@ -113,11 +113,11 @@ function renderSwatchRow(
           defaultColor: ctx.plugin.settings[settingKey] || "#000000",
           onSave: (hexColor) => {
             ctx.plugin.settings[settingKey] = hexColor;
-            ctx.plugin.saveSettings();
+            void ctx.plugin.saveSettings();
           },
           onClear: () => {
             ctx.plugin.settings[settingKey] = DEFAULT_SETTINGS[settingKey];
-            ctx.plugin.saveSettings();
+            void ctx.plugin.saveSettings();
             ctx.refresh();
           },
         });

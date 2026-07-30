@@ -8,8 +8,8 @@ import {
 import type { ToolbarStyleKey } from "src/settings/settingsData";
 import { POSITION_STYLES, STYLE_LABELS } from "src/settings/settingsData";
 import type { SettingsTabContext } from "src/settings/settingsTab";
-import { checkHtml } from "src/toolbar/toolbarDom";
-import { strings, t } from "src/translations/helper";
+import { applyButtonIcon } from "src/toolbar/toolbarDom";
+import { format, strings, t } from "src/translations/helper";
 import {
   DIVIDER_COMMAND_ID,
   GenNonDuplicateID,
@@ -61,7 +61,9 @@ export function renderCommandsTab(
   listContainer.addClass(state.style);
   listContainer.createEl("div", {
     cls: `position-style-info ${state.style}`,
-    text: `${strings.currentlyEditingCommands} "${STYLE_LABELS[state.style]}" ${strings.configuration}`,
+    text: format(strings.editingCommandsFor, {
+      style: STYLE_LABELS[state.style],
+    }),
   });
 
   new Setting(listContainer)
@@ -71,10 +73,9 @@ export function renderCommandsTab(
       addButton
         .setIcon("plus")
         .setTooltip(strings.add)
-        .onClick(() => {
-          new CommandPicker(ctx.plugin, state.style).open();
-          ctx.rebuildToolbar();
-        });
+        // No rebuild here: this fires when the picker *opens*, long before a
+        // command is chosen. CommandPicker rebuilds once it has one.
+        .onClick(() => new CommandPicker(ctx.plugin, state.style).open());
     });
 
   renderCommandList(ctx, listContainer, state.style);
@@ -95,7 +96,7 @@ function renderCommandList(
 
   const save = () => {
     ctx.plugin.updateCurrentCommands(commands, style);
-    ctx.plugin.saveSettings();
+    void ctx.plugin.saveSettings();
   };
 
   Sortable.create(listEl, {
@@ -112,10 +113,19 @@ function renderCommandList(
     },
     onSort: (evt) => {
       if (evt.oldIndex == null || evt.newIndex == null) return;
-      if (evt.from.className === evt.to.className) {
+      // Sortable fires onSort on BOTH lists for a cross-list drag. The
+      // destination owns the move so it is applied exactly once.
+      if (evt.to !== listEl) return;
+
+      if (evt.from === listEl) {
         moveWithin(commands, evt.oldIndex, evt.newIndex);
-        save();
+      } else {
+        const source = submenuFor(evt.from, commands);
+        if (!source || evt.oldIndex >= source.length) return;
+        commands.splice(evt.newIndex, 0, source.splice(evt.oldIndex, 1)[0]);
       }
+
+      save();
       ctx.rebuildToolbar();
     },
   });
@@ -269,29 +279,25 @@ function renderSubmenuRow(
     group: { name: "item", pull: true, put: row.isPlainItemDragging },
     onSort: (evt) => {
       if (evt.oldIndex == null || evt.newIndex == null) return;
+      // Destination owns the move, as in the top-level list above. Without this
+      // both submenus in a submenu-to-submenu drag reorder themselves instead.
+      if (evt.to !== subListEl) return;
 
-      switch (classifyDrag(evt)) {
-        case "reorderSubmenu":
-          moveWithin(command.SubmenuCommands!, evt.oldIndex, evt.newIndex);
-          break;
-        case "submenuToToolbar": {
-          const source = submenuOf(evt, commands);
-          if (!source || evt.oldIndex >= source.length) return;
-          commands.splice(evt.newIndex, 0, source.splice(evt.oldIndex, 1)[0]);
-          break;
-        }
-        case "toolbarToSubmenu": {
-          const target = submenuOf(evt, commands);
-          if (!target || evt.oldIndex >= commands.length) return;
-          target.splice(evt.newIndex, 0, commands.splice(evt.oldIndex, 1)[0]);
-          break;
-        }
-        default:
-          return;
+      const submenu = command.SubmenuCommands!;
+
+      if (evt.from === subListEl) {
+        moveWithin(submenu, evt.oldIndex, evt.newIndex);
+      } else if (evt.from.classList.contains(TOP_LEVEL_CONTAINER_CLASS)) {
+        if (evt.oldIndex >= commands.length) return;
+        submenu.splice(evt.newIndex, 0, commands.splice(evt.oldIndex, 1)[0]);
+      } else {
+        const source = submenuFor(evt.from, commands);
+        if (!source || evt.oldIndex >= source.length) return;
+        submenu.splice(evt.newIndex, 0, source.splice(evt.oldIndex, 1)[0]);
       }
 
       ctx.plugin.updateCurrentCommands(commands, style);
-      ctx.plugin.saveSettings();
+      void ctx.plugin.saveSettings();
       ctx.rebuildToolbar();
     },
   });
@@ -321,25 +327,12 @@ function renderSubmenuRow(
   });
 }
 
-type SubmenuDrag =
-  | "reorderSubmenu"
-  | "submenuToToolbar"
-  | "toolbarToSubmenu"
-  | "unsupported";
-
-function classifyDrag(evt: Sortable.SortableEvent): SubmenuDrag {
-  if (evt.from.className === evt.to.className) return "reorderSubmenu";
-  if (evt.to.className === TOP_LEVEL_CONTAINER_CLASS) return "submenuToToolbar";
-  if (evt.from.className === TOP_LEVEL_CONTAINER_CLASS) {
-    return "toolbarToSubmenu";
-  }
-  return "unsupported";
-}
-
-function submenuOf(evt: Sortable.SortableEvent, commands: Command[]) {
-  const parentId = evt.target.parentElement?.dataset?.["id"];
+// The submenu a sub-list element belongs to. Each sub-list is a child of the
+// parent command's row, which carries its id in `data-id`.
+function submenuFor(listEl: HTMLElement, commands: Command[]) {
+  const parentId = listEl.parentElement?.dataset?.["id"];
   if (!parentId) {
-    console.error("editing-toolbar: drag target has no parent command id");
+    console.error("editing-toolbar: drag source has no parent command id");
     return null;
   }
   const parent = commands.find((command) => command.id === parentId);
@@ -398,12 +391,7 @@ function configureIconButton(
     ).open();
   });
 
-  const icon = command.icon ?? "";
-  if (checkHtml(icon)) {
-    button.buttonEl.innerHTML = icon;
-  } else {
-    button.setIcon(icon);
-  }
+  applyButtonIcon(button, command.icon);
 }
 
 function configureRenameButton(

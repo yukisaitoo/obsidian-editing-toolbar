@@ -33,7 +33,7 @@ import {
   resolveToolbarState,
 } from "src/toolbar/toolbarVisibility";
 import { strings } from "src/translations/helper";
-import { ViewUtils } from "src/util/viewUtils";
+import { isAllowedViewType } from "src/util/viewUtils";
 import { EditingToolbarSettingTab } from "../settings/settingsTab";
 
 interface EditorContextMenuAction {
@@ -87,7 +87,7 @@ export default class EditingToolbarPlugin extends Plugin {
     this.registerEvent(
       this.app.workspace.on("window-open", (leaf) => {
         this.registerSelectionEvents(leaf.doc);
-        ensureToolbar(this.app, this, "following", leaf.doc);
+        updateFollowingBar(this.app, this, null, leaf.doc);
       }),
     );
 
@@ -241,7 +241,6 @@ export default class EditingToolbarPlugin extends Plugin {
       actions.push(
         { title: strings.addPrefixSuffix, commandId: "add-wrap" },
         { title: strings.insertBlankLines, commandId: "insert-blank-lines" },
-        { title: strings.extractBetweenStrings, commandId: "extract-between" },
       );
     }
 
@@ -309,9 +308,6 @@ export default class EditingToolbarPlugin extends Plugin {
   }
 
   onunload(): void {
-    this.app.workspace.off("active-leaf-change", this.handleEditingToolbar);
-    this.app.workspace.off("layout-change", this.handleEditingToolbar);
-
     this.topToolbarResizeObserver?.disconnect();
     this.topToolbarResizeObserver = null;
 
@@ -320,7 +316,7 @@ export default class EditingToolbarPlugin extends Plugin {
 
   isView() {
     const view = this.app.workspace.getActiveViewOfType(ItemView);
-    return ViewUtils.isAllowedViewType(view);
+    return isAllowedViewType(view);
   }
 
   // Safe to call as often as the workspace fires events: builds only what is
@@ -477,6 +473,8 @@ export default class EditingToolbarPlugin extends Plugin {
   }
 }
 
+// Fires immediately, then ignores calls for `limit` ms. The pending timer only
+// resets a local flag, so it is safe to leave running past unload.
 function throttle(func: () => void, limit: number): () => void {
   let inThrottle = false;
   return () => {

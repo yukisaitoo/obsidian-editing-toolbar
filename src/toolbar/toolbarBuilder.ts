@@ -20,7 +20,7 @@ import {
 } from "src/toolbar/toolbarDom";
 import { resolveToolbarDocument, windowOf } from "src/toolbar/toolbarHost";
 import { applyToolbarState } from "src/toolbar/toolbarVisibility";
-import { ViewUtils } from "src/util/viewUtils";
+import { isAllowedViewType } from "src/util/viewUtils";
 
 const VIEW_TYPE_MOUNT_SELECTORS: Record<string, string> = {
   markdown: ".markdown-source-view",
@@ -63,7 +63,7 @@ export function ensureToolbar(
   hostDocument?: Document,
 ): HTMLElement | null {
   if (!plugin.isDesktop()) return null;
-  if (!ViewUtils.isAllowedViewType(app.workspace.getActiveViewOfType(ItemView))) {
+  if (!isAllowedViewType(app.workspace.getActiveViewOfType(ItemView))) {
     return null;
   }
 
@@ -246,7 +246,7 @@ function refreshOverflow(
   popoverBar: HTMLElement,
 ): void {
   const hasOverflow = reflowToolbarOverflow(bar, popoverBar, () => {
-    if (!ViewUtils.isAllowedViewType(
+    if (!isAllowedViewType(
       plugin.app.workspace.getActiveViewOfType(ItemView),
     )) {
       return undefined;

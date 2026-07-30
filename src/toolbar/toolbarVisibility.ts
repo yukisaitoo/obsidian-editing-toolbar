@@ -1,7 +1,7 @@
 import { ItemView, View } from "obsidian";
 import type EditingToolbarPlugin from "src/plugin/main";
 import type { ToolbarStyleKey } from "src/settings/settingsData";
-import { ViewUtils } from "src/util/viewUtils";
+import { isAllowedViewType, isSourceMode } from "src/util/viewUtils";
 
 export type ToolbarState = "visible" | "hidden";
 
@@ -22,7 +22,7 @@ export function resolveToolbarState(
 
   const view = plugin.app.workspace.getActiveViewOfType(ItemView);
 
-  if (!ViewUtils.isAllowedViewType(view)) {
+  if (!isAllowedViewType(view)) {
     // Clicking a sidebar takes focus off the note but leaves it on screen, so
     // the top bar stays; switching the main pane to a PDF/graph does hide it.
     return style === "top" && isMainAreaEditable(plugin) ? "visible" : "hidden";
@@ -41,11 +41,11 @@ export function resolveToolbarState(
 }
 
 function isReadingMode(view: View | null): boolean {
-  return view?.getViewType() === "markdown" && !ViewUtils.isSourceMode(view);
+  return view?.getViewType() === "markdown" && !isSourceMode(view);
 }
 
 function isMainAreaEditable(plugin: EditingToolbarPlugin): boolean {
   const view = plugin.app.workspace.getMostRecentLeaf()?.view ?? null;
   const type = view?.getViewType();
-  return type === "canvas" || (type === "markdown" && ViewUtils.isSourceMode(view));
+  return type === "canvas" || (type === "markdown" && isSourceMode(view));
 }

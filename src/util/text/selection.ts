@@ -13,3 +13,12 @@ export function requireSelection(
   }
   return selection;
 }
+
+export function replaceDocument(editor: Editor, text: string): void {
+  const lastLine = editor.lastLine();
+  editor.replaceRange(
+    text,
+    { line: 0, ch: 0 },
+    { line: lastLine, ch: editor.getLine(lastLine).length },
+  );
+}

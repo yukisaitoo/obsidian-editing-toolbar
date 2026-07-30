@@ -5,7 +5,7 @@ export const registerCoreCommands: Registrar = ({ plugin, runOnEditor }) => {
   plugin.addCommand({
     id: "renumber-ordered-list",
     name: "Renumber ordered list",
-    editorCallback: (editor) => runOnEditor(() => renumberSelection(editor)),
+    callback: () => runOnEditor(renumberSelection),
   });
 
   plugin.addCommand({

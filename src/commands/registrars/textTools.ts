@@ -1,10 +1,6 @@
 import { App, Editor } from "obsidian";
 import type { Registrar } from "src/commands/registrars/types";
-import {
-  IExtractBetweenResult,
-  IWrapInputResult,
-  TextInputModal,
-} from "src/modals/TextInputModal";
+import { TextInputModal } from "src/modals/TextInputModal";
 import { strings } from "src/translations/helper";
 import {
   dedupe,
@@ -17,15 +13,18 @@ import {
   convertListToTableMultiDim,
   convertTableToList,
 } from "src/util/text/tables";
-import { copySelectionAsPlainText, processWhitespace } from "src/util/text/whitespace";
+import {
+  copySelectionAsPlainText,
+  processWhitespace,
+} from "src/util/text/whitespace";
 import { addWrap, extractBetween, smartTypography } from "src/util/text/wrap";
 
-export const registerTextToolCommands: Registrar = ({ plugin }) => {
-  const add = (
-    id: string,
-    name: string,
-    editorCallback: (editor: Editor) => void,
-  ) => plugin.addCommand({ id, name, editorCallback });
+export const registerTextToolCommands: Registrar = ({
+  plugin,
+  runOnEditor,
+}) => {
+  const add = (id: string, name: string, run: (editor: Editor) => void) =>
+    plugin.addCommand({ id, name, callback: () => runOnEditor(run) });
 
   add("get-plain-text", "Get plain text", copySelectionAsPlainText);
   add("insert-blank-lines", "Insert blank lines", insertBlankLines);
@@ -51,22 +50,27 @@ export const registerTextToolCommands: Registrar = ({ plugin }) => {
   );
 
   add("add-wrap", "Add prefix/suffix", (editor) =>
-    prompt(
+    promptFields(
       plugin.app,
       strings.addPrefixSuffix,
       [
-        { key: "prefix", label: strings.prefix, placeholder: strings.enterPrefix },
-        { key: "suffix", label: strings.suffix, placeholder: strings.enterSuffix },
+        {
+          key: "prefix",
+          label: strings.prefix,
+          placeholder: strings.enterPrefix,
+        },
+        {
+          key: "suffix",
+          label: strings.suffix,
+          placeholder: strings.enterSuffix,
+        },
       ],
-      (result) => {
-        const { prefix, suffix } = result as unknown as IWrapInputResult;
-        addWrap(editor, prefix, suffix, true);
-      },
+      (result) => addWrap(editor, result.prefix, result.suffix, true),
     ),
   );
 
   add("number-lines", "Number lines (custom)", (editor) =>
-    prompt(
+    promptFields(
       plugin.app,
       strings.numberLinesConfiguration,
       [
@@ -86,7 +90,7 @@ export const registerTextToolCommands: Registrar = ({ plugin }) => {
   );
 
   add("extract-between", "Extract between strings", (editor) =>
-    prompt(
+    promptFields(
       plugin.app,
       strings.extractBetweenStrings,
       [
@@ -103,15 +107,12 @@ export const registerTextToolCommands: Registrar = ({ plugin }) => {
           defaultValue: "]",
         },
       ],
-      (result) => {
-        const { start, end } = result as unknown as IExtractBetweenResult;
-        extractBetween(editor, start, end);
-      },
+      (result) => extractBetween(editor, result.start, result.end),
     ),
   );
 
   add("merge-lines", strings.mergeLines, (editor) =>
-    prompt(
+    promptFields(
       plugin.app,
       strings.mergeLinesSettings,
       [
@@ -139,7 +140,7 @@ interface PromptField {
   defaultValue?: string;
 }
 
-function prompt(
+function promptFields(
   app: App,
   title: string,
   fields: PromptField[],

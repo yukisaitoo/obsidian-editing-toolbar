@@ -52,12 +52,12 @@ export function renderAppearanceTab(
       POSITION_STYLES.forEach((style) =>
         dropdown.addOption(style, STYLE_LABELS[style]),
       );
-      dropdown.setValue(editingStyle).onChange(async (value) => {
-        const style = value as ToolbarStyleKey;
-        ctx.plugin.appearanceEditStyle = style;
-        ctx.plugin.settings.positionStyle = style;
-        await ctx.plugin.saveSettings();
-        ctx.rebuildToolbar();
+      // Only the edit target moves. Writing positionStyle here would repoint the
+      // live toolbar as a side effect of choosing which one to restyle, which is
+      // exactly what appearanceEditStyle exists to avoid.
+      dropdown.setValue(editingStyle).onChange((value) => {
+        ctx.plugin.appearanceEditStyle = value as ToolbarStyleKey;
+        ctx.refresh();
       });
     });
 
@@ -100,7 +100,7 @@ export function renderAppearanceTab(
           ).toolbarIconSize = value;
 
           if (ctx.plugin.liveStyle === editingStyle) {
-            document.documentElement.style.setProperty(
+            activeWindow.document.documentElement.style.setProperty(
               "--toolbar-icon-size",
               `${value}px`,
             );
@@ -129,7 +129,10 @@ function applyColor(
   color: string,
 ): void {
   if (ctx.plugin.liveStyle === editingStyle) {
-    document.documentElement.style.setProperty(config.cssProperty, color);
+    activeWindow.document.documentElement.style.setProperty(
+      config.cssProperty,
+      color,
+    );
   }
   void ctx.plugin.saveSettings();
   // No refresh() here: inside a Pickr callback a synchronous re-render would

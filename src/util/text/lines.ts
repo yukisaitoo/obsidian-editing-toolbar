@@ -1,11 +1,20 @@
 import { Editor, Notice } from "obsidian";
-import { strings } from "src/translations/helper";
-import { requireSelection } from "src/util/text/selection";
+import { format, strings } from "src/translations/helper";
+import { replaceDocument, requireSelection } from "src/util/text/selection";
 
 export function insertBlankLines(editor: Editor): void {
+  const selection = editor.getSelection();
+  const spaceOut = (text: string) =>
+    text.replace(/([^\n])\n(?=[^\n])/g, "$1\n\n");
+
+  if (selection) {
+    editor.replaceSelection(spaceOut(selection));
+    return;
+  }
+
   const text = editor.getValue();
   if (!text) return;
-  editor.setValue(text.replace(/([^\n])\n([^\n])/g, "$1\n\n$2"));
+  replaceDocument(editor, spaceOut(text));
 }
 
 export function splitLines(editor: Editor): void {
@@ -29,8 +38,10 @@ export function splitLines(editor: Editor): void {
     return;
   }
 
-  editor.replaceSelection(splitOutsideBrackets(selection, separator).join("\n"));
-  new Notice(`${strings.merged} '${separator}' ${strings.mergeCompleted}`);
+  editor.replaceSelection(
+    splitOutsideBrackets(selection, separator).join("\n"),
+  );
+  new Notice(`${strings.splitOn} '${separator}' — ${strings.splitCompleted}`);
 }
 
 export function mergeLines(
@@ -41,7 +52,10 @@ export function mergeLines(
     trimLines?: boolean;
   },
 ): void {
-  const selection = requireSelection(editor, strings.pleaseSelectLinesMergeFirst);
+  const selection = requireSelection(
+    editor,
+    strings.pleaseSelectLinesMergeFirst,
+  );
   if (selection === null) return;
 
   const hasCustomSep = options.separator !== "";
@@ -111,9 +125,7 @@ export function dedupe(
   }
 
   editor.replaceSelection(result.join("\n"));
-  new Notice(
-    `${strings.deduplicationCompletedRemaining} ${result.length} ${strings.lines}`,
-  );
+  new Notice(format(strings.dedupeCompleted, { count: result.length }));
 }
 
 export function numberList(
