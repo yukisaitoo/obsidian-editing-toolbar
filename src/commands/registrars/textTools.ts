@@ -17,7 +17,7 @@ import {
   convertListToTableMultiDim,
   convertTableToList,
 } from "src/util/text/tables";
-import { getPlainText, processWhitespace } from "src/util/text/whitespace";
+import { copySelectionAsPlainText, processWhitespace } from "src/util/text/whitespace";
 import { addWrap, extractBetween, smartTypography } from "src/util/text/wrap";
 
 export const registerTextToolCommands: Registrar = ({ plugin }) => {
@@ -27,7 +27,7 @@ export const registerTextToolCommands: Registrar = ({ plugin }) => {
     editorCallback: (editor: Editor) => void,
   ) => plugin.addCommand({ id, name, editorCallback });
 
-  add("get-plain-text", "Get plain text", getPlainText);
+  add("get-plain-text", "Get plain text", copySelectionAsPlainText);
   add("insert-blank-lines", "Insert blank lines", insertBlankLines);
   add("split-lines", "Split lines", splitLines);
   add("smart-symbols", "Convert punctuation width", smartTypography);

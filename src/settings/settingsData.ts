@@ -15,32 +15,34 @@ export const STYLE_LABELS: Record<ToolbarStyleKey, string> = {
   following: strings.followingToolbar,
 };
 
-export interface StyleAppearanceSettings {
-  toolbarBackgroundColor?: string;
-  toolbarIconColor?: string;
-  toolbarIconSize?: number;
+export interface AppearanceSettings {
+  toolbarBackgroundColor: string;
+  toolbarIconColor: string;
+  toolbarIconSize: number;
 }
+
+export type StyleAppearanceSettings = Partial<AppearanceSettings>;
 
 export interface AppearanceByStyle {
   [style: string]: StyleAppearanceSettings;
 }
 
-// Falls back to the global default field when `style`'s bucket omits the key.
-export function getAppearanceValue<K extends keyof StyleAppearanceSettings>(
+export const DEFAULT_APPEARANCE: AppearanceSettings = {
+  toolbarBackgroundColor: "var(--background-primary)",
+  toolbarIconColor: "var(--text-normal)",
+  toolbarIconSize: 18,
+};
+
+export function getAppearanceValue<K extends keyof AppearanceSettings>(
   settings: EditingToolbarSettings,
   key: K,
   style: string,
-): NonNullable<StyleAppearanceSettings[K]> {
-  // The global field is always populated from DEFAULT_SETTINGS, so never undefined.
-  const bucketValue = settings.appearanceByStyle?.[style]?.[key];
-  return (bucketValue ??
-    (settings as unknown as StyleAppearanceSettings)[key]) as NonNullable<
-    StyleAppearanceSettings[K]
-  >;
+): AppearanceSettings[K] {
+  return settings.appearanceByStyle?.[style]?.[key] ?? DEFAULT_APPEARANCE[key];
 }
 
 // Writable bucket for `style`, created on demand. Keys left out of it fall back
-// to the global fields via getAppearanceValue().
+// to DEFAULT_APPEARANCE via getAppearanceValue().
 export function getAppearanceBucket(
   settings: EditingToolbarSettings,
   style: string,
@@ -68,9 +70,8 @@ export function applyAppearanceVars(
   );
 }
 
-// Which style should own "primary" after a toggle, or null to leave it alone.
-// Turning a style on makes it primary; turning the primary off promotes the next
-// enabled style in POSITION_STYLES order.
+// Which style owns "primary" after a toggle, or null to leave it alone: enabling one
+// makes it primary, disabling the primary promotes the next enabled style.
 export function resolveNextPositionStyle(
   settings: EditingToolbarSettings,
   toggledStyle: ToolbarStyleKey,
@@ -123,13 +124,7 @@ export interface EditingToolbarSettings {
   custom_fc4: string;
   custom_fc5: string;
 
-  // Per-style appearance buckets (top/following)
   appearanceByStyle?: AppearanceByStyle;
-
-  // Global appearance defaults, used as the fallback for empty per-style buckets
-  toolbarBackgroundColor: string;
-  toolbarIconColor: string;
-  toolbarIconSize: number;
 }
 
 // The command lists are seeded in loadSettings() rather than here, so a list the
@@ -153,27 +148,8 @@ export const DEFAULT_SETTINGS: EditingToolbarSettings = {
   custom_fc3: "#245BDB",
   custom_fc4: "#6425D0",
   custom_fc5: "#646A73",
-
-  appearanceByStyle: {
-    top: {
-      toolbarBackgroundColor: "var(--background-primary)",
-      toolbarIconColor: "var(--text-normal)",
-      toolbarIconSize: 18,
-    },
-    following: {
-      toolbarBackgroundColor: "var(--background-primary)",
-      toolbarIconColor: "var(--text-normal)",
-      toolbarIconSize: 18,
-    },
-  },
-
-  // Global appearance defaults: used as the fallback for any empty per-style bucket
-  toolbarBackgroundColor: "var(--background-primary)",
-  toolbarIconColor: "var(--text-normal)",
-  toolbarIconSize: 18,
 };
 
-/** Command list each style starts with on a fresh install. */
 export const DEFAULT_COMMANDS_BY_STYLE: Record<ToolbarStyleKey, Command[]> = {
   top: DEFAULT_TOOLBAR_COMMANDS,
   following: DEFAULT_FOLLOWING_COMMANDS,

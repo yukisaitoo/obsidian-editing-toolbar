@@ -95,8 +95,6 @@ export function dedupe(
   for (const line of selection.split(/\r?\n/)) {
     const content = options.trimBeforeCompare ? line.trim() : line;
 
-    // Blank lines are kept as spacing unless includeEmpty opts them into the
-    // duplicate check.
     if (content === "" && !options.includeEmpty) {
       result.push(line);
       continue;
@@ -147,7 +145,6 @@ export function numberList(
   new Notice(`${strings.numberingCompletedStarting} ${startNumber}`);
 }
 
-/** A numbered or arrow-delimited run only counts if it repeats. */
 function detectListPattern(text: string): RegExp | null {
   const numberedList = /\s?\d+[.、]\s?/g;
   const arrowSymbol = /\s?[→=>]\s?/g;
@@ -183,7 +180,6 @@ const BRACKET_PAIRS: Record<string, string> = {
   "[": "]",
 };
 
-/** Splits on `separator` but leaves quoted and bracketed spans intact. */
 function splitOutsideBrackets(text: string, separator: string): string[] {
   const parts: string[] = [];
   let current = "";

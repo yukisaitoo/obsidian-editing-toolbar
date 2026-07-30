@@ -13,7 +13,7 @@ interface BuiltInCalloutType {
 }
 
 export interface CalloutTypeInfo {
-  type: string; // e.g. 'note', 'ad-warning'
+  type: string;
   label: string;
   icon: string | AdmonitionIconDefinition;
   color: string;
@@ -21,11 +21,9 @@ export interface CalloutTypeInfo {
   sourcePlugin?: string;
 }
 
-/**
- * Shape of an entry in the Admonition plugin's own type registry. Asserted, not
- * validated — `icon` is an object on current Admonition but was a bare icon name
- * in older releases, so both are accepted.
- */
+// An entry in the Admonition plugin's type registry, asserted rather than
+// validated. `icon` is an object on current Admonition and a bare name on older
+// releases, so both are accepted.
 export interface AdmonitionDefinition {
   type: string;
   title?: string;
@@ -138,11 +136,8 @@ const BUILT_IN_CALLOUT_TYPES: readonly BuiltInCalloutType[] = [
   },
 ];
 
-/**
- * Obsidian's built-in callouts (each alias listed as its own pickable entry),
- * followed by any types the Admonition plugin contributes. A built-in of the
- * same name wins, so Admonition cannot shadow `[!note]`.
- */
+// Built-ins first, each alias its own pickable entry, then Admonition's types. A
+// built-in of the same name wins, so Admonition cannot shadow `[!note]`.
 export function buildCalloutOptions(
   admonitionDefinitions?: Record<string, AdmonitionDefinition>,
 ): CalloutTypeInfo[] {
@@ -175,7 +170,7 @@ export function buildCalloutOptions(
         admonition.title ||
         admonition.type.charAt(0).toUpperCase() + admonition.type.slice(1),
       icon: admonition.icon,
-      color: `rgb(${admonition.color})`, // Admonition stores colour as "R,G,B"
+      color: `rgb(${admonition.color})`,
       isAdmonition: true,
       sourcePlugin: "Admonition",
     });

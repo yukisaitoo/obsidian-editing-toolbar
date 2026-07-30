@@ -27,7 +27,6 @@ interface RenderContext {
   style: ToolbarStyleKey;
 }
 
-/** Every button lands in the main bar; geometry.reflowToolbarOverflow moves the tail. */
 export function renderToolbarCommands(
   ctx: RenderContext,
   commands: Command[],

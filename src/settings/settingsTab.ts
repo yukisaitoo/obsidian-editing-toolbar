@@ -29,9 +29,8 @@ export interface SettingsTabContext {
   plugin: EditingToolbarPlugin;
   refresh(): void;
   rebuildToolbar(): void;
-  // Destroyed by the shell on the next render.
   createPickr(options: ColorPickrOptions): Pickr;
-  // Arms on first click, acts on the second.
+  // Arms on the first click, deletes on the second.
   createDeleteButton(
     button: ButtonComponent,
     onDelete: () => Promise<void>,
@@ -107,8 +106,7 @@ export class EditingToolbarSettingTab extends PluginSettingTab {
   hide(): void {
     this.destroyPickrs();
     // The style being edited must not outlive the pane, or resolveActiveStyle()
-    // keeps reporting it and the workspace renders one style while everything
-    // else reasons about another.
+    // keeps reporting it after the workspace has moved on.
     this.plugin.appearanceEditStyle = null;
     this.rebuildToolbar();
   }

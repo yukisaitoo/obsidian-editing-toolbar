@@ -2,7 +2,6 @@ import { Editor, Notice } from "obsidian";
 import { strings } from "src/translations/helper";
 import { requireSelection } from "src/util/text/selection";
 
-/** Falls back to the whole document when nothing is selected. */
 export function addWrap(
   editor: Editor,
   prefix = "",

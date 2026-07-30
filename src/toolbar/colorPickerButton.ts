@@ -90,7 +90,6 @@ export function createColorPickerButton(
   attachFlyoutClamp(button.buttonEl);
 }
 
-/** Each swatch cell applies its own `background-color`; the header rows are inert. */
 function wireSwatches(
   plugin: EditingToolbarPlugin,
   root: ParentNode,
@@ -150,7 +149,6 @@ function openAppearanceSettings(app: App): void {
   }, 200);
 }
 
-/** Swatches carry computed `rgb(...)`; settings and markup want hex. */
 function toHex(color: string): string {
   const rgb = color.match(/\d+/g);
   if (/^rgba?\(/i.test(color) && rgb && rgb.length >= 3) {

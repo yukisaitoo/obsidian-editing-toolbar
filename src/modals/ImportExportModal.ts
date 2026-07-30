@@ -12,6 +12,7 @@ import type EditingToolbarPlugin from "src/plugin/main";
 import type {
   EditingToolbarSettings,
   StyleAppearanceSettings,
+  ToolbarStyleKey,
 } from "src/settings/settingsData";
 import { POSITION_STYLES } from "src/settings/settingsData";
 import { strings } from "src/translations/helper";
@@ -47,6 +48,25 @@ const APPEARANCE_KEYS: (keyof StyleAppearanceSettings)[] = [
   "toolbarIconColor",
   "toolbarIconSize",
 ];
+
+const COMMAND_LIST_LABELS: Record<
+  ToolbarStyleKey,
+  { update: string; clear: string }
+> = {
+  top: {
+    update: strings.updateTopStyleCommands,
+    clear: strings.clearAllTopStyleCommands,
+  },
+  following: {
+    update: strings.updateFollowingStyleCommands,
+    clear: strings.clearAllFollowingStyleCommands,
+  },
+};
+
+interface ImportedCommandList {
+  style: ToolbarStyleKey;
+  commands: Command[];
+}
 
 export class ImportExportModal extends Modal {
   plugin: EditingToolbarPlugin;
@@ -182,8 +202,6 @@ export class ImportExportModal extends Modal {
       },
       followingCommands: settings.followingCommands ?? [],
       topCommands: settings.topCommands ?? [],
-      // The real appearance state. The global toolbar* fields are only a fallback
-      // for cleared buckets and no UI ever writes them, so they stay out.
       appearanceByStyle: settings.appearanceByStyle ?? {},
     };
 
@@ -213,39 +231,21 @@ export class ImportExportModal extends Modal {
         return;
       }
 
-      const containsFollowingCommands = "followingCommands" in importData;
-      const containsTopCommands = "topCommands" in importData;
       const containsGeneralSettings = "positionStyle" in importData;
       const positionStyle = importData.positionStyle;
 
-      // Reject non-array command lists here, before anything is mutated — the
-      // import path below assumes it can iterate them.
-      if (
-        (containsFollowingCommands &&
-          !Array.isArray(importData.followingCommands)) ||
-        (containsTopCommands && !Array.isArray(importData.topCommands))
-      ) {
-        new Notice(strings.invalidImportDataFormat);
-        return;
+      const lists: ImportedCommandList[] = [];
+      for (const style of POSITION_STYLES) {
+        const key = `${style}Commands` as const;
+        if (!(key in importData)) continue;
+        if (!Array.isArray(importData[key])) {
+          new Notice(strings.invalidImportDataFormat);
+          return;
+        }
+        lists.push({ style, commands: importData[key] });
       }
 
-      const hasFollowingCommands =
-        containsFollowingCommands && importData.followingCommands.length > 0;
-      const hasTopCommands =
-        containsTopCommands && importData.topCommands.length > 0;
-
-      const emptyFollowingCommands =
-        containsFollowingCommands && importData.followingCommands.length === 0;
-      const emptyTopCommands =
-        containsTopCommands && importData.topCommands.length === 0;
-
-      if (
-        !hasFollowingCommands &&
-        !hasTopCommands &&
-        !emptyFollowingCommands &&
-        !emptyTopCommands &&
-        !containsGeneralSettings
-      ) {
+      if (!lists.length && !containsGeneralSettings) {
         new Notice(strings.validConfigurationFoundImportData);
         return;
       }
@@ -256,19 +256,13 @@ export class ImportExportModal extends Modal {
       if (containsGeneralSettings) {
         summary.push(`• ${strings.updateGeneralSettings}`);
       }
-      if (hasFollowingCommands) {
-        const count = importData.followingCommands.length;
-        summary.push(`• ${strings.updateFollowingStyleCommands} (${count})`);
-      }
-      if (hasTopCommands) {
-        const count = importData.topCommands.length;
-        summary.push(`• ${strings.updateTopStyleCommands} (${count})`);
-      }
-      if (isOverwrite && emptyFollowingCommands) {
-        summary.push(`• ${strings.clearAllFollowingStyleCommands} ⚠️`);
-      }
-      if (isOverwrite && emptyTopCommands) {
-        summary.push(`• ${strings.clearAllTopStyleCommands} ⚠️`);
+      for (const { style, commands } of lists) {
+        const labels = COMMAND_LIST_LABELS[style];
+        if (commands.length) {
+          summary.push(`• ${labels.update} (${commands.length})`);
+        } else if (isOverwrite) {
+          summary.push(`• ${labels.clear} ⚠️`);
+        }
       }
       if (positionStyle) {
         const name = this.getPositionStyleName(positionStyle);
@@ -290,16 +284,10 @@ export class ImportExportModal extends Modal {
           const backup = this.snapshotSettings();
 
           try {
-            if (this.importMode === "overwrite") {
-              this.performOverwriteImport(importData);
-            } else {
-              this.performUpdateImport(importData);
-            }
+            this.applyImport(importData, lists);
 
             await this.plugin.saveSettings();
 
-            // Rebuilds every bar so an imported positionStyle takes effect
-            // without a reload.
             this.plugin.rebuildToolbars();
 
             new Notice(strings.configurationImportedSuccessfully);
@@ -327,46 +315,31 @@ export class ImportExportModal extends Modal {
     }
   }
 
-  // Rollback snapshot. Not structuredClone: CommandPicker stores live Obsidian
-  // Command objects, whose callbacks would throw DataCloneError. A JSON round
-  // trip drops them, which is exactly what saveSettings() persists anyway — the
-  // toolbar dispatches by command id, never through a stored callback.
+  // Not structuredClone: CommandPicker stores live Obsidian Command objects whose
+  // callbacks would throw DataCloneError. The JSON round trip drops them, which is
+  // what saveSettings() persists anyway — dispatch goes by command id.
   private snapshotSettings(): EditingToolbarSettings {
     return JSON.parse(JSON.stringify(this.plugin.settings));
   }
 
-  performOverwriteImport(importData: JsonPayload) {
+  private applyImport(
+    importData: JsonPayload,
+    lists: ImportedCommandList[],
+  ): void {
     this.importGeneralSettings(importData);
 
-    if (importData.followingCommands) {
-      this.plugin.settings.followingCommands = importData.followingCommands;
-    }
-
-    if (importData.topCommands) {
-      this.plugin.settings.topCommands = importData.topCommands;
+    for (const { style, commands } of lists) {
+      const key = `${style}Commands` as const;
+      if (this.importMode === "overwrite") {
+        this.plugin.settings[key] = commands;
+      } else {
+        this.updateCommandArray(this.plugin.settings[key], commands);
+      }
     }
   }
 
-  performUpdateImport(importData: JsonPayload) {
-    this.importGeneralSettings(importData);
-
-    if (importData.followingCommands) {
-      this.updateCommandArray(
-        this.plugin.settings.followingCommands,
-        importData.followingCommands,
-      );
-    }
-
-    if (importData.topCommands) {
-      this.updateCommandArray(
-        this.plugin.settings.topCommands,
-        importData.topCommands,
-      );
-    }
-  }
-  // Merges `sourceArray` into `targetArray` in place: known ids are replaced,
-  // new ones appended. Submenus recurse, so a submenu the payload does not
-  // mention keeps the entries it already had.
+  // Merges in place: known ids are replaced, new ones appended. Submenus recurse, so
+  // one the payload does not mention keeps the entries it had.
   private updateCommandArray(
     targetArray: Command[],
     sourceArray: Command[],
@@ -399,9 +372,8 @@ export class ImportExportModal extends Modal {
     this.importAppearance(importData.appearanceByStyle);
   }
 
-  // Overwrite replaces a style's bucket outright, so a swatch the payload cleared
-  // stays cleared; update merges the payload's keys over what's already there.
-  // Styles and keys the plugin doesn't know about are ignored.
+  // Overwrite replaces the bucket outright, so a swatch the payload cleared stays
+  // cleared; update merges its keys over what is there. Unknown keys are ignored.
   private importAppearance(imported: JsonPayload) {
     if (!imported || typeof imported !== "object") return;
 

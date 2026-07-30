@@ -256,9 +256,8 @@ function renderSubmenuRow(
     cls: "editingToolbarSettingsTabsContainer_sub",
   });
 
-  // The empty-state hint is a CSS ::before, which cannot reach the translation
-  // table, so the copy is handed to it as a custom property. JSON.stringify
-  // produces the quoted-and-escaped string `content` expects.
+  // The empty-state hint is a CSS ::before, so the translated copy reaches it as a
+  // custom property. JSON.stringify produces the quoting `content` expects.
   subListEl.style.setProperty(
     "--editing-toolbar-drag-hint",
     JSON.stringify(`✖️${strings.dragCommandsHere}`),
@@ -271,21 +270,24 @@ function renderSubmenuRow(
     onSort: (evt) => {
       if (evt.oldIndex == null || evt.newIndex == null) return;
 
-      if (evt.from.className === evt.to.className) {
-        // Reordered inside this submenu.
-        moveWithin(command.SubmenuCommands!, evt.oldIndex, evt.newIndex);
-      } else if (evt.to.className === TOP_LEVEL_CONTAINER_CLASS) {
-        // Dragged out of a submenu onto the toolbar.
-        const source = submenuOf(evt, commands);
-        if (!source || evt.oldIndex >= source.length) return;
-        commands.splice(evt.newIndex, 0, source.splice(evt.oldIndex, 1)[0]);
-      } else if (evt.from.className === TOP_LEVEL_CONTAINER_CLASS) {
-        // Dragged from the toolbar into a submenu.
-        const target = submenuOf(evt, commands);
-        if (!target || evt.oldIndex >= commands.length) return;
-        target.splice(evt.newIndex, 0, commands.splice(evt.oldIndex, 1)[0]);
-      } else {
-        return;
+      switch (classifyDrag(evt)) {
+        case "reorderSubmenu":
+          moveWithin(command.SubmenuCommands!, evt.oldIndex, evt.newIndex);
+          break;
+        case "submenuToToolbar": {
+          const source = submenuOf(evt, commands);
+          if (!source || evt.oldIndex >= source.length) return;
+          commands.splice(evt.newIndex, 0, source.splice(evt.oldIndex, 1)[0]);
+          break;
+        }
+        case "toolbarToSubmenu": {
+          const target = submenuOf(evt, commands);
+          if (!target || evt.oldIndex >= commands.length) return;
+          target.splice(evt.newIndex, 0, commands.splice(evt.oldIndex, 1)[0]);
+          break;
+        }
+        default:
+          return;
       }
 
       ctx.plugin.updateCurrentCommands(commands, style);
@@ -317,6 +319,21 @@ function renderSubmenuRow(
       }),
     );
   });
+}
+
+type SubmenuDrag =
+  | "reorderSubmenu"
+  | "submenuToToolbar"
+  | "toolbarToSubmenu"
+  | "unsupported";
+
+function classifyDrag(evt: Sortable.SortableEvent): SubmenuDrag {
+  if (evt.from.className === evt.to.className) return "reorderSubmenu";
+  if (evt.to.className === TOP_LEVEL_CONTAINER_CLASS) return "submenuToToolbar";
+  if (evt.from.className === TOP_LEVEL_CONTAINER_CLASS) {
+    return "toolbarToSubmenu";
+  }
+  return "unsupported";
 }
 
 function submenuOf(evt: Sortable.SortableEvent, commands: Command[]) {

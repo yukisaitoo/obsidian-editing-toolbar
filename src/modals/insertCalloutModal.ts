@@ -64,8 +64,8 @@ export class InsertCalloutModal extends Modal {
         const admonitions = this.allCalloutOptions.filter(
           (opt) => opt.isAdmonition,
         );
-        // DropdownComponent has no <optgroup>; fake a separator with a disabled
-        // option so keyboard navigation skips over it.
+        // DropdownComponent has no <optgroup>; a disabled option fakes a separator
+        // that keyboard navigation skips.
         const addSeparator = (label: string) => {
           dropdown.addOption(SEPARATOR_VALUE, label);
           const option =
@@ -89,11 +89,6 @@ export class InsertCalloutModal extends Modal {
         });
         dropdown.setValue(this.type);
         dropdown.onChange((value) => {
-          if (value === SEPARATOR_VALUE) {
-            // Separators are disabled, but revert defensively just in case
-            dropdown.setValue(this.type);
-            return;
-          }
           this.type = value;
           this.updateIconAndColor(this.iconContainerEl, value);
         });
@@ -172,12 +167,7 @@ export class InsertCalloutModal extends Modal {
     iconContainer.empty();
 
     const typeInfo = this.allCalloutOptions.find((t) => t.type === typeKey);
-    if (!typeInfo) {
-      // Shouldn't happen if the dropdown is in sync with allCalloutOptions
-      setIcon(iconContainer, "lucide-alert-circle");
-      iconContainer.style.removeProperty("--callout-color");
-      return;
-    }
+    if (!typeInfo) return;
 
     iconContainer.style.setProperty("--callout-color", typeInfo.color);
     const icon = typeInfo.icon;
@@ -201,8 +191,6 @@ export class InsertCalloutModal extends Modal {
       return;
     }
 
-    // A 'default' name is Admonition's own and may not be a valid lucide id;
-    // anything else (font-awesome, etc.) gets a placeholder instead.
     const renderable =
       icon.name?.startsWith("lucide-") || icon.type === "default";
     setIcon(iconContainer, renderable ? icon.name : "lucide-box");

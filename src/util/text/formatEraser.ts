@@ -34,7 +34,6 @@ function stripInlineMarkdown(text: string): string {
   );
 }
 
-/** Drops the `> [!type]` wrapper and the quote prefix from the lines it covers. */
 function unwrapCallout(text: string): string {
   let level = 0;
   let inCallout = false;

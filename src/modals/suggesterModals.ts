@@ -83,8 +83,7 @@ export class ChooseFromIconList extends FuzzySuggestModal<string> {
         this.isSubmenuItem,
         currentCommands,
       );
-      // A command that is no longer in the list has nothing to write to, so
-      // treat the pick as a no-op rather than indexing with -1.
+      // Removed from the list while the picker was open: nothing to write to.
       if (location.index === -1) return;
 
       if (this.isSubmenuItem) {
@@ -142,7 +141,6 @@ export class CommandPicker extends FuzzySuggestModal<Command> {
       return;
     }
 
-    // A command with no icon needs one picked before it can go on the toolbar.
     if (!item.icon) {
       new ChooseFromIconList(
         this.plugin,

@@ -9,8 +9,8 @@ export function GenNonDuplicateID(randomLength: number) {
 
 export const DIVIDER_COMMAND_ID = "editingToolbar-Divider-Line";
 
-// Dividers are looked up by id like any other command, so every one carries its
-// own id under a shared prefix. DIVIDER_COMMAND_ID itself is only the CSS class.
+// Every divider carries its own id under this prefix; the constant alone is the
+// CSS class.
 export function isDivider(id: string): boolean {
   return id.startsWith(DIVIDER_COMMAND_ID);
 }
@@ -19,8 +19,7 @@ export function newDividerId(): string {
   return `${DIVIDER_COMMAND_ID}-${GenNonDuplicateID(4)}`;
 }
 
-// `subIndex` is -1 for a top-level command; `index` is -1 when the command is
-// not in the list at all.
+// `subIndex` is -1 for a top-level command, `index` -1 when it is not in the list.
 export function findCommandLocation(
   command: Command,
   isSubmenuItem: boolean,
@@ -43,8 +42,7 @@ export function findCommandLocation(
   return { index: -1, subIndex: -1 };
 }
 
-// Rows are a section header, a blank spacer, or clickable swatches. The toolbar
-// reads each swatch's `background-color`, so the header labels are inert.
+// The toolbar reads each swatch's `background-color`; headers and spacers are inert.
 type PickerRow =
   | { header: string }
   | { spacer: true }
@@ -135,8 +133,6 @@ export function setHeader(str: string, editor: Editor) {
 }
 
 
-// Shift each selection by the inserted tag's length so it still covers the
-// original text.
 function adjustSelectionsForTag(editor: Editor, tagLength: number) {
   return editor.listSelections().map((sel) => {
     const isForward =
@@ -155,6 +151,13 @@ function adjustSelectionsForTag(editor: Editor, tagLength: number) {
   });
 }
 
+function wrapEachLine(text: string, open: string, close: string): string {
+  return text
+    .split("\n")
+    .map((line) => (line.trim() ? `${open}${line}${close}` : line))
+    .join("\n");
+}
+
 export function setFontcolor(color: string, editor: Editor) {
   const selectText = editor.getSelection();
 
@@ -162,33 +165,28 @@ export function setFontcolor(color: string, editor: Editor) {
     return;
   }
 
-  const fontColorRegex = /<font\s+color=["']?[^"'>]+["']?>(.*?)<\/font>/gms;
+  const fontColorRegex = /<font\s+color=["']?[^"'>]+["']?>(.*?)<\/font>/ms;
   const hasColorTag = fontColorRegex.test(selectText);
-  const isAlreadyInSameColor = (text: string, targetColor: string): boolean => {
-    const cleanColorRegex = new RegExp(`^<font\\s+color=["']?${targetColor}["']?>(.+)<\\/font>$`, 'ms');
-    return cleanColorRegex.test(text.trim());
-  };
 
-  if (isAlreadyInSameColor(selectText, color)) {
+  const sameColorRegex = new RegExp(
+    `^<font\\s+color=["']?${color}["']?>(.+)<\\/font>$`,
+    "ms",
+  );
+  if (sameColorRegex.test(selectText.trim())) {
     return;
   }
 
-  const replaceColor = (match: string, text: string) => {
-    return text.split('\n').map(line =>
-      line.trim() ? `<font color="${color}">${line}</font>` : line
-    ).join('\n');
-  };
+  const open = `<font color="${color}">`;
+  const close = "</font>";
 
-  const newText = selectText.replace(fontColorRegex, replaceColor);
+  const finalText = hasColorTag
+    ? selectText.replace(
+        new RegExp(fontColorRegex.source, "gms"),
+        (_match, inner: string) => wrapEachLine(inner, open, close),
+      )
+    : wrapEachLine(selectText, open, close);
 
-  // No tags matched → wrap each non-empty line fresh
-  const finalText = newText === selectText
-    ? selectText.split('\n').map(line => 
-        line.trim() ? `<font color="${color}">${line}</font>` : line
-      ).join('\n')
-    : newText;
-
-  const tagLength = hasColorTag ? 0 : `<font color="${color}"></font>`.length;
+  const tagLength = hasColorTag ? 0 : `${open}${close}`.length;
   const adjustedSelections = adjustSelectionsForTag(editor, tagLength);
 
   editor.replaceSelection(finalText);
@@ -196,8 +194,7 @@ export function setFontcolor(color: string, editor: Editor) {
 }
 
 const COLOR_VALUE = String.raw`(?:#[0-9a-fA-F]{3,8}|rgba?\([^)]+\))`;
-// Matches both the style this writes today and the bare `background:…` written
-// before highlights carried an explicit text colour.
+// The trailing `color:` is optional: older highlights carry only `background:`.
 const MARK_STYLE = String.raw`background:${COLOR_VALUE}(?:\s*;\s*color:[^"'>]*)?`;
 const escapeForRegex = (value: string) =>
   value.replace(/([()[{*+.$^\\|?])/g, "\\$1");
@@ -257,39 +254,25 @@ export function setBackgroundcolor(color: string, editor: Editor) {
 
   const style = `background:${color};color:${highlightTextColor(color)}`;
 
-  const bgColorRegex = new RegExp(
+  const hasColorTag = new RegExp(
     String.raw`<mark\s+style=["']?${MARK_STYLE}["']?>([\s\S]*?)<\/mark>`,
-    "g",
+  ).test(selectText);
+
+  const sameColorRegex = new RegExp(
+    `^<mark\\s+style=["']?${escapeForRegex(style)}["']?>([\\s\\S]+)<\\/mark>$`,
   );
-  const hasColorTag = bgColorRegex.test(selectText);
-
-  const isAlreadyInSameColor = (text: string): boolean => {
-    const cleanColorRegex = new RegExp(
-      `^<mark\\s+style=["']?${escapeForRegex(style)}["']?>([\\s\\S]+)<\\/mark>$`,
-    );
-    return cleanColorRegex.test(text.trim());
-  };
-
-  if (isAlreadyInSameColor(selectText)) {
+  if (sameColorRegex.test(selectText.trim())) {
     return;
   }
 
-  let finalText;
-
-  if (hasColorTag) {
-    // Replaces the whole declaration pair — a recolour carries the text colour.
-    finalText = selectText.replace(
-      new RegExp(
-        String.raw`(<mark\s+style=["']?)${MARK_STYLE}(["']?>)`,
-        "gi",
-      ),
-      `$1${style}$2`,
-    );
-  } else {
-    finalText = selectText.split('\n').map(line =>
-      line.trim() ? `<mark style="${style}">${line}</mark>` : line
-    ).join('\n');
-  }
+  // A recolour rewrites the whole declaration pair, since the text colour is
+  // derived from the new background.
+  const finalText = hasColorTag
+    ? selectText.replace(
+        new RegExp(String.raw`(<mark\s+style=["']?)${MARK_STYLE}(["']?>)`, "gi"),
+        `$1${style}$2`,
+      )
+    : wrapEachLine(selectText, `<mark style="${style}">`, "</mark>");
 
   const tagLength = hasColorTag ? 0 : `<mark style="${style}"></mark>`.length;
   const adjustedSelections = adjustSelectionsForTag(editor, tagLength);

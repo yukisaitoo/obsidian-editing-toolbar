@@ -70,7 +70,6 @@ export class TextInputModal extends Modal {
             setTimeout(() => textarea.inputEl.focus(), 10);
           }
 
-          // Ctrl/Cmd+Enter submits from a multiline field.
           textarea.inputEl.addEventListener("keydown", (e) => {
             if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
               e.preventDefault();

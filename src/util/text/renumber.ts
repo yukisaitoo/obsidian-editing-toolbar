@@ -8,10 +8,8 @@ const LIST_SEPARATOR_FILLER = "ㅤ";
 const ORDERED_ITEM = /^(\s*)(\d+)\.\s(.*)$/;
 
 interface OrderedItem {
-  /** The raw leading whitespace, preserved verbatim on rewrite. */
   indent: string;
   number: number;
-  /** Everything after the `N. ` marker. */
   body: string;
 }
 
@@ -46,15 +44,8 @@ export function renumberSelection(editor: Editor): void {
   renumberLines(editor, lines, startLine);
 }
 
-/**
- * Whether `line` begins a list rather than continuing one — which decides
- * between renumbering the whole list and renumbering from the cursor down.
- *
- * The indent test is "this line is indented at all", not "the line above is
- * shallower". That is what this has always done, and it is kept deliberately:
- * it makes any nested item renumber its entire list, which is the more useful
- * behaviour of the two.
- */
+// Begins a list (renumber all of it) rather than continuing one (renumber from the
+// cursor down). Any indented item counts as a start.
 function startsList(editor: Editor, line: number): boolean {
   if (line === 0) return true;
   if (!parseOrderedItem(editor.getLine(line - 1))) return true;
@@ -121,11 +112,9 @@ function renumberLines(
   );
 }
 
-/**
- * An earlier ordered list butted right up against this one makes the markdown
- * parser read the two as a single list, so a blank line is pushed between them
- * before renumbering. Returns the start line shifted by any insertion.
- */
+// An earlier ordered list butted right up against this one reads as a single list
+// to the markdown parser, so a blank line is pushed between them before
+// renumbering. Returns the start line shifted by any insertion.
 function separateFromPreviousList(editor: Editor, startLine: number): number {
   const tree = syntaxTree(editor.cm.state);
   const startOffset = editor.posToOffset({ line: startLine, ch: 0 });
@@ -166,8 +155,6 @@ function renumber(lines: string[]): string[] {
       return line;
     }
 
-    // Any change of depth restarts at 1, so a nested list and the level it
-    // returns to each begin their own count.
     const indent = item.indent.length;
     numberByIndent[indent] =
       indent === previousIndent ? (numberByIndent[indent] ?? 1) + 1 : 1;

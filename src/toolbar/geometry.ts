@@ -1,14 +1,9 @@
-// Measuring and placing anything that hangs off a toolbar.
-//
-// Two facts drive every function here, both verified against Obsidian's app.css:
-//
-//  1. `.workspace-leaf` is `contain: strict; overflow: hidden`, so `position: fixed`
-//     inside a pane resolves against the PANE, not the viewport, and anything put
-//     outside the pane is clipped away rather than merely off-centre. Read where
-//     offset 0,0 actually lands and convert against that; never assume.
-//  2. Measure with getBoundingClientRect, never scrollWidth/scrollHeight. Submenu
-//     buttons hang `visibility: hidden` (so still laid out) `.subitem` flyouts off
-//     themselves, which inflate scroll size by hundreds of phantom pixels.
+// Two facts from Obsidian's app.css drive every function here:
+//  1. `.workspace-leaf` is `contain: strict`, so `position: fixed` inside a pane
+//     resolves against the PANE and anything outside it is clipped, not just
+//     off-centre. Read where offset 0,0 lands and convert against that.
+//  2. Measure with getBoundingClientRect, never scrollWidth: submenu buttons hang
+//     `visibility: hidden` flyouts that inflate scroll size by phantom pixels.
 
 import { Editor } from "obsidian";
 import { BAR_SELECTOR, POPOVER_SELECTOR } from "src/toolbar/toolbarDom";
@@ -20,7 +15,6 @@ const POPOVER_EDGE_MARGIN = 12;
 const POPOVER_GAP = 8;
 const OVERFLOW_TOLERANCE = 1;
 
-/** Viewport-space box a toolbar's popovers must stay inside: its pane, capped at the window. */
 export function paneRelativeBounds(bar: HTMLElement | null, margin: number) {
   const win = bar ? windowOf(bar) : activeWindow;
   const host = bar?.parentElement?.getBoundingClientRect();
@@ -58,7 +52,6 @@ export function anchorPopoverToButton(
   popoverEl.style.top = `${top - origin.top}px`;
 }
 
-/** Re-measured on every hover: the button moves with resizes, reflow and the caret. */
 export function attachFlyoutClamp(button: HTMLElement): void {
   button.addEventListener("mouseenter", () => clampFlyoutToPane(button));
 }
@@ -90,11 +83,9 @@ function clampFlyoutToPane(button: HTMLElement): void {
   if (shift) button.style.setProperty(FLYOUT_SHIFT_VAR, `${shift}px`);
 }
 
-/**
- * Shuffle buttons between the bar and the » popover so the bar fits its pane.
- * Available room is the PANE's width — the bar shrink-to-fits its content and so
- * never reports overflow itself. Returns whether the » button is still needed.
- */
+// Shuffles buttons between the bar and the » popover so the bar fits its pane.
+// Available room is the PANE's width: the bar shrink-to-fits and so never reports
+// overflow itself. Returns whether » is still needed.
 export function reflowToolbarOverflow(
   bar: HTMLElement,
   popoverBar: HTMLElement | null,
@@ -105,38 +96,30 @@ export function reflowToolbarOverflow(
   const available = availableWidth(bar);
   if (available <= 0) return popoverBar.firstElementChild !== null;
 
-  const moreOf = () => bar.querySelector<HTMLElement>(":scope > .more-menu");
+  const existingMore = bar.querySelector<HTMLElement>(":scope > .more-menu");
   const overflowing = () => visibleSpan(bar) > available + OVERFLOW_TOLERANCE;
 
-  if (!moreOf() && !popoverBar.firstElementChild && !overflowing()) return false;
-
-  const more = moreOf() ?? createMore();
-  if (!more) return popoverBar.firstElementChild !== null;
-
-  // » only costs width while the popover keeps an item, so drop it when pulling
-  // the next candidate back would empty the popover.
-  while (popoverBar.firstElementChild) {
-    more.style.display = popoverBar.childElementCount === 1 ? "none" : "";
-    const candidate = popoverBar.firstElementChild as HTMLElement;
-    bar.insertBefore(candidate, more);
-    if (overflowing()) {
-      popoverBar.insertBefore(candidate, popoverBar.firstChild);
-      break;
-    }
+  if (!existingMore && !popoverBar.firstElementChild && !overflowing()) {
+    return false;
   }
 
-  if (overflowing()) {
-    more.style.display = ""; // about to be shown; reserve its width
-    let guard = bar.children.length;
-    while (overflowing() && guard-- > 0) {
-      const movable = (Array.from(bar.children) as HTMLElement[]).filter(
-        (el) => el !== more,
-      );
-      const last = movable[movable.length - 1];
-      if (!last) break;
-      // Prepend so the popover reads left-to-right in original command order.
-      popoverBar.insertBefore(last, popoverBar.firstChild);
-    }
+  const more = existingMore ?? createMore();
+  if (!more) return popoverBar.firstElementChild !== null;
+
+  // » only earns its width while the popover holds something, so try the whole set
+  // with it hidden first.
+  more.style.display = "none";
+  while (popoverBar.firstElementChild) {
+    bar.insertBefore(popoverBar.firstElementChild, more);
+  }
+  if (!overflowing()) return false;
+
+  // » stays last, so the button before it is always the next one to give up.
+  more.style.display = "";
+  while (overflowing()) {
+    const last = more.previousElementSibling;
+    if (!last) break;
+    popoverBar.insertBefore(last, popoverBar.firstChild);
   }
 
   const hasOverflow = popoverBar.firstElementChild !== null;
@@ -153,7 +136,6 @@ function availableWidth(bar: HTMLElement): number {
   return parent.clientWidth - padX;
 }
 
-// » is the last child and toggled via display, so a hidden one adds no width.
 function visibleSpan(bar: HTMLElement): number {
   let left = Infinity;
   let right = -Infinity;
@@ -166,7 +148,6 @@ function visibleSpan(bar: HTMLElement): number {
   return right > left ? right - left : 0;
 }
 
-/** Places the selection-following bar near the caret, kept inside the editor. */
 export function positionFollowingBar(
   toolbar: HTMLElement,
   editor: Editor,

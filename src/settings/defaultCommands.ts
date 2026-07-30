@@ -391,7 +391,6 @@ const cloneToolbarDefault = (id: string): Command =>
     DEFAULT_TOOLBAR_COMMANDS.find((command) => command.id === id)!,
   );
 
-// Fresh-install default for the following toolbar.
 export const DEFAULT_FOLLOWING_COMMANDS: Command[] = [
   { id: "editing-toolbar:toggle-bold", name: "Bold", icon: "bold-glyph" },
   {

@@ -1,9 +1,8 @@
 import { getIconIds } from "obsidian";
 import { internalIconNames, pickerIconNames } from "src/icons/customIcons";
 
-// Call only after addIcons(), which registers the plugin's own icons. Legacy ids
-// that would display under the same name as a "lucide-" one are dropped, so the
-// picker shows no visual duplicates.
+// Call only after addIcons(). Legacy ids that would display under the same name as
+// a "lucide-" one are dropped, so the picker shows no visual duplicates.
 export function getAppIcons(): string[] {
   const own = new Set([...pickerIconNames, ...internalIconNames]);
   const seen = new Set(pickerIconNames);

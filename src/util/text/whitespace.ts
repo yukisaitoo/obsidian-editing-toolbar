@@ -45,8 +45,7 @@ export function processWhitespace(
 const MARKDOWN_SYNTAX =
   /(^#+\s|(?<=^|\s*)#|^>|^- \[( |x)\]|^\+ |<[^<>]+>|^1\. |^-+$|^\*+$|==|\*+|~~|```|!*\[\[|\]\])/gm;
 
-/** Copies the selection to the clipboard with its markdown syntax stripped. */
-export function getPlainText(editor: Editor): void {
+export function copySelectionAsPlainText(editor: Editor): void {
   const selection = requireSelection(editor);
   if (selection === null) return;
 

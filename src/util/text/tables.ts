@@ -14,8 +14,6 @@ export function convertListToTableMultiDim(editor: Editor): void {
 
   const { preText, rows } = collectRows(lines, tabSize, maxLevel);
 
-  // A flat list becomes two columns verbatim; a nested one blanks repeated
-  // ancestor cells so the table reads as a tree.
   const finalRows = maxLevel === 1 ? rows : blankRepeatedAncestors(rows);
   editor.replaceSelection(
     renderTable(editor, preText, finalRows, maxLevel + 1),
@@ -52,7 +50,6 @@ export function convertTableToList(editor: Editor): void {
   new Notice(strings.tableConvertedMultiLevelList);
 }
 
-/** Uses the shallowest non-zero indent as one level; defaults to 4 spaces. */
 function detectIndentWidth(lines: string[]): number {
   const indents = lines
     .map((line) => line.match(LIST_ITEM))
@@ -82,8 +79,6 @@ function collectRows(lines: string[], tabSize: number, maxLevel: number) {
     const match = line.match(LIST_ITEM);
 
     if (!match) {
-      // Text before the first list item is kept above the table; continuation
-      // lines inside it fold into the previous cell.
       if (!insideTable) {
         preText.push(line);
       } else if (line.trim() !== "" && currentRow.length) {
@@ -164,7 +159,6 @@ function renderTable(
   return needsGap ? `\n${table}` : table;
 }
 
-/** Uses the selection if it holds a table, otherwise grabs the one at the cursor. */
 function selectSurroundingTable(editor: Editor): string | null {
   const selection = editor.getSelection();
   if (selection?.includes("|")) return selection;

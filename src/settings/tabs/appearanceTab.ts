@@ -21,7 +21,6 @@ const BACKGROUND_SWATCHES = [
 
 const ICON_SWATCHES = ["#4A5568", "#D4AF37", "#2D3033", "#6D5846", "#4C2A55"];
 
-// A fixed command set for the preview bar
 const PREVIEW_COMMANDS = [
   { name: "Bold", icon: "bold" },
   { name: "Italics", icon: "italic" },
@@ -58,8 +57,6 @@ export function renderAppearanceTab(
         ctx.plugin.appearanceEditStyle = style;
         ctx.plugin.settings.positionStyle = style;
         await ctx.plugin.saveSettings();
-        // Rebuilding is what swaps the workspace over to the new style; it also
-        // re-renders this pane, so the preview follows without a refresh() here.
         ctx.rebuildToolbar();
       });
     });
@@ -131,14 +128,12 @@ function applyColor(
   config: ColorSettingConfig,
   color: string,
 ): void {
-  // Only push the global CSS variable when editing the style on screen.
   if (ctx.plugin.liveStyle === editingStyle) {
     document.documentElement.style.setProperty(config.cssProperty, color);
   }
   void ctx.plugin.saveSettings();
-  // Deliberately no refresh() alongside this: we are inside a Pickr callback, and
-  // a synchronous re-render would destroyAndRemove() the very instance still
-  // dispatching. The rebuild re-renders this pane on a timer instead.
+  // No refresh() here: inside a Pickr callback a synchronous re-render would
+  // destroyAndRemove() the instance still dispatching. The rebuild does it on a timer.
   ctx.rebuildToolbar();
 }
 
@@ -173,7 +168,6 @@ function renderColorSetting(
           applyColor(ctx, editingStyle, config, hexColor);
         },
         onClear: () => {
-          // Dropping the key falls the style back to the global appearance field.
           delete getAppearanceBucket(ctx.plugin.settings, editingStyle)[
             config.key
           ];
@@ -205,8 +199,8 @@ function renderPreview(
   previewBar.addClass("editing-toolbar-preview");
   previewBar.addClass("editingToolbarDefaultAesthetic");
   previewBar.addClass(PREVIEW_LAYOUT_CLASS[editingStyle]);
-  // Borrows the real bar's chrome without the live-instance class, so the
-  // toolbar lifecycle (selfDestruct, getExistingToolbar) can never see it.
+  // The shared chrome class, but not the live-instance one: the toolbar lifecycle
+  // (selfDestruct, getExistingToolbar) must never see the preview.
   previewBar.addClass(SHARED_BAR_CLASS);
 
   PREVIEW_COMMANDS.forEach((command) => {
@@ -216,6 +210,5 @@ function renderPreview(
     setIcon(button.buttonEl, command.icon);
   });
 
-  // Same custom properties the real toolbar sets, so the preview tracks the size.
   applyAppearanceVars(previewBar, ctx.plugin.settings, editingStyle);
 }

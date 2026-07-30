@@ -23,7 +23,6 @@ const REGISTRARS: Registrar[] = [
 // eslint-disable-next-line @typescript-eslint/no-explicit-any -- untyped Obsidian canvas view
 type CanvasView = any;
 
-/** Owns editor access and the shared command mechanics; registrars own the lists. */
 export class CommandsManager {
   constructor(private plugin: EditingToolbarPlugin) {}
 
@@ -45,9 +44,7 @@ export class CommandsManager {
     );
   }
 
-  // The single validation point for editor-backed commands: downstream actions
-  // get a guaranteed-live editor and never re-check. Focus is restored after,
-  // since clicking a toolbar button takes it off the editor.
+  // Focus is restored after: clicking a toolbar button takes it off the editor.
   public runOnEditor = (action: (editor: Editor) => unknown): void => {
     const editor = this.getActiveEditor();
     if (!editor) return;
@@ -110,10 +107,8 @@ export class CommandsManager {
     return leaves.find((leaf) => leaf?.view?.getViewType?.() === "canvas")?.view ?? null;
   }
 
-  /**
-   * Wraps the selection in `command`'s prefix/suffix, or unwraps it when the
-   * surrounding text already matches — the toggle behind bold, italics, etc.
-   */
+  // Wraps the selection in `command`'s prefix/suffix, or unwraps it when the text
+  // already matches — the toggle behind bold, italics and friends.
   public applyCommand = (command: CommandPlot, editor: Editor): void => {
     const selectedText = editor.getSelection();
     const cursorStart = editor.getCursor("from");

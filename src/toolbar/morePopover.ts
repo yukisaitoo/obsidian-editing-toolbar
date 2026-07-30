@@ -15,16 +15,11 @@ const DETACHED_POPUP_SELECTOR =
 
 const TOOLTIP_DELAY = 250;
 
-// One live popover per popover bar. The bar outlives the » button across
-// rebuilds, so keying on the bar is what lets a rebuild retire the old instance.
+// One live popover per popover bar. The bar outlives the » button across rebuilds,
+// so keying on the bar is what lets a rebuild retire the old instance.
 const popovers = new WeakMap<HTMLElement, MorePopover>();
 const openPopovers = new Set<MorePopover>();
 
-/**
- * The » overflow button and the popover it toggles. Owning open/close/reposition
- * on one object means a rebuilt bar simply drops the old instance — no bookkeeping
- * about whether a stored callback is still the current one.
- */
 export class MorePopover {
   readonly el: HTMLElement;
   private readonly button: ButtonComponent;
@@ -70,7 +65,6 @@ export class MorePopover {
     openPopovers.delete(this);
   }
 
-  /** Placed by measurement, so anything that moves the » has to re-run this. */
   reposition(): void {
     anchorPopoverToButton(this.button.buttonEl, this.popoverBar);
   }
@@ -88,7 +82,7 @@ export class MorePopover {
     if (!target) return;
     if (
       this.popoverBar.contains(target) ||
-      this.el.contains(target) || // re-click: onClick toggles it
+      this.el.contains(target) ||
       (target instanceof Element && target.closest(DETACHED_POPUP_SELECTOR))
     ) {
       return;
@@ -105,10 +99,8 @@ export function morePopoverFor(popoverBar: HTMLElement): MorePopover | undefined
   return popovers.get(popoverBar);
 }
 
-/**
- * The popover is a sibling of the bar, not a child, so hiding the bar would leave
- * it floating over the note. Called whenever a bar goes away or hides.
- */
+// The popover is a sibling of the bar, not a child, so hiding the bar would leave
+// it floating over the note.
 export function closeMoreOverflowPopovers(root?: ParentNode): void {
   openPopovers.forEach((popover) => popover.close());
   // A bar rebuilt while open leaves the class on a popover whose instance is gone.

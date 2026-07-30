@@ -13,8 +13,6 @@ export function applyToolbarState(el: HTMLElement, state: ToolbarState): void {
   el.toggleClass(HIDDEN_CLASS, state === "hidden");
 }
 
-// The one place that decides whether a toolbar shows. Every caller applies this
-// result rather than reasoning about its own case.
 export function resolveToolbarState(
   plugin: EditingToolbarPlugin,
   style: ToolbarStyleKey,
@@ -32,7 +30,7 @@ export function resolveToolbarState(
 
   if (isReadingMode(view)) return "hidden";
 
-  // Canvas has no text selection to follow, so the bar just stays up there.
+  // Only markdown is selection-gated; canvas has no text selection to follow.
   if (style === "following" && view?.getViewType() === "markdown") {
     const hasSelection =
       plugin.commandsManager.getActiveEditor()?.somethingSelected() ?? false;

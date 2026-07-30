@@ -8,7 +8,6 @@ import {
   resolveToolbarState,
 } from "src/toolbar/toolbarVisibility";
 
-/** Shows or hides the selection-following bar and re-anchors it to the caret. */
 export function updateFollowingBar(
   app: App,
   plugin: EditingToolbarPlugin,

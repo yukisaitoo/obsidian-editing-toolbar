@@ -77,8 +77,6 @@ export default class EditingToolbarPlugin extends Plugin {
   async onload(): Promise<void> {
     await this.loadSettings();
 
-    this.initAppearanceStore();
-
     this.settingTab = new EditingToolbarSettingTab(this.app, this);
     this.addSettingTab(this.settingTab);
 
@@ -111,7 +109,7 @@ export default class EditingToolbarPlugin extends Plugin {
     this.applyRootAppearanceVars();
   }
 
-  // Document-level fallback for anything outside a bar. Always the live style —
+  // Document-level fallback for anything outside a bar, always on the live style:
   // the settings tab's "style being edited" only governs its own preview.
   private applyRootAppearanceVars(): void {
     applyAppearanceVars(
@@ -133,30 +131,13 @@ export default class EditingToolbarPlugin extends Plugin {
       }
     }
 
-    // Seed only when never persisted, so a list the user cleared stays empty.
-    // Deep-copy so the default constants are never aliased by persisted objects.
+    // Seed only when never persisted, so a list the user cleared stays empty. The
+    // clone keeps DEFAULT_COMMANDS_BY_STYLE from being edited in place later.
     for (const style of POSITION_STYLES) {
       const key = `${style}Commands` as const;
       if (!loadedData || loadedData[key] === undefined) {
         this.settings[key] = structuredClone(DEFAULT_COMMANDS_BY_STYLE[style]);
       }
-    }
-  }
-
-  // Empty buckets fall back to the global fields via getAppearanceValue().
-  private initAppearanceStore(): void {
-    // Deep-copy: the settings tab writes to and deletes from these in place.
-    if (
-      this.settings.appearanceByStyle === DEFAULT_SETTINGS.appearanceByStyle
-    ) {
-      this.settings.appearanceByStyle = structuredClone(
-        DEFAULT_SETTINGS.appearanceByStyle,
-      );
-    }
-
-    const store = (this.settings.appearanceByStyle ??= {});
-    for (const style of POSITION_STYLES) {
-      store[style] ??= {};
     }
   }
 
@@ -167,8 +148,8 @@ export default class EditingToolbarPlugin extends Plugin {
       : "top";
   }
 
-  // While the settings tab is open this is the style being edited there, which
-  // can differ from the one rendered in the workspace.
+  // While the settings tab is open this is the style being edited there, which can
+  // differ from the one rendered in the workspace.
   public resolveActiveStyle(): ToolbarStyleKey {
     return this.appearanceEditStyle ?? this.liveStyle;
   }
@@ -342,11 +323,8 @@ export default class EditingToolbarPlugin extends Plugin {
     return ViewUtils.isAllowedViewType(view);
   }
 
-  /**
-   * Re-syncs every toolbar with what resolveToolbarState says it should be.
-   * Safe to call as often as the workspace fires events — it builds only what is
-   * missing and never has an opinion of its own about visibility.
-   */
+  // Safe to call as often as the workspace fires events: builds only what is
+  // missing, and defers to resolveToolbarState for every visibility decision.
   handleEditingToolbar = () => {
     closeMoreOverflowPopovers();
 
@@ -365,7 +343,6 @@ export default class EditingToolbarPlugin extends Plugin {
     }
   };
 
-  /** Tears every bar down and builds them again — for command or appearance edits. */
   rebuildToolbars(): void {
     selfDestruct(this);
     this.applyRootAppearanceVars();
@@ -390,8 +367,6 @@ export default class EditingToolbarPlugin extends Plugin {
     await this.saveData(this.settings);
   }
 
-  // Seeds the per-style command lists the way loadSettings() does, since
-  // DEFAULT_SETTINGS keeps them empty.
   async resetSettings(): Promise<void> {
     this.settings = structuredClone(DEFAULT_SETTINGS);
     for (const style of POSITION_STYLES) {
@@ -400,7 +375,6 @@ export default class EditingToolbarPlugin extends Plugin {
       );
     }
 
-    this.initAppearanceStore();
     this.appearanceEditStyle = null;
 
     await this.saveSettings();

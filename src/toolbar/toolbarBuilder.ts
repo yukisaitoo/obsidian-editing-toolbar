@@ -22,8 +22,6 @@ import { resolveToolbarDocument, windowOf } from "src/toolbar/toolbarHost";
 import { applyToolbarState } from "src/toolbar/toolbarVisibility";
 import { ViewUtils } from "src/util/viewUtils";
 
-// The top bar lives inside the active leaf, so each pane owns one and it is found
-// by walking that leaf. Every other style has one bar per window, worth caching.
 const VIEW_TYPE_MOUNT_SELECTORS: Record<string, string> = {
   markdown: ".markdown-source-view",
   canvas: ".canvas-wrapper",
@@ -38,6 +36,8 @@ export function getExistingToolbar(
   const doc = hostDocument ?? resolveToolbarDocument(app);
   const selector = `${BAR_SELECTOR}[data-toolbar-style="${style}"]`;
 
+  // One top bar per pane, so it is found by walking the active leaf rather than
+  // cached; every other style has a single bar per window.
   if (style === "top") {
     return (
       app.workspace
@@ -54,11 +54,8 @@ export function getExistingToolbar(
   return found;
 }
 
-/**
- * Get-or-build the bar for `style`. Idempotent — callers never need to check
- * first, and calling twice cannot produce a duplicate bar. Returns null when this
- * style has nothing to show (mobile, disallowed view, or an empty command list).
- */
+// Idempotent: calling twice cannot produce a duplicate bar. Null means this style
+// has nothing to show (mobile, disallowed view, or an empty command list).
 export function ensureToolbar(
   app: App,
   plugin: EditingToolbarPlugin,
@@ -117,7 +114,6 @@ export function disposeToolbar(
   plugin.clearToolbarCache(style);
 }
 
-/** Removes every bar in every window. Used on unload and before a full rebuild. */
 export function selfDestruct(plugin: EditingToolbarPlugin): void {
   const roots: ParentNode[] = [activeWindow.document];
 
@@ -156,11 +152,8 @@ function mountBars(
   bar.addClass(SHARED_BAR_CLASS);
   bar.addClass(style === "top" ? "top" : "editingToolbarFlex");
 
-  // A following bar is absolutely positioned but has no offsets until
-  // positionFollowingBar runs, so mounting it visible parks it at its CSS
-  // origin — the pane's top-left corner. Start hidden and let the caller's
-  // applyToolbarState reveal it once it has been anchored. The top bar is in
-  // normal flow and needs no such deferral.
+  // No offsets until positionFollowingBar runs, so mounting it visible would park
+  // it at the pane's top-left; the caller reveals it once anchored.
   if (style !== "top") applyToolbarState(bar, "hidden");
 
   const popoverBar = createBarEl(doc, "editingToolbarPopoverBar", style);
