@@ -56,22 +56,11 @@ export class CommandsManager {
 
     const editor = this.getActiveEditor();
     if (editor) {
-      this.runOnEditor(() => (action === "undo" ? editor.undo() : editor.redo()));
+      this.runOnEditor(() =>
+        action === "undo" ? editor.undo() : editor.redo(),
+      );
       return;
     }
-
-    // No editor and no canvas — let whichever core command is applicable answer.
-    const fallbacks =
-      action === "undo"
-        ? ["canvas:undo", "editor:undo"]
-        : ["canvas:redo", "editor:redo"];
-    fallbacks.some((id) => {
-      try {
-        return this.plugin.app.commands.executeCommandById(id);
-      } catch {
-        return false;
-      }
-    });
   };
 
   /** Canvas exposes undo/redo under two different names across versions. */
@@ -104,7 +93,10 @@ export class CommandsManager {
     if (active?.getViewType?.() === "canvas") return active;
 
     const leaves = this.plugin.app.workspace.getLeavesOfType?.("canvas") ?? [];
-    return leaves.find((leaf) => leaf?.view?.getViewType?.() === "canvas")?.view ?? null;
+    return (
+      leaves.find((leaf) => leaf?.view?.getViewType?.() === "canvas")?.view ??
+      null
+    );
   }
 
   // Wraps the selection in `command`'s prefix/suffix, or unwraps it when the text

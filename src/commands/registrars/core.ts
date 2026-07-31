@@ -19,20 +19,20 @@ export const registerCoreCommands: Registrar = ({ plugin, runOnEditor }) => {
     },
   });
 
-  plugin.addCommand({
-    id: "toggle-top-toolbar",
-    name: "Toggle top toolbar",
-    callback: () =>
-      plugin.setToolbarStyleEnabled("top", !plugin.settings.enableTopToolbar),
-  });
+  // plugin.addCommand({
+  //   id: "toggle-top-toolbar",
+  //   name: "Toggle top toolbar",
+  //   callback: () =>
+  //     plugin.setToolbarStyleEnabled("top", !plugin.settings.enableTopToolbar),
+  // });
 
-  plugin.addCommand({
-    id: "toggle-following-toolbar",
-    name: "Toggle selection toolbar",
-    callback: () =>
-      plugin.setToolbarStyleEnabled(
-        "following",
-        !plugin.settings.enableFollowingToolbar,
-      ),
-  });
+  // plugin.addCommand({
+  //   id: "toggle-following-toolbar",
+  //   name: "Toggle selection toolbar",
+  //   callback: () =>
+  //     plugin.setToolbarStyleEnabled(
+  //       "following",
+  //       !plugin.settings.enableFollowingToolbar,
+  //     ),
+  // });
 };

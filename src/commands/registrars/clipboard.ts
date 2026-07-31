@@ -12,6 +12,7 @@ export const registerClipboardAndHistoryCommands: Registrar = ({
     icon: "undo-glyph",
     callback: () => runHistoryAction("undo"),
   });
+
   plugin.addCommand({
     id: "editor-redo",
     name: "Redo edit",
@@ -45,10 +46,15 @@ export const registerClipboardAndHistoryCommands: Registrar = ({
     navigator.clipboard.writeText(editor.getSelection()),
   );
 
-  addClipboardCommand("editor-cut", "Cut", "lucide-scissors", async (editor) => {
-    await navigator.clipboard.writeText(editor.getSelection());
-    editor.replaceSelection("");
-  });
+  addClipboardCommand(
+    "editor-cut",
+    "Cut",
+    "lucide-scissors",
+    async (editor) => {
+      await navigator.clipboard.writeText(editor.getSelection());
+      editor.replaceSelection("");
+    },
+  );
 
   addClipboardCommand(
     "editor-paste",
