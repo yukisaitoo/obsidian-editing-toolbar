@@ -19,7 +19,7 @@ This is a Word-style editing toolbar for Obsidian.
 
 ![Selection toolbar](docs/images/selection-toolbar.png)
 
-Config in **Settings → (unofficial) Editing Toolbar**:
+Config in **Settings → Editing Toolbar**:
 
 **Appearance**
 
