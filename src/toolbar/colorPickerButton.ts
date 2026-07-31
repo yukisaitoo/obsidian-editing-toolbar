@@ -10,13 +10,12 @@ import { attachFlyoutClamp } from "src/toolbar/geometry";
 import { applyButtonIcon, TOOLTIP_DELAY } from "src/toolbar/toolbarDom";
 import { syncToolbarState } from "src/toolbar/toolbarVisibility";
 import { strings } from "src/translations/helper";
+import { toHexColor } from "src/util/color";
 import {
   renderBackgroundColorPicker,
   renderFontColorPicker,
-  setBackgroundColor,
-  setFontColor,
-  toHexColor,
-} from "src/util/util";
+} from "src/util/colorPickerDom";
+import { setBackgroundColor, setFontColor } from "src/util/text/inlineColor";
 
 interface PickerVariant {
   tooltip: string;

@@ -1,0 +1,57 @@
+interface Rgba {
+  r: number;
+  g: number;
+  b: number;
+  a: number;
+}
+
+// Accepts `#rgb`, `#rgba`, `#rrggbb`, `#rrggbbaa`, `rgb()` and `rgba()`. Anything
+// else (a `var()`, a named colour) returns null for the caller to pass through.
+function parseColor(color: string): Rgba | null {
+  const hex = color.trim().match(/^#([0-9a-fA-F]+)$/);
+  if (hex) {
+    let digits = hex[1];
+    if (digits.length === 3 || digits.length === 4) {
+      digits = digits
+        .split("")
+        .map((d) => d + d)
+        .join("");
+    }
+    if (digits.length !== 6 && digits.length !== 8) return null;
+    return {
+      r: parseInt(digits.slice(0, 2), 16),
+      g: parseInt(digits.slice(2, 4), 16),
+      b: parseInt(digits.slice(4, 6), 16),
+      a: digits.length === 8 ? parseInt(digits.slice(6, 8), 16) / 255 : 1,
+    };
+  }
+
+  const fn = color.trim().match(/^rgba?\(([^)]+)\)$/i);
+  if (!fn) return null;
+  const parts = fn[1]
+    .split(/[,/\s]+/)
+    .filter(Boolean)
+    .map(Number);
+  if (parts.length < 3 || parts.slice(0, 3).some(Number.isNaN)) return null;
+  return {
+    r: parts[0],
+    g: parts[1],
+    b: parts[2],
+    a: parts.length > 3 && !Number.isNaN(parts[3]) ? parts[3] : 1,
+  };
+}
+
+// Serialises back to hex, keeping alpha as the 8-digit form. Colours that
+// parseColor does not understand are returned untouched.
+export function toHexColor(color: string): string {
+  const rgba = parseColor(color);
+  if (!rgba) return color;
+
+  const channel = (value: number) =>
+    Math.max(0, Math.min(255, Math.round(value)))
+      .toString(16)
+      .padStart(2, "0");
+
+  const rgb = `#${channel(rgba.r)}${channel(rgba.g)}${channel(rgba.b)}`;
+  return rgba.a >= 1 ? rgb : `${rgb}${channel(rgba.a * 255)}`;
+}

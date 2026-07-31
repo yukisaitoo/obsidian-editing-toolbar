@@ -16,7 +16,7 @@ import type {
 } from "src/settings/settingsData";
 import { POSITION_STYLES } from "src/settings/settingsData";
 import { strings } from "src/translations/helper";
-import { parseCommandList } from "src/util/util";
+import { parseCommandList } from "src/util/commandStorage";
 
 // Import/export crosses a JSON boundary with no schema: every payload below is
 // whatever the user's file happened to contain.

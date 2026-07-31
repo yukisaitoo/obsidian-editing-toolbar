@@ -13,7 +13,7 @@ import { getAppIcons } from "src/icons/appIcons";
 import type EditingToolbarPlugin from "src/plugin/main";
 import type { ToolbarStyleKey } from "src/settings/settingsData";
 import { format, strings, t } from "src/translations/helper";
-import { findCommandLocation, toStoredCommand } from "src/util/util";
+import { findCommandLocation, toStoredCommand } from "src/util/commandStorage";
 
 type IconSelectCallback = (iconId: string) => void;
 

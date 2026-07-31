@@ -15,7 +15,7 @@ import {
 } from "src/toolbar/toolbarDom";
 import { syncToolbarState } from "src/toolbar/toolbarVisibility";
 import { t } from "src/translations/helper";
-import { DIVIDER_COMMAND_ID, isDivider } from "src/util/util";
+import { DIVIDER_COMMAND_ID, isDivider } from "src/util/commandIds";
 
 interface RenderContext {
   app: App;

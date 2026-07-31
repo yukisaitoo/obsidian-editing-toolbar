@@ -1,7 +1,8 @@
 import { Editor } from "obsidian";
 import type { Registrar } from "src/commands/registrars/types";
 import { setFormatEraser } from "src/util/text/formatEraser";
-import { setBackgroundColor, setFontColor, setHeader } from "src/util/util";
+import { setHeader } from "src/util/text/header";
+import { setBackgroundColor, setFontColor } from "src/util/text/inlineColor";
 
 type MarkdownFormat = Parameters<Editor["toggleMarkdownFormatting"]>[0];
 

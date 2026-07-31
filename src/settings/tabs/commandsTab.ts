@@ -15,7 +15,7 @@ import {
   isDivider,
   newDividerId,
   uniqueId,
-} from "src/util/util";
+} from "src/util/commandIds";
 
 const TOP_LEVEL_CONTAINER_CLASS = "editingToolbarSettingsTabsContainer";
 
