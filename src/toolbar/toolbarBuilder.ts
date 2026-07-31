@@ -84,10 +84,7 @@ export function ensureToolbar(
   const bars = mountBars(app, plugin.settings, style, doc);
   if (!bars) return null;
 
-  renderToolbarCommands(
-    { app, plugin, bar: bars.bar, style },
-    commands,
-  );
+  renderToolbarCommands({ app, plugin, bar: bars.bar, style }, commands);
 
   refreshOverflow(plugin, bars.bar, bars.popoverBar);
   if (style === "top") {
@@ -115,6 +112,8 @@ export function disposeToolbar(
 }
 
 export function selfDestruct(plugin: EditingToolbarPlugin): void {
+  closeMoreOverflowPopovers();
+
   const roots: ParentNode[] = [activeWindow.document];
 
   const rootSplit = plugin.app.workspace.rootSplit as unknown as {
@@ -213,16 +212,12 @@ function findMountTarget(
   viewType: string,
 ): HTMLElement | null {
   const known = VIEW_TYPE_MOUNT_SELECTORS[viewType];
-  const target = known
-    ? container.querySelector<HTMLElement>(known)
-    : null;
+  const target = known ? container.querySelector<HTMLElement>(known) : null;
   if (target) return target;
 
   const viewContent = container.querySelector<HTMLElement>(".view-content");
   if (!viewContent) return null;
-  return (
-    viewContent.querySelector<HTMLElement>(":scope > div") ?? viewContent
-  );
+  return viewContent.querySelector<HTMLElement>(":scope > div") ?? viewContent;
 }
 
 function mountInWorkspaceRoot(
@@ -246,9 +241,9 @@ function refreshOverflow(
   popoverBar: HTMLElement,
 ): void {
   const hasOverflow = reflowToolbarOverflow(bar, popoverBar, () => {
-    if (!isAllowedViewType(
-      plugin.app.workspace.getActiveViewOfType(ItemView),
-    )) {
+    if (
+      !isAllowedViewType(plugin.app.workspace.getActiveViewOfType(ItemView))
+    ) {
       return undefined;
     }
     return new MorePopover(bar, popoverBar).el;
