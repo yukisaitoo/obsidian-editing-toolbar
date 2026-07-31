@@ -969,24 +969,21 @@ body.theme-dark .modal-container.editingToolbar-Modal .modal input[type='range']
    8. EDITOR AND HOST INTEGRATIONS
    ========================================================================== */
 
-/* Fallback for highlights written before setBackgroundcolor() started emitting
-   an explicit `color:` — those marks carry only a background, so the text
-   colour still has to be guessed from it. New marks set colour inline, which
-   wins over these rules.
+/* --- Highlights written by setBackgroundcolor() --------------------------- */
 
-   rgba() is the translucent swatch set: it composites over the theme
-   background, so the theme's text colour is already right. rgb() is the opaque
-   pastel set — uniformly light, so it needs dark text (it previously matched
-   neither rule and went unreadable in dark themes). Hex is only ever a
-   user-defined custom colour, so "light" is a guess here; that guess is exactly
-   what the write-time calculation replaced. */
-:is(.cm-line, p) :is(mark, span)[style^="background:rgba"] {
-  color: var(--text-normal);
-}
+/* The UA stylesheet declares `mark { background: mark; color: marktext }`. A
+   declaration on the element always beats an inherited value — inheritance only
+   fills in where nothing is declared — so `body { color: var(--text-normal) }`
+   never reaches a `<mark>`, and the text lands on the `marktext` system colour.
+   Our highlights set a background and deliberately leave the text alone, so the
+   UA declaration has to be handed back to inheritance explicitly.
 
-:is(.cm-line, p) :is(mark, span)[style^="background:rgb("],
-:is(.cm-line, p) :is(mark, span)[style^="background:#"] {
-  color: black;
+   Class-scoped so nothing else is touched: Obsidian's native `==highlight==` and
+   any hand-written `<mark>` keep their own styling. Marks of ours that still
+   carry an inline `color:` keep that too — a style attribute outranks any
+   stylesheet rule — until a recolour rewrites them. */
+mark.editing-toolbar-highlight {
+  color: inherit;
 }
 
 /* --- Obsidian canvas ------------------------------------------------------ */

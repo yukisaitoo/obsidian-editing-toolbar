@@ -231,8 +231,17 @@ export function setFontcolor(color: string, editor: Editor) {
 }
 
 const COLOR_VALUE = String.raw`(?:#[0-9a-fA-F]{3,8}|rgba?\([^)]+\))`;
-// The trailing `color:` is optional: older highlights carry only `background:`.
+// The trailing `color:` is optional: marks written back when the text colour was
+// derived still carry one, and a recolour has to match them to strip it.
 const MARK_STYLE = String.raw`background:${COLOR_VALUE}(?:\s*;\s*color:[^"'>]*)?`;
+// Marks the highlights as ours. styles.css hooks this to undo the `<mark>` user
+// agent rule, which must not reach Obsidian's own `==highlight==` or a mark
+// written by hand.
+const HIGHLIGHT_CLASS = "editing-toolbar-highlight";
+// The class is optional when matching so a recolour still finds marks written
+// before it existed — recognising them is what lets the rewrite upgrade them
+// rather than nest a second mark inside.
+const MARK_OPEN = String.raw`<mark\s+(?:class=["']?${HIGHLIGHT_CLASS}["']?\s+)?style=["']?${MARK_STYLE}["']?>`;
 const escapeForRegex = (value: string) =>
   value.replace(/([()[{*+.$^\\|?])/g, "\\$1");
 
@@ -294,16 +303,6 @@ export function toHexColor(color: string): string {
   return rgba.a >= 1 ? rgb : `${rgb}${channel(rgba.a * 255)}`;
 }
 
-// A translucent fill composites over the theme background and keeps the theme's
-// text colour; an opaque one needs black or white picked by luminance.
-function highlightTextColor(background: string): string {
-  const rgba = parseColor(background);
-  if (!rgba || rgba.a < 0.5) return "var(--text-normal)";
-  // Rec. 709 luma — the usual cheap stand-in for perceived lightness.
-  const luma = (0.2126 * rgba.r + 0.7152 * rgba.g + 0.0722 * rgba.b) / 255;
-  return luma > 0.5 ? "#000000" : "#ffffff";
-}
-
 export function setBackgroundcolor(color: string, editor: Editor) {
   const selectText = editor.getSelection();
 
@@ -311,29 +310,34 @@ export function setBackgroundcolor(color: string, editor: Editor) {
     return;
   }
 
-  const style = `background:${color};color:${highlightTextColor(color)}`;
+  // Background only: the chosen colour goes in as-is and the text colour is left
+  // to the theme. Deriving one would mean guessing, and a translucent fill has
+  // no fixed luminance to guess from — it composites over whatever is behind it.
+  const style = `background:${color}`;
+  const open = `<mark class="${HIGHLIGHT_CLASS}" style="${style}">`;
 
   const hasColorTag = new RegExp(
-    String.raw`<mark\s+style=["']?${MARK_STYLE}["']?>([\s\S]*?)<\/mark>`,
+    String.raw`${MARK_OPEN}[\s\S]*?<\/mark>`,
   ).test(selectText);
 
+  // Requires the class, so a mark of the same colour that predates it still falls
+  // through to the rewrite below and picks one up.
   const sameColorRegex = new RegExp(
-    `^<mark\\s+style=["']?${escapeForRegex(style)}["']?>([\\s\\S]+)<\\/mark>$`,
+    `^<mark\\s+class=["']?${HIGHLIGHT_CLASS}["']?\\s+style=["']?${escapeForRegex(style)}["']?>([\\s\\S]+)<\\/mark>$`,
   );
   if (sameColorRegex.test(selectText.trim())) {
     return;
   }
 
-  // A recolour rewrites the whole declaration pair, since the text colour is
-  // derived from the new background.
+  // The whole opening tag is replaced rather than just the colour, so a mark ends
+  // up with one set of attributes: a stale `color:` goes and a missing class
+  // arrives. Replacing via a function keeps `$` in the colour from being read as
+  // a backreference.
   const finalText = hasColorTag
-    ? selectText.replace(
-        new RegExp(String.raw`(<mark\s+style=["']?)${MARK_STYLE}(["']?>)`, "gi"),
-        `$1${style}$2`,
-      )
-    : wrapEachLine(selectText, `<mark style="${style}">`, "</mark>");
+    ? selectText.replace(new RegExp(MARK_OPEN, "gi"), () => open)
+    : wrapEachLine(selectText, open, "</mark>");
 
-  const tagLength = hasColorTag ? 0 : `<mark style="${style}"></mark>`.length;
+  const tagLength = hasColorTag ? 0 : `${open}</mark>`.length;
   const adjustedSelections = adjustSelectionsForTag(editor, tagLength);
 
   editor.replaceSelection(finalText);

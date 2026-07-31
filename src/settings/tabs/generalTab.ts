@@ -52,6 +52,8 @@ export function renderGeneralTab(
     cls: "custom_bg",
     keyPrefix: "custom_bg",
     swatches: BACKGROUND_SWATCHES,
+    // `<mark style="background:…">` carry alpha
+    opacity: true,
   });
   renderSwatchRow(ctx, paintbrushContainer, {
     name: strings.setCustomFontColor,
@@ -59,6 +61,8 @@ export function renderGeneralTab(
     cls: "custom_font",
     keyPrefix: "custom_fc",
     swatches: FONT_SWATCHES,
+    // `<font color=…>` cannot carry alpha
+    opacity: false,
   });
 
   new Setting(containerEl)
@@ -92,6 +96,7 @@ function renderSwatchRow(
     cls: string;
     keyPrefix: "custom_bg" | "custom_fc";
     swatches: string[];
+    opacity: boolean;
   },
 ): void {
   new Setting(containerEl)
@@ -109,7 +114,7 @@ function renderSwatchRow(
           el: pickerContainer.createDiv({ cls: "picker" }),
           container: pickerContainer,
           swatches: config.swatches,
-          opacity: true,
+          opacity: config.opacity,
           defaultColor: ctx.plugin.settings[settingKey] || "#000000",
           onSave: (hexColor) => {
             ctx.plugin.settings[settingKey] = hexColor;
