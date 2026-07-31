@@ -1,4 +1,4 @@
-import { App, ButtonComponent, MenuItem, setIcon } from "obsidian";
+import { App, ButtonComponent, MenuItem, Platform, setIcon } from "obsidian";
 
 export const TOOLTIP_DELAY = 250;
 
@@ -28,21 +28,30 @@ export function applyMenuItemIcon(menuItem: MenuItem, icon: string = ""): void {
 
 export const NO_HOTKEY = "–";
 
-export function getHotkey(app: App, cmdId: string, highlight = false): string {
+const MODIFIER_LABELS: Record<string, string> = Platform.isMacOS
+  ? { Ctrl: "⌃", Alt: "⌥", Shift: "⇧", Meta: "⌘", Mod: "⌘" }
+  : { Ctrl: "Ctrl", Alt: "Alt", Shift: "Shift", Meta: "Win", Mod: "Ctrl" };
+
+const MODIFIER_ORDER = Platform.isMacOS
+  ? ["Ctrl", "Alt", "Shift", "Meta", "Mod"]
+  : ["Mod", "Ctrl", "Meta", "Alt", "Shift"];
+
+export function getHotkey(app: App, cmdId: string): string {
   const command = app.commands.findCommand(cmdId);
   if (!command) return NO_HOTKEY;
 
   const custom = app.hotkeyManager.customKeys[command.id]?.[0];
-  if (custom) return formatCombo(custom, highlight ? "*" : "");
-
-  return formatCombo(command.hotkeys?.[0], "");
+  return formatCombo(custom ?? command.hotkeys?.[0]);
 }
 
 function formatCombo(
   combo: { modifiers?: string[]; key?: string } | undefined,
-  marker: string,
 ): string {
   if (!combo?.key) return NO_HOTKEY;
-  const keys = [...(combo.modifiers ?? []), combo.key].join("+");
-  return marker + keys.replace("Mod", "Ctrl") + marker;
+
+  const modifiers = [...(combo.modifiers ?? [])]
+    .sort((a, b) => MODIFIER_ORDER.indexOf(a) - MODIFIER_ORDER.indexOf(b))
+    .map((modifier) => MODIFIER_LABELS[modifier] ?? modifier);
+
+  return [...modifiers, combo.key].join(Platform.isMacOS ? "" : "+");
 }
