@@ -69,6 +69,7 @@ export const commandNames: Record<string, string> = {
   "Swap line down": "行を下へ移動",
   "Attach file": "ファイルを添付",
   "Cycle list and checklist": "リスト形式を切り替え",
+  "Toggle checklist status": "チェックリスト状態を切り替え",
   Blockquote: "引用",
   Callout: "コールアウト",
   Superscript: "上付き文字",

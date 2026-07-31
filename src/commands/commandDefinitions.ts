@@ -121,7 +121,7 @@ export const CORE_EDITOR_COMMANDS: Command[] = [
   },
   {
     id: "editor:toggle-checklist-status",
-    name: "Cycle list and checklist",
+    name: "Toggle checklist status",
     icon: "checkbox-glyph",
   },
   {

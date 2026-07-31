@@ -5,7 +5,6 @@ import type { en } from "../en";
 const ui: Partial<Record<keyof typeof en, string>> = {
   dragCommandsHere: "Arraste aqui",
   add: "Adicionar",
-  addCommand: "Adicionar Comando",
   addSeparator: "Adicionar Separador",
   addSubmenu: "Adicionar Submenu",
   addCommandOntoEditingToolbar:
@@ -26,13 +25,9 @@ const ui: Partial<Record<keyof typeof en, string>> = {
     "Escolha qual estilo de barra de ferramentas você deseja editar.",
   chooseWhichToolbarStyleCommand:
     "Escolha o comando de qual estilo de barra de ferramentas você deseja editar.",
-  clearAllMainMenuCommands: "Limpar todos os Comandos do Menu Principal",
-  clickPickerAdjustColor: "Clique no seletor para ajustar a cor",
   closed: "Fechado",
   collapseState: "Estado de Colapso",
   default: "Padrão",
-  command: "Comando",
-  commandId: "ID do Comando",
   configurationCopiedClipboard:
     "Configuração copiada para a área de transferência",
   configurationImportedSuccessfully: "Configuração importada com sucesso",
@@ -65,7 +60,6 @@ const ui: Partial<Record<keyof typeof en, string>> = {
   failedCopyConfiguration: "Falha ao copiar configuração",
   fontColors: "Cores de Texto",
   general: "Geral",
-  icon: "Ícone",
   import: "Importar",
   importConfiguration: "Configuração de Importação",
   importMode: "Modo de Importação",
@@ -95,17 +89,14 @@ const ui: Partial<Record<keyof typeof en, string>> = {
   pleasePasteConfigurationDataFirst:
     "Por favor coloque os dados da configuração primeiro",
   pleaseSelectTextFirst: "Por favor selecione o texto primeiro",
-  positionSettings: "Configurações de Posição",
   prefix: "Prefixo",
   renumberList: "Renumerar Lista",
   reset: "Reiniciar",
-  result: "Resultado: ",
   setPositionStyle: "Definir Estilo de Posição para:",
   setBackgroundColorToolbar: "Definir a cor de fundo da barra de ferramentas.",
   setColorToolbarIcon: "Definir a cor do ícone da barra de ferramentas.",
   setSizeToolbarIconPx:
     "Definir o tamanho do ícone da barra de ferramentas (px); padrão: 18px",
-  settings: "Configurações",
   suffix: "Sufixo",
   commandAlreadyExists: "O comando {name} já existe",
   import3: "Esta importação irá:",
@@ -114,13 +105,11 @@ const ui: Partial<Record<keyof typeof en, string>> = {
   toolbarCommands: "Comandos da Barra de Ferramentas",
   toolbarIconColor: "Cor do Ícone da Barra de Ferramentas",
   toolbarIconSize: "Tamanho do Ícone da Barra de Ferramentas",
-  toolbarPosition: "Posição da Barra de Ferramentas",
   toolbarPreviewHypotheticalCommandConfigurati:
     "Visualização da barra de ferramentas (com uma configuração de comandos hipotética).",
   toolbarSettings: "Configurações da Barra de Ferramentas",
   topToolbar: "Barra de Ferramentas de Topo",
   updateImport: "Atualizar Importação",
-  updateMainMenuCommands: "Atualizar Comandos do Menu Principal",
   updateModeAddNewItems:
     "Modo de Atualização (Adicionar novos itens e atualizar os existentes)",
   updateGeneralSettings: "Atualizar configurações gerais",
