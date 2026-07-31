@@ -51,6 +51,7 @@ export interface SettingsTabContext {
 export class EditingToolbarSettingTab extends PluginSettingTab {
   plugin: EditingToolbarPlugin;
   private activeTab: TabId = "general";
+  private isOpen = false;
   private pickrs: Pickr[] = [];
   private sortables: Sortable[] = [];
   private commandStyle: ToolbarStyleKey;
@@ -60,8 +61,11 @@ export class EditingToolbarSettingTab extends PluginSettingTab {
     this.plugin = plugin;
     this.commandStyle = plugin.liveStyle;
 
-    // A rebuild re-renders this pane too, so its previews match the live bars.
-    this.plugin.register(this.plugin.onRebuild(() => this.display()));
+    this.plugin.register(
+      this.plugin.onRebuild(() => {
+        if (this.isOpen) this.display();
+      }),
+    );
   }
 
   setActiveTab(tab: TabId): void {
@@ -70,6 +74,7 @@ export class EditingToolbarSettingTab extends PluginSettingTab {
   }
 
   display(): void {
+    this.isOpen = true;
     this.destroyTabResources();
 
     const { containerEl } = this;
@@ -120,6 +125,7 @@ export class EditingToolbarSettingTab extends PluginSettingTab {
   }
 
   hide(): void {
+    this.isOpen = false;
     this.destroyTabResources();
     // The style being edited must not outlive the pane, or resolveActiveStyle()
     // keeps reporting it after the workspace has moved on.
