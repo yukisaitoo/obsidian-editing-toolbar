@@ -67,8 +67,6 @@ export default class EditingToolbarPlugin extends Plugin {
   public admonitionDefinitions: Record<string, AdmonitionDefinition> | null =
     null;
 
-  topToolbarResizeObserver: ResizeObserver | null = null;
-
   settingTab!: EditingToolbarSettingTab;
 
   private toolbarCache: Map<ToolbarStyleKey, HTMLElement> = new Map();
@@ -316,9 +314,6 @@ export default class EditingToolbarPlugin extends Plugin {
   }
 
   onunload(): void {
-    this.topToolbarResizeObserver?.disconnect();
-    this.topToolbarResizeObserver = null;
-
     selfDestruct(this);
   }
 

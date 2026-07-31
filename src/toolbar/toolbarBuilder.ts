@@ -27,6 +27,9 @@ const VIEW_TYPE_MOUNT_SELECTORS: Record<string, string> = {
   canvas: ".canvas-wrapper",
 };
 
+// Top bars are per view, so each one needs its own observer.
+const toolbarResizeObservers = new Map<HTMLElement, ResizeObserver>();
+
 export function getExistingToolbar(
   app: App,
   plugin: EditingToolbarPlugin,
@@ -113,6 +116,7 @@ export function disposeToolbar(
 
 export function selfDestruct(plugin: EditingToolbarPlugin): void {
   closeMoreOverflowPopovers();
+  disconnectToolbarResizeObservers();
 
   const roots: ParentNode[] = [activeWindow.document];
 
@@ -260,8 +264,13 @@ function observeToolbarResize(
   bar: HTMLElement,
   popoverBar: HTMLElement,
 ): void {
-  plugin.topToolbarResizeObserver?.disconnect();
-  plugin.topToolbarResizeObserver = null;
+  // A bar removed with its tab never fires again, so nothing else retires its
+  // observer.
+  for (const [observedBar, stale] of toolbarResizeObservers) {
+    if (observedBar.isConnected) continue;
+    stale.disconnect();
+    toolbarResizeObservers.delete(observedBar);
+  }
 
   const parent = bar.parentElement;
   if (!parent) return;
@@ -272,9 +281,7 @@ function observeToolbarResize(
   const observer = new ObserverCtor(() => {
     if (!bar.isConnected) {
       observer.disconnect();
-      if (plugin.topToolbarResizeObserver === observer) {
-        plugin.topToolbarResizeObserver = null;
-      }
+      toolbarResizeObservers.delete(bar);
       return;
     }
     refreshOverflow(plugin, bar, popoverBar);
@@ -283,7 +290,12 @@ function observeToolbarResize(
   });
 
   observer.observe(parent);
-  plugin.topToolbarResizeObserver = observer;
+  toolbarResizeObservers.set(bar, observer);
+}
+
+function disconnectToolbarResizeObservers(): void {
+  toolbarResizeObservers.forEach((observer) => observer.disconnect());
+  toolbarResizeObservers.clear();
 }
 
 export { closeMoreOverflowPopovers };
