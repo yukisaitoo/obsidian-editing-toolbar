@@ -16,6 +16,7 @@ import type {
 } from "src/settings/settingsData";
 import { POSITION_STYLES } from "src/settings/settingsData";
 import { strings } from "src/translations/helper";
+import { parseCommandList } from "src/util/util";
 
 // Import/export crosses a JSON boundary with no schema: every payload below is
 // whatever the user's file happened to contain.
@@ -238,11 +239,13 @@ export class ImportExportModal extends Modal {
       for (const style of POSITION_STYLES) {
         const key = `${style}Commands` as const;
         if (!(key in importData)) continue;
-        if (!Array.isArray(importData[key])) {
+
+        const commands = parseCommandList(importData[key]);
+        if (!commands) {
           new Notice(strings.invalidImportDataFormat);
           return;
         }
-        lists.push({ style, commands: importData[key] });
+        lists.push({ style, commands });
       }
 
       if (!lists.length && !containsGeneralSettings) {
@@ -286,15 +289,17 @@ export class ImportExportModal extends Modal {
           try {
             this.applyImport(importData, lists);
 
-            await this.plugin.saveSettings();
-
             this.plugin.rebuildToolbars();
+
+            await this.plugin.saveSettings();
 
             new Notice(strings.configurationImportedSuccessfully);
           } catch (error) {
-            // ConfirmModal awaits this callback without a catch, so rethrowing
-            // would strand the user with silently half-imported settings.
+            // Saving last keeps a failed import off disk, so restoring the
+            // snapshot and rebuilding again undoes it completely. ConfirmModal
+            // awaits this callback without a catch, so nothing is rethrown.
             this.plugin.settings = backup;
+            this.plugin.rebuildToolbars();
             console.error("Import error: ", error);
             new Notice(
               strings.error +
