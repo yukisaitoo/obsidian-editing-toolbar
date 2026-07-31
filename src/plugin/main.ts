@@ -73,9 +73,17 @@ export default class EditingToolbarPlugin extends Plugin {
 
   private toolbarCache: Map<ToolbarStyleKey, HTMLElement> = new Map();
   private rebuildListeners = new Set<() => void>();
+  private cssReady?: Promise<void>;
+
+  // Obsidian injects styles.css only after onload() resolves, so a bar built during
+  // onload paints unstyled — flyouts open.
+  override loadCSS(): Promise<void> {
+    return (this.cssReady ??= super.loadCSS());
+  }
 
   async onload(): Promise<void> {
     addIcons();
+    await this.loadCSS();
     await this.loadSettings();
 
     this.settingTab = new EditingToolbarSettingTab(this.app, this);
@@ -98,6 +106,7 @@ export default class EditingToolbarPlugin extends Plugin {
     this.registerEvent(
       this.app.workspace.on("layout-change", this.handleEditingToolbar),
     );
+    this.applyRootAppearanceVars();
     this.app.workspace.onLayoutReady(() => this.rebuildToolbars());
     this.app.workspace.onLayoutReady(async () => {
       await this.tryGetAdmonitionTypes();
@@ -106,7 +115,6 @@ export default class EditingToolbarPlugin extends Plugin {
     this.registerEvent(
       this.app.workspace.on("editor-menu", this.handleEditorContextMenu),
     );
-    this.applyRootAppearanceVars();
   }
 
   // Document-level fallback for anything outside a bar, always on the live style:

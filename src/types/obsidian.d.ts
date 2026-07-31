@@ -28,6 +28,12 @@ declare module "obsidian" {
     getPlugin(pluginId: string): Plugin | null;
   }
 
+  interface Plugin {
+    // Injects styles.css into the document head. Obsidian calls it itself, after
+    // onload() has resolved.
+    loadCSS(): Promise<void>;
+  }
+
   interface Commands {
     commands: Record<string, Command>;
     addCommand(cmd: Command): void;
