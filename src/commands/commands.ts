@@ -11,6 +11,7 @@ import type {
   RegistrarContext,
 } from "src/commands/registrars/types";
 import EditingToolbarPlugin from "src/plugin/main";
+import { selectAt } from "src/util/text/selection";
 
 const REGISTRARS: Registrar[] = [
   registerCoreCommands,
@@ -127,11 +128,4 @@ export class CommandsManager {
     editor.replaceSelection(`${prefix}${selectedText}${suffix}`);
     selectAt(editor, from + prefix.length, selectedText.length);
   };
-}
-
-function selectAt(editor: Editor, offset: number, length: number): void {
-  editor.setSelection(
-    editor.offsetToPos(offset),
-    editor.offsetToPos(offset + length),
-  );
 }

@@ -1,6 +1,7 @@
 import { Command, Editor } from "obsidian";
 import { EditingToolbarSettings } from "../settings/settingsData";
 import { strings } from "../translations/helper";
+import { replaceSelectionAndSelect } from "./text/selection";
 
 export function GenNonDuplicateID(randomLength: number) {
   const idStr = Date.now().toString(36);
@@ -347,24 +348,6 @@ export function setHeader(marker: string, editor: Editor) {
   });
 }
 
-function adjustSelectionsForTag(editor: Editor, tagLength: number) {
-  return editor.listSelections().map((sel) => {
-    const isForward =
-      sel.anchor.line < sel.head.line ||
-      (sel.anchor.line === sel.head.line && sel.anchor.ch < sel.head.ch);
-
-    return isForward
-      ? {
-          anchor: { line: sel.anchor.line, ch: sel.anchor.ch },
-          head: { line: sel.head.line, ch: sel.head.ch + tagLength },
-        }
-      : {
-          anchor: { line: sel.anchor.line, ch: sel.anchor.ch + tagLength },
-          head: { line: sel.head.line, ch: sel.head.ch },
-        };
-  });
-}
-
 function wrapEachLine(text: string, open: string, close: string): string {
   return text
     .split("\n")
@@ -400,11 +383,7 @@ export function setFontcolor(color: string, editor: Editor) {
       )
     : wrapEachLine(selectText, open, close);
 
-  const tagLength = hasColorTag ? 0 : `${open}${close}`.length;
-  const adjustedSelections = adjustSelectionsForTag(editor, tagLength);
-
-  editor.replaceSelection(finalText);
-  editor.setSelections(adjustedSelections);
+  replaceSelectionAndSelect(editor, finalText);
 }
 
 const COLOR_VALUE = String.raw`(?:#[0-9a-fA-F]{3,8}|rgba?\([^)]+\))`;
@@ -514,9 +493,5 @@ export function setBackgroundcolor(color: string, editor: Editor) {
     ? selectText.replace(new RegExp(MARK_OPEN, "gi"), () => open)
     : wrapEachLine(selectText, open, "</mark>");
 
-  const tagLength = hasColorTag ? 0 : `${open}</mark>`.length;
-  const adjustedSelections = adjustSelectionsForTag(editor, tagLength);
-
-  editor.replaceSelection(finalText);
-  editor.setSelections(adjustedSelections);
+  replaceSelectionAndSelect(editor, finalText);
 }
