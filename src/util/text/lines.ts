@@ -91,11 +91,7 @@ function joinerFor(soFar: string, next: string): string {
 
 export function dedupe(
   editor: Editor,
-  options: {
-    includeEmpty?: boolean;
-    trimBeforeCompare?: boolean;
-    sort?: boolean;
-  } = {},
+  options: { trimBeforeCompare?: boolean } = {},
 ): void {
   const selection = requireSelection(
     editor,
@@ -109,7 +105,7 @@ export function dedupe(
   for (const line of selection.split(/\r?\n/)) {
     const content = options.trimBeforeCompare ? line.trim() : line;
 
-    if (content === "" && !options.includeEmpty) {
+    if (content === "") {
       result.push(line);
       continue;
     }
@@ -118,10 +114,6 @@ export function dedupe(
       seen.add(content);
       result.push(line);
     }
-  }
-
-  if (options.sort) {
-    result.sort((a, b) => a.localeCompare(b, "zh-CN", { numeric: true }));
   }
 
   editor.replaceSelection(result.join("\n"));
