@@ -1,6 +1,5 @@
 import { Editor } from "obsidian";
 import type { Registrar } from "src/commands/registrars/types";
-import { BACKGROUND_COLOR_ICON, FONT_COLOR_ICON } from "src/icons/inlineIcons";
 import { setFormatEraser } from "src/util/text/formatEraser";
 import { setBackgroundcolor, setFontcolor, setHeader } from "src/util/util";
 
@@ -95,14 +94,14 @@ export const registerFormattingCommands: Registrar = ({
 
   add("format-eraser", "Format eraser", "eraser", setFormatEraser);
 
-  add("change-font-color", "Change font color", FONT_COLOR_ICON, (editor) =>
+  add("change-font-color", "Change font color", "font-color", (editor) =>
     setFontcolor(plugin.settings.lastFontColor, editor),
   );
 
   add(
     "change-background-color",
     "Change background color",
-    BACKGROUND_COLOR_ICON,
+    "background-color",
     (editor) => setBackgroundcolor(plugin.settings.lastHighlightColor, editor),
   );
 

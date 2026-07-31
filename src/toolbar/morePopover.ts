@@ -1,5 +1,4 @@
 import { ButtonComponent } from "obsidian";
-import { MORE_CHEVRON_ICON } from "src/icons/inlineIcons";
 import { anchorPopoverToButton } from "src/toolbar/geometry";
 import { POPOVER_SELECTOR, TOOLTIP_DELAY } from "src/toolbar/toolbarDom";
 import { strings } from "src/translations/helper";
@@ -37,7 +36,7 @@ export class MorePopover {
       .setClass("editingToolbarCommandItem")
       .setTooltip(strings.more, { delay: TOOLTIP_DELAY })
       .onClick(() => (this.isOpen ? this.close() : this.open()));
-    this.button.buttonEl.innerHTML = MORE_CHEVRON_ICON;
+    this.button.setIcon("more-chevron");
 
     popovers.set(popoverBar, this);
   }

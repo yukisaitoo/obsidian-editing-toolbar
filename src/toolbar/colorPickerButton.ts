@@ -2,7 +2,7 @@ import { App, ButtonComponent, Command, Editor } from "obsidian";
 import {
   BACKGROUND_COLOR_ICON_CLASS,
   FONT_COLOR_ICON_CLASS,
-} from "src/icons/inlineIcons";
+} from "src/icons/customIcons";
 import type EditingToolbarPlugin from "src/plugin/main";
 import { ownCommand, PLUGIN_ID } from "src/plugin/pluginId";
 import type { ToolbarStyleKey } from "src/settings/settingsData";

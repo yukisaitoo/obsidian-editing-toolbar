@@ -144,8 +144,7 @@ function needsSeparationBefore(editor: Editor, startLine: number): boolean {
   return previous !== "" && !previous.includes(LIST_SEPARATOR_FILLER);
 }
 
-// Exported for tests: this is the whole numbering rule, and it is pure.
-export function renumberOrderedItems(lines: string[]): string[] {
+function renumberOrderedItems(lines: string[]): string[] {
   let numberByIndent: Record<number, number> = {};
   let previousIndent = -1;
 

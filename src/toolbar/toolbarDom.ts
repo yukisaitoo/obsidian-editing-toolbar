@@ -9,32 +9,14 @@ export const SHARED_BAR_CLASS = "editing-toolbar-bar";
 export const BAR_SELECTOR = ".editingToolbarModalBar";
 export const POPOVER_SELECTOR = ".editingToolbarPopoverBar";
 
-export function checkHtml(htmlStr: string): boolean {
-  return /<[^>]+>/g.test(htmlStr);
-}
-
 export function applyButtonIcon(btn: ButtonComponent, icon?: string): void {
-  const iconStr = icon ?? "";
-  if (checkHtml(iconStr)) {
-    btn.buttonEl.innerHTML = iconStr;
-  } else {
-    btn.setIcon(iconStr);
-  }
+  btn.setIcon(icon ?? "");
 }
 
 export function applyMenuItemIcon(menuItem: MenuItem, icon: string = ""): void {
   if (!icon) {
     menuItem.setIcon("");
     menuItem.iconEl?.empty();
-    return;
-  }
-
-  if (checkHtml(icon)) {
-    menuItem.setIcon("lucide-square");
-    if (menuItem.iconEl) {
-      menuItem.iconEl.empty();
-      menuItem.iconEl.innerHTML = icon;
-    }
     return;
   }
 

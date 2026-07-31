@@ -1,20 +1,5 @@
 import type { Command } from "obsidian";
 
-import {
-  ALIGN_CENTER_ICON,
-  ALIGN_LEFT_ICON,
-  ALIGN_RIGHT_ICON,
-  BACKGROUND_COLOR_ICON,
-  FONT_COLOR_ICON,
-  HORIZONTAL_RULE_ICON,
-  INDENT_LIST_ICON,
-  JUSTIFY_TEXT_ICON,
-  MARKDOWN_SYNTAX_ICON,
-  ORDERED_LIST_ICON,
-  UNINDENT_LIST_ICON,
-  UNORDERED_LIST_ICON,
-  WIKILINK_ICON,
-} from "src/icons/inlineIcons";
 import { ownCommand } from "src/plugin/pluginId";
 
 export const DEFAULT_TOOLBAR_COMMANDS: Command[] = [
@@ -261,7 +246,7 @@ export const DEFAULT_TOOLBAR_COMMANDS: Command[] = [
   {
     id: "SubmenuCommands-mdcmder",
     name: "Markdown syntax",
-    icon: MARKDOWN_SYNTAX_ICON,
+    icon: "markdown-syntax",
     SubmenuCommands: [
       {
         id: ownCommand("superscript"),
@@ -286,7 +271,7 @@ export const DEFAULT_TOOLBAR_COMMANDS: Command[] = [
       {
         id: ownCommand("editor:insert-wikilink"),
         name: "Wikilink",
-        icon: WIKILINK_ICON,
+        icon: "wikilink",
       },
       {
         id: ownCommand("editor:insert-embed"),
@@ -296,7 +281,7 @@ export const DEFAULT_TOOLBAR_COMMANDS: Command[] = [
       {
         id: ownCommand("hrline"),
         name: "Horizontal rule",
-        icon: HORIZONTAL_RULE_ICON,
+        icon: "horizontal-rule",
       },
       {
         id: ownCommand("toggle-inline-math"),
@@ -328,61 +313,61 @@ export const DEFAULT_TOOLBAR_COMMANDS: Command[] = [
       {
         id: ownCommand("toggle-numbered-list"),
         name: "Ordered list",
-        icon: ORDERED_LIST_ICON,
+        icon: "ordered-list",
       },
       {
         id: ownCommand("toggle-bullet-list"),
         name: "Unordered list",
-        icon: UNORDERED_LIST_ICON,
+        icon: "unordered-list",
       },
       {
         id: ownCommand("undent-list"),
         name: "Unindent list",
-        icon: UNINDENT_LIST_ICON,
+        icon: "unindent-list",
       },
       {
         id: ownCommand("indent-list"),
         name: "Indent list",
-        icon: INDENT_LIST_ICON,
+        icon: "indent-list",
       },
     ],
   },
   {
     id: "SubmenuCommands-aligin",
     name: "Alignment",
-    icon: ALIGN_CENTER_ICON,
+    icon: "align-center-glyph",
     SubmenuCommands: [
       {
         id: ownCommand("justify"),
         name: "Justify text",
-        icon: JUSTIFY_TEXT_ICON,
+        icon: "justify-text",
       },
       {
         id: ownCommand("left"),
         name: "Align text left",
-        icon: ALIGN_LEFT_ICON,
+        icon: "align-left-glyph",
       },
       {
         id: ownCommand("center"),
         name: "Center text",
-        icon: ALIGN_CENTER_ICON,
+        icon: "align-center-glyph",
       },
       {
         id: ownCommand("right"),
         name: "Align text right",
-        icon: ALIGN_RIGHT_ICON,
+        icon: "align-right-glyph",
       },
     ],
   },
   {
     id: ownCommand("change-font-color"),
     name: "Change font color",
-    icon: FONT_COLOR_ICON,
+    icon: "font-color",
   },
   {
     id: ownCommand("change-background-color"),
     name: "Change background color",
-    icon: BACKGROUND_COLOR_ICON,
+    icon: "background-color",
   },
 ];
 
