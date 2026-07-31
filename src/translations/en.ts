@@ -132,7 +132,6 @@ export const en = {
     "Restore all settings and toolbar command lists to their defaults. This can't be undone.",
   resetConfigurationConfirm:
     "This restores every setting and all toolbar command lists to their defaults.\nThis can't be undone.",
-  selectTextSeeMoreTools: "Select text to see more tools",
   separator: "Separator",
   separatorLeaveEmptySmartSpacing: "Separator (leave empty for smart spacing)",
   setPositionStyle: "Set Position Style to:",

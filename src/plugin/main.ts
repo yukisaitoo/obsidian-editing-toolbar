@@ -40,7 +40,6 @@ interface EditorContextMenuAction {
   title: string;
   commandId?: string;
   callback?: () => void;
-  disabled?: boolean;
 }
 
 const ADMONITION_PLUGIN_ID = "obsidian-admonition";
@@ -175,11 +174,6 @@ export default class EditingToolbarPlugin extends Plugin {
     menu.addItem((item) => {
       item.setTitle(action.title);
 
-      if (action.disabled) {
-        item.setDisabled(true);
-        return;
-      }
-
       item.onClick(() => {
         if (action.callback) {
           action.callback();
@@ -199,10 +193,6 @@ export default class EditingToolbarPlugin extends Plugin {
     icon: string,
     actions: EditorContextMenuAction[],
   ): void {
-    if (!actions.length) {
-      return;
-    }
-
     menu.addItem((item) => {
       item.setTitle(title).setIcon(icon);
       item.setSection("info");
@@ -241,9 +231,7 @@ export default class EditingToolbarPlugin extends Plugin {
         { title: strings.listTable, commandId: "list-to-table" },
         { title: strings.tableList, commandId: "table-to-list" },
       );
-    }
-
-    if (!hasSelection) {
+    } else {
       actions.push(
         { title: strings.addPrefixSuffix, commandId: "add-wrap" },
         { title: strings.insertBlankLines, commandId: "insert-blank-lines" },
@@ -259,10 +247,6 @@ export default class EditingToolbarPlugin extends Plugin {
 
     if (!hasSelection && isTableContext) {
       actions.push({ title: strings.tableList, commandId: "table-to-list" });
-    }
-
-    if (!actions.length) {
-      actions.push({ title: strings.selectTextSeeMoreTools, disabled: true });
     }
 
     return actions;

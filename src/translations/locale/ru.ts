@@ -134,8 +134,6 @@ const ui: Partial<Record<keyof typeof en, string>> = {
   removeAllWhitespace: "Удалить все пробельные символы",
   renumberList: "Перенумеровать список",
   reset: "Сбросить",
-  selectTextSeeMoreTools:
-    "Выделите текст, чтобы увидеть дополнительные инструменты",
   separator: "Разделитель",
   separatorLeaveEmptySmartSpacing:
     "Разделитель (оставьте пустым для умных интервалов)",

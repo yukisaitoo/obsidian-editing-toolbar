@@ -116,7 +116,6 @@ const ui: Partial<Record<keyof typeof en, string>> = {
   removeAllWhitespace: "移除所有空白",
   renumberList: "列表重新编号",
   reset: "重置",
-  selectTextSeeMoreTools: "选中文本后显示更多工具",
   separator: "分隔符",
   separatorLeaveEmptySmartSpacing: "分隔符 (留空则开启智能中英间距)",
   setPositionStyle: "设置位置样式为：",
