@@ -281,9 +281,7 @@ export default class EditingToolbarPlugin extends Plugin {
     ) {
       this.admonitionDefinitions = admonitionPlugin.admonitions;
     } else {
-      console.warn(
-        "Could not read types from admonitionPlugin.admonitions (as object).",
-      );
+      console.warn("editing-toolbar: could not read admonition types");
       this.admonitionDefinitions = null;
     }
   }
@@ -331,12 +329,9 @@ export default class EditingToolbarPlugin extends Plugin {
     return () => this.rebuildListeners.delete(listener);
   }
 
+  // The live settings array — callers mutate in place, then saveSettings().
   getCurrentCommands(style: ToolbarStyleKey): Command[] {
     return this.settings[`${style}Commands`];
-  }
-
-  updateCurrentCommands(commands: Command[], style: ToolbarStyleKey): void {
-    this.settings[`${style}Commands`] = commands;
   }
 
   async saveSettings() {

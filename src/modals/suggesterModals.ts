@@ -1,5 +1,4 @@
 import {
-  App,
   Command,
   FuzzyMatch,
   FuzzySuggestModal,
@@ -91,10 +90,6 @@ export class ChooseFromIconList extends FuzzySuggestModal<string> {
     } else {
       currentCommands[location.index].icon = item;
     }
-    this.plugin.updateCurrentCommands(
-      currentCommands,
-      this.currentEditingConfig,
-    );
 
     await this.plugin.saveSettings();
     this.plugin.rebuildToolbars();
@@ -128,10 +123,6 @@ export class CommandPicker extends FuzzySuggestModal<Command> {
       this.currentEditingConfig,
     );
     currentCommands.push(toStoredCommand(command));
-    this.plugin.updateCurrentCommands(
-      currentCommands,
-      this.currentEditingConfig,
-    );
     await this.plugin.saveSettings();
     this.plugin.rebuildToolbars();
   }
@@ -170,7 +161,6 @@ export class ChangeCmdname extends Modal {
   isSubmenuItem: boolean;
   currentEditingConfig: ToolbarStyleKey;
   constructor(
-    app: App,
     plugin: EditingToolbarPlugin,
     item: Command,
     isSubmenuItem: boolean,
@@ -213,10 +203,6 @@ export class ChangeCmdname extends Modal {
       }
     }
 
-    this.plugin.updateCurrentCommands(
-      currentCommands,
-      this.currentEditingConfig,
-    );
     await this.plugin.saveSettings();
   }
 

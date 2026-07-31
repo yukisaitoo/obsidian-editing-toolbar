@@ -128,7 +128,7 @@ export class ImportExportModal extends Modal {
             new Notice(strings.configurationCopiedClipboard);
           })
           .catch((err) => {
-            console.error("Failed to copy: ", err);
+            console.error("editing-toolbar: failed to copy configuration", err);
             new Notice(strings.failedCopyConfiguration);
           });
       });
@@ -300,7 +300,7 @@ export class ImportExportModal extends Modal {
             // awaits this callback without a catch, so nothing is rethrown.
             this.plugin.settings = backup;
             this.plugin.rebuildToolbars();
-            console.error("Import error: ", error);
+            console.error("editing-toolbar: import failed", error);
             new Notice(
               strings.error +
                 " " +

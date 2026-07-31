@@ -94,10 +94,7 @@ function renderCommandList(
   // Submenus take only plain commands; the `put` checks below read this.
   let draggedItemClass = "";
 
-  const save = () => {
-    ctx.plugin.updateCurrentCommands(commands, style);
-    void ctx.plugin.saveSettings();
-  };
+  const save = () => void ctx.plugin.saveSettings();
 
   ctx.createSortable(listEl, {
     ...SHARED_SORTABLE_OPTIONS,
@@ -183,7 +180,7 @@ function renderCommandRow(
         .setTooltip(strings.addSubmenu)
         .setClass("editingToolbarSettingsButton")
         .onClick(() =>
-          insertAfter(ctx, commands, index, style, {
+          insertAfter(ctx, commands, index, {
             id: "SubmenuCommands-" + uniqueId(1),
             name: "Submenu",
             icon: "remix-Filter3Line",
@@ -197,7 +194,7 @@ function renderCommandRow(
         .setTooltip(strings.addSeparator)
         .setClass("editingToolbarSettingsButton")
         .onClick(() =>
-          insertAfter(ctx, commands, index, style, {
+          insertAfter(ctx, commands, index, {
             id: newDividerId(),
             name: strings.verticalSplit,
             icon: "vertical-split",
@@ -206,7 +203,7 @@ function renderCommandRow(
     })
     .addButton((deleteButton) =>
       ctx.createDeleteButton(deleteButton, () =>
-        removeCommand(ctx, commands, command, style),
+        removeCommand(ctx, commands, command),
       ),
     );
 }
@@ -243,7 +240,6 @@ function renderSubmenuRow(
         .setValue(command.menuType || "submenu")
         .onChange(async (value) => {
           command.menuType = value as "submenu" | "dropdown";
-          ctx.plugin.updateCurrentCommands(commands, style);
           await ctx.plugin.saveSettings();
           ctx.rebuildToolbar();
           new Notice(
@@ -258,7 +254,7 @@ function renderSubmenuRow(
     })
     .addButton((deleteButton) =>
       ctx.createDeleteButton(deleteButton, () =>
-        removeCommand(ctx, commands, command, style),
+        removeCommand(ctx, commands, command),
       ),
     );
 
@@ -296,7 +292,6 @@ function renderSubmenuRow(
         submenu.splice(evt.newIndex, 0, source.splice(evt.oldIndex, 1)[0]);
       }
 
-      ctx.plugin.updateCurrentCommands(commands, style);
       void ctx.plugin.saveSettings();
       ctx.rebuildToolbar();
     },
@@ -347,10 +342,8 @@ async function removeCommand(
   ctx: SettingsTabContext,
   commands: Command[],
   command: Command,
-  style: ToolbarStyleKey,
 ): Promise<void> {
   commands.remove(command);
-  ctx.plugin.updateCurrentCommands(commands, style);
   await ctx.plugin.saveSettings();
   ctx.refresh();
   ctx.rebuildToolbar();
@@ -364,11 +357,9 @@ async function insertAfter(
   ctx: SettingsTabContext,
   commands: Command[],
   index: number,
-  style: ToolbarStyleKey,
   command: Command,
 ): Promise<void> {
   commands.splice(index + 1, 0, command);
-  ctx.plugin.updateCurrentCommands(commands, style);
   await ctx.plugin.saveSettings();
   ctx.refresh();
   ctx.rebuildToolbar();
@@ -409,12 +400,6 @@ function configureRenameButton(
     )
     .setClass("editingToolbarSettingsButton")
     .onClick(() => {
-      new ChangeCmdname(
-        ctx.app,
-        ctx.plugin,
-        command,
-        isSubmenuItem,
-        style,
-      ).open();
+      new ChangeCmdname(ctx.plugin, command, isSubmenuItem, style).open();
     });
 }

@@ -7,6 +7,8 @@
     "target": "ES2020",
     "strict": true,
     "noImplicitAny": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
     "moduleResolution": "bundler",
     "importHelpers": true,
     "esModuleInterop": true,
