@@ -15,16 +15,10 @@ declare module "obsidian" {
   interface SettingsManager {
     activeTab: SettingTab | null;
     openTabById(id: string): SettingTab | null;
-    openTab(tab: SettingTab): void;
     open(): void;
-    close(): void;
-    onOpen(): void;
-    onClose(): void;
-    containerEl: HTMLDivElement;
   }
 
   interface Plugins {
-    plugins: Record<string, Plugin>;
     getPlugin(pluginId: string): Plugin | null;
   }
 
@@ -35,9 +29,6 @@ declare module "obsidian" {
   }
 
   interface Commands {
-    commands: Record<string, Command>;
-    addCommand(cmd: Command): void;
-    removeCommand(cmd: string): void;
     executeCommandById(id: string): boolean;
     findCommand(id: string): Command | undefined;
     listCommands(): Command[];
@@ -50,12 +41,11 @@ declare module "obsidian" {
   }
 
   interface Workspace {
-    floatingSplit: WorkspaceParentExt;
-    on(
-      name: "url-menu",
-      callback: (menu: Menu, url: string, view: MarkdownView) => unknown,
-      ctx?: unknown,
-    ): EventRef;
+    floatingSplit?: { children: WorkspaceItem[] };
+  }
+
+  interface WorkspaceItem {
+    containerEl: HTMLElement;
   }
 
   interface Editor {
@@ -74,28 +64,9 @@ declare module "obsidian" {
     toggleMarkdownFormatting(format: string): void;
   }
 
-  export interface WorkspaceItemExt extends WorkspaceItem {
-    containerEl: HTMLElement;
-    width: number;
-  }
-
-  export interface WorkspaceParentExt
-    extends WorkspaceParent, WorkspaceItemExt, WorkspaceContainer {
-    children: WorkspaceItemExt[];
-    onChildResizeStart: (leaf: WorkspaceItemExt, event: MouseEvent) => void;
-    oldChildResizeStart: (leaf: WorkspaceItemExt, event: MouseEvent) => void;
-    direction: "horizontal" | "vertical";
-  }
-
   interface View {
     editor: Editor | undefined;
-    leaf: WorkspaceLeaf | undefined;
     getMode: () => string;
-  }
-
-  interface WorkspaceLeaf {
-    view: View;
-    width: number;
   }
 
   interface Menu {

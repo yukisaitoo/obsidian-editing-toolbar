@@ -119,15 +119,11 @@ export function selfDestruct(plugin: EditingToolbarPlugin): void {
 
   const roots: ParentNode[] = [activeWindow.document];
 
-  const rootSplit = plugin.app.workspace.rootSplit as unknown as {
-    containerEl?: HTMLElement;
-  };
+  const rootSplit = plugin.app.workspace.rootSplit;
   if (rootSplit?.containerEl) roots.push(rootSplit.containerEl);
 
   plugin.app.workspace.floatingSplit?.children.forEach((child) => {
-    const containerEl = (child as unknown as { containerEl?: HTMLElement })
-      .containerEl;
-    if (containerEl) roots.push(containerEl);
+    if (child.containerEl) roots.push(child.containerEl);
   });
 
   roots.forEach((root) =>
