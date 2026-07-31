@@ -1,5 +1,5 @@
 import { ButtonComponent, Command, Notice, Setting } from "obsidian";
-import Sortable from "sortablejs";
+import type Sortable from "sortablejs";
 import {
   ChangeCmdname,
   ChooseFromIconList,
@@ -99,7 +99,7 @@ function renderCommandList(
     void ctx.plugin.saveSettings();
   };
 
-  Sortable.create(listEl, {
+  ctx.createSortable(listEl, {
     ...SHARED_SORTABLE_OPTIONS,
     group: "item",
     animation: 500,
@@ -273,7 +273,7 @@ function renderSubmenuRow(
     JSON.stringify(`✖️${strings.dragCommandsHere}`),
   );
 
-  Sortable.create(subListEl, {
+  ctx.createSortable(subListEl, {
     ...SHARED_SORTABLE_OPTIONS,
     animation: 150,
     group: { name: "item", pull: true, put: row.isPlainItemDragging },

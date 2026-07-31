@@ -6,6 +6,7 @@ import {
   PluginSettingTab,
   setIcon,
 } from "obsidian";
+import Sortable from "sortablejs";
 import type EditingToolbarPlugin from "src/plugin/main";
 import type { ColorPickrOptions } from "src/settings/pickr";
 import { createColorPickr } from "src/settings/pickr";
@@ -38,6 +39,7 @@ export interface SettingsTabContext {
   refresh(): void;
   rebuildToolbar(): void;
   createPickr(options: ColorPickrOptions): Pickr;
+  createSortable(el: HTMLElement, options: Sortable.Options): void;
   // Arms on the first click, deletes on the second.
   createDeleteButton(
     button: ButtonComponent,
@@ -50,6 +52,7 @@ export class EditingToolbarSettingTab extends PluginSettingTab {
   plugin: EditingToolbarPlugin;
   private activeTab: TabId = "general";
   private pickrs: Pickr[] = [];
+  private sortables: Sortable[] = [];
   private commandStyle: ToolbarStyleKey;
 
   constructor(app: App, plugin: EditingToolbarPlugin) {
@@ -67,7 +70,7 @@ export class EditingToolbarSettingTab extends PluginSettingTab {
   }
 
   display(): void {
-    this.destroyPickrs();
+    this.destroyTabResources();
 
     const { containerEl } = this;
     containerEl.empty();
@@ -117,7 +120,7 @@ export class EditingToolbarSettingTab extends PluginSettingTab {
   }
 
   hide(): void {
-    this.destroyPickrs();
+    this.destroyTabResources();
     // The style being edited must not outlive the pane, or resolveActiveStyle()
     // keeps reporting it after the workspace has moved on.
     this.plugin.appearanceEditStyle = null;
@@ -134,6 +137,9 @@ export class EditingToolbarSettingTab extends PluginSettingTab {
         const pickr = createColorPickr(options);
         this.pickrs.push(pickr);
         return pickr;
+      },
+      createSortable: (el, options) => {
+        this.sortables.push(Sortable.create(el, options));
       },
       createDeleteButton: (button, onDelete, tooltip = strings.delete) =>
         this.createDeleteButton(button, onDelete, tooltip),
@@ -178,8 +184,12 @@ export class EditingToolbarSettingTab extends PluginSettingTab {
       });
   }
 
-  private destroyPickrs(): void {
+  // Both hold references that outlive the DOM they were built on, so they are torn
+  // down before every re-render — while their elements are still attached.
+  private destroyTabResources(): void {
     this.pickrs.forEach((pickr) => pickr?.destroyAndRemove());
     this.pickrs = [];
+    this.sortables.forEach((sortable) => sortable.destroy());
+    this.sortables = [];
   }
 }
