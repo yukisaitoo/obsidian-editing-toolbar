@@ -145,28 +145,33 @@ export function backcolorpicker(
   ]);
 }
 
-export function setHeader(str: string, editor: Editor) {
-  // from https://github.com/obsidian-canzi/Enhanced-editing
+// Blockquote and callout lead-in. Held aside and re-attached, so a heading change
+// never rewrites it. `[!name]` requires the `!` so a top-level `[x] task` is not
+// mistaken for a callout.
+const BLOCK_PREFIX = /^\s*(?:>\s*)*(?:\[!\w+\]\s*)?/;
+// Heading, bullet, ordered and task markers all give way to a new heading.
+const LINE_MARKERS = /^(?:(?:#{1,6}\s+)|(?:[-+*]\s+)|(?:\d+\.\s+)|(?:\[[ xX]\]\s+))+/;
+
+// from https://github.com/obsidian-canzi/Enhanced-editing
+export function setHeader(marker: string, editor: Editor) {
   const cursor = editor.getCursor();
-  const linetext = editor.getLine(cursor.line);
-  let newstr: string;
-  const headingRegex = /^(\s*(?:>\s*)*(?:\[[!\w]+\]\s*)?)#{1,6}\s+/;
-  const blockPrefixRegex = /^(?:\s*(?:>\s*)*(?:\[[!\w]+\]\s*)?)?(?:(?:#{1,6}\s+)|(?:[-+*]\s+)|(?:\d+\.\s+)|(?:\[[ xX]\]\s+))+/;
-  const match = linetext.match(headingRegex);
-  const matchstr = match?.[0]?.trim();
+  const lineText = editor.getLine(cursor.line);
+  const blockPrefix = lineText.match(BLOCK_PREFIX)?.[0] ?? "";
+  const body = lineText.slice(blockPrefix.length);
+  const heading = body.match(/^(#{1,6})\s+/);
 
-  if (str === matchstr || str === "") {
-    newstr = linetext.replace(headingRegex, "$1");
-  } else {
-    newstr = linetext.replace(blockPrefixRegex, "").trimStart();
-    newstr = `${str} ${newstr}`;
-  }
+  const newText =
+    marker === "" || marker === heading?.[1]
+      ? blockPrefix + body.slice(heading?.[0].length ?? 0)
+      : `${blockPrefix}${marker} ${body.replace(LINE_MARKERS, "").trimStart()}`;
 
-  const lineEnd = newstr !== "" ? linetext.length : 0;
-  const linend = editor.getRange(cursor, { line: cursor.line, ch: lineEnd });
-
-  editor.setLine(cursor.line, newstr);
-  editor.setCursor({ line: cursor.line, ch: newstr.length - linend.length });
+  // Hold the cursor the same distance from the end of the line.
+  const textAfterCursor = lineText.slice(cursor.ch);
+  editor.setLine(cursor.line, newText);
+  editor.setCursor({
+    line: cursor.line,
+    ch: Math.max(0, newText.length - textAfterCursor.length),
+  });
 }
 
 
