@@ -1,6 +1,7 @@
 import { DropdownComponent, Modal, Platform, Setting, setIcon } from "obsidian";
 import type { CalloutTypeInfo } from "src/modals/callout/calloutTypes";
 import { buildCalloutOptions } from "src/modals/callout/calloutTypes";
+import { focusAfterOpen } from "src/modals/modalFocus";
 import EditingToolbarPlugin from "src/plugin/main";
 import { strings } from "src/translations/helper";
 
@@ -156,11 +157,7 @@ export class InsertCalloutModal extends Modal {
         return btn;
       });
 
-    setTimeout(() => {
-      if (this.contentTextArea) {
-        this.contentTextArea.focus();
-      }
-    }, 10);
+    focusAfterOpen(this.contentTextArea);
   }
   private updateIconAndColor(iconContainer: HTMLElement, typeKey: string) {
     if (!iconContainer) return;
@@ -242,13 +239,17 @@ export class InsertCalloutModal extends Modal {
       };
     }
 
-    setTimeout(() => {
+    // Deferred by one microtask on purpose: the caller closes the modal right after
+    // this, and Modal.close() synchronously hands focus back to whatever held it when
+    // the modal opened — the toolbar button, not the editor. The trailing newline,
+    // the cursor move and the focus below all have to land after that.
+    void Promise.resolve().then(() => {
       editor.replaceRange("\n", newCursorPos);
       editor.setCursor({
         line: newCursorPos.line + 1,
         ch: 0,
       });
       editor.focus();
-    }, 0);
+    });
   }
 }

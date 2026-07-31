@@ -1,4 +1,5 @@
 import { App, Modal, Setting } from "obsidian";
+import { focusAfterOpen } from "src/modals/modalFocus";
 import { strings } from "src/translations/helper";
 
 interface ITextInputResult {
@@ -57,7 +58,7 @@ export class TextInputModal extends Modal {
           textarea.inputEl.addClass("editing-toolbar-textarea-input");
 
           if (field === this.fields[0]) {
-            setTimeout(() => textarea.inputEl.focus(), 10);
+            focusAfterOpen(textarea.inputEl);
           }
 
           textarea.inputEl.addEventListener("keydown", (e) => {
@@ -79,7 +80,7 @@ export class TextInputModal extends Modal {
           });
 
         if (field === this.fields[0]) {
-          setTimeout(() => text.inputEl.focus(), 10);
+          focusAfterOpen(text.inputEl);
         }
 
         text.inputEl.addEventListener("keydown", (e) => {
