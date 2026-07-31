@@ -11,6 +11,7 @@ import {
 import { CommandsManager } from "src/commands/commands";
 import addIcons from "src/icons/customIcons";
 import type { AdmonitionDefinition } from "src/modals/callout/calloutTypes";
+import { ownCommand } from "src/plugin/pluginId";
 import type { ToolbarStyleKey } from "src/settings/settingsData";
 import {
   applyAppearanceVars,
@@ -158,12 +159,8 @@ export default class EditingToolbarPlugin extends Plugin {
     return this.appearanceEditStyle ?? this.liveStyle;
   }
 
-  private getPluginCommandId(commandId: string): string {
-    return `${this.manifest.id}:${commandId}`;
-  }
-
   private executePluginCommand(commandId: string): void {
-    this.app.commands.executeCommandById(this.getPluginCommandId(commandId));
+    this.app.commands.executeCommandById(ownCommand(commandId));
   }
 
   private addEditorContextAction(

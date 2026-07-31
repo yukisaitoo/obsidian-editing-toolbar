@@ -55,13 +55,9 @@ export class CommandsManager {
   private runHistoryAction = (action: "undo" | "redo"): void => {
     if (this.runCanvasHistoryAction(action)) return;
 
-    const editor = this.getActiveEditor();
-    if (editor) {
-      this.runOnEditor(() =>
-        action === "undo" ? editor.undo() : editor.redo(),
-      );
-      return;
-    }
+    this.runOnEditor((editor) =>
+      action === "undo" ? editor.undo() : editor.redo(),
+    );
   };
 
   /** Canvas exposes undo/redo under two different names across versions. */
