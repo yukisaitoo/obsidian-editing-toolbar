@@ -103,56 +103,35 @@ export class CommandsManager {
   // already matches — the toggle behind bold, italics and friends.
   public applyCommand = (command: CommandPlot, editor: Editor): void => {
     const selectedText = editor.getSelection();
-    const cursorStart = editor.getCursor("from");
-    const cursorEnd = editor.getCursor("to");
+    const start = editor.getCursor("from");
+    const end = editor.getCursor("to");
     const suffix = command.suffix;
     const prefix =
-      command.islinehead && cursorStart.ch > 0
+      command.islinehead && start.ch > 0
         ? "\n" + command.prefix
         : command.prefix;
 
-    const preStart = {
-      line: cursorStart.line - command.line,
-      ch: cursorStart.ch - prefix.length,
-    };
-    const sufEnd = {
-      line: cursorStart.line + command.line,
-      ch: cursorEnd.ch + suffix.length,
-    };
+    const from = editor.posToOffset(start);
+    const preStart = editor.offsetToPos(Math.max(0, from - prefix.length));
+    const sufEnd = editor.offsetToPos(editor.posToOffset(end) + suffix.length);
 
     if (
-      editor.getRange(preStart, cursorStart) === prefix &&
-      editor.getRange(cursorEnd, sufEnd) === suffix
+      editor.getRange(preStart, start) === prefix &&
+      editor.getRange(end, sufEnd) === suffix
     ) {
       editor.replaceRange(selectedText, preStart, sufEnd);
-      editor.setCursor(cursorStart.line - command.line, cursorStart.ch);
-      selectRange(editor, cursorStart.line, preStart.ch, selectedText.length);
+      selectAt(editor, from - prefix.length, selectedText.length);
       return;
     }
 
     editor.replaceSelection(`${prefix}${selectedText}${suffix}`);
-
-    if (command.char > 0) {
-      editor.setCursor(
-        cursorStart.line + command.line,
-        cursorStart.ch + command.char + selectedText.length,
-      );
-      return;
-    }
-    selectRange(
-      editor,
-      cursorStart.line,
-      cursorStart.ch + prefix.length,
-      selectedText.length,
-    );
+    selectAt(editor, from + prefix.length, selectedText.length);
   };
 }
 
-function selectRange(
-  editor: Editor,
-  line: number,
-  ch: number,
-  length: number,
-): void {
-  editor.setSelection({ line, ch }, { line, ch: ch + length });
+function selectAt(editor: Editor, offset: number, length: number): void {
+  editor.setSelection(
+    editor.offsetToPos(offset),
+    editor.offsetToPos(offset + length),
+  );
 }

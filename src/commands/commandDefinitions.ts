@@ -1,8 +1,6 @@
 import type { Command } from "obsidian";
 
 export type CommandPlot = {
-  char: number;
-  line: number;
   prefix: string;
   suffix: string;
   islinehead: boolean;
@@ -10,64 +8,46 @@ export type CommandPlot = {
 
 export const WRAP_COMMANDS: Record<string, CommandPlot> = {
   hrline: {
-    char: 5,
-    line: 1,
-    prefix: "\n---",
-    suffix: "\n",
+    prefix: "\n---\n",
+    suffix: "",
     islinehead: true,
   },
   justify: {
-    char: 0,
-    line: 0,
     prefix: '<p align="justify">',
     suffix: "</p>",
     islinehead: false,
   },
   left: {
-    char: 0,
-    line: 0,
     prefix: '<p align="left">',
     suffix: "</p>",
     islinehead: false,
   },
   right: {
-    char: 0,
-    line: 0,
     prefix: '<p align="right">',
     suffix: "</p>",
     islinehead: false,
   },
   center: {
-    char: 0,
-    line: 0,
     prefix: "<center>",
     suffix: "</center>",
     islinehead: false,
   },
   underline: {
-    char: 0,
-    line: 0,
     prefix: "<u>",
     suffix: "</u>",
     islinehead: false,
   },
   superscript: {
-    char: 0,
-    line: 0,
     prefix: "<sup>",
     suffix: "</sup>",
     islinehead: false,
   },
   subscript: {
-    char: 0,
-    line: 0,
     prefix: "<sub>",
     suffix: "</sub>",
     islinehead: false,
   },
   codeblock: {
-    char: 4,
-    line: 0,
     prefix: "\n```\n",
     suffix: "\n```\n",
     islinehead: false,
