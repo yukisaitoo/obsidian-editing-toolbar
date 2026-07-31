@@ -58,14 +58,13 @@ export function getExistingToolbar(
 }
 
 // Idempotent: calling twice cannot produce a duplicate bar. Null means this style
-// has nothing to show (mobile, disallowed view, or an empty command list).
+// has nothing to show (disallowed view or an empty command list).
 export function ensureToolbar(
   app: App,
   plugin: EditingToolbarPlugin,
   style: ToolbarStyleKey,
   hostDocument?: Document,
 ): HTMLElement | null {
-  if (!plugin.isDesktop()) return null;
   if (!isAllowedViewType(app.workspace.getActiveViewOfType(ItemView))) {
     return null;
   }

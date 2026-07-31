@@ -6,7 +6,6 @@ import {
   MarkdownFileInfo,
   MarkdownView,
   Menu,
-  Platform,
   Plugin,
 } from "obsidian";
 import { CommandsManager } from "src/commands/commands";
@@ -290,10 +289,6 @@ export default class EditingToolbarPlugin extends Plugin {
       );
       this.admonitionDefinitions = null;
     }
-  }
-
-  isDesktop() {
-    return !Platform.isMobileApp;
   }
 
   onunload(): void {
