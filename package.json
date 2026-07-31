@@ -4,7 +4,7 @@
   "description": "Unofficial fork of Editing Toolbar with the AI features removed. A MS Word-like editing toolbar for Obsidian. Original plugin by Cuman.",
   "repository": "https://github.com/yukisaitoo/obsidian-editing-toolbar",
   "scripts": {
-    "build": "tsc --noEmit && eslint src && rollup --config rollup.config.mjs --environment BUILD:production",
+    "build": "tsc --noEmit && eslint src && rollup --config rollup.config.mjs",
     "deploy": "npm run build && bash deploy.sh"
   },
   "keywords": [],

@@ -9,8 +9,6 @@
     "noImplicitAny": true,
     "moduleResolution": "bundler",
     "importHelpers": true,
-    "inlineSourceMap": true,
-    "inlineSources": true,
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "skipLibCheck": true,
