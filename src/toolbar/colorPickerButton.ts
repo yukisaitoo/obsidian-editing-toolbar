@@ -8,10 +8,7 @@ import { ownCommand, PLUGIN_ID } from "src/plugin/pluginId";
 import type { ToolbarStyleKey } from "src/settings/settingsData";
 import { attachFlyoutClamp } from "src/toolbar/geometry";
 import { applyButtonIcon, TOOLTIP_DELAY } from "src/toolbar/toolbarDom";
-import {
-  applyToolbarState,
-  resolveToolbarState,
-} from "src/toolbar/toolbarVisibility";
+import { syncToolbarState } from "src/toolbar/toolbarVisibility";
 import { strings } from "src/translations/helper";
 import {
   backcolorpicker,
@@ -74,7 +71,7 @@ export function createColorPickerButton(
       if (target?.closest(".x-color-picker-wrapper, .subitem")) return;
 
       app.commands.executeCommandById(item.id);
-      applyToolbarState(bar, resolveToolbarState(plugin, style));
+      syncToolbarState(plugin, bar, style);
     });
   applyButtonIcon(button, item.icon);
 

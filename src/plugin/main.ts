@@ -30,7 +30,7 @@ import {
 } from "src/toolbar/toolbarBuilder";
 import {
   applyToolbarState,
-  resolveToolbarState,
+  resolveToolbarDecision,
 } from "src/toolbar/toolbarVisibility";
 import { strings } from "src/translations/helper";
 import { isAllowedViewType } from "src/util/viewUtils";
@@ -328,7 +328,7 @@ export default class EditingToolbarPlugin extends Plugin {
   }
 
   // Safe to call as often as the workspace fires events: builds only what is
-  // missing, and defers to resolveToolbarState for every visibility decision.
+  // missing, and defers to resolveToolbarDecision for every visibility decision.
   handleEditingToolbar = () => {
     closeMoreOverflowPopovers();
 
@@ -338,12 +338,14 @@ export default class EditingToolbarPlugin extends Plugin {
         continue;
       }
 
-      const state = resolveToolbarState(this, style);
+      const decision = resolveToolbarDecision(this, style);
+      if (decision === "leave") continue;
+
       const bar =
-        state === "visible"
+        decision === "visible"
           ? ensureToolbar(this.app, this, style)
           : getExistingToolbar(this.app, this, style);
-      if (bar) applyToolbarState(bar, state);
+      if (bar) applyToolbarState(bar, decision);
     }
   };
 

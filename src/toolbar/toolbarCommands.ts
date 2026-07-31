@@ -13,10 +13,7 @@ import {
   NO_HOTKEY,
   TOOLTIP_DELAY,
 } from "src/toolbar/toolbarDom";
-import {
-  applyToolbarState,
-  resolveToolbarState,
-} from "src/toolbar/toolbarVisibility";
+import { syncToolbarState } from "src/toolbar/toolbarVisibility";
 import { t } from "src/translations/helper";
 import { DIVIDER_COMMAND_ID, isDivider } from "src/util/util";
 
@@ -120,7 +117,7 @@ function renderFlyout(ctx: RenderContext, item: Command, index: number) {
 
 function runCommand(ctx: RenderContext, commandId: string): void {
   ctx.app.commands.executeCommandById(commandId);
-  applyToolbarState(ctx.bar, resolveToolbarState(ctx.plugin, ctx.style));
+  syncToolbarState(ctx.plugin, ctx.bar, ctx.style);
 }
 
 function tooltipFor(app: App, item: Command): string {

@@ -5,7 +5,7 @@ import { ensureToolbar, getExistingToolbar } from "src/toolbar/toolbarBuilder";
 import { resolveToolbarDocument } from "src/toolbar/toolbarHost";
 import {
   applyToolbarState,
-  resolveToolbarState,
+  resolveToolbarDecision,
 } from "src/toolbar/toolbarVisibility";
 
 // `hostDocument` pins the window to act on; without it the active editor decides.
@@ -17,16 +17,16 @@ export function updateFollowingBar(
 ): void {
   const target = editor ?? plugin.commandsManager.getActiveEditor();
   const doc = hostDocument ?? resolveToolbarDocument(app, target);
-  const state = resolveToolbarState(plugin, "following");
+  const decision = resolveToolbarDecision(plugin, "following");
 
   const bar =
-    state === "visible"
+    decision === "visible"
       ? ensureToolbar(app, plugin, "following", doc)
       : getExistingToolbar(app, plugin, "following", doc);
-  if (!bar) return;
+  if (!bar || decision === "leave") return;
 
-  applyToolbarState(bar, state);
-  if (state === "visible" && target) {
+  applyToolbarState(bar, decision);
+  if (decision === "visible" && target) {
     positionFollowingBar(bar, target, doc);
   }
 }
