@@ -297,5 +297,3 @@ function disconnectToolbarResizeObservers(): void {
   toolbarResizeObservers.forEach((observer) => observer.disconnect());
   toolbarResizeObservers.clear();
 }
-
-export { closeMoreOverflowPopovers };

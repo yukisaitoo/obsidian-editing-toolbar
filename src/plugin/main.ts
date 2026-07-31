@@ -236,6 +236,9 @@ export default class EditingToolbarPlugin extends Plugin {
         { title: strings.addPrefixSuffix, commandId: "add-wrap" },
         { title: strings.insertBlankLines, commandId: "insert-blank-lines" },
       );
+      if (isTableContext) {
+        actions.push({ title: strings.tableList, commandId: "table-to-list" });
+      }
     }
 
     if (isOrderedListLine) {
@@ -243,10 +246,6 @@ export default class EditingToolbarPlugin extends Plugin {
         title: strings.renumberList,
         commandId: "renumber-ordered-list",
       });
-    }
-
-    if (!hasSelection && isTableContext) {
-      actions.push({ title: strings.tableList, commandId: "table-to-list" });
     }
 
     return actions;
