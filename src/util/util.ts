@@ -372,6 +372,10 @@ function wrapEachLine(text: string, open: string, close: string): string {
     .join("\n");
 }
 
+// One tag wrapping the whole selection, with its colour captured. Comparing that
+// capture as a string keeps a colour containing regex syntax out of the pattern.
+const SINGLE_FONT_TAG = /^<font\s+color=["']?([^"'>]+)["']?>[\s\S]+<\/font>$/;
+
 export function setFontcolor(color: string, editor: Editor) {
   const selectText = editor.getSelection();
 
@@ -382,11 +386,7 @@ export function setFontcolor(color: string, editor: Editor) {
   const fontColorRegex = /<font\s+color=["']?[^"'>]+["']?>(.*?)<\/font>/ms;
   const hasColorTag = fontColorRegex.test(selectText);
 
-  const sameColorRegex = new RegExp(
-    `^<font\\s+color=["']?${color}["']?>(.+)<\\/font>$`,
-    "ms",
-  );
-  if (sameColorRegex.test(selectText.trim())) {
+  if (selectText.trim().match(SINGLE_FONT_TAG)?.[1] === color) {
     return;
   }
 
@@ -419,8 +419,13 @@ const HIGHLIGHT_CLASS = "editing-toolbar-highlight";
 // before it existed — recognising them is what lets the rewrite upgrade them
 // rather than nest a second mark inside.
 const MARK_OPEN = String.raw`<mark\s+(?:class=["']?${HIGHLIGHT_CLASS}["']?\s+)?style=["']?${MARK_STYLE}["']?>`;
-const escapeForRegex = (value: string) =>
-  value.replace(/([()[{*+.$^\\|?])/g, "\\$1");
+// One mark wrapping the whole selection, with its style captured. Requires the
+// class, so a mark of the same colour that predates it still falls through to the
+// rewrite and picks one up. Comparing the capture as a string keeps a colour
+// containing regex syntax out of the pattern.
+const SINGLE_MARK = new RegExp(
+  String.raw`^<mark\s+class=["']?${HIGHLIGHT_CLASS}["']?\s+style=["']?(${MARK_STYLE})["']?>[\s\S]+<\/mark>$`,
+);
 
 export interface Rgba {
   r: number;
@@ -497,12 +502,7 @@ export function setBackgroundcolor(color: string, editor: Editor) {
     selectText,
   );
 
-  // Requires the class, so a mark of the same colour that predates it still falls
-  // through to the rewrite below and picks one up.
-  const sameColorRegex = new RegExp(
-    `^<mark\\s+class=["']?${HIGHLIGHT_CLASS}["']?\\s+style=["']?${escapeForRegex(style)}["']?>([\\s\\S]+)<\\/mark>$`,
-  );
-  if (sameColorRegex.test(selectText.trim())) {
+  if (selectText.trim().match(SINGLE_MARK)?.[1] === style) {
     return;
   }
 
