@@ -77,33 +77,24 @@ export class ChooseFromIconList extends FuzzySuggestModal<string> {
     const currentCommands = this.plugin.getCurrentCommands(
       this.currentEditingConfig,
     );
-    if (this.command.icon) {
-      const location = findCommandLocation(
-        this.command,
-        this.isSubmenuItem,
-        currentCommands,
-      );
-      // Removed from the list while the picker was open: nothing to write to.
-      if (location.index === -1) return;
+    const location = findCommandLocation(
+      this.command,
+      this.isSubmenuItem,
+      currentCommands,
+    );
+    // Not in the list — removed while the picker was open: nothing to write to.
+    if (location.index === -1) return;
 
-      if (this.isSubmenuItem) {
-        currentCommands[location.index].SubmenuCommands![
-          location.subIndex
-        ].icon = item;
-      } else {
-        currentCommands[location.index].icon = item;
-      }
-      this.plugin.updateCurrentCommands(
-        currentCommands,
-        this.currentEditingConfig,
-      );
+    if (this.isSubmenuItem) {
+      currentCommands[location.index].SubmenuCommands![location.subIndex].icon =
+        item;
     } else {
-      currentCommands.push(toStoredCommand({ ...this.command, icon: item }));
-      this.plugin.updateCurrentCommands(
-        currentCommands,
-        this.currentEditingConfig,
-      );
+      currentCommands[location.index].icon = item;
     }
+    this.plugin.updateCurrentCommands(
+      currentCommands,
+      this.currentEditingConfig,
+    );
 
     await this.plugin.saveSettings();
     this.plugin.rebuildToolbars();
@@ -130,6 +121,21 @@ export class CommandPicker extends FuzzySuggestModal<Command> {
     return t(item.name);
   }
 
+  // Read afresh rather than reusing the list from onChooseItem: the icon picker sits
+  // open in between, so that reference can be stale by the time an icon is chosen.
+  private async addCommand(command: Command): Promise<void> {
+    const currentCommands = this.plugin.getCurrentCommands(
+      this.currentEditingConfig,
+    );
+    currentCommands.push(toStoredCommand(command));
+    this.plugin.updateCurrentCommands(
+      currentCommands,
+      this.currentEditingConfig,
+    );
+    await this.plugin.saveSettings();
+    this.plugin.rebuildToolbars();
+  }
+
   async onChooseItem(item: Command): Promise<void> {
     const currentCommands = this.plugin.getCurrentCommands(
       this.currentEditingConfig,
@@ -148,19 +154,13 @@ export class CommandPicker extends FuzzySuggestModal<Command> {
         this.plugin,
         item,
         false,
-        undefined,
+        (icon) => void this.addCommand({ ...item, icon }),
         this.currentEditingConfig,
       ).open();
       return;
     }
 
-    currentCommands.push(toStoredCommand(item));
-    this.plugin.updateCurrentCommands(
-      currentCommands,
-      this.currentEditingConfig,
-    );
-    await this.plugin.saveSettings();
-    this.plugin.rebuildToolbars();
+    await this.addCommand(item);
   }
 }
 
