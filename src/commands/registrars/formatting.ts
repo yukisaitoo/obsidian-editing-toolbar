@@ -1,7 +1,7 @@
 import { Editor } from "obsidian";
 import type { Registrar } from "src/commands/registrars/types";
 import { setFormatEraser } from "src/util/text/formatEraser";
-import { setBackgroundcolor, setFontcolor, setHeader } from "src/util/util";
+import { setBackgroundColor, setFontColor, setHeader } from "src/util/util";
 
 type MarkdownFormat = Parameters<Editor["toggleMarkdownFormatting"]>[0];
 
@@ -95,14 +95,14 @@ export const registerFormattingCommands: Registrar = ({
   add("format-eraser", "Format eraser", "eraser", setFormatEraser);
 
   add("change-font-color", "Change font color", "font-color", (editor) =>
-    setFontcolor(plugin.settings.lastFontColor, editor),
+    setFontColor(plugin.settings.lastFontColor, editor),
   );
 
   add(
     "change-background-color",
     "Change background color",
     "background-color",
-    (editor) => setBackgroundcolor(plugin.settings.lastHighlightColor, editor),
+    (editor) => setBackgroundColor(plugin.settings.lastHighlightColor, editor),
   );
 
   LIST_ACTIONS.forEach(({ id, name, icon, run }) => add(id, name, icon, run));

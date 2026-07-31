@@ -969,7 +969,7 @@ body.theme-dark .modal-container.editingToolbar-Modal .modal input[type='range']
    8. EDITOR AND HOST INTEGRATIONS
    ========================================================================== */
 
-/* --- Highlights written by setBackgroundcolor() --------------------------- */
+/* --- Highlights written by setBackgroundColor() --------------------------- */
 
 /* The UA stylesheet declares `mark { background: mark; color: marktext }`. A
    declaration on the element always beats an inherited value — inheritance only

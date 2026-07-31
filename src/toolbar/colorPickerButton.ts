@@ -11,10 +11,10 @@ import { applyButtonIcon, TOOLTIP_DELAY } from "src/toolbar/toolbarDom";
 import { syncToolbarState } from "src/toolbar/toolbarVisibility";
 import { strings } from "src/translations/helper";
 import {
-  backcolorpicker,
-  colorpicker,
-  setBackgroundcolor,
-  setFontcolor,
+  renderBackgroundColorPicker,
+  renderFontColorPicker,
+  setBackgroundColor,
+  setFontColor,
   toHexColor,
 } from "src/util/util";
 
@@ -34,18 +34,18 @@ const VARIANTS: Record<string, PickerVariant> = {
     customTooltip: strings.customFontColor,
     tableId: "x-color-picker-table",
     iconClass: FONT_COLOR_ICON_CLASS,
-    render: colorpicker,
+    render: renderFontColorPicker,
     settingsKey: "lastFontColor",
-    apply: setFontcolor,
+    apply: setFontColor,
   },
   [ownCommand("change-background-color")]: {
     tooltip: strings.backgroundColor,
     customTooltip: strings.customBackgroundColor,
     tableId: "x-backgroundcolor-picker-table",
     iconClass: BACKGROUND_COLOR_ICON_CLASS,
-    render: backcolorpicker,
+    render: renderBackgroundColorPicker,
     settingsKey: "lastHighlightColor",
-    apply: setBackgroundcolor,
+    apply: setBackgroundColor,
   },
 };
 

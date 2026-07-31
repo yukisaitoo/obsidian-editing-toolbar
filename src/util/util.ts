@@ -3,7 +3,7 @@ import { EditingToolbarSettings } from "../settings/settingsData";
 import { strings } from "../translations/helper";
 import { replaceSelectionAndSelect } from "./text/selection";
 
-export function GenNonDuplicateID(randomLength: number) {
+export function uniqueId(randomLength: number) {
   const idStr = Date.now().toString(36);
   return (
     idStr +
@@ -22,7 +22,7 @@ export function isDivider(id: string): boolean {
 }
 
 export function newDividerId(): string {
-  return `${DIVIDER_COMMAND_ID}-${GenNonDuplicateID(4)}`;
+  return `${DIVIDER_COMMAND_ID}-${uniqueId(4)}`;
 }
 
 // `app.commands.listCommands()` hands back the LIVE registry objects. Storing one
@@ -140,7 +140,7 @@ function renderColorPicker(
   }
 }
 
-export function colorpicker(
+export function renderFontColorPicker(
   parent: HTMLElement,
   plugin: { settings: EditingToolbarSettings },
 ): void {
@@ -261,7 +261,7 @@ export function colorpicker(
   ]);
 }
 
-export function backcolorpicker(
+export function renderBackgroundColorPicker(
   parent: HTMLElement,
   plugin: { settings: EditingToolbarSettings },
 ): void {
@@ -359,7 +359,7 @@ function wrapEachLine(text: string, open: string, close: string): string {
 // capture as a string keeps a colour containing regex syntax out of the pattern.
 const SINGLE_FONT_TAG = /^<font\s+color=["']?([^"'>]+)["']?>[\s\S]+<\/font>$/;
 
-export function setFontcolor(color: string, editor: Editor) {
+export function setFontColor(color: string, editor: Editor) {
   const selectText = editor.getSelection();
 
   if (!selectText || selectText.trim() === "") {
@@ -464,7 +464,7 @@ export function toHexColor(color: string): string {
   return rgba.a >= 1 ? rgb : `${rgb}${channel(rgba.a * 255)}`;
 }
 
-export function setBackgroundcolor(color: string, editor: Editor) {
+export function setBackgroundColor(color: string, editor: Editor) {
   const selectText = editor.getSelection();
 
   if (!selectText || selectText.trim() === "") {

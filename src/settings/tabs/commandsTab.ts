@@ -12,9 +12,9 @@ import { applyButtonIcon } from "src/toolbar/toolbarDom";
 import { format, strings, t } from "src/translations/helper";
 import {
   DIVIDER_COMMAND_ID,
-  GenNonDuplicateID,
   isDivider,
   newDividerId,
+  uniqueId,
 } from "src/util/util";
 
 const TOP_LEVEL_CONTAINER_CLASS = "editingToolbarSettingsTabsContainer";
@@ -184,7 +184,7 @@ function renderCommandRow(
         .setClass("editingToolbarSettingsButton")
         .onClick(() =>
           insertAfter(ctx, commands, index, style, {
-            id: "SubmenuCommands-" + GenNonDuplicateID(1),
+            id: "SubmenuCommands-" + uniqueId(1),
             name: "Submenu",
             icon: "remix-Filter3Line",
             SubmenuCommands: [],
