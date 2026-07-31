@@ -75,6 +75,7 @@ export default class EditingToolbarPlugin extends Plugin {
   private rebuildListeners = new Set<() => void>();
 
   async onload(): Promise<void> {
+    addIcons();
     await this.loadSettings();
 
     this.settingTab = new EditingToolbarSettingTab(this.app, this);
@@ -105,7 +106,6 @@ export default class EditingToolbarPlugin extends Plugin {
     this.registerEvent(
       this.app.workspace.on("editor-menu", this.handleEditorContextMenu),
     );
-    addIcons();
     this.applyRootAppearanceVars();
   }
 
