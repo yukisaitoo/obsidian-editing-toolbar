@@ -1,4 +1,4 @@
-import { App, ButtonComponent, Command, Menu } from "obsidian";
+import { App, ButtonComponent, Command, Menu, TooltipOptions } from "obsidian";
 import type EditingToolbarPlugin from "src/plugin/main";
 import type { ToolbarStyleKey } from "src/settings/settingsData";
 import {
@@ -49,11 +49,10 @@ export function renderToolbarCommands(
 
 function renderPlainButton(ctx: RenderContext, item: Command) {
   const button = new ButtonComponent(ctx.bar)
-    .setTooltip(tooltipFor(ctx.app, item))
+    .setTooltip(tooltipFor(ctx.app, item), tooltipOptions(ctx))
     .onClick(() => runCommand(ctx, item.id));
 
   button.setClass("editingToolbarCommandItem");
-  applyTooltipPosition(ctx, button);
   if (isDivider(item.id)) button.setClass(DIVIDER_COMMAND_ID);
   applyButtonIcon(button, item.icon);
 }
@@ -61,9 +60,8 @@ function renderPlainButton(ctx: RenderContext, item: Command) {
 function renderDropdown(ctx: RenderContext, item: Command) {
   const parent = new ButtonComponent(ctx.bar);
   parent.setClass(SUBMENU_BUTTON_CLASS);
-  applyTooltipPosition(ctx, parent);
   applyButtonIcon(parent, item.icon);
-  parent.setTooltip(tooltipFor(ctx.app, item));
+  parent.setTooltip(tooltipFor(ctx.app, item), tooltipOptions(ctx));
 
   parent.onClick((evt: MouseEvent) => {
     const menu = new Menu();
@@ -97,7 +95,6 @@ function renderDropdown(ctx: RenderContext, item: Command) {
 function renderFlyout(ctx: RenderContext, item: Command) {
   const parent = new ButtonComponent(ctx.bar);
   parent.setClass(SUBMENU_BUTTON_CLASS);
-  applyTooltipPosition(ctx, parent);
   applyButtonIcon(parent, item.icon);
 
   const submenu = createDiv("subitem");
@@ -105,11 +102,10 @@ function renderFlyout(ctx: RenderContext, item: Command) {
 
   item.SubmenuCommands?.forEach((subitem) => {
     const subBtn = new ButtonComponent(submenu)
-      .setTooltip(tooltipFor(ctx.app, subitem))
+      .setTooltip(tooltipFor(ctx.app, subitem), tooltipOptions(ctx))
       .setClass("menu-item")
       .onClick(() => runCommand(ctx, subitem.id));
 
-    applyTooltipPosition(ctx, subBtn);
     if (isDivider(subitem.id)) subBtn.setClass(DIVIDER_COMMAND_ID);
     applyButtonIcon(subBtn, subitem.icon);
   });
@@ -129,11 +125,6 @@ function tooltipFor(app: App, item: Command): string {
 }
 
 // A floating bar sits over the text it acts on, so its tooltips go above it.
-function applyTooltipPosition(
-  ctx: RenderContext,
-  button: ButtonComponent,
-): void {
-  if (ctx.style !== "top") {
-    button.buttonEl.setAttribute("aria-label-position", "top");
-  }
+function tooltipOptions(ctx: RenderContext): TooltipOptions {
+  return ctx.style === "top" ? {} : { placement: "top" };
 }

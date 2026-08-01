@@ -69,6 +69,7 @@ export function createColorPickerButton(
       app.commands.executeCommandById(item.id);
       syncToolbarState(plugin, bar, style);
     });
+
   // On the icon, not the button: the swatch panel below is a child of the button.
   setTooltip(applyButtonIcon(button, item.icon), variant.tooltip);
 
