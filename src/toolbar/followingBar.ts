@@ -27,7 +27,7 @@ export function updateFollowingBar(
 
   applyToolbarState(bar, decision);
   if (decision === "visible" && target) {
-    positionFollowingBar(bar, target, doc);
+    positionFollowingBar(bar, target);
   }
 }
 

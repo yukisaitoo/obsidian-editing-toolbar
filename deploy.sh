@@ -9,7 +9,7 @@
 #
 set -euo pipefail
 
-PLUGIN_ID="editing-toolbar-unofficial"
+PLUGIN_ID="editing-toolbar"
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ENV_FILE="$ROOT_DIR/.env"
 BUILD_DIR="$ROOT_DIR/dist"

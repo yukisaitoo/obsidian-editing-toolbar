@@ -14,6 +14,15 @@ const FLYOUT_EDGE_MARGIN = 6;
 const POPOVER_EDGE_MARGIN = 12;
 const POPOVER_GAP = 8;
 const OVERFLOW_TOLERANCE = 1;
+const FOLLOWING_EDGE_MARGIN = 12;
+const FOLLOWING_GAP = 10;
+const FOLLOWING_CARET_INSET = 28;
+
+// `min` wins over `max` so an element wider or taller than its bounds overhangs
+// the end that can be scrolled back into view.
+function clamp(value: number, min: number, max: number): number {
+  return Math.min(Math.max(value, min), Math.max(min, max));
+}
 
 export function paneRelativeBounds(bar: HTMLElement | null, margin: number) {
   const win = bar ? windowOf(bar) : activeWindow;
@@ -39,9 +48,8 @@ export function anchorPopoverToButton(
   const anchor = anchorEl.getBoundingClientRect();
   const bounds = paneRelativeBounds(popoverEl, POPOVER_EDGE_MARGIN);
 
-  const maxLeft = Math.max(bounds.left, bounds.right - origin.width);
-  let left = origin.width > 0 ? anchor.right - origin.width : anchor.left;
-  left = Math.min(Math.max(left, bounds.left), maxLeft);
+  const wanted = origin.width > 0 ? anchor.right - origin.width : anchor.left;
+  const left = clamp(wanted, bounds.left, bounds.right - origin.width);
 
   let top = anchor.bottom + POPOVER_GAP;
   if (origin.height > 0 && top + origin.height > bounds.bottom) {
@@ -151,23 +159,30 @@ function visibleSpan(bar: HTMLElement): number {
 export function positionFollowingBar(
   toolbar: HTMLElement,
   editor: Editor,
-  doc: Document,
 ): void {
+  // Same reset-measure-delta as anchorPopoverToButton: the bar is absolute inside
+  // the root split, so everything measured below is in the wrong space to assign.
+  toolbar.style.left = "0px";
+  toolbar.style.top = "0px";
+
+  const origin = toolbar.getBoundingClientRect();
+  const bounds = paneRelativeBounds(toolbar, FOLLOWING_EDGE_MARGIN);
   const editorRect = editor.containerEl.getBoundingClientRect();
-  const windowWidth = windowOf(toolbar).innerWidth;
   const coords = editor.coordsAtPos(editor.getCursor("from"));
 
-  const leftDockWidth =
-    (doc.getElementsByClassName("mod-left-split")[0]?.clientWidth ?? 0) +
-    (doc.getElementsByClassName("side-dock-ribbon mod-left")[0]?.clientWidth ?? 0);
+  const left = clamp(
+    coords.left - FOLLOWING_CARET_INSET,
+    bounds.left,
+    bounds.right - origin.width,
+  );
+  const top = clamp(
+    followingBarTop(editor, coords, editorRect, origin.height),
+    bounds.top,
+    bounds.bottom - origin.height,
+  );
 
-  let left = coords.left - leftDockWidth - 28;
-  if (left + toolbar.offsetWidth > windowWidth - leftDockWidth) {
-    left = windowWidth - leftDockWidth - toolbar.offsetWidth - 12;
-  }
-
-  toolbar.style.left = `${Math.max(0, left)}px`;
-  toolbar.style.top = `${Math.max(0, followingBarTop(editor, coords, editorRect, toolbar.offsetHeight))}px`;
+  toolbar.style.left = `${left - origin.left}px`;
+  toolbar.style.top = `${top - origin.top}px`;
 }
 
 function followingBarTop(
@@ -178,24 +193,21 @@ function followingBarTop(
 ): number {
   const from = editor.getCursor("from");
   const to = editor.getCursor("to");
-  const above = coords.top - toolbarHeight - 10;
-
-  if (from.line === to.line) {
-    return above > editorRect.top ? above : editor.coordsAtPos(to).bottom + 10;
-  }
-
   // A selection dragged upwards keeps its head at the start, so the bar belongs
-  // above it; dragged downwards, below.
-  if (editor.getCursor("head").ch === from.ch) {
-    return above > editorRect.top ? above : editorRect.top + 2 * toolbarHeight;
-  }
+  // above it; dragged downwards, below the caret.
+  const downward =
+    from.line !== to.line && editor.getCursor("head").ch !== from.ch;
+  const anchor = downward ? (caretCoords(editor) ?? coords) : coords;
 
-  const cursorCoords = caretCoords(editor);
-  if (!cursorCoords) return above;
-  const below = cursorCoords.bottom + 10;
-  return below < editorRect.bottom - toolbarHeight
-    ? below
-    : editorRect.bottom - 2 * toolbarHeight;
+  const above = anchor.top - toolbarHeight - FOLLOWING_GAP;
+  const below = anchor.bottom + FOLLOWING_GAP;
+  return downward
+    ? below + toolbarHeight < editorRect.bottom
+      ? below
+      : above
+    : above > editorRect.top
+      ? above
+      : below;
 }
 
 function caretCoords(editor: Editor) {
