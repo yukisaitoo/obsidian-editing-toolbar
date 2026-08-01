@@ -184,7 +184,7 @@ export function renderBackgroundColorPicker(
     },
     {
       colors: [
-        "rgba(3, 135, 102, 0.2)",
+        "rgba(46, 161, 33, 0.2)",
         "rgba(3, 135, 102, 0.2)",
         "rgba(5, 117, 197, 0.2)",
         "rgba(74, 82, 199, 0.2)",
