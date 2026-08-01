@@ -214,49 +214,17 @@ export class InsertCalloutModal extends Modal {
 
     calloutText += `\n> ${this.content.replace(/\n/g, "\n> ")}`;
 
-    const cursor = editor.getCursor();
-    const line = editor.getLine(cursor.line);
-    const isLineStart = cursor.ch === 0;
-
-    let newCursorPos: { line: number; ch: number };
-
-    if (editor.getSelection()) {
-      if (!isLineStart && line.trim().length > 0) {
-        calloutText = "\n" + calloutText;
-      }
-      const selectionStart = editor.getCursor("from");
-      editor.replaceSelection(calloutText);
-
-      const calloutLines = calloutText.split("\n").length;
-      newCursorPos = {
-        line: selectionStart.line + calloutLines,
-        ch: 0,
-      };
-    } else {
-      if (!isLineStart && line.trim().length > 0) {
-        calloutText = "\n" + calloutText;
-      }
-
-      editor.replaceRange(calloutText, cursor);
-
-      const calloutLines = calloutText.split("\n").length;
-      newCursorPos = {
-        line: cursor.line + calloutLines,
-        ch: 0,
-      };
+    const from = editor.getCursor("from");
+    if (editor.getLine(from.line).slice(0, from.ch).trim() !== "") {
+      calloutText = "\n" + calloutText;
     }
 
-    // Deferred by one microtask on purpose: the caller closes the modal right after
-    // this, and Modal.close() synchronously hands focus back to whatever held it when
-    // the modal opened — the toolbar button, not the editor. The trailing newline,
-    // the cursor move and the focus below all have to land after that.
-    void Promise.resolve().then(() => {
-      editor.replaceRange("\n", newCursorPos);
-      editor.setCursor({
-        line: newCursorPos.line + 1,
-        ch: 0,
-      });
-      editor.focus();
-    });
+    // The trailing newline leaves the cursor on a fresh line below the callout and
+    // pushes any text that followed the cursor down with it.
+    editor.replaceSelection(calloutText + "\n");
+
+    // Modal.close() runs right after this and synchronously hands focus back to
+    // whatever held it when the modal opened — the toolbar button, not the editor.
+    void Promise.resolve().then(() => editor.focus());
   }
 }

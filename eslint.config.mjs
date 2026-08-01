@@ -22,19 +22,6 @@ export default tseslint.config(
         "warn",
         { argsIgnorePattern: "^_", varsIgnorePattern: "^_" },
       ],
-      "@typescript-eslint/ban-ts-comment": "warn",
-      "no-empty": ["warn", { allowEmptyCatch: true }],
-      // The codebase deliberately uses `guard && sideEffect()` and ternaries for
-      // control flow — allow those rather than rewrite hundreds of call sites.
-      "@typescript-eslint/no-unused-expressions": [
-        "error",
-        { allowShortCircuit: true, allowTernary: true },
-      ],
-      // Regex escapes are easy to break by bulk-stripping; surface as warnings.
-      "no-useless-escape": "warn",
-      // Behavior-sensitive `this`-forwarding utility (throttle) — warn, don't block.
-      "@typescript-eslint/no-this-alias": "warn",
-      "@typescript-eslint/no-unsafe-function-type": "warn",
     },
   },
 );

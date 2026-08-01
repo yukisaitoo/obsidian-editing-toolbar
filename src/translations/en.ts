@@ -121,7 +121,7 @@ export const en = {
   pleaseSelectTextFirst: "Please select text first",
   pleaseSelectTextDedupeFirst: "Please select text to dedupe first",
   pleaseSelectTextNumberFirst: "Please select text to number first",
-  pleaseSpecifyStartEndString: "Please specify start or end string",
+  pleaseSpecifyStartEndString: "Please specify both start and end strings",
   prefix: "Prefix",
   prefixSuffixAdded: "Prefix/suffix added",
   removeAllWhitespace: "Remove all whitespace",

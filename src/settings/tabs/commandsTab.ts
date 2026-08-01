@@ -14,7 +14,7 @@ import {
   DIVIDER_COMMAND_ID,
   isDivider,
   newDividerId,
-  uniqueId,
+  newSubmenuId,
 } from "src/util/commandIds";
 import { hasSubmenu, SubmenuCommand } from "src/util/commandStorage";
 
@@ -182,7 +182,7 @@ function renderCommandRow(
         .setClass("editingToolbarSettingsButton")
         .onClick(() =>
           insertAfter(ctx, commands, index, {
-            id: "SubmenuCommands-" + uniqueId(1),
+            id: newSubmenuId(),
             name: "Submenu",
             icon: "remix-Filter3Line",
             SubmenuCommands: [],

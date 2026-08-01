@@ -1,13 +1,3 @@
-export function uniqueId(randomLength: number) {
-  const idStr = Date.now().toString(36);
-  return (
-    idStr +
-    Math.random()
-      .toString(36)
-      .slice(3, 3 + randomLength)
-  );
-}
-
 export const DIVIDER_COMMAND_ID = "editingToolbar-Divider-Line";
 
 // Every divider carries its own id under this prefix; the constant alone is the
@@ -17,5 +7,9 @@ export function isDivider(id: string): boolean {
 }
 
 export function newDividerId(): string {
-  return `${DIVIDER_COMMAND_ID}-${uniqueId(4)}`;
+  return `${DIVIDER_COMMAND_ID}-${crypto.randomUUID()}`;
+}
+
+export function newSubmenuId(): string {
+  return `SubmenuCommands-${crypto.randomUUID()}`;
 }

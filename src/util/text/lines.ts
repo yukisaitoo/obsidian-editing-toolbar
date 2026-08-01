@@ -58,7 +58,8 @@ export function mergeLines(
   );
   if (selection === null) return;
 
-  const hasCustomSep = options.separator !== "";
+  const separator = options.separator ?? "";
+  const hasCustomSep = separator !== "";
   let result = "";
 
   for (const raw of selection.split(/\r?\n/)) {
@@ -70,15 +71,15 @@ export function mergeLines(
     }
 
     if (result !== "" && !result.endsWith("\n")) {
-      result += hasCustomSep ? options.separator : joinerFor(result, line);
+      result += hasCustomSep ? separator : joinerFor(result, line);
     }
     result += line;
   }
 
-  editor.replaceSelection(result.replace(/[ ]{2,}/g, " ").trim());
+  editor.replaceSelection(result.trim());
   new Notice(
     hasCustomSep
-      ? `${strings.merged} '${options.separator}'`
+      ? `${strings.merged} '${separator}'`
       : strings.mergeCompleted,
   );
 }

@@ -24,7 +24,7 @@ export function toStoredCommand(command: Command): Command {
   return stored;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- unvalidated settings JSON
 export function parseCommandList(value: any): Command[] | null {
   if (!Array.isArray(value)) return null;
 

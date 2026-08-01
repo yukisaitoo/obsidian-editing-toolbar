@@ -15,7 +15,7 @@ import { hasSubmenu, parseCommandList } from "src/util/commandStorage";
 
 // Import/export crosses a JSON boundary with no schema: every payload below is
 // whatever the user's file happened to contain.
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- unvalidated import/export JSON
 export type JsonPayload = any;
 
 export type ImportMode = "overwrite" | "update";

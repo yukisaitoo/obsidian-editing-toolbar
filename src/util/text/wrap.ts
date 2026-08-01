@@ -33,7 +33,7 @@ export function extractBetween(
   startStr: string,
   endStr: string,
 ): void {
-  if (!startStr && !endStr) {
+  if (!startStr || !endStr) {
     new Notice(strings.pleaseSpecifyStartEndString);
     return;
   }
