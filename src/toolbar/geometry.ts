@@ -93,7 +93,7 @@ function clampFlyoutToPane(button: HTMLElement): void {
 export function reflowToolbarOverflow(
   bar: HTMLElement,
   popoverBar: HTMLElement | null,
-  createMore: () => HTMLElement | undefined,
+  createMore: () => HTMLElement,
 ): boolean {
   if (!popoverBar || !bar.isConnected) return false;
 
@@ -108,7 +108,6 @@ export function reflowToolbarOverflow(
   }
 
   const more = existingMore ?? createMore();
-  if (!more) return popoverBar.firstElementChild !== null;
 
   // » only earns its width while the popover holds something, so try the whole set
   // with it hidden first.

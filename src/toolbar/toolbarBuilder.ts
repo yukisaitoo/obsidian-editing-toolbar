@@ -66,8 +66,8 @@ export function ensureToolbar(
 
   renderToolbarCommands({ app, plugin, bar: bars.bar }, commands);
 
-  refreshOverflow(plugin, bars.bar, bars.popoverBar);
-  observeToolbarResize(plugin, bars.bar, bars.popoverBar);
+  refreshOverflow(bars.bar, bars.popoverBar);
+  observeToolbarResize(bars.bar, bars.popoverBar);
 
   syncColorIcons(doc, plugin.settings);
   return bars.bar;
@@ -166,19 +166,12 @@ function findMountTarget(
   return viewContent.querySelector<HTMLElement>(":scope > div") ?? viewContent;
 }
 
-function refreshOverflow(
-  plugin: EditingToolbarPlugin,
-  bar: HTMLElement,
-  popoverBar: HTMLElement,
-): void {
-  const hasOverflow = reflowToolbarOverflow(bar, popoverBar, () => {
-    if (
-      !isAllowedViewType(plugin.app.workspace.getActiveViewOfType(ItemView))
-    ) {
-      return undefined;
-    }
-    return new MorePopover(bar, popoverBar).el;
-  });
+function refreshOverflow(bar: HTMLElement, popoverBar: HTMLElement): void {
+  const hasOverflow = reflowToolbarOverflow(
+    bar,
+    popoverBar,
+    () => new MorePopover(bar, popoverBar).el,
+  );
 
   // The pane grew and » went away; an open popover would have no dismiss button.
   if (!hasOverflow) morePopoverFor(popoverBar)?.close();
@@ -187,7 +180,6 @@ function refreshOverflow(
 // Observe the PANE, not the bar: moving buttons resizes the bar, so observing the
 // bar would feed its own reflow back into itself.
 function observeToolbarResize(
-  plugin: EditingToolbarPlugin,
   bar: HTMLElement,
   popoverBar: HTMLElement,
 ): void {
@@ -211,7 +203,7 @@ function observeToolbarResize(
       toolbarResizeObservers.delete(bar);
       return;
     }
-    refreshOverflow(plugin, bar, popoverBar);
+    refreshOverflow(bar, popoverBar);
     const popover = morePopoverFor(popoverBar);
     if (popover?.isOpen) popover.reposition();
   });
