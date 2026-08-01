@@ -5,7 +5,7 @@
 //  2. Measure with getBoundingClientRect, never scrollWidth: submenu buttons hang
 //     `visibility: hidden` flyouts that inflate scroll size by phantom pixels.
 
-import { Editor } from "obsidian";
+import { Editor, EditorCoords } from "obsidian";
 import { BAR_SELECTOR, POPOVER_SELECTOR } from "src/toolbar/toolbarDom";
 import { windowOf } from "src/toolbar/toolbarHost";
 
@@ -159,7 +159,10 @@ function visibleSpan(bar: HTMLElement): number {
 export function positionFollowingBar(
   toolbar: HTMLElement,
   editor: Editor,
-): void {
+): boolean {
+  const coords = editor.coordsAtPos(editor.getCursor("from"));
+  if (!coords) return false;
+
   // Same reset-measure-delta as anchorPopoverToButton: the bar is absolute inside
   // the root split, so everything measured below is in the wrong space to assign.
   toolbar.style.left = "0px";
@@ -168,7 +171,6 @@ export function positionFollowingBar(
   const origin = toolbar.getBoundingClientRect();
   const bounds = paneRelativeBounds(toolbar, FOLLOWING_EDGE_MARGIN);
   const editorRect = editor.containerEl.getBoundingClientRect();
-  const coords = editor.coordsAtPos(editor.getCursor("from"));
 
   const left = clamp(
     coords.left - FOLLOWING_CARET_INSET,
@@ -183,6 +185,7 @@ export function positionFollowingBar(
 
   toolbar.style.left = `${left - origin.left}px`;
   toolbar.style.top = `${top - origin.top}px`;
+  return true;
 }
 
 function followingBarTop(
@@ -210,15 +213,10 @@ function followingBarTop(
       : below;
 }
 
-function caretCoords(editor: Editor) {
+function caretCoords(editor: Editor): EditorCoords | null {
   const head = editor.getCursor("head");
   if (head.ch !== editor.getCursor("from").ch) {
     head.ch = Math.max(0, head.ch - 1);
   }
-
-  if (editor.cursorCoords) return editor.cursorCoords(true, "window");
-  if (!editor.coordsAtPos) return undefined;
-
-  const offset = editor.posToOffset(head);
-  return editor.cm.coordsAtPos?.(offset) ?? editor.coordsAtPos(offset);
+  return editor.coordsAtPos(head);
 }

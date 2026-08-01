@@ -26,8 +26,9 @@ export function updateFollowingBar(
   if (!bar || decision === "leave") return;
 
   applyToolbarState(bar, decision);
-  if (decision === "visible" && target) {
-    positionFollowingBar(bar, target);
+  // Nothing to follow means nothing to show, same as losing the selection.
+  if (decision === "visible" && target && !positionFollowingBar(bar, target)) {
+    applyToolbarState(bar, "hidden");
   }
 }
 

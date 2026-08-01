@@ -52,9 +52,8 @@ declare module "obsidian" {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any -- CodeMirror editor handle, untyped by Obsidian
     cm: any;
     containerEl: HTMLElement;
-    coordsAtPos(pos: EditorPosition | number): EditorCoords;
-    // CodeMirror 5 legacy; absent on the CM6 editor, hence optional.
-    cursorCoords?(start: boolean, mode: string): EditorCoords;
+    // null when `pos` falls outside CodeMirror's rendered viewport.
+    coordsAtPos(pos: EditorPosition): EditorCoords | null;
     // Undocumented internal editing commands exposed by Obsidian's editor
     indentList(): void;
     unindentList(): void;
