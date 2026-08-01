@@ -16,6 +16,7 @@ import {
   newDividerId,
   uniqueId,
 } from "src/util/commandIds";
+import { hasSubmenu, SubmenuCommand } from "src/util/commandStorage";
 
 const TOP_LEVEL_CONTAINER_CLASS = "editingToolbarSettingsTabsContainer";
 
@@ -129,7 +130,7 @@ function renderCommandList(
 
   commands.forEach((command, index) => {
     const setting = new Setting(listEl);
-    if (command.SubmenuCommands) {
+    if (hasSubmenu(command)) {
       renderSubmenuRow(ctx, setting, {
         command,
         commands,
@@ -209,7 +210,7 @@ function renderCommandRow(
 }
 
 interface SubmenuRowContext {
-  command: Command;
+  command: SubmenuCommand;
   commands: Command[];
   style: ToolbarStyleKey;
   isPlainItemDragging(): boolean;
@@ -279,7 +280,7 @@ function renderSubmenuRow(
       // both submenus in a submenu-to-submenu drag reorder themselves instead.
       if (evt.to !== subListEl) return;
 
-      const submenu = command.SubmenuCommands!;
+      const submenu = command.SubmenuCommands;
 
       if (evt.from === subListEl) {
         moveWithin(submenu, evt.oldIndex, evt.newIndex);
@@ -297,7 +298,7 @@ function renderSubmenuRow(
     },
   });
 
-  command.SubmenuCommands!.forEach((subCommand) => {
+  command.SubmenuCommands.forEach((subCommand) => {
     const subSetting = new Setting(subListEl)
       .setClass("editingToolbarCommandItem")
       .addButton((iconButton) =>
@@ -313,7 +314,7 @@ function renderSubmenuRow(
 
     subSetting.addButton((deleteButton) =>
       ctx.createDeleteButton(deleteButton, async () => {
-        command.SubmenuCommands!.remove(subCommand);
+        command.SubmenuCommands.remove(subCommand);
         await ctx.plugin.saveSettings();
         ctx.refresh();
         ctx.rebuildToolbar();
@@ -331,7 +332,7 @@ function submenuFor(listEl: HTMLElement, commands: Command[]) {
     return null;
   }
   const parent = commands.find((command) => command.id === parentId);
-  if (!parent?.SubmenuCommands) {
+  if (!parent || !hasSubmenu(parent)) {
     console.error("editing-toolbar: no submenu for command", parentId);
     return null;
   }

@@ -16,6 +16,7 @@ import {
 import { syncToolbarState } from "src/toolbar/toolbarVisibility";
 import { t } from "src/translations/helper";
 import { DIVIDER_COMMAND_ID, isDivider } from "src/util/commandIds";
+import { hasSubmenu, SubmenuCommand } from "src/util/commandStorage";
 
 interface RenderContext {
   app: App;
@@ -29,7 +30,7 @@ export function renderToolbarCommands(
   commands: Command[],
 ): void {
   commands.forEach((item) => {
-    if ("SubmenuCommands" in item) {
+    if (hasSubmenu(item)) {
       if (item.menuType === "dropdown") {
         renderDropdown(ctx, item);
       } else {
@@ -57,7 +58,7 @@ function renderPlainButton(ctx: RenderContext, item: Command) {
   applyButtonIcon(button, item.icon);
 }
 
-function renderDropdown(ctx: RenderContext, item: Command) {
+function renderDropdown(ctx: RenderContext, item: SubmenuCommand) {
   const parent = new ButtonComponent(ctx.bar);
   parent.setClass(SUBMENU_BUTTON_CLASS);
   applyButtonIcon(parent, item.icon);
@@ -66,7 +67,7 @@ function renderDropdown(ctx: RenderContext, item: Command) {
   parent.onClick((evt: MouseEvent) => {
     const menu = new Menu();
 
-    item.SubmenuCommands?.forEach((subitem) => {
+    item.SubmenuCommands.forEach((subitem) => {
       if (isDivider(subitem.id)) {
         menu.addSeparator();
         menu.addItem((menuItem) => {
@@ -92,7 +93,7 @@ function renderDropdown(ctx: RenderContext, item: Command) {
   });
 }
 
-function renderFlyout(ctx: RenderContext, item: Command) {
+function renderFlyout(ctx: RenderContext, item: SubmenuCommand) {
   const parent = new ButtonComponent(ctx.bar);
   parent.setClass(SUBMENU_BUTTON_CLASS);
   applyButtonIcon(parent, item.icon);
@@ -100,7 +101,7 @@ function renderFlyout(ctx: RenderContext, item: Command) {
   const submenu = createDiv("subitem");
   parent.buttonEl.insertAdjacentElement("afterbegin", submenu);
 
-  item.SubmenuCommands?.forEach((subitem) => {
+  item.SubmenuCommands.forEach((subitem) => {
     const subBtn = new ButtonComponent(submenu)
       .setTooltip(tooltipFor(ctx.app, subitem), tooltipOptions(ctx))
       .setClass("menu-item")

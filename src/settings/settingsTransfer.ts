@@ -11,7 +11,7 @@ import {
   DEFAULT_SETTINGS,
   POSITION_STYLES,
 } from "src/settings/settingsData";
-import { parseCommandList } from "src/util/commandStorage";
+import { hasSubmenu, parseCommandList } from "src/util/commandStorage";
 
 // Import/export crosses a JSON boundary with no schema: every payload below is
 // whatever the user's file happened to contain.
@@ -161,7 +161,7 @@ function mergeCommands(existing: Command[], imported: Command[]): Command[] {
 
 // A submenu the payload does not mention keeps the entries it had.
 function mergeCommand(existing: Command, imported: Command): Command {
-  if (!existing.SubmenuCommands || !imported.SubmenuCommands) return imported;
+  if (!hasSubmenu(existing) || !hasSubmenu(imported)) return imported;
 
   return {
     ...imported,

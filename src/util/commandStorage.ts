@@ -1,5 +1,12 @@
 import { Command } from "obsidian";
 
+export type SubmenuCommand = Command & { SubmenuCommands: Command[] };
+
+// A submenu parent holds a list of children, empty until the user drags some in.
+export function hasSubmenu(command: Command): command is SubmenuCommand {
+  return Array.isArray(command.SubmenuCommands);
+}
+
 // `app.commands.listCommands()` hands back the LIVE registry objects. Storing one
 // in settings means a later rename or icon change writes straight through to
 // Obsidian's command palette, so everything entering settings is copied to plain
@@ -11,7 +18,7 @@ export function toStoredCommand(command: Command): Command {
     icon: command.icon,
   };
   if (command.menuType) stored.menuType = command.menuType;
-  if (command.SubmenuCommands) {
+  if (hasSubmenu(command)) {
     stored.SubmenuCommands = command.SubmenuCommands.map(toStoredCommand);
   }
   return stored;
