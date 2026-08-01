@@ -24,9 +24,12 @@ function indentWidth(line: string): number {
 }
 
 export function renumberSelection(editor: Editor): void {
-  const selection = editor.getSelection();
-  if (selection) {
-    renumberLines(editor, selection.split("\n"), editor.getCursor("from").line);
+  if (editor.somethingSelected()) {
+    const from = editor.getCursor("from");
+    const to = editor.getCursor("to");
+    // A selection ending at the start of a line doesn't include that line.
+    const endLine = to.ch === 0 && to.line > from.line ? to.line - 1 : to.line;
+    renumberLines(editor, readLines(editor, from.line, endLine), from.line);
     return;
   }
 
@@ -37,11 +40,19 @@ export function renumberSelection(editor: Editor): void {
     ? fullListRange(editor, cursor.line)
     : listRangeFromCursor(editor, cursor.line);
 
+  renumberLines(editor, readLines(editor, startLine, endLine), startLine);
+}
+
+function readLines(
+  editor: Editor,
+  startLine: number,
+  endLine: number,
+): string[] {
   const lines: string[] = [];
   for (let line = startLine; line <= endLine; line++) {
     lines.push(editor.getLine(line));
   }
-  renumberLines(editor, lines, startLine);
+  return lines;
 }
 
 // Begins a list (renumber all of it) rather than continuing one (renumber from the
