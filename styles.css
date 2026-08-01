@@ -265,7 +265,12 @@ button.editingToolbarCommandsubItem::after {
 /* --flyout-shift is set on the button by clampFlyoutToPane() to pull a flyout
    back inside the pane; 0 (centred under the button) until it needs to move.
    Only visibility transitions — a transform transition would animate the shift
-   and make the next measurement read a mid-flight position. */
+   and make the next measurement read a mid-flight position.
+
+   The visibility transition can't go to 0: a panel could sit a few px below 
+   the parent (see .x-color-picker-wrapper's top offset) — without a cushion 
+   the panel blinks out mid-travel and, being visibility: hidden, can't be 
+   hovered back. Crossing a few px takes single-digit ms. */
 :is(.editing-toolbar-bar, .editingToolbarPopoverBar) button.editingToolbarCommandsubItem>.subitem {
   position: absolute;
   display: flex;
@@ -276,14 +281,13 @@ button.editingToolbarCommandsubItem::after {
   box-shadow: none;
   user-select: none;
   visibility: hidden;
-  transition: visibility 0.15s linear;
+  transition: visibility 0.05s linear;
   z-index: 1;
 }
 
 :is(.editing-toolbar-bar, .editingToolbarPopoverBar) button.editingToolbarCommandsubItem:hover>.subitem,
 :is(.editing-toolbar-bar, .editingToolbarPopoverBar) button.editingToolbarCommandsubItem>.subitem:hover {
   visibility: visible;
-  transition: visibility 0.3s linear;
 }
 
 :is(.editing-toolbar-bar, .editingToolbarPopoverBar) button.editingToolbarCommandsubItem>.subitem svg {
