@@ -6,6 +6,7 @@ import {
   MarkdownFileInfo,
   MarkdownView,
   Menu,
+  Notice,
   Plugin,
 } from "obsidian";
 import { CommandsManager } from "src/commands/commands";
@@ -15,13 +16,15 @@ import { ownCommand } from "src/plugin/pluginId";
 import type { ToolbarStyleKey } from "src/settings/settingsData";
 import {
   applyAppearanceVars,
-  DEFAULT_COMMANDS_BY_STYLE,
-  DEFAULT_SETTINGS,
+  createDefaultSettings,
   EditingToolbarSettings,
   POSITION_STYLES,
   resolveNextPositionStyle,
 } from "src/settings/settingsData";
-import type { JsonPayload } from "src/settings/settingsTransfer";
+import {
+  buildImportedSettings,
+  parseImport,
+} from "src/settings/settingsTransfer";
 import { hideFollowingBar, updateFollowingBar } from "src/toolbar/followingBar";
 import { closeMoreOverflowPopovers } from "src/toolbar/morePopover";
 import {
@@ -125,21 +128,20 @@ export default class EditingToolbarPlugin extends Plugin {
     );
   }
 
-  async loadSettings() {
-    const loadedData = await this.loadData();
-    this.settings = structuredClone(DEFAULT_SETTINGS);
+  async loadSettings(): Promise<void> {
+    this.settings = createDefaultSettings();
 
-    // Seed only when never persisted, so a list the user cleared stays empty.
-    for (const style of POSITION_STYLES) {
-      const key = `${style}Commands` as const;
-      if (loadedData?.[key] == null) {
-        this.settings[key] = structuredClone(DEFAULT_COMMANDS_BY_STYLE[style]);
-      }
+    const loaded = await this.loadData();
+    if (loaded == null) return;
+
+    const parsed = parseImport(loaded);
+    if (!parsed) {
+      console.warn("editing-toolbar: unreadable data.json", loaded);
+      new Notice(strings.unreadableSettingsFile);
+      return;
     }
 
-    for (const [key, value] of Object.entries(loadedData ?? {})) {
-      if (value != null) (this.settings as JsonPayload)[key] = value;
-    }
+    this.settings = buildImportedSettings(this.settings, parsed, "overwrite");
   }
 
   public get liveStyle(): ToolbarStyleKey {
@@ -335,13 +337,7 @@ export default class EditingToolbarPlugin extends Plugin {
   }
 
   async resetSettings(): Promise<void> {
-    this.settings = structuredClone(DEFAULT_SETTINGS);
-    for (const style of POSITION_STYLES) {
-      this.settings[`${style}Commands`] = structuredClone(
-        DEFAULT_COMMANDS_BY_STYLE[style],
-      );
-    }
-
+    this.settings = createDefaultSettings();
     this.appearanceEditStyle = null;
 
     await this.saveSettings();

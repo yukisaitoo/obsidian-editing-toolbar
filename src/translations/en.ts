@@ -134,6 +134,8 @@ export const en = {
     "This restores every setting and all toolbar command lists to their defaults.\nThis can't be undone.",
   separator: "Separator",
   separatorLeaveEmptySmartSpacing: "Separator (leave empty for smart spacing)",
+  unreadableSettingsFile:
+    "Settings file could not be read — defaults loaded. Back up data.json before changing any setting.",
   setPositionStyle: "Set Position Style to:",
   setBackgroundColorToolbar: "Set the background color of the toolbar.",
   setColorToolbarIcon: "Set the color of the toolbar icon.",

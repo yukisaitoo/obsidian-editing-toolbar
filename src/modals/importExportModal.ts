@@ -187,14 +187,7 @@ export class ImportExportModal extends Modal {
         return;
       }
 
-      const importData = JSON.parse(importText);
-
-      if (!importData || typeof importData !== "object") {
-        new Notice(strings.invalidImportDataFormat);
-        return;
-      }
-
-      const parsed = parseImport(importData);
+      const parsed = parseImport(JSON.parse(importText));
       if (!parsed) {
         new Notice(strings.invalidImportDataFormat);
         return;

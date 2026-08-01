@@ -72,7 +72,7 @@ export function ensureToolbar(
   const doc = hostDocument ?? resolveToolbarDocument(app);
   const commands = plugin.getCurrentCommands(style);
 
-  if (!commands?.length) {
+  if (!commands.length) {
     disposeToolbar(app, plugin, style, doc);
     return null;
   }

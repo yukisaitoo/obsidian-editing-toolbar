@@ -61,6 +61,8 @@ export interface ParsedImport {
 // The one place the payload is inspected: null means it is not importable, and
 // everything past here works with typed data.
 export function parseImport(data: JsonPayload): ParsedImport | null {
+  if (!data || typeof data !== "object") return null;
+
   const general: Partial<EditingToolbarSettings> = {};
 
   for (const key of GENERAL_SETTING_KEYS) {

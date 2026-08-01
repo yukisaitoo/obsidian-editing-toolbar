@@ -127,8 +127,8 @@ export interface EditingToolbarSettings {
   appearanceByStyle?: AppearanceByStyle;
 }
 
-// The command lists are seeded in loadSettings() rather than here, so a list the
-// user deliberately cleared is not re-filled on every load.
+// The command lists are seeded by createDefaultSettings() rather than here, so a
+// list the user deliberately cleared is not re-filled on every load.
 export const DEFAULT_SETTINGS: EditingToolbarSettings = {
   positionStyle: "top",
   followingCommands: [],
@@ -154,3 +154,15 @@ export const DEFAULT_COMMANDS_BY_STYLE: Record<ToolbarStyleKey, Command[]> = {
   top: DEFAULT_TOOLBAR_COMMANDS,
   following: DEFAULT_FOLLOWING_COMMANDS,
 };
+
+// Cloned, because the defaults above are shared module constants and callers
+// mutate what they get back.
+export function createDefaultSettings(): EditingToolbarSettings {
+  const settings = structuredClone(DEFAULT_SETTINGS);
+  for (const style of POSITION_STYLES) {
+    settings[`${style}Commands`] = structuredClone(
+      DEFAULT_COMMANDS_BY_STYLE[style],
+    );
+  }
+  return settings;
+}
