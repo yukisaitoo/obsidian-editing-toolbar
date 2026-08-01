@@ -1,4 +1,11 @@
-import { DropdownComponent, Modal, Platform, Setting, setIcon } from "obsidian";
+import {
+  DropdownComponent,
+  Modal,
+  Platform,
+  Setting,
+  sanitizeHTMLToDom,
+  setIcon,
+} from "obsidian";
 import type { CalloutTypeInfo } from "src/modals/callout/calloutTypes";
 import { buildCalloutOptions } from "src/modals/callout/calloutTypes";
 import { focusAfterOpen } from "src/modals/modalFocus";
@@ -178,7 +185,7 @@ export class InsertCalloutModal extends Modal {
     // directly rather than through --callout-color.
     if (icon.type === "custom" && icon.svg) {
       iconContainer.style.removeProperty("--callout-color");
-      iconContainer.innerHTML = icon.svg;
+      iconContainer.appendChild(sanitizeHTMLToDom(icon.svg));
       const svgEl = iconContainer.querySelector("svg");
       if (svgEl) {
         svgEl.style.fill = typeInfo.color;

@@ -1,9 +1,9 @@
-import { syntaxTree } from "@codemirror/language";
 import { Editor } from "obsidian";
 
-// Hangul Filler (U+3164): invisible but non-whitespace, so it spaces a block
-// apart from a renumbered list without the gap collapsing.
-const LIST_SEPARATOR_FILLER = "ㅤ";
+// Two ordered lists that touch parse as one list, so the second keeps counting
+// from the first. An HTML comment is CommonMark's way to break them apart; it
+// renders as nothing.
+const LIST_SEPARATOR = "<!-- -->";
 
 const ORDERED_ITEM = /^(\s*)(\d+)\.\s(.*)$/;
 
@@ -107,52 +107,28 @@ function renumberLines(
   startLine: number,
 ): void {
   if (!lines.some((line) => parseOrderedItem(line))) return;
-  if (!editor.cm) return;
 
-  const firstLine = separateFromPreviousList(editor, startLine);
-
-  const result = needsSeparationBefore(editor, firstLine)
-    ? ["", LIST_SEPARATOR_FILLER, ...renumberOrderedItems(lines)]
+  const result = continuesPreviousList(editor, startLine)
+    ? ["", LIST_SEPARATOR, "", ...renumberOrderedItems(lines)]
     : renumberOrderedItems(lines);
 
-  const lastLine = firstLine + lines.length - 1;
+  const lastLine = startLine + lines.length - 1;
   editor.replaceRange(
     result.join("\n"),
-    { line: firstLine, ch: 0 },
+    { line: startLine, ch: 0 },
     { line: lastLine, ch: editor.getLine(lastLine).length },
   );
 }
 
-// An earlier ordered list butted right up against this one reads as a single list
-// to the markdown parser, so a blank line is pushed between them before
-// renumbering. Returns the start line shifted by any insertion.
-function separateFromPreviousList(editor: Editor, startLine: number): number {
-  const tree = syntaxTree(editor.cm.state);
-  const startOffset = editor.posToOffset({ line: startLine, ch: 0 });
-
-  let previousListEnd = -1;
-  tree.iterate({
-    from: 0,
-    to: startOffset,
-    enter: (node) => {
-      if (node.name === "OrderedList") previousListEnd = node.to;
-    },
-  });
-  if (previousListEnd < 0) return startLine;
-
-  const gapLine = editor.offsetToPos(previousListEnd).line + 1;
-  if (gapLine >= startLine || editor.getLine(gapLine).trim() === "") {
-    return startLine;
+// Blank lines do not end a list, so the nearest non-blank line above decides
+// whether these items would be swallowed by an earlier list.
+function continuesPreviousList(editor: Editor, startLine: number): boolean {
+  for (let line = startLine - 1; line >= 0; line--) {
+    const text = editor.getLine(line);
+    if (text.trim() === "") continue;
+    return parseOrderedItem(text) !== null;
   }
-
-  editor.replaceRange("\n", { line: gapLine, ch: 0 });
-  return startLine + 1;
-}
-
-function needsSeparationBefore(editor: Editor, startLine: number): boolean {
-  if (startLine === 0) return false;
-  const previous = editor.getLine(startLine - 1).trim();
-  return previous !== "" && !previous.includes(LIST_SEPARATOR_FILLER);
+  return false;
 }
 
 function renumberOrderedItems(lines: string[]): string[] {
