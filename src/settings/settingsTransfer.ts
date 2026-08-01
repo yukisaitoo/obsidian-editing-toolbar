@@ -6,7 +6,12 @@ import type {
   StyleAppearanceSettings,
   ToolbarStyleKey,
 } from "src/settings/settingsData";
-import { POSITION_STYLES } from "src/settings/settingsData";
+import {
+  DEFAULT_APPEARANCE,
+  DEFAULT_SETTINGS,
+  POSITION_STYLES,
+} from "src/settings/settingsData";
+import { parseCommandList } from "src/util/commandStorage";
 
 // Import/export crosses a JSON boundary with no schema: every payload below is
 // whatever the user's file happened to contain.
@@ -47,29 +52,90 @@ export interface ImportedCommandList {
   commands: Command[];
 }
 
+export interface ParsedImport {
+  general: Partial<EditingToolbarSettings>;
+  appearance: AppearanceByStyle;
+  lists: ImportedCommandList[];
+}
+
+// The one place the payload is inspected: null means it is not importable, and
+// everything past here works with typed data.
+export function parseImport(data: JsonPayload): ParsedImport | null {
+  const general: Partial<EditingToolbarSettings> = {};
+
+  for (const key of GENERAL_SETTING_KEYS) {
+    const value = data[key];
+    if (value === undefined) continue;
+    if (typeof value !== typeof DEFAULT_SETTINGS[key]) return null;
+    (general as JsonPayload)[key] = value;
+  }
+
+  // The only general key whose values are a closed set.
+  if (
+    general.positionStyle !== undefined &&
+    !POSITION_STYLES.includes(general.positionStyle as ToolbarStyleKey)
+  ) {
+    return null;
+  }
+
+  const appearance = parseAppearance(data.appearanceByStyle);
+  if (!appearance) return null;
+
+  const lists: ImportedCommandList[] = [];
+  for (const style of POSITION_STYLES) {
+    const key = `${style}Commands` as const;
+    if (!(key in data)) continue;
+
+    const commands = parseCommandList(data[key]);
+    if (!commands) return null;
+    lists.push({ style, commands });
+  }
+
+  return { general, appearance, lists };
+}
+
+// An absent bucket store becomes {}, which merges as a no-op.
+function parseAppearance(value: JsonPayload): AppearanceByStyle | null {
+  if (value === undefined) return {};
+  if (!value || typeof value !== "object") return null;
+
+  const parsed: AppearanceByStyle = {};
+
+  for (const style of POSITION_STYLES) {
+    const source = value[style];
+    if (source === undefined) continue;
+    if (!source || typeof source !== "object") return null;
+
+    const bucket: StyleAppearanceSettings = {};
+    for (const key of APPEARANCE_KEYS) {
+      const entry = source[key];
+      if (entry === undefined) continue;
+      if (typeof entry !== typeof DEFAULT_APPEARANCE[key]) return null;
+      (bucket as JsonPayload)[key] = entry;
+    }
+
+    parsed[style] = bucket;
+  }
+
+  return parsed;
+}
+
 // Returns the settings the import would produce, leaving `current` untouched so the
 // caller can put it back if anything downstream fails.
 export function buildImportedSettings(
   current: EditingToolbarSettings,
-  importData: JsonPayload,
-  lists: ImportedCommandList[],
+  parsed: ParsedImport,
   mode: ImportMode,
 ): EditingToolbarSettings {
-  const next: EditingToolbarSettings = { ...current };
-
-  GENERAL_SETTING_KEYS.forEach((key) => {
-    if (importData[key] !== undefined) {
-      (next as JsonPayload)[key] = importData[key];
-    }
-  });
+  const next: EditingToolbarSettings = { ...current, ...parsed.general };
 
   next.appearanceByStyle = mergeAppearance(
     current.appearanceByStyle,
-    importData.appearanceByStyle,
+    parsed.appearance,
     mode,
   );
 
-  for (const { style, commands } of lists) {
+  for (const { style, commands } of parsed.lists) {
     const key = `${style}Commands` as const;
     next[key] =
       mode === "overwrite" ? commands : mergeCommands(current[key], commands);
@@ -107,30 +173,17 @@ function mergeCommand(existing: Command, imported: Command): Command {
 }
 
 // Overwrite replaces the bucket outright, so a swatch the payload cleared stays
-// cleared; update merges its keys over what is there. Unknown keys are ignored.
+// cleared; update merges its keys over what is there.
 function mergeAppearance(
   current: AppearanceByStyle | undefined,
-  imported: JsonPayload,
+  imported: AppearanceByStyle,
   mode: ImportMode,
-): AppearanceByStyle | undefined {
-  if (!imported || typeof imported !== "object") return current;
-
+): AppearanceByStyle {
   const store: AppearanceByStyle = { ...current };
 
-  for (const style of POSITION_STYLES) {
-    const source = imported[style];
-    if (!source || typeof source !== "object") continue;
-
-    const bucket: StyleAppearanceSettings =
-      mode === "overwrite" ? {} : { ...store[style] };
-
-    APPEARANCE_KEYS.forEach((key) => {
-      if (source[key] !== undefined) {
-        (bucket as JsonPayload)[key] = source[key];
-      }
-    });
-
-    store[style] = bucket;
+  for (const [style, source] of Object.entries(imported)) {
+    store[style] =
+      mode === "overwrite" ? { ...source } : { ...store[style], ...source };
   }
 
   return store;

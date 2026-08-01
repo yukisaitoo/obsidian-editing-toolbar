@@ -9,18 +9,13 @@ import {
 import { ConfirmModal } from "src/modals/ConfirmModal";
 import type EditingToolbarPlugin from "src/plugin/main";
 import type { ToolbarStyleKey } from "src/settings/settingsData";
-import { POSITION_STYLES } from "src/settings/settingsData";
-import type {
-  ImportedCommandList,
-  ImportMode,
-  JsonPayload,
-} from "src/settings/settingsTransfer";
+import type { ImportMode, JsonPayload } from "src/settings/settingsTransfer";
 import {
   buildImportedSettings,
   GENERAL_SETTING_KEYS,
+  parseImport,
 } from "src/settings/settingsTransfer";
 import { strings } from "src/translations/helper";
-import { parseCommandList } from "src/util/commandStorage";
 
 const COMMAND_LIST_LABELS: Record<
   ToolbarStyleKey,
@@ -199,23 +194,21 @@ export class ImportExportModal extends Modal {
         return;
       }
 
-      const containsGeneralSettings = "positionStyle" in importData;
-      const positionStyle = importData.positionStyle;
-
-      const lists: ImportedCommandList[] = [];
-      for (const style of POSITION_STYLES) {
-        const key = `${style}Commands` as const;
-        if (!(key in importData)) continue;
-
-        const commands = parseCommandList(importData[key]);
-        if (!commands) {
-          new Notice(strings.invalidImportDataFormat);
-          return;
-        }
-        lists.push({ style, commands });
+      const parsed = parseImport(importData);
+      if (!parsed) {
+        new Notice(strings.invalidImportDataFormat);
+        return;
       }
 
-      if (!lists.length && !containsGeneralSettings) {
+      const { general, appearance, lists } = parsed;
+      const containsGeneralSettings = Object.keys(general).length > 0;
+      const positionStyle = general.positionStyle;
+
+      if (
+        !lists.length &&
+        !containsGeneralSettings &&
+        !Object.keys(appearance).length
+      ) {
         new Notice(strings.validConfigurationFoundImportData);
         return;
       }
@@ -256,8 +249,7 @@ export class ImportExportModal extends Modal {
           try {
             this.plugin.settings = buildImportedSettings(
               previous,
-              importData,
-              lists,
+              parsed,
               this.importMode,
             );
 
