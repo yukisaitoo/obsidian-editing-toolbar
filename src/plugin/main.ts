@@ -21,6 +21,7 @@ import {
   POSITION_STYLES,
   resolveNextPositionStyle,
 } from "src/settings/settingsData";
+import type { JsonPayload } from "src/settings/settingsTransfer";
 import { hideFollowingBar, updateFollowingBar } from "src/toolbar/followingBar";
 import { closeMoreOverflowPopovers } from "src/toolbar/morePopover";
 import {
@@ -126,23 +127,18 @@ export default class EditingToolbarPlugin extends Plugin {
 
   async loadSettings() {
     const loadedData = await this.loadData();
-    this.settings = Object.assign({}, DEFAULT_SETTINGS, loadedData);
+    this.settings = structuredClone(DEFAULT_SETTINGS);
 
-    for (const key of Object.keys(
-      DEFAULT_SETTINGS,
-    ) as (keyof EditingToolbarSettings)[]) {
-      if (this.settings[key] === undefined || this.settings[key] === null) {
-        (this.settings[key] as unknown) = DEFAULT_SETTINGS[key];
+    // Seed only when never persisted, so a list the user cleared stays empty.
+    for (const style of POSITION_STYLES) {
+      const key = `${style}Commands` as const;
+      if (loadedData?.[key] == null) {
+        this.settings[key] = structuredClone(DEFAULT_COMMANDS_BY_STYLE[style]);
       }
     }
 
-    // Seed only when never persisted, so a list the user cleared stays empty. The
-    // clone keeps DEFAULT_COMMANDS_BY_STYLE from being edited in place later.
-    for (const style of POSITION_STYLES) {
-      const key = `${style}Commands` as const;
-      if (!loadedData || loadedData[key] === undefined) {
-        this.settings[key] = structuredClone(DEFAULT_COMMANDS_BY_STYLE[style]);
-      }
+    for (const [key, value] of Object.entries(loadedData ?? {})) {
+      if (value != null) (this.settings as JsonPayload)[key] = value;
     }
   }
 
