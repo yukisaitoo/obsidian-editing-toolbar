@@ -10,7 +10,7 @@ export function hasSubmenu(command: Command): command is SubmenuCommand {
 // `app.commands.listCommands()` hands back the LIVE registry objects. Storing one
 // in settings means a later rename or icon change writes straight through to
 // Obsidian's command palette, so everything entering settings is copied to plain
-// data first. It also drops the `callback`s that would break structuredClone.
+// data first.
 export function toStoredCommand(command: Command): Command {
   const stored: Command = {
     id: command.id,
@@ -18,9 +18,11 @@ export function toStoredCommand(command: Command): Command {
     icon: command.icon,
   };
   if (command.menuType) stored.menuType = command.menuType;
+
   if (hasSubmenu(command)) {
     stored.SubmenuCommands = command.SubmenuCommands.map(toStoredCommand);
   }
+
   return stored;
 }
 
@@ -41,12 +43,14 @@ export function parseCommandList(value: any): Command[] | null {
       if (item.menuType !== "submenu" && item.menuType !== "dropdown") {
         return null;
       }
+
       command.menuType = item.menuType;
     }
 
     if (item.SubmenuCommands !== undefined) {
       const submenu = parseCommandList(item.SubmenuCommands);
       if (!submenu) return null;
+
       command.SubmenuCommands = submenu;
     }
 
@@ -69,5 +73,6 @@ export function findStoredCommand(
     const match = parent.SubmenuCommands?.find((v) => v.id === command.id);
     if (match) return match;
   }
+
   return null;
 }

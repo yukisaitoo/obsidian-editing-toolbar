@@ -35,7 +35,7 @@ export function processWhitespace(
 }
 
 const MARKDOWN_SYNTAX =
-  /(^#+\s|(?<=^|\s*)#|^>|^- \[( |x)\]|^\+ |<[^<>]+>|^1\. |^-+$|^\*+$|==|\*+|~~|```|!*\[\[|\]\])/gm;
+  /(^#+\s|(?<=^|\s)#|^>|^- \[( |x)\]|^\+ |<[^<>]+>|^1\. |^-+$|^\*+$|==|\*+|~~|```|!*\[\[|\]\])/gm;
 
 export function copySelectionAsPlainText(editor: Editor): void {
   const selection = requireSelection(editor);

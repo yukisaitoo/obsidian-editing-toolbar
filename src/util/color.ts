@@ -6,7 +6,7 @@ interface Rgba {
 }
 
 // Accepts `#rgb`, `#rgba`, `#rrggbb`, `#rrggbbaa`, `rgb()` and `rgba()`. Anything
-// else (a `var()`, a named colour) is not a colour we can serialise, so null.
+// else is not a colour we can serialise, so null.
 function parseColor(color: string): Rgba | null {
   const hex = color.trim().match(/^#([0-9a-fA-F]+)$/);
   if (hex) {
@@ -28,11 +28,13 @@ function parseColor(color: string): Rgba | null {
 
   const fn = color.trim().match(/^rgba?\(([^)]+)\)$/i);
   if (!fn) return null;
+
   const parts = fn[1]
     .split(/[,/\s]+/)
     .filter(Boolean)
     .map(Number);
   if (parts.length < 3 || parts.slice(0, 3).some(Number.isNaN)) return null;
+
   return {
     r: parts[0],
     g: parts[1],
