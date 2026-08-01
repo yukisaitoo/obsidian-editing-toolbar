@@ -7,7 +7,11 @@ import type EditingToolbarPlugin from "src/plugin/main";
 import { ownCommand, PLUGIN_ID } from "src/plugin/pluginId";
 import type { ToolbarStyleKey } from "src/settings/settingsData";
 import { attachFlyoutClamp } from "src/toolbar/geometry";
-import { applyButtonIcon, TOOLTIP_DELAY } from "src/toolbar/toolbarDom";
+import {
+  applyButtonIcon,
+  SUBMENU_BUTTON_CLASS,
+  TOOLTIP_DELAY,
+} from "src/toolbar/toolbarDom";
 import { syncToolbarState } from "src/toolbar/toolbarVisibility";
 import { strings } from "src/translations/helper";
 import { toHexColor } from "src/util/color";
@@ -59,7 +63,8 @@ export function createColorPickerButton(
   const variant = VARIANTS[item.id];
 
   const button = new ButtonComponent(bar)
-    .setClass("editingToolbarCommandsubItem-font-color")
+    .setClass(SUBMENU_BUTTON_CLASS)
+    .setClass("editingToolbarColorPickerItem")
     .setTooltip(variant.tooltip, { delay: TOOLTIP_DELAY })
     .onClick((event: MouseEvent) => {
       // Clicks inside the swatch panel are handled by the swatches themselves.

@@ -9,6 +9,10 @@ export const SHARED_BAR_CLASS = "editing-toolbar-bar";
 export const BAR_SELECTOR = ".editingToolbarModalBar";
 export const POPOVER_SELECTOR = ".editingToolbarPopoverBar";
 
+// Every button that opens a panel wears this: dropdowns, flyouts and the colour
+// pickers alike.
+export const SUBMENU_BUTTON_CLASS = "editingToolbarCommandsubItem";
+
 export function applyButtonIcon(btn: ButtonComponent, icon?: string): void {
   btn.setIcon(icon ?? "");
 }

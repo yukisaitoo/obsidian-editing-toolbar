@@ -79,7 +79,7 @@
 }
 
 /* Spacing comes from the container's gap here, not per-button margins. */
-.editing-toolbar-bar.editingToolbarFlex :is(.editingToolbarCommandItem, button[class^=editingToolbarCommandsubItem]) {
+.editing-toolbar-bar.editingToolbarFlex :is(.editingToolbarCommandItem, button.editingToolbarCommandsubItem) {
   min-width: 20px;
   margin: auto 0;
 }
@@ -103,7 +103,7 @@
 /* Button chrome shared by both bars. Dividers deliberately match here too, so
    they inherit border/box-shadow resets; §5 narrows their box afterwards and
    relies on source order to win (equal specificity). */
-:is(.editing-toolbar-bar, .editingToolbarPopoverBar) :is(.editingToolbarCommandItem, button[class^=editingToolbarCommandsubItem]) {
+:is(.editing-toolbar-bar, .editingToolbarPopoverBar) :is(.editingToolbarCommandItem, button.editingToolbarCommandsubItem) {
   display: inline-flex;
   /* Grows with the icon so large sizes push the bar taller rather than
      spilling out of a fixed box. 28px is the default size's height. */
@@ -124,12 +124,12 @@
   contain: none;
 }
 
-.editingToolbarPopoverBar :is(.editingToolbarCommandItem, button[class^=editingToolbarCommandsubItem]) {
+.editingToolbarPopoverBar :is(.editingToolbarCommandItem, button.editingToolbarCommandsubItem) {
   transition: all 0.2s linear;
 }
 
-:is(.editing-toolbar-bar, .editingToolbarPopoverBar) button[class^=editingToolbarCommandsubItem]>.subitem button:hover,
-:is(.editing-toolbar-bar, .editingToolbarPopoverBar) button[class^=editingToolbarCommand]:hover {
+:is(.editing-toolbar-bar, .editingToolbarPopoverBar) button.editingToolbarCommandsubItem>.subitem button:hover,
+:is(.editing-toolbar-bar, .editingToolbarPopoverBar) button:is(.editingToolbarCommandItem, .editingToolbarCommandsubItem):hover {
   background-color: var(--background-modifier-hover) !important;
 }
 
@@ -157,11 +157,11 @@
   box-shadow: var(--shadow-s);
 }
 
-.editing-toolbar-bar.editingToolbarDefaultAesthetic:not(.top) :is(.editingToolbarCommandItem, button[class^=editingToolbarCommandsubItem]) {
+.editing-toolbar-bar.editingToolbarDefaultAesthetic:not(.top) :is(.editingToolbarCommandItem, button.editingToolbarCommandsubItem) {
   min-height: max(28px, calc(var(--toolbar-icon-size) + 10px));
 }
 
-.editing-toolbar-bar.editingToolbarDefaultAesthetic:not(.top) button[class^=editingToolbarCommandsubItem] {
+.editing-toolbar-bar.editingToolbarDefaultAesthetic:not(.top) button.editingToolbarCommandsubItem {
   margin: auto;
   padding: 6px;
   border: none;
@@ -172,8 +172,8 @@
 
 /* Toolbar icons honor the configured icon colour and size. */
 :is(.editing-toolbar-bar, .editingToolbarPopoverBar).editingToolbarDefaultAesthetic .editingToolbarCommandItem svg,
-:is(.editing-toolbar-bar, .editingToolbarPopoverBar).editingToolbarDefaultAesthetic button[class^=editingToolbarCommandsubItem] svg,
-:is(.editing-toolbar-bar, .editingToolbarPopoverBar).editingToolbarDefaultAesthetic button[class^=editingToolbarCommandsubItem]>.subitem svg {
+:is(.editing-toolbar-bar, .editingToolbarPopoverBar).editingToolbarDefaultAesthetic button.editingToolbarCommandsubItem svg,
+:is(.editing-toolbar-bar, .editingToolbarPopoverBar).editingToolbarDefaultAesthetic button.editingToolbarCommandsubItem>.subitem svg {
   color: var(--editing-toolbar-icon-color);
   width: var(--toolbar-icon-size);
   height: var(--toolbar-icon-size);
@@ -241,7 +241,7 @@
    ========================================================================== */
 
 /* Chevron affordance on any button that opens a submenu. */
-button[class^=editingToolbarCommandsubItem]::after {
+button.editingToolbarCommandsubItem::after {
   content: url("data:image/svg+xml,%3Csvg width='4' height='4' version='1.1' xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1024 1024' enable-background='new 0 0 1024 1024' xml:space='preserve'%3E%3Cpath fill='%23808080' d='M13.24 80.11 l461.75 560.8 q14.56 16.02 36.41 16.02 q21.85 0 36.42 -16.02 l463.2 -560.8 q10.2 -10.19 12.38 -24.75 q2.18 -14.57 -3.64 -27.68 q-5.82 -13.11 -18.21 -20.39 q-12.39 -7.29 -26.95 -7.29 l-924.95 0 q-20.4 0 -34.23 13.11 q-13.84 13.11 -15.29 32.77 q-1.46 19.66 13.11 34.23 Z'/%3E%3C/svg%3E");
   margin-left: 1px;
   margin-top: 6px;
@@ -250,7 +250,7 @@ button[class^=editingToolbarCommandsubItem]::after {
 /* Anchors the flyout to its own button. Without this the nearest positioned
    ancestor is the bar itself, so any explicit left/right on .subitem would be
    measured against the whole pane. */
-:is(.editing-toolbar-bar, .editingToolbarPopoverBar) button[class^=editingToolbarCommandsubItem] {
+:is(.editing-toolbar-bar, .editingToolbarPopoverBar) button.editingToolbarCommandsubItem {
   position: relative;
 }
 
@@ -258,7 +258,7 @@ button[class^=editingToolbarCommandsubItem]::after {
    back inside the pane; 0 (centred under the button) until it needs to move.
    Only visibility transitions — a transform transition would animate the shift
    and make the next measurement read a mid-flight position. */
-:is(.editing-toolbar-bar, .editingToolbarPopoverBar) button[class^=editingToolbarCommandsubItem]>.subitem {
+:is(.editing-toolbar-bar, .editingToolbarPopoverBar) button.editingToolbarCommandsubItem>.subitem {
   position: absolute;
   display: flex;
   transform: translate(var(--flyout-shift, 0px), 105%);
@@ -272,18 +272,18 @@ button[class^=editingToolbarCommandsubItem]::after {
   z-index: 1;
 }
 
-:is(.editing-toolbar-bar, .editingToolbarPopoverBar) button[class^=editingToolbarCommandsubItem]:hover>.subitem,
-:is(.editing-toolbar-bar, .editingToolbarPopoverBar) button[class^=editingToolbarCommandsubItem]>.subitem:hover {
+:is(.editing-toolbar-bar, .editingToolbarPopoverBar) button.editingToolbarCommandsubItem:hover>.subitem,
+:is(.editing-toolbar-bar, .editingToolbarPopoverBar) button.editingToolbarCommandsubItem>.subitem:hover {
   visibility: visible;
   transition: visibility 0.3s linear;
 }
 
-:is(.editing-toolbar-bar, .editingToolbarPopoverBar) button[class^=editingToolbarCommandsubItem]>.subitem svg {
+:is(.editing-toolbar-bar, .editingToolbarPopoverBar) button.editingToolbarCommandsubItem>.subitem svg {
   max-width: 1.3em;
   max-height: 1.3em;
 }
 
-:is(.editing-toolbar-bar, .editingToolbarPopoverBar) button[class^=editingToolbarCommandsubItem]>.subitem button.menu-item:not(.editingToolbar-Divider-Line) {
+:is(.editing-toolbar-bar, .editingToolbarPopoverBar) button.editingToolbarCommandsubItem>.subitem button.menu-item:not(.editingToolbar-Divider-Line) {
   display: inline-flex;
   background-color: transparent;
   box-shadow: none;
@@ -291,13 +291,13 @@ button[class^=editingToolbarCommandsubItem]::after {
   align-items: center;
 }
 
-:is(.editing-toolbar-bar, .editingToolbarPopoverBar) button[class^=editingToolbarCommandsubItem]>.subitem .menu-item {
+:is(.editing-toolbar-bar, .editingToolbarPopoverBar) button.editingToolbarCommandsubItem>.subitem .menu-item {
   margin-left: 2px;
   margin-right: 2px;
   padding: 6px 8px;
 }
 
-.editingToolbarCommandsubItem-font-color button {
+.editingToolbarColorPickerItem button {
   background-color: transparent;
 }
 

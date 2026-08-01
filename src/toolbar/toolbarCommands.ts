@@ -11,6 +11,7 @@ import {
   applyMenuItemIcon,
   getHotkey,
   NO_HOTKEY,
+  SUBMENU_BUTTON_CLASS,
   TOOLTIP_DELAY,
 } from "src/toolbar/toolbarDom";
 import { syncToolbarState } from "src/toolbar/toolbarVisibility";
@@ -28,12 +29,12 @@ export function renderToolbarCommands(
   ctx: RenderContext,
   commands: Command[],
 ): void {
-  commands.forEach((item, index) => {
+  commands.forEach((item) => {
     if ("SubmenuCommands" in item) {
       if (item.menuType === "dropdown") {
-        renderDropdown(ctx, item, index);
+        renderDropdown(ctx, item);
       } else {
-        renderFlyout(ctx, item, index);
+        renderFlyout(ctx, item);
       }
       return;
     }
@@ -58,9 +59,9 @@ function renderPlainButton(ctx: RenderContext, item: Command) {
   applyButtonIcon(button, item.icon);
 }
 
-function renderDropdown(ctx: RenderContext, item: Command, index: number) {
+function renderDropdown(ctx: RenderContext, item: Command) {
   const parent = new ButtonComponent(ctx.bar);
-  parent.setClass("editingToolbarCommandsubItem" + index);
+  parent.setClass(SUBMENU_BUTTON_CLASS);
   applyTooltipPosition(ctx, parent);
   applyButtonIcon(parent, item.icon);
   parent.setTooltip(tooltipFor(ctx.app, item), { delay: TOOLTIP_DELAY });
@@ -92,9 +93,9 @@ function renderDropdown(ctx: RenderContext, item: Command, index: number) {
   });
 }
 
-function renderFlyout(ctx: RenderContext, item: Command, index: number) {
+function renderFlyout(ctx: RenderContext, item: Command) {
   const parent = new ButtonComponent(ctx.bar);
-  parent.setClass("editingToolbarCommandsubItem" + index);
+  parent.setClass(SUBMENU_BUTTON_CLASS);
   applyTooltipPosition(ctx, parent);
   applyButtonIcon(parent, item.icon);
 
