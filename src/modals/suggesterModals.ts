@@ -1,18 +1,19 @@
 import {
+  ButtonComponent,
   Command,
   FuzzyMatch,
   FuzzySuggestModal,
   Modal,
   Notice,
   TextComponent,
-  debounce,
   setIcon,
 } from "obsidian";
 import { getAppIcons } from "src/icons/appIcons";
+import { focusAfterOpen } from "src/modals/modalFocus";
 import type EditingToolbarPlugin from "src/plugin/main";
 import type { ToolbarStyleKey } from "src/settings/settingsData";
 import { format, strings, t } from "src/translations/helper";
-import { findCommandLocation, toStoredCommand } from "src/util/commandStorage";
+import { findStoredCommand, toStoredCommand } from "src/util/commandStorage";
 
 type IconSelectCallback = (iconId: string) => void;
 
@@ -73,24 +74,15 @@ export class ChooseFromIconList extends FuzzySuggestModal<string> {
       return;
     }
 
-    const currentCommands = this.plugin.getCurrentCommands(
-      this.currentEditingConfig,
-    );
-    const location = findCommandLocation(
+    const target = findStoredCommand(
       this.command,
       this.isSubmenuItem,
-      currentCommands,
+      this.plugin.getCurrentCommands(this.currentEditingConfig),
     );
-    // Not in the list — removed while the picker was open: nothing to write to.
-    if (location.index === -1) return;
+    // Removed while the picker was open: nothing to write to.
+    if (!target) return;
 
-    if (this.isSubmenuItem) {
-      currentCommands[location.index].SubmenuCommands![location.subIndex].icon =
-        item;
-    } else {
-      currentCommands[location.index].icon = item;
-    }
-
+    target.icon = item;
     await this.plugin.saveSettings();
     this.plugin.rebuildToolbars();
   }
@@ -175,66 +167,50 @@ export class ChangeCmdname extends Modal {
     this.containerEl.addClass("changename");
   }
   private async commitName(value: string): Promise<void> {
-    const currentCommands = this.plugin.getCurrentCommands(
-      this.currentEditingConfig,
-    );
-
-    const location = findCommandLocation(
+    const target = findStoredCommand(
       this.item,
       this.isSubmenuItem,
-      currentCommands,
+      this.plugin.getCurrentCommands(this.currentEditingConfig),
     );
+    // Removed while the modal was open: nothing to rename.
+    if (!target) return;
 
-    // The rename is written to the entry in the list, never to `this.item` — for a
-    // command just picked from the palette those are the same live object, and
-    // mutating it would rename the palette entry too.
-    if (!this.isSubmenuItem) {
-      if (location.index === -1) {
-        currentCommands.push(toStoredCommand({ ...this.item, name: value }));
-      } else {
-        currentCommands[location.index].name = value;
-      }
-    } else {
-      const submenu = currentCommands[location.index]?.SubmenuCommands;
-      if (location.subIndex === -1) {
-        submenu?.push(toStoredCommand({ ...this.item, name: value }));
-      } else if (submenu) {
-        submenu[location.subIndex].name = value;
-      }
-    }
-
+    target.name = value;
     await this.plugin.saveSettings();
+    this.plugin.rebuildToolbars();
   }
 
   onOpen() {
     const { contentEl } = this;
     contentEl.createEl("b", { text: strings.pleaseEnterNewName });
 
-    const debouncedCommit = debounce(
-      (value: string) => void this.commitName(value),
-      100,
-      true,
-    );
-
     const textComponent = new TextComponent(contentEl);
-    textComponent.inputEl.classList.add("InputPromptInputEl");
-    textComponent
-      .setPlaceholder("")
-      .setValue(this.item.name ?? "")
-      .onChange(debouncedCommit);
+    textComponent.setPlaceholder("").setValue(this.item.name ?? "");
+    focusAfterOpen(textComponent.inputEl);
 
-    textComponent.inputEl.addEventListener("keydown", async (ev) => {
+    const submit = async () => {
+      await this.commitName(textComponent.inputEl.value);
+      this.close();
+    };
+
+    textComponent.inputEl.addEventListener("keydown", (ev) => {
       // isComposing guards IME users, whose confirm-Enter must not close the modal.
       if (ev.key !== "Enter" || ev.isComposing) return;
       ev.preventDefault();
-      debouncedCommit.cancel();
-      await this.commitName(textComponent.inputEl.value);
-      this.close();
+      void submit();
     });
+
+    const buttons = contentEl.createDiv("modal-button-container");
+    new ButtonComponent(buttons)
+      .setButtonText(strings.confirm)
+      .setCta()
+      .onClick(() => void submit());
+    new ButtonComponent(buttons)
+      .setButtonText(strings.cancel)
+      .onClick(() => this.close());
   }
   onClose() {
     const { contentEl } = this;
     contentEl.empty();
-    this.plugin.rebuildToolbars();
   }
 }

@@ -48,25 +48,19 @@ export function parseCommandList(value: any): Command[] | null {
   return commands;
 }
 
-// `subIndex` is -1 for a top-level command, `index` -1 when it is not in the list.
-export function findCommandLocation(
+// The stored entry for this command, or null once it is no longer in the list.
+export function findStoredCommand(
   command: Command,
   isSubmenuItem: boolean,
   currentCommands: Command[],
-): { index: number; subIndex: number } {
+): Command | null {
   if (!isSubmenuItem) {
-    return {
-      index: currentCommands.findIndex((v) => v.id === command.id),
-      subIndex: -1,
-    };
+    return currentCommands.find((v) => v.id === command.id) ?? null;
   }
 
-  for (let index = 0; index < currentCommands.length; index++) {
-    const submenu = currentCommands[index].SubmenuCommands;
-    const subIndex = submenu?.findIndex((v) => v.id === command.id) ?? -1;
-    if (subIndex >= 0) {
-      return { index, subIndex };
-    }
+  for (const parent of currentCommands) {
+    const match = parent.SubmenuCommands?.find((v) => v.id === command.id);
+    if (match) return match;
   }
-  return { index: -1, subIndex: -1 };
+  return null;
 }

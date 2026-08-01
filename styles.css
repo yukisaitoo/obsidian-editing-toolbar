@@ -886,6 +886,16 @@ body.theme-dark .modal-container.editingToolbar-Modal .modal input[type='range']
   background-color: var(--background-secondary);
 }
 
+.modal-container.changename .modal-content > b {
+  display: block;
+  margin-bottom: var(--size-4-2);
+}
+
+.modal-container.changename .modal-content input[type='text'] {
+  width: 100%;
+  box-shadow: none;
+}
+
 /* --- Import/export modal (ImportExportModal.ts) --------------------------- */
 
 .editing-toolbar-import-export-modal .export-container,
