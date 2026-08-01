@@ -9,6 +9,7 @@ import {
 import { ConfirmModal } from "src/modals/confirmModal";
 import type EditingToolbarPlugin from "src/plugin/main";
 import type { ToolbarStyleKey } from "src/settings/settingsData";
+import { STYLE_LABELS } from "src/settings/settingsData";
 import type { ImportMode, JsonPayload } from "src/settings/settingsTransfer";
 import {
   buildImportedSettings,
@@ -221,8 +222,9 @@ export class ImportExportModal extends Modal {
         }
       }
       if (positionStyle) {
-        const name = this.getPositionStyleName(positionStyle);
-        summary.push(`• ${strings.setPositionStyle} ${name}`);
+        summary.push(
+          `• ${strings.setPositionStyle} ${STYLE_LABELS[positionStyle]}`,
+        );
       }
 
       summary.push(
@@ -278,16 +280,5 @@ export class ImportExportModal extends Modal {
   onClose() {
     const { contentEl } = this;
     contentEl.empty();
-  }
-
-  getPositionStyleName(style: string): string {
-    switch (style) {
-      case "following":
-        return strings.followingToolbar;
-      case "top":
-        return strings.topToolbar;
-      default:
-        return style;
-    }
   }
 }

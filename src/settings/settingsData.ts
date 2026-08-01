@@ -76,7 +76,7 @@ export function resolveNextPositionStyle(
   settings: EditingToolbarSettings,
   toggledStyle: ToolbarStyleKey,
   enabled: boolean,
-  prevStyle: string | null,
+  prevStyle: ToolbarStyleKey | null,
 ): ToolbarStyleKey | null {
   if (enabled) return toggledStyle;
   if (prevStyle !== toggledStyle) return null;
@@ -107,7 +107,7 @@ export type CustomColorKey =
 export interface EditingToolbarSettings {
   lastFontColor: string;
   lastHighlightColor: string;
-  positionStyle: string;
+  positionStyle: ToolbarStyleKey;
   followingCommands: Command[];
   topCommands: Command[];
   enableTopToolbar: boolean;

@@ -93,10 +93,11 @@ export function parseImport(data: JsonPayload): ParsedImport | null {
       : value;
   }
 
-  // The only general key whose values are a closed set.
+  // The only general key whose values are a closed set. Assigned above through a
+  // JsonPayload cast, so the declared type is not yet earned — this is what earns it.
   if (
     general.positionStyle !== undefined &&
-    !POSITION_STYLES.includes(general.positionStyle as ToolbarStyleKey)
+    !POSITION_STYLES.includes(general.positionStyle)
   ) {
     return null;
   }

@@ -9,16 +9,6 @@ import {
 import type { SettingsTabContext } from "src/settings/settingsTab";
 import { strings } from "src/translations/helper";
 
-const HIGHLIGHT_SWATCHES = [
-  "#FFB78B8C",
-  "#CDF4698C",
-  "#A0CCF68C",
-  "#F0A7D88C",
-  "#ADEFEF8C",
-];
-
-const FONT_SWATCHES = ["#D83931", "#DE7802", "#245BDB", "#6425D0", "#646A73"];
-
 const STYLE_DESCRIPTIONS: Record<string, string> = {
   top: strings.enableToolbarPositionedTop,
   following: strings.enableToolbarAppearsUponText,
@@ -51,7 +41,6 @@ export function renderGeneralTab(
     desc: strings.setCustomBackgroundDesc,
     cls: "custom_bg",
     keyPrefix: "custom_bg",
-    swatches: HIGHLIGHT_SWATCHES,
     // `<mark style="background:…">` carry alpha
     opacity: true,
   });
@@ -60,7 +49,6 @@ export function renderGeneralTab(
     desc: strings.setCustomFontColorDesc,
     cls: "custom_font",
     keyPrefix: "custom_fc",
-    swatches: FONT_SWATCHES,
     // `<font color=…>` cannot carry alpha
     opacity: false,
   });
@@ -95,10 +83,14 @@ function renderSwatchRow(
     desc: string;
     cls: string;
     keyPrefix: "custom_bg" | "custom_fc";
-    swatches: string[];
     opacity: boolean;
   },
 ): void {
+  const keys = [1, 2, 3, 4, 5].map(
+    (i) => `${config.keyPrefix}${i}` as CustomColorKey,
+  );
+  const swatches = keys.map((key) => DEFAULT_SETTINGS[key]);
+
   new Setting(containerEl)
     .setName(config.name)
     .setDesc(config.desc)
@@ -108,12 +100,11 @@ function renderSwatchRow(
         cls: "pickr-container",
       });
 
-      for (let i = 1; i <= 5; i++) {
-        const settingKey = `${config.keyPrefix}${i}` as CustomColorKey;
+      for (const settingKey of keys) {
         ctx.createPickr({
           el: pickerContainer.createDiv({ cls: "picker" }),
           container: pickerContainer,
-          swatches: config.swatches,
+          swatches,
           opacity: config.opacity,
           defaultColor: ctx.plugin.settings[settingKey] || "#000000",
           onSave: (hexColor) => {

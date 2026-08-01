@@ -1,18 +1,9 @@
-import {
-  Command,
-  debounce,
-  Editor,
-  ItemView,
-  MarkdownFileInfo,
-  MarkdownView,
-  Menu,
-  Notice,
-  Plugin,
-} from "obsidian";
+import { Command, debounce, ItemView, Notice, Plugin } from "obsidian";
 import { CommandsManager } from "src/commands/commands";
 import addIcons from "src/icons/customIcons";
 import type { AdmonitionDefinition } from "src/modals/callout/calloutTypes";
-import { ownCommand } from "src/plugin/pluginId";
+import { readAdmonitionDefinitions } from "src/plugin/admonitions";
+import { registerEditorContextMenu } from "src/plugin/editorContextMenu";
 import type { ToolbarStyleKey } from "src/settings/settingsData";
 import {
   applyAppearanceVars,
@@ -39,14 +30,6 @@ import {
 import { strings } from "src/translations/helper";
 import { isAllowedViewType } from "src/util/viewUtils";
 import { EditingToolbarSettingTab } from "../settings/settingsTab";
-
-interface EditorContextMenuAction {
-  title: string;
-  commandId?: string;
-  callback?: () => void;
-}
-
-const ADMONITION_PLUGIN_ID = "obsidian-admonition";
 
 const SELECTION_KEYS = new Set([
   "ArrowUp",
@@ -109,13 +92,11 @@ export default class EditingToolbarPlugin extends Plugin {
     );
     this.applyRootAppearanceVars();
     this.app.workspace.onLayoutReady(() => this.rebuildToolbars());
-    this.app.workspace.onLayoutReady(async () => {
-      await this.tryGetAdmonitionTypes();
+    this.app.workspace.onLayoutReady(() => {
+      this.admonitionDefinitions = readAdmonitionDefinitions(this.app);
     });
 
-    this.registerEvent(
-      this.app.workspace.on("editor-menu", this.handleEditorContextMenu),
-    );
+    registerEditorContextMenu(this);
   }
 
   // Document-level fallback for anything outside a bar, always on the live style:
@@ -145,143 +126,13 @@ export default class EditingToolbarPlugin extends Plugin {
   }
 
   public get liveStyle(): ToolbarStyleKey {
-    const raw = this.settings.positionStyle;
-    return POSITION_STYLES.includes(raw as ToolbarStyleKey)
-      ? (raw as ToolbarStyleKey)
-      : "top";
+    return this.settings.positionStyle;
   }
 
   // While the settings tab is open this is the style being edited there, which can
   // differ from the one rendered in the workspace.
   public resolveActiveStyle(): ToolbarStyleKey {
     return this.appearanceEditStyle ?? this.liveStyle;
-  }
-
-  private executePluginCommand(commandId: string): void {
-    this.app.commands.executeCommandById(ownCommand(commandId));
-  }
-
-  private addEditorContextAction(
-    menu: Menu,
-    action: EditorContextMenuAction,
-  ): void {
-    menu.addItem((item) => {
-      item.setTitle(action.title);
-
-      item.onClick(() => {
-        if (action.callback) {
-          action.callback();
-          return;
-        }
-
-        if (action.commandId) {
-          this.executePluginCommand(action.commandId);
-        }
-      });
-    });
-  }
-
-  private addEditorContextSubmenu(
-    menu: Menu,
-    title: string,
-    icon: string,
-    actions: EditorContextMenuAction[],
-  ): void {
-    menu.addItem((item) => {
-      item.setTitle(title).setIcon(icon);
-      item.setSection("info");
-
-      const submenu = item.setSubmenu();
-      actions.forEach((action) => this.addEditorContextAction(submenu, action));
-    });
-  }
-
-  private buildTextContextActions(editor: Editor): EditorContextMenuAction[] {
-    const actions: EditorContextMenuAction[] = [];
-    const hasSelection = editor.somethingSelected();
-    const cursor = editor.getCursor();
-    const lineText = editor.getLine(cursor.line);
-    const isOrderedListLine = /^\d+\.\s/.test(lineText);
-    const isTableContext = lineText.includes("|");
-
-    if (hasSelection) {
-      actions.push(
-        { title: strings.splitLines, commandId: "split-lines" },
-        { title: strings.mergeLines, commandId: "merge-lines" },
-        { title: strings.fullHalfConverter, commandId: "smart-symbols" },
-        { title: strings.dedupeLines, commandId: "dedupe-lines" },
-        { title: strings.addPrefixSuffix, commandId: "add-wrap" },
-        { title: strings.numberLinesCustom, commandId: "number-lines" },
-        { title: strings.trimLineEnds, commandId: "remove-whitespace-trim" },
-        {
-          title: strings.shrinkExtraSpaces,
-          commandId: "remove-whitespace-compress",
-        },
-        {
-          title: strings.removeAllWhitespace,
-          commandId: "remove-whitespace-all",
-        },
-        { title: strings.extractBetweenStrings, commandId: "extract-between" },
-        { title: strings.listTable, commandId: "list-to-table" },
-        { title: strings.tableList, commandId: "table-to-list" },
-      );
-    } else {
-      actions.push(
-        { title: strings.addPrefixSuffix, commandId: "add-wrap" },
-        { title: strings.insertBlankLines, commandId: "insert-blank-lines" },
-      );
-      if (isTableContext) {
-        actions.push({ title: strings.tableList, commandId: "table-to-list" });
-      }
-    }
-
-    if (isOrderedListLine) {
-      actions.push({
-        title: strings.renumberList,
-        commandId: "renumber-ordered-list",
-      });
-    }
-
-    return actions;
-  }
-
-  private handleEditorContextMenu = (
-    menu: Menu,
-    editor: Editor,
-    _view: MarkdownView | MarkdownFileInfo,
-  ): void => {
-    this.addEditorContextSubmenu(
-      menu,
-      strings.textTools,
-      "whole-word",
-      this.buildTextContextActions(editor),
-    );
-  };
-
-  async tryGetAdmonitionTypes(): Promise<void> {
-    const admonitionPluginInstance =
-      this.app.plugins?.getPlugin(ADMONITION_PLUGIN_ID);
-    if (admonitionPluginInstance) {
-      this.processAdmonitionTypes(admonitionPluginInstance);
-    }
-  }
-
-  processAdmonitionTypes(pluginInstance: unknown) {
-    const admonitionPlugin = pluginInstance as {
-      admonitions?: Record<string, AdmonitionDefinition>;
-    };
-
-    if (
-      admonitionPlugin.admonitions &&
-      typeof admonitionPlugin.admonitions === "object" &&
-      !Array.isArray(admonitionPlugin.admonitions) &&
-      Object.keys(admonitionPlugin.admonitions).length > 0
-    ) {
-      this.admonitionDefinitions = admonitionPlugin.admonitions;
-    } else {
-      console.warn("editing-toolbar: could not read admonition types");
-      this.admonitionDefinitions = null;
-    }
   }
 
   onunload(): void {
@@ -427,7 +278,7 @@ export default class EditingToolbarPlugin extends Plugin {
     updateFollowingBar(this.app, this, editor);
   }
 
-  private onPositionStyleChange(newStyle: string): void {
+  private onPositionStyleChange(newStyle: ToolbarStyleKey): void {
     this.settings.positionStyle = newStyle;
     this.rebuildToolbars();
   }
