@@ -8,7 +8,7 @@ import {
 import type { ToolbarStyleKey } from "src/settings/settingsData";
 import { POSITION_STYLES, STYLE_LABELS } from "src/settings/settingsData";
 import type { SettingsTabContext } from "src/settings/settingsTab";
-import { applyButtonIcon } from "src/toolbar/toolbarDom";
+import { applyButtonIcon, SUBMENU_BUTTON_CLASS } from "src/toolbar/toolbarDom";
 import { format, strings, t } from "src/translations/helper";
 import {
   DIVIDER_COMMAND_ID,
@@ -92,9 +92,6 @@ function renderCommandList(
     cls: TOP_LEVEL_CONTAINER_CLASS,
   });
 
-  // Submenus take only plain commands; the `put` checks below read this.
-  let draggedItemClass = "";
-
   const save = () => void ctx.plugin.saveSettings();
 
   ctx.createSortable(listEl, {
@@ -106,9 +103,6 @@ function renderCommandList(
     preventOnFilter: false,
     onChoose: (evt) => evt.item.classList.add("sortable-chosen-feedback"),
     onUnchoose: (evt) => evt.item.classList.remove("sortable-chosen-feedback"),
-    onStart: (evt) => {
-      draggedItemClass = evt.item.className;
-    },
     onSort: (evt) => {
       if (evt.oldIndex == null || evt.newIndex == null) return;
       // Sortable fires onSort on BOTH lists for a cross-list drag. The
@@ -131,13 +125,7 @@ function renderCommandList(
   commands.forEach((command, index) => {
     const setting = new Setting(listEl);
     if (hasSubmenu(command)) {
-      renderSubmenuRow(ctx, setting, {
-        command,
-        commands,
-        style,
-        isPlainItemDragging: () =>
-          !draggedItemClass.includes("editingToolbarCommandsubItem"),
-      });
+      renderSubmenuRow(ctx, setting, { command, commands, style });
     } else {
       renderCommandRow(ctx, setting, { command, index, commands, style });
     }
@@ -213,7 +201,6 @@ interface SubmenuRowContext {
   command: SubmenuCommand;
   commands: Command[];
   style: ToolbarStyleKey;
-  isPlainItemDragging(): boolean;
 }
 
 function renderSubmenuRow(
@@ -226,7 +213,7 @@ function renderSubmenuRow(
   setting.settingEl.setAttribute("data-id", command.id);
   setting
     .setClass("editingToolbarCommandItem")
-    .setClass("editingToolbarCommandsubItem")
+    .setClass(SUBMENU_BUTTON_CLASS)
     .setName(t(command.name))
     .addButton((iconButton) =>
       configureIconButton(ctx, iconButton, command, false, style),
@@ -273,7 +260,13 @@ function renderSubmenuRow(
   ctx.createSortable(subListEl, {
     ...SHARED_SORTABLE_OPTIONS,
     animation: 150,
-    group: { name: "item", pull: true, put: row.isPlainItemDragging },
+    group: {
+      name: "item",
+      pull: true,
+      // Submenus take plain commands only — never another submenu.
+      put: (_to, _from, dragEl) =>
+        !dragEl.classList.contains(SUBMENU_BUTTON_CLASS),
+    },
     onSort: (evt) => {
       if (evt.oldIndex == null || evt.newIndex == null) return;
       // Destination owns the move, as in the top-level list above. Without this
