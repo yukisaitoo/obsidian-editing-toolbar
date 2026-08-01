@@ -1,6 +1,6 @@
-# Editing Toolbar (Unofficial)
+# Editing Toolbar (personal)
 
-This fork is not affiliated with or endorsed by the original author, and is **not** distributed through the Obsidian community plugin store. For the real thing, please use the [original plugin](https://github.com/cumany/obsidian-editing-toolbar).
+This fork is not affiliated with or endorsed by the original author, and will **not** be distributed through the Obsidian community plugin store. For the real thing, see [original plugin](https://github.com/cumany/obsidian-editing-toolbar).
 
 ## Contents
 
@@ -32,7 +32,7 @@ Config in **Settings → Editing Toolbar**:
 
 ## Install
 
-This fork isn't on the community store, so you build and deploy it into your vault yourself.
+Build and deploy it into your vault yourself.
 
 1. Clone the repo and install dependencies:
 
@@ -62,5 +62,5 @@ This fork isn't on the community store, so you build and deploy it into your vau
 
 ---
 
-_I consider this project feature-complete (at least for how I use it), so I don't plan to do further development.
+_I consider this project feature-complete (at least for how I use it), and have no plans for further enhancements.
 That said, if you enjoy it and run into bugs, feel free to [open an issue](https://github.com/yukisaitoo/obsidian-editing-toolbar/issues)._
