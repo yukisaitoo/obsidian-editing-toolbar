@@ -3,6 +3,8 @@ import {
   applyAppearanceVars,
   getAppearanceBucket,
   getAppearanceValue,
+  TOOLBAR_ICON_SIZE_MAX,
+  TOOLBAR_ICON_SIZE_MIN,
 } from "src/settings/settingsData";
 import type { SettingsTabContext } from "src/settings/settingsTab";
 import { SHARED_BAR_CLASS } from "src/toolbar/toolbarDom";
@@ -57,7 +59,7 @@ export function renderAppearanceTab(
     .addSlider((slider) => {
       slider
         .setValue(getAppearanceValue(ctx.plugin.settings, "toolbarIconSize"))
-        .setLimits(12, 32, 1)
+        .setLimits(TOOLBAR_ICON_SIZE_MIN, TOOLBAR_ICON_SIZE_MAX, 1)
         .setDynamicTooltip()
         .onChange(async (value) => {
           getAppearanceBucket(ctx.plugin.settings).toolbarIconSize = value;

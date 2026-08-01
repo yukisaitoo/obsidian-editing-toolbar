@@ -10,6 +10,12 @@ export interface AppearanceSettings {
 
 export type AppearanceOverrides = Partial<AppearanceSettings>;
 
+export const TOOLBAR_ICON_SIZE_MIN = 12;
+export const TOOLBAR_ICON_SIZE_MAX = 32;
+
+// The colour defaults are theme vars, not hex, so they are the one thing the override
+// bucket must never hold: parseAppearance() keeps only hex, and would drop them on the
+// next load. Clearing a colour deletes its key instead of writing the default back.
 export const DEFAULT_APPEARANCE: AppearanceSettings = {
   toolbarBackgroundColor: "var(--background-primary)",
   toolbarIconColor: "var(--text-normal)",

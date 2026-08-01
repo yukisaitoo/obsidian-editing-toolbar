@@ -2,11 +2,14 @@ import type { Command } from "obsidian";
 
 import type {
   AppearanceOverrides,
+  AppearanceSettings,
   EditingToolbarSettings,
 } from "src/settings/settingsData";
 import {
   DEFAULT_APPEARANCE,
   DEFAULT_SETTINGS,
+  TOOLBAR_ICON_SIZE_MAX,
+  TOOLBAR_ICON_SIZE_MIN,
 } from "src/settings/settingsData";
 import { toHexColor } from "src/util/color";
 import { hasSubmenu, parseCommandList } from "src/util/commandStorage";
@@ -53,12 +56,6 @@ const COLOR_SETTING_KEYS = new Set<keyof EditingToolbarSettings>([
   "custom_fc5",
 ]);
 
-const APPEARANCE_KEYS: (keyof AppearanceOverrides)[] = [
-  "toolbarBackgroundColor",
-  "toolbarIconColor",
-  "toolbarIconSize",
-];
-
 // `appearance` and `commands` are null when the payload did not mention them at
 // all — distinct from an empty one, which overwrite mode is meant to apply.
 export interface ParsedImport {
@@ -104,14 +101,34 @@ function parseAppearance(value: JsonPayload): AppearanceOverrides | null {
 
   const parsed: AppearanceOverrides = {};
 
-  for (const key of APPEARANCE_KEYS) {
+  const take = <K extends keyof AppearanceSettings>(
+    key: K,
+    sanitise: (entry: AppearanceSettings[K]) => AppearanceSettings[K] | null,
+  ): boolean => {
     const entry = value[key];
-    if (entry === undefined) continue;
-    if (typeof entry !== typeof DEFAULT_APPEARANCE[key]) return null;
-    (parsed as JsonPayload)[key] = entry;
-  }
+    if (entry === undefined) return true;
+    if (typeof entry !== typeof DEFAULT_APPEARANCE[key]) return false;
 
-  return parsed;
+    // An omitted key already means "use DEFAULT_APPEARANCE", so dropping it recovers.
+    const clean = sanitise(entry);
+    if (clean !== null) parsed[key] = clean;
+
+    return true;
+  };
+
+  return take("toolbarBackgroundColor", toHexColor) &&
+    take("toolbarIconColor", toHexColor) &&
+    take("toolbarIconSize", clampIconSize)
+    ? parsed
+    : null;
+}
+
+function clampIconSize(size: number): number | null {
+  if (!Number.isFinite(size)) return null;
+
+  return Math.round(
+    Math.min(TOOLBAR_ICON_SIZE_MAX, Math.max(TOOLBAR_ICON_SIZE_MIN, size)),
+  );
 }
 
 // Returns the settings the import would produce, leaving `current` untouched so the
@@ -169,4 +186,3 @@ function mergeCommand(existing: Command, imported: Command): Command {
     ),
   };
 }
-
