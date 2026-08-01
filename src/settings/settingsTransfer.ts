@@ -58,45 +58,59 @@ const COLOR_SETTING_KEYS = new Set<keyof EditingToolbarSettings>([
 
 // `appearance` and `commands` are null when the payload did not mention them at
 // all — distinct from an empty one, which overwrite mode is meant to apply.
+// `skipped` names every value the payload could not supply.
 export interface ParsedImport {
   general: Partial<EditingToolbarSettings>;
   appearance: AppearanceOverrides | null;
   commands: Command[] | null;
+  skipped: string[];
 }
 
-// The one place the payload is inspected: null means it is not importable, and
-// everything past here works with typed data.
+// The one place the payload is inspected: everything past here works with typed
+// data. A value that will not parse costs itself alone and is named in `skipped`;
+// null is reserved for a payload that is not an object at all.
 export function parseImport(data: JsonPayload): ParsedImport | null {
   if (!data || typeof data !== "object") return null;
 
   const general: Partial<EditingToolbarSettings> = {};
+  const skipped: string[] = [];
 
   for (const key of GENERAL_SETTING_KEYS) {
     const value = data[key];
     if (value === undefined) continue;
-    if (typeof value !== typeof DEFAULT_SETTINGS[key]) return null;
 
-    (general as JsonPayload)[key] = COLOR_SETTING_KEYS.has(key)
-      ? (toHexColor(value) ?? DEFAULT_SETTINGS[key])
-      : value;
+    // A key left out of `general` keeps whatever the caller already had, which is
+    // the default on load and the current value on import.
+    const clean =
+      typeof value !== typeof DEFAULT_SETTINGS[key]
+        ? null
+        : COLOR_SETTING_KEYS.has(key)
+          ? toHexColor(value)
+          : value;
+
+    if (clean === null) skipped.push(key);
+    else (general as JsonPayload)[key] = clean;
   }
 
   let appearance: AppearanceOverrides | null = null;
   if ("appearance" in data) {
-    appearance = parseAppearance(data.appearance);
-    if (!appearance) return null;
+    appearance = parseAppearance(data.appearance, skipped);
+    if (!appearance) skipped.push("appearance");
   }
 
   let commands: Command[] | null = null;
   if ("commands" in data) {
-    commands = parseCommandList(data.commands);
-    if (!commands) return null;
+    commands = parseCommandList(data.commands, skipped);
+    if (!commands) skipped.push("commands");
   }
 
-  return { general, appearance, commands };
+  return { general, appearance, commands, skipped };
 }
 
-function parseAppearance(value: JsonPayload): AppearanceOverrides | null {
+function parseAppearance(
+  value: JsonPayload,
+  skipped: string[],
+): AppearanceOverrides | null {
   if (!value || typeof value !== "object") return null;
 
   const parsed: AppearanceOverrides = {};
@@ -104,23 +118,23 @@ function parseAppearance(value: JsonPayload): AppearanceOverrides | null {
   const take = <K extends keyof AppearanceSettings>(
     key: K,
     sanitise: (entry: AppearanceSettings[K]) => AppearanceSettings[K] | null,
-  ): boolean => {
+  ): void => {
     const entry = value[key];
-    if (entry === undefined) return true;
-    if (typeof entry !== typeof DEFAULT_APPEARANCE[key]) return false;
+    if (entry === undefined) return;
 
     // An omitted key already means "use DEFAULT_APPEARANCE", so dropping it recovers.
-    const clean = sanitise(entry);
-    if (clean !== null) parsed[key] = clean;
+    const clean =
+      typeof entry === typeof DEFAULT_APPEARANCE[key] ? sanitise(entry) : null;
 
-    return true;
+    if (clean === null) skipped.push(`appearance.${key}`);
+    else parsed[key] = clean;
   };
 
-  return take("toolbarBackgroundColor", toHexColor) &&
-    take("toolbarIconColor", toHexColor) &&
-    take("toolbarIconSize", clampIconSize)
-    ? parsed
-    : null;
+  take("toolbarBackgroundColor", toHexColor);
+  take("toolbarIconColor", toHexColor);
+  take("toolbarIconSize", clampIconSize);
+
+  return parsed;
 }
 
 function clampIconSize(size: number): number | null {

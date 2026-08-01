@@ -192,6 +192,11 @@ export class ImportExportModal extends Modal {
       } else if (commands && isOverwrite) {
         summary.push(`• ${strings.clearAllCommands} ⚠️`);
       }
+      if (parsed.skipped.length) {
+        summary.push(
+          `• ${strings.skipUnreadableEntries} (${parsed.skipped.length}) ⚠️`,
+        );
+      }
 
       summary.push(
         "",

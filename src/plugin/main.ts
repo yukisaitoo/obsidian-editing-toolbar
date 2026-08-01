@@ -89,6 +89,11 @@ export default class EditingToolbarPlugin extends Plugin {
     }
 
     this.settings = buildImportedSettings(this.settings, parsed, "overwrite");
+
+    if (parsed.skipped.length) {
+      console.warn("editing-toolbar: skipped unreadable settings", parsed.skipped);
+      new Notice(strings.skippedSettingsValues);
+    }
   }
 
   onunload(): void {
