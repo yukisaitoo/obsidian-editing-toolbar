@@ -124,6 +124,14 @@
   contain: none;
 }
 
+/* Wraps the icon so a tooltip can be hung on it without covering a flyout;
+   stretches so it still spans the button's content box. */
+.editing-toolbar-icon {
+  display: flex;
+  align-self: stretch;
+  align-items: center;
+}
+
 .editingToolbarPopoverBar :is(.editingToolbarCommandItem, button.editingToolbarCommandsubItem) {
   transition: all 0.2s linear;
 }

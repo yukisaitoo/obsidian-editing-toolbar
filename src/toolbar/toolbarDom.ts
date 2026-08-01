@@ -1,7 +1,5 @@
 import { App, ButtonComponent, MenuItem, Platform, setIcon } from "obsidian";
 
-export const TOOLTIP_DELAY = 250;
-
 // Two separate hooks on purpose: SHARED_BAR_CLASS is styling only (the settings
 // preview wears it too), while the selectors below mark a *live* bar and are what
 // every lifecycle query matches.
@@ -13,8 +11,15 @@ export const POPOVER_SELECTOR = ".editingToolbarPopoverBar";
 // pickers alike.
 export const SUBMENU_BUTTON_CLASS = "editingToolbarCommandsubItem";
 
-export function applyButtonIcon(btn: ButtonComponent, icon?: string): void {
-  btn.setIcon(icon ?? "");
+// Returns the icon element so a tooltip can be anchored to it: Obsidian labels
+// the nearest [aria-label] ancestor, which on the button would take in a flyout.
+export function applyButtonIcon(
+  btn: ButtonComponent,
+  icon?: string,
+): HTMLElement {
+  const iconEl = btn.buttonEl.createSpan({ cls: "editing-toolbar-icon" });
+  setIcon(iconEl, icon ?? "");
+  return iconEl;
 }
 
 export function applyMenuItemIcon(menuItem: MenuItem, icon: string = ""): void {

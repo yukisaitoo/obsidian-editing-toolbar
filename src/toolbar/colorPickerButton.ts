@@ -1,4 +1,4 @@
-import { App, ButtonComponent, Command, Editor } from "obsidian";
+import { App, ButtonComponent, Command, Editor, setTooltip } from "obsidian";
 import {
   BACKGROUND_COLOR_ICON_CLASS,
   FONT_COLOR_ICON_CLASS,
@@ -7,11 +7,7 @@ import type EditingToolbarPlugin from "src/plugin/main";
 import { ownCommand, PLUGIN_ID } from "src/plugin/pluginId";
 import type { ToolbarStyleKey } from "src/settings/settingsData";
 import { attachFlyoutClamp } from "src/toolbar/geometry";
-import {
-  applyButtonIcon,
-  SUBMENU_BUTTON_CLASS,
-  TOOLTIP_DELAY,
-} from "src/toolbar/toolbarDom";
+import { applyButtonIcon, SUBMENU_BUTTON_CLASS } from "src/toolbar/toolbarDom";
 import { syncToolbarState } from "src/toolbar/toolbarVisibility";
 import { strings } from "src/translations/helper";
 import { toHexColor } from "src/util/color";
@@ -65,7 +61,6 @@ export function createColorPickerButton(
   const button = new ButtonComponent(bar)
     .setClass(SUBMENU_BUTTON_CLASS)
     .setClass("editingToolbarColorPickerItem")
-    .setTooltip(variant.tooltip, { delay: TOOLTIP_DELAY })
     .onClick((event: MouseEvent) => {
       // Clicks inside the swatch panel are handled by the swatches themselves.
       const target = event.target as HTMLElement | null;
@@ -74,7 +69,8 @@ export function createColorPickerButton(
       app.commands.executeCommandById(item.id);
       syncToolbarState(plugin, bar, style);
     });
-  applyButtonIcon(button, item.icon);
+  // On the icon, not the button: the swatch panel below is a child of the button.
+  setTooltip(applyButtonIcon(button, item.icon), variant.tooltip);
 
   const submenu = createEl("div");
   submenu.addClass("subitem");
@@ -87,7 +83,7 @@ export function createColorPickerButton(
   if (wrapper) {
     new ButtonComponent(wrapper)
       .setIcon("palette")
-      .setTooltip(variant.customTooltip, { delay: TOOLTIP_DELAY })
+      .setTooltip(variant.customTooltip)
       .onClick(() => openCustomColorSettings(app, plugin));
   }
 
@@ -149,12 +145,8 @@ function paintColorIcons(
 
 // The custom swatches this button edits live on the General tab. Straight there by
 // id — no timer, and no dependence on it happening to be the first tab.
-function openCustomColorSettings(
-  app: App,
-  plugin: EditingToolbarPlugin,
-): void {
+function openCustomColorSettings(app: App, plugin: EditingToolbarPlugin): void {
   app.setting.open();
   app.setting.openTabById(PLUGIN_ID);
   plugin.settingTab.setActiveTab("general");
 }
-

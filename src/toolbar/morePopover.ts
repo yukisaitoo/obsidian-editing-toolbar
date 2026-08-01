@@ -1,6 +1,6 @@
 import { ButtonComponent } from "obsidian";
 import { anchorPopoverToButton } from "src/toolbar/geometry";
-import { POPOVER_SELECTOR, TOOLTIP_DELAY } from "src/toolbar/toolbarDom";
+import { POPOVER_SELECTOR } from "src/toolbar/toolbarDom";
 import { strings } from "src/translations/helper";
 
 // A class rather than inline visibility: a hovered flyout inside the popover sets
@@ -34,7 +34,7 @@ export class MorePopover {
 
     this.button = new ButtonComponent(this.el)
       .setClass("editingToolbarCommandItem")
-      .setTooltip(strings.more, { delay: TOOLTIP_DELAY })
+      .setTooltip(strings.more)
       .onClick(() => (this.isOpen ? this.close() : this.open()));
     this.button.setIcon("more-chevron");
 
@@ -92,7 +92,9 @@ export class MorePopover {
   };
 }
 
-export function morePopoverFor(popoverBar: HTMLElement): MorePopover | undefined {
+export function morePopoverFor(
+  popoverBar: HTMLElement,
+): MorePopover | undefined {
   return popovers.get(popoverBar);
 }
 

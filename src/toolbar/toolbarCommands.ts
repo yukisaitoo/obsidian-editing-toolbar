@@ -12,7 +12,6 @@ import {
   getHotkey,
   NO_HOTKEY,
   SUBMENU_BUTTON_CLASS,
-  TOOLTIP_DELAY,
 } from "src/toolbar/toolbarDom";
 import { syncToolbarState } from "src/toolbar/toolbarVisibility";
 import { t } from "src/translations/helper";
@@ -50,7 +49,7 @@ export function renderToolbarCommands(
 
 function renderPlainButton(ctx: RenderContext, item: Command) {
   const button = new ButtonComponent(ctx.bar)
-    .setTooltip(tooltipFor(ctx.app, item), { delay: TOOLTIP_DELAY })
+    .setTooltip(tooltipFor(ctx.app, item))
     .onClick(() => runCommand(ctx, item.id));
 
   button.setClass("editingToolbarCommandItem");
@@ -64,7 +63,7 @@ function renderDropdown(ctx: RenderContext, item: Command) {
   parent.setClass(SUBMENU_BUTTON_CLASS);
   applyTooltipPosition(ctx, parent);
   applyButtonIcon(parent, item.icon);
-  parent.setTooltip(tooltipFor(ctx.app, item), { delay: TOOLTIP_DELAY });
+  parent.setTooltip(tooltipFor(ctx.app, item));
 
   parent.onClick((evt: MouseEvent) => {
     const menu = new Menu();
@@ -80,7 +79,9 @@ function renderDropdown(ctx: RenderContext, item: Command) {
       }
 
       menu.addItem((menuItem) => {
-        menuItem.setTitle(t(subitem.name)).onClick(() => runCommand(ctx, subitem.id));
+        menuItem
+          .setTitle(t(subitem.name))
+          .onClick(() => runCommand(ctx, subitem.id));
         applyMenuItemIcon(menuItem, subitem.icon);
         menuItem.dom
           .createSpan({ cls: "menu-item-hotkey" })
@@ -104,7 +105,7 @@ function renderFlyout(ctx: RenderContext, item: Command) {
 
   item.SubmenuCommands?.forEach((subitem) => {
     const subBtn = new ButtonComponent(submenu)
-      .setTooltip(tooltipFor(ctx.app, subitem), { delay: TOOLTIP_DELAY })
+      .setTooltip(tooltipFor(ctx.app, subitem))
       .setClass("menu-item")
       .onClick(() => runCommand(ctx, subitem.id));
 
@@ -128,7 +129,10 @@ function tooltipFor(app: App, item: Command): string {
 }
 
 // A floating bar sits over the text it acts on, so its tooltips go above it.
-function applyTooltipPosition(ctx: RenderContext, button: ButtonComponent): void {
+function applyTooltipPosition(
+  ctx: RenderContext,
+  button: ButtonComponent,
+): void {
   if (ctx.style !== "top") {
     button.buttonEl.setAttribute("aria-label-position", "top");
   }
