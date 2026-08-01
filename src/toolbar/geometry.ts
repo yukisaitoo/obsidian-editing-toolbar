@@ -24,7 +24,7 @@ function clamp(value: number, min: number, max: number): number {
   return Math.min(Math.max(value, min), Math.max(min, max));
 }
 
-export function paneRelativeBounds(bar: HTMLElement | null, margin: number) {
+function paneRelativeBounds(bar: HTMLElement | null, margin: number) {
   const win = bar ? windowOf(bar) : activeWindow;
   const host = bar?.parentElement?.getBoundingClientRect();
   return {

@@ -99,7 +99,7 @@ export function ensureToolbar(
   return bars.bar;
 }
 
-export function disposeToolbar(
+function disposeToolbar(
   app: App,
   plugin: EditingToolbarPlugin,
   style: ToolbarStyleKey,

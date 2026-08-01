@@ -164,7 +164,7 @@ export class EditingToolbarSettingTab extends PluginSettingTab {
     onDelete: () => Promise<void>,
     tooltip: string,
   ): void {
-    let confirmTimeout: NodeJS.Timeout;
+    let confirmTimeout: ReturnType<typeof setTimeout> | undefined;
 
     const disarm = () => {
       clearTimeout(confirmTimeout);

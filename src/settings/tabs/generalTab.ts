@@ -1,5 +1,5 @@
 import { Setting } from "obsidian";
-import { ConfirmModal } from "src/modals/ConfirmModal";
+import { ConfirmModal } from "src/modals/confirmModal";
 import type { CustomColorKey } from "src/settings/settingsData";
 import {
   DEFAULT_SETTINGS,
@@ -9,7 +9,7 @@ import {
 import type { SettingsTabContext } from "src/settings/settingsTab";
 import { strings } from "src/translations/helper";
 
-const BACKGROUND_SWATCHES = [
+const HIGHLIGHT_SWATCHES = [
   "#FFB78B8C",
   "#CDF4698C",
   "#A0CCF68C",
@@ -51,7 +51,7 @@ export function renderGeneralTab(
     desc: strings.setCustomBackgroundDesc,
     cls: "custom_bg",
     keyPrefix: "custom_bg",
-    swatches: BACKGROUND_SWATCHES,
+    swatches: HIGHLIGHT_SWATCHES,
     // `<mark style="background:…">` carry alpha
     opacity: true,
   });

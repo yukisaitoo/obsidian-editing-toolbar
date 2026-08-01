@@ -1,6 +1,6 @@
 import { App, Editor } from "obsidian";
 import type { Registrar } from "src/commands/registrars/types";
-import { TextInputModal } from "src/modals/TextInputModal";
+import { TextInputModal } from "src/modals/textInputModal";
 import { strings } from "src/translations/helper";
 import {
   dedupe,

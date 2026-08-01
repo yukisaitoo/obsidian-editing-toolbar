@@ -6,7 +6,7 @@ import {
   Setting,
   TextAreaComponent,
 } from "obsidian";
-import { ConfirmModal } from "src/modals/ConfirmModal";
+import { ConfirmModal } from "src/modals/confirmModal";
 import type EditingToolbarPlugin from "src/plugin/main";
 import type { ToolbarStyleKey } from "src/settings/settingsData";
 import type { ImportMode, JsonPayload } from "src/settings/settingsTransfer";

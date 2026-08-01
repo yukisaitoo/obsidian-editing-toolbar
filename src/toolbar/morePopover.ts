@@ -98,10 +98,10 @@ export function morePopoverFor(popoverBar: HTMLElement): MorePopover | undefined
 
 // The popover is a sibling of the bar, not a child, so hiding the bar would leave
 // it floating over the note.
-export function closeMoreOverflowPopovers(root?: ParentNode): void {
+export function closeMoreOverflowPopovers(): void {
   openPopovers.forEach((popover) => popover.close());
   // A bar rebuilt while open leaves the class on a popover whose instance is gone.
-  (root ?? activeWindow.document)
+  activeWindow.document
     .querySelectorAll(`${POPOVER_SELECTOR}.${OPEN_CLASS}`)
     .forEach((el) => el.removeClass(OPEN_CLASS));
 }

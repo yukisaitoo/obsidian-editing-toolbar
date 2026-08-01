@@ -1,5 +1,5 @@
 import { Setting } from "obsidian";
-import { ImportExportModal } from "src/modals/ImportExportModal";
+import { ImportExportModal } from "src/modals/importExportModal";
 import type { SettingsTabContext } from "src/settings/settingsTab";
 import { strings } from "src/translations/helper";
 
