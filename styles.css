@@ -394,10 +394,6 @@ button.editingToolbarCommandsubItem::after {
   box-shadow: 0 3px 6px -4px rgba(0, 0, 0, .12), 0 6px 16px 0 rgba(0, 0, 0, .08), 0 9px 28px 8px rgba(0, 0, 0, .05);
 }
 
-.pickr .pcr-button {
-  background-color: var(--pcr-color);
-}
-
 /* --- Dropdown-menu variant (Obsidian Menu, rendered outside the bar) ------- */
 
 /* Category headings are rendered as disabled menu items; the ::before/::after
@@ -493,14 +489,12 @@ button.editingToolbarCommandsubItem::after {
 }
 
 .editing-toolbar-content .setting-item {
-  padding-left: 1em;
-  padding-right: 1em;
+  align-items: center;
 }
 
 /* Doubled class beats Obsidian's `.setting-item .setting-item-*` rules, which 
    otherwise force the command row onto a single non-wrapping line. */
 .editing-toolbar-content .editingToolbarCommandItem.editingToolbarCommandItem {
-  align-items: center;
   flex-wrap: wrap;
 }
 
@@ -575,12 +569,7 @@ button.editingToolbarCommandsubItem::after {
 }
 
 .editingToolbarCommandItem {
-  padding: 10px 0;
   cursor: grab;
-}
-
-.setting-item.editingToolbarCommandItem:first-child {
-  padding-top: 12px;
 }
 
 .editingToolbarSettingsTabsContainer :is(.sortable-fallback, .sortable-drag) {
