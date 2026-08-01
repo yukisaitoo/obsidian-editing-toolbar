@@ -33,12 +33,8 @@ export const registerClipboardAndHistoryCommands: Registrar = ({
       icon,
       callback: () =>
         runOnEditor(async (editor) => {
-          try {
-            await run(editor);
-            plugin.app.commands.executeCommandById("editor:focus");
-          } catch (error) {
-            console.error(`editing-toolbar: ${id} failed`, error);
-          }
+          await run(editor);
+          plugin.app.commands.executeCommandById("editor:focus");
         }),
     });
 

@@ -49,7 +49,15 @@ export class CommandsManager {
   public runOnEditor = (action: (editor: Editor) => unknown): void => {
     const editor = this.getActiveEditor();
     if (!editor) return;
-    void Promise.resolve(action(editor)).then(() => editor.focus());
+    void (async () => {
+      try {
+        await action(editor);
+      } catch (error) {
+        console.error("editing-toolbar: command failed", error);
+      } finally {
+        editor.focus();
+      }
+    })();
   };
 
   private runHistoryAction = (action: "undo" | "redo"): void => {
