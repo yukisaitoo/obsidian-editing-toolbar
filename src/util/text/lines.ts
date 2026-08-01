@@ -186,19 +186,27 @@ const BRACKET_PAIRS: Record<string, string> = {
 };
 
 function splitOutsideBrackets(text: string, separator: string): string[] {
+  const chars = [...text];
   const parts: string[] = [];
   let current = "";
   let closer: string | null = null;
 
-  for (const char of text) {
+  for (let i = 0; i < chars.length; i++) {
+    const char = chars[i];
+
     if (closer) {
       current += char;
       if (char === closer) closer = null;
       continue;
     }
 
-    if (BRACKET_PAIRS[char]) {
-      closer = BRACKET_PAIRS[char];
+    const pair = BRACKET_PAIRS[char];
+    // A symmetric quote opens only at a word boundary, so "don't" is an apostrophe.
+    const opens =
+      pair && (pair !== char || i === 0 || /[\s([{]/.test(chars[i - 1]));
+
+    if (opens) {
+      closer = pair;
       current += char;
     } else if (char === separator) {
       parts.push(current.trim());
@@ -207,6 +215,9 @@ function splitOutsideBrackets(text: string, separator: string): string[] {
       current += char;
     }
   }
+
+  // Nothing ever closed the group, so the guess was wrong — split anyway.
+  if (closer) return text.split(separator).map((s) => s.trim()).filter(Boolean);
 
   if (current) parts.push(current.trim());
   return parts.filter(Boolean);
