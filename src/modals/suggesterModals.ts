@@ -11,7 +11,6 @@ import {
 import { getAppIcons } from "src/icons/appIcons";
 import { focusAfterOpen } from "src/modals/modalFocus";
 import type EditingToolbarPlugin from "src/plugin/main";
-import type { ToolbarStyleKey } from "src/settings/settingsData";
 import { format, strings, t } from "src/translations/helper";
 import { findStoredCommand, toStoredCommand } from "src/util/commandStorage";
 
@@ -21,14 +20,12 @@ export class ChooseFromIconList extends FuzzySuggestModal<string> {
   plugin: EditingToolbarPlugin;
   command: Command;
   isSubmenuItem: boolean;
-  currentEditingConfig: ToolbarStyleKey;
   customCallback: IconSelectCallback | null = null;
   constructor(
     plugin: EditingToolbarPlugin,
     command: Command,
     isSubmenuItem: boolean = false,
     callback?: IconSelectCallback,
-    currentEditingConfig?: ToolbarStyleKey,
   ) {
     super(plugin.app);
     this.plugin = plugin;
@@ -36,7 +33,6 @@ export class ChooseFromIconList extends FuzzySuggestModal<string> {
     this.isSubmenuItem = isSubmenuItem;
     this.customCallback = callback || null;
     this.setPlaceholder(strings.chooseIcon2);
-    this.currentEditingConfig = currentEditingConfig ?? plugin.liveStyle;
   }
 
   private capitalJoin(string: string): string {
@@ -77,7 +73,7 @@ export class ChooseFromIconList extends FuzzySuggestModal<string> {
     const target = findStoredCommand(
       this.command,
       this.isSubmenuItem,
-      this.plugin.getCurrentCommands(this.currentEditingConfig),
+      this.plugin.settings.commands,
     );
     // Removed while the picker was open: nothing to write to.
     if (!target) return;
@@ -90,14 +86,9 @@ export class ChooseFromIconList extends FuzzySuggestModal<string> {
 
 export class CommandPicker extends FuzzySuggestModal<Command> {
   command!: Command;
-  currentEditingConfig: ToolbarStyleKey;
-  constructor(
-    private plugin: EditingToolbarPlugin,
-    currentEditingConfig?: ToolbarStyleKey,
-  ) {
+  constructor(private plugin: EditingToolbarPlugin) {
     super(plugin.app);
     this.setPlaceholder(strings.chooseCommand);
-    this.currentEditingConfig = currentEditingConfig ?? plugin.liveStyle;
   }
 
   getItems(): Command[] {
@@ -111,20 +102,13 @@ export class CommandPicker extends FuzzySuggestModal<Command> {
   // Read afresh rather than reusing the list from onChooseItem: the icon picker sits
   // open in between, so that reference can be stale by the time an icon is chosen.
   private async addCommand(command: Command): Promise<void> {
-    const currentCommands = this.plugin.getCurrentCommands(
-      this.currentEditingConfig,
-    );
-    currentCommands.push(toStoredCommand(command));
+    this.plugin.settings.commands.push(toStoredCommand(command));
     await this.plugin.saveSettings();
     this.plugin.rebuildToolbars();
   }
 
   async onChooseItem(item: Command): Promise<void> {
-    const currentCommands = this.plugin.getCurrentCommands(
-      this.currentEditingConfig,
-    );
-
-    if (currentCommands.some((v) => v.id === item.id)) {
+    if (this.plugin.settings.commands.some((v) => v.id === item.id)) {
       new Notice(
         format(strings.commandAlreadyExists, { name: t(item.name) }),
         3000,
@@ -138,7 +122,6 @@ export class CommandPicker extends FuzzySuggestModal<Command> {
         item,
         false,
         (icon) => void this.addCommand({ ...item, icon }),
-        this.currentEditingConfig,
       ).open();
       return;
     }
@@ -151,18 +134,15 @@ export class ChangeCmdname extends Modal {
   plugin: EditingToolbarPlugin;
   item: Command;
   isSubmenuItem: boolean;
-  currentEditingConfig: ToolbarStyleKey;
   constructor(
     plugin: EditingToolbarPlugin,
     item: Command,
     isSubmenuItem: boolean,
-    currentEditingConfig?: ToolbarStyleKey,
   ) {
     super(plugin.app);
     this.plugin = plugin;
     this.item = item;
     this.isSubmenuItem = isSubmenuItem;
-    this.currentEditingConfig = currentEditingConfig ?? plugin.liveStyle;
     this.containerEl.addClass("editingToolbar-Modal");
     this.containerEl.addClass("changename");
   }
@@ -170,7 +150,7 @@ export class ChangeCmdname extends Modal {
     const target = findStoredCommand(
       this.item,
       this.isSubmenuItem,
-      this.plugin.getCurrentCommands(this.currentEditingConfig),
+      this.plugin.settings.commands,
     );
     // Removed while the modal was open: nothing to rename.
     if (!target) return;

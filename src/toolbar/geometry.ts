@@ -5,7 +5,6 @@
 //  2. Measure with getBoundingClientRect, never scrollWidth: submenu buttons hang
 //     `visibility: hidden` flyouts that inflate scroll size by phantom pixels.
 
-import { Editor, EditorCoords } from "obsidian";
 import { BAR_SELECTOR, POPOVER_SELECTOR } from "src/toolbar/toolbarDom";
 import { windowOf } from "src/toolbar/toolbarHost";
 
@@ -14,9 +13,6 @@ const FLYOUT_EDGE_MARGIN = 6;
 const POPOVER_EDGE_MARGIN = 12;
 const POPOVER_GAP = 8;
 const OVERFLOW_TOLERANCE = 1;
-const FOLLOWING_EDGE_MARGIN = 12;
-const FOLLOWING_GAP = 10;
-const FOLLOWING_CARET_INSET = 28;
 
 // `min` wins over `max` so an element wider or taller than its bounds overhangs
 // the end that can be scrolled back into view.
@@ -154,69 +150,4 @@ function visibleSpan(bar: HTMLElement): number {
     if (r.right > right) right = r.right;
   }
   return right > left ? right - left : 0;
-}
-
-export function positionFollowingBar(
-  toolbar: HTMLElement,
-  editor: Editor,
-): boolean {
-  const coords = editor.coordsAtPos(editor.getCursor("from"));
-  if (!coords) return false;
-
-  // Same reset-measure-delta as anchorPopoverToButton: the bar is absolute inside
-  // the root split, so everything measured below is in the wrong space to assign.
-  toolbar.style.left = "0px";
-  toolbar.style.top = "0px";
-
-  const origin = toolbar.getBoundingClientRect();
-  const bounds = paneRelativeBounds(toolbar, FOLLOWING_EDGE_MARGIN);
-  const editorRect = editor.containerEl.getBoundingClientRect();
-
-  const left = clamp(
-    coords.left - FOLLOWING_CARET_INSET,
-    bounds.left,
-    bounds.right - origin.width,
-  );
-  const top = clamp(
-    followingBarTop(editor, coords, editorRect, origin.height),
-    bounds.top,
-    bounds.bottom - origin.height,
-  );
-
-  toolbar.style.left = `${left - origin.left}px`;
-  toolbar.style.top = `${top - origin.top}px`;
-  return true;
-}
-
-function followingBarTop(
-  editor: Editor,
-  coords: { top: number; bottom: number },
-  editorRect: { top: number; bottom: number },
-  toolbarHeight: number,
-): number {
-  const from = editor.getCursor("from");
-  const to = editor.getCursor("to");
-  // A selection dragged upwards keeps its head at the start, so the bar belongs
-  // above it; dragged downwards, below the caret.
-  const downward =
-    from.line !== to.line && editor.getCursor("head").ch !== from.ch;
-  const anchor = downward ? (caretCoords(editor) ?? coords) : coords;
-
-  const above = anchor.top - toolbarHeight - FOLLOWING_GAP;
-  const below = anchor.bottom + FOLLOWING_GAP;
-  return downward
-    ? below + toolbarHeight < editorRect.bottom
-      ? below
-      : above
-    : above > editorRect.top
-      ? above
-      : below;
-}
-
-function caretCoords(editor: Editor): EditorCoords | null {
-  const head = editor.getCursor("head");
-  if (head.ch !== editor.getCursor("from").ch) {
-    head.ch = Math.max(0, head.ch - 1);
-  }
-  return editor.coordsAtPos(head);
 }

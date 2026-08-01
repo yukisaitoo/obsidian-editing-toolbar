@@ -370,35 +370,3 @@ export const DEFAULT_TOOLBAR_COMMANDS: Command[] = [
     icon: "background-color",
   },
 ];
-
-// Deep-copied so the following default never aliases the top default's objects.
-const cloneToolbarDefault = (id: string): Command =>
-  structuredClone(
-    DEFAULT_TOOLBAR_COMMANDS.find((command) => command.id === id)!,
-  );
-
-export const DEFAULT_FOLLOWING_COMMANDS: Command[] = [
-  { id: ownCommand("toggle-bold"), name: "Bold", icon: "bold-glyph" },
-  {
-    id: ownCommand("toggle-italics"),
-    name: "Italic",
-    icon: "italic-glyph",
-  },
-  {
-    id: ownCommand("toggle-strikethrough"),
-    name: "Strikethrough",
-    icon: "strikethrough-glyph",
-  },
-  {
-    id: ownCommand("toggle-highlight"),
-    name: "Highlight",
-    icon: "highlight-glyph",
-  },
-  {
-    id: ownCommand("editor:toggle-code"),
-    name: "Inline code",
-    icon: "code-glyph",
-  },
-  cloneToolbarDefault(ownCommand("change-font-color")),
-  cloneToolbarDefault(ownCommand("change-background-color")),
-];

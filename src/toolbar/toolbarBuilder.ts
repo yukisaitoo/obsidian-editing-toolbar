@@ -3,7 +3,6 @@ import type EditingToolbarPlugin from "src/plugin/main";
 import {
   applyAppearanceVars,
   EditingToolbarSettings,
-  ToolbarStyleKey,
 } from "src/settings/settingsData";
 import { syncColorIcons } from "src/toolbar/colorPickerButton";
 import { reflowToolbarOverflow } from "src/toolbar/geometry";
@@ -19,7 +18,6 @@ import {
   SHARED_BAR_CLASS,
 } from "src/toolbar/toolbarDom";
 import { resolveToolbarDocument, windowOf } from "src/toolbar/toolbarHost";
-import { applyToolbarState } from "src/toolbar/toolbarVisibility";
 import { isAllowedViewType } from "src/util/viewUtils";
 
 const VIEW_TYPE_MOUNT_SELECTORS: Record<string, string> = {
@@ -27,90 +25,57 @@ const VIEW_TYPE_MOUNT_SELECTORS: Record<string, string> = {
   canvas: ".canvas-wrapper",
 };
 
-// Top bars are per view, so each one needs its own observer.
+// Bars are per view, so each one needs its own observer.
 const toolbarResizeObservers = new Map<HTMLElement, ResizeObserver>();
 
-export function getExistingToolbar(
-  app: App,
-  plugin: EditingToolbarPlugin,
-  style: ToolbarStyleKey,
-  hostDocument?: Document,
-): HTMLElement | null {
-  const doc = hostDocument ?? resolveToolbarDocument(app);
-  const selector = `${BAR_SELECTOR}[data-toolbar-style="${style}"]`;
-
-  // One top bar per pane, so it is found by walking the active leaf rather than
-  // cached; every other style has a single bar per window.
-  if (style === "top") {
-    return (
-      app.workspace
-        .getActiveViewOfType(ItemView)
-        ?.containerEl?.querySelector<HTMLElement>(selector) ?? null
-    );
-  }
-
-  const cached = plugin.getCachedToolbar(style);
-  if (cached && cached.ownerDocument === doc) return cached;
-
-  const found = doc.querySelector<HTMLElement>(selector);
-  if (found) plugin.setCachedToolbar(style, found);
-  return found;
+// One bar per pane, so it is found by walking the active leaf.
+export function getExistingToolbar(app: App): HTMLElement | null {
+  return (
+    app.workspace
+      .getActiveViewOfType(ItemView)
+      ?.containerEl?.querySelector<HTMLElement>(BAR_SELECTOR) ?? null
+  );
 }
 
-// Idempotent: calling twice cannot produce a duplicate bar. Null means this style
-// has nothing to show (disallowed view or an empty command list).
+// Idempotent: calling twice cannot produce a duplicate bar. Null means there is
+// nothing to show (disallowed view or an empty command list).
 export function ensureToolbar(
   app: App,
   plugin: EditingToolbarPlugin,
-  style: ToolbarStyleKey,
-  hostDocument?: Document,
 ): HTMLElement | null {
   if (!isAllowedViewType(app.workspace.getActiveViewOfType(ItemView))) {
     return null;
   }
 
-  const doc = hostDocument ?? resolveToolbarDocument(app);
-  const commands = plugin.getCurrentCommands(style);
+  const doc = resolveToolbarDocument(app);
+  const commands = plugin.settings.commands;
 
   if (!commands.length) {
-    disposeToolbar(app, plugin, style, doc);
+    disposeToolbar(app, doc);
     return null;
   }
 
-  const existing = getExistingToolbar(app, plugin, style, doc);
+  const existing = getExistingToolbar(app);
   if (existing) {
-    applyAppearanceVars(existing, plugin.settings, style);
+    applyAppearanceVars(existing, plugin.settings);
     return existing;
   }
 
-  const bars = mountBars(app, plugin.settings, style, doc);
+  const bars = mountBars(app, plugin.settings, doc);
   if (!bars) return null;
 
-  renderToolbarCommands({ app, plugin, bar: bars.bar, style }, commands);
+  renderToolbarCommands({ app, plugin, bar: bars.bar }, commands);
 
   refreshOverflow(plugin, bars.bar, bars.popoverBar);
-  if (style === "top") {
-    observeToolbarResize(plugin, bars.bar, bars.popoverBar);
-  } else {
-    plugin.setCachedToolbar(style, bars.bar);
-  }
+  observeToolbarResize(plugin, bars.bar, bars.popoverBar);
 
   syncColorIcons(doc, plugin.settings);
   return bars.bar;
 }
 
-function disposeToolbar(
-  app: App,
-  plugin: EditingToolbarPlugin,
-  style: ToolbarStyleKey,
-  hostDocument?: Document,
-): void {
-  const doc = hostDocument ?? resolveToolbarDocument(app);
-  getExistingToolbar(app, plugin, style, doc)?.remove();
-  doc
-    .querySelectorAll(`${POPOVER_SELECTOR}[data-toolbar-style="${style}"]`)
-    .forEach((el) => el.remove());
-  plugin.clearToolbarCache(style);
+function disposeToolbar(app: App, doc: Document): void {
+  getExistingToolbar(app)?.remove();
+  doc.querySelectorAll(POPOVER_SELECTOR).forEach((el) => el.remove());
 }
 
 export function selfDestruct(plugin: EditingToolbarPlugin): void {
@@ -131,8 +96,6 @@ export function selfDestruct(plugin: EditingToolbarPlugin): void {
       .querySelectorAll(`${BAR_SELECTOR}, ${POPOVER_SELECTOR}`)
       .forEach((el) => el.remove()),
   );
-
-  plugin.clearToolbarCache();
 }
 
 interface MountedBars {
@@ -143,39 +106,23 @@ interface MountedBars {
 function mountBars(
   app: App,
   settings: EditingToolbarSettings,
-  style: ToolbarStyleKey,
   doc: Document,
 ): MountedBars | null {
-  const bar = createBarEl(doc, "editingToolbarModalBar", style);
+  const bar = createBarEl(doc, "editingToolbarModalBar");
   bar.addClass(SHARED_BAR_CLASS);
-  bar.addClass(style === "top" ? "top" : "editingToolbarFlex");
 
-  // No offsets until positionFollowingBar runs, so mounting it visible would park
-  // it at the pane's top-left; the caller reveals it once anchored.
-  if (style !== "top") applyToolbarState(bar, "hidden");
+  const popoverBar = createBarEl(doc, "editingToolbarPopoverBar");
 
-  const popoverBar = createBarEl(doc, "editingToolbarPopoverBar", style);
+  applyAppearanceVars(bar, settings);
+  applyAppearanceVars(popoverBar, settings);
 
-  applyAppearanceVars(bar, settings, style);
-  applyAppearanceVars(popoverBar, settings, style);
-
-  const mounted =
-    style === "top"
-      ? mountInActiveView(app, bar, popoverBar)
-      : mountInWorkspaceRoot(doc, bar, popoverBar);
-
-  return mounted ? { bar, popoverBar } : null;
+  return mountInActiveView(app, bar, popoverBar) ? { bar, popoverBar } : null;
 }
 
-function createBarEl(
-  doc: Document,
-  className: string,
-  style: ToolbarStyleKey,
-): HTMLElement {
+function createBarEl(doc: Document, className: string): HTMLElement {
   const el = doc.createElement("div");
   el.addClass(className);
   el.addClass("editingToolbarDefaultAesthetic");
-  el.setAttribute("data-toolbar-style", style);
   return el;
 }
 
@@ -217,21 +164,6 @@ function findMountTarget(
   const viewContent = container.querySelector<HTMLElement>(".view-content");
   if (!viewContent) return null;
   return viewContent.querySelector<HTMLElement>(":scope > div") ?? viewContent;
-}
-
-function mountInWorkspaceRoot(
-  doc: Document,
-  bar: HTMLElement,
-  popoverBar: HTMLElement,
-): boolean {
-  const workspaceRoot = doc.body?.querySelector<HTMLElement>(
-    ".mod-vertical.mod-root",
-  );
-  if (!workspaceRoot) return false;
-
-  workspaceRoot.insertAdjacentElement("afterbegin", popoverBar);
-  workspaceRoot.insertAdjacentElement("afterbegin", bar);
-  return true;
 }
 
 function refreshOverflow(

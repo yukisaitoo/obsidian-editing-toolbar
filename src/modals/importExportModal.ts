@@ -8,8 +8,6 @@ import {
 } from "obsidian";
 import { ConfirmModal } from "src/modals/confirmModal";
 import type EditingToolbarPlugin from "src/plugin/main";
-import type { ToolbarStyleKey } from "src/settings/settingsData";
-import { STYLE_LABELS } from "src/settings/settingsData";
 import type { ImportMode, JsonPayload } from "src/settings/settingsTransfer";
 import {
   buildImportedSettings,
@@ -17,20 +15,6 @@ import {
   parseImport,
 } from "src/settings/settingsTransfer";
 import { strings } from "src/translations/helper";
-
-const COMMAND_LIST_LABELS: Record<
-  ToolbarStyleKey,
-  { update: string; clear: string }
-> = {
-  top: {
-    update: strings.updateTopStyleCommands,
-    clear: strings.clearAllTopStyleCommands,
-  },
-  following: {
-    update: strings.updateFollowingStyleCommands,
-    clear: strings.clearAllFollowingStyleCommands,
-  },
-};
 
 export class ImportExportModal extends Modal {
   plugin: EditingToolbarPlugin;
@@ -164,18 +148,13 @@ export class ImportExportModal extends Modal {
         exportTime: new Date().toISOString(),
         pluginId: this.plugin.manifest.id,
       },
-      followingCommands: settings.followingCommands ?? [],
-      topCommands: settings.topCommands ?? [],
-      appearanceByStyle: settings.appearanceByStyle ?? {},
+      commands: settings.commands ?? [],
+      appearance: settings.appearance ?? {},
     };
 
     GENERAL_SETTING_KEYS.forEach((key) => {
       exportContent[key] = settings[key];
     });
-
-    if (!exportContent.positionStyle) {
-      exportContent.positionStyle = "top";
-    }
 
     this.textArea.setValue(JSON.stringify(exportContent, null, 2));
   }
@@ -194,15 +173,10 @@ export class ImportExportModal extends Modal {
         return;
       }
 
-      const { general, appearance, lists } = parsed;
+      const { general, appearance, commands } = parsed;
       const containsGeneralSettings = Object.keys(general).length > 0;
-      const positionStyle = general.positionStyle;
 
-      if (
-        !lists.length &&
-        !containsGeneralSettings &&
-        !Object.keys(appearance).length
-      ) {
+      if (!commands && !containsGeneralSettings && !appearance) {
         new Notice(strings.validConfigurationFoundImportData);
         return;
       }
@@ -213,18 +187,10 @@ export class ImportExportModal extends Modal {
       if (containsGeneralSettings) {
         summary.push(`• ${strings.updateGeneralSettings}`);
       }
-      for (const { style, commands } of lists) {
-        const labels = COMMAND_LIST_LABELS[style];
-        if (commands.length) {
-          summary.push(`• ${labels.update} (${commands.length})`);
-        } else if (isOverwrite) {
-          summary.push(`• ${labels.clear} ⚠️`);
-        }
-      }
-      if (positionStyle) {
-        summary.push(
-          `• ${strings.setPositionStyle} ${STYLE_LABELS[positionStyle]}`,
-        );
+      if (commands?.length) {
+        summary.push(`• ${strings.updateCommands} (${commands.length})`);
+      } else if (commands && isOverwrite) {
+        summary.push(`• ${strings.clearAllCommands} ⚠️`);
       }
 
       summary.push(

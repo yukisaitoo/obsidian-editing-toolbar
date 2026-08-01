@@ -11,9 +11,6 @@ const ui: Partial<Record<keyof typeof en, string>> = {
   addCommandOntoEditingToolbar:
     "Добавьте команду на панель инструментов из библиотеки команд Obsidian. Для изменения порядка перетаскивайте элементы команд. Для удаления используйте кнопку удаления справа от команды.",
   appearance: "Внешний вид",
-  clearAllFollowingStyleCommands: "Очистить все команды стиля следования",
-  clearAllTopStyleCommands: "Очистить все команды верхнего стиля",
-  editingCommandsFor: 'Сейчас редактируются команды для конфигурации "{style}"',
   backgroundColor: "Цвет фона",
   buttonSubmenu: "Подменю кнопки",
   calloutType: "Тип Callout",
@@ -23,10 +20,6 @@ const ui: Partial<Record<keyof typeof en, string>> = {
   chooseCommand: "Выберите команду",
   chooseIcon2: "Выберите значок",
   chooseHowImportConfiguration: "Выберите способ импорта конфигурации",
-  chooseWhichToolbarStyleS:
-    "Выберите стиль панели инструментов для редактирования.",
-  chooseWhichToolbarStyleCommand:
-    "Выберите команду стиля панели инструментов для редактирования.",
   closed: "Свернуто",
   collapseState: "Состояние сворачивания",
   default: "По умолчанию",
@@ -54,10 +47,6 @@ const ui: Partial<Record<keyof typeof en, string>> = {
   doWantContinue: "Вы хотите продолжить?",
   dropdownMenu: "Выпадающее меню",
   editingToolbarCommands: "Команды панели инструментов",
-  enableToolbarPositionedTop:
-    "Включить панель инструментов в верхней части окна.",
-  enableToolbarAppearsUponText:
-    "Включить панель инструментов, появляющуюся при выделении текста.",
   endString: "Конечная строка",
   enterEndString: "Введите конечную строку",
   enterPrefix: "Введите префикс",
@@ -104,8 +93,6 @@ const ui: Partial<Record<keyof typeof en, string>> = {
   matchesFound: "Совпадений не найдено",
   obviousSeparatorListPatternDetected:
     "Не обнаружено явных разделителей или шаблонов списка",
-  updateFollowingStyleCommands: "Обновить команды стиля следования",
-  updateTopStyleCommands: "Обновить команды верхнего стиля",
   validConfigurationFoundImportData:
     "В импортируемых данных не найдена корректная конфигурация",
   numberLinesCustom: "Пронумеровать строки (настраиваемо)",
@@ -137,7 +124,6 @@ const ui: Partial<Record<keyof typeof en, string>> = {
   separator: "Разделитель",
   separatorLeaveEmptySmartSpacing:
     "Разделитель (оставьте пустым для умных интервалов)",
-  setPositionStyle: "Установить стиль расположения:",
   setBackgroundColorToolbar: "Установить цвет фона панели инструментов.",
   setColorToolbarIcon: "Установить цвет значков панели инструментов.",
   setSizeToolbarIconPx:
@@ -162,8 +148,6 @@ const ui: Partial<Record<keyof typeof en, string>> = {
   toolbarIconSize: "Размер значков панели инструментов",
   toolbarPreviewHypotheticalCommandConfigurati:
     "Предпросмотр панели инструментов (с примерной конфигурацией команд)",
-  toolbarSettings: "Настройки панели инструментов",
-  topToolbar: "Верхняя панель инструментов",
   trimLineEnds: "Удалить пробелы в начале и конце строк",
   updateImport: "Импорт с обновлением",
   updateModeAddNewItems:
@@ -195,10 +179,8 @@ export const commandNames: Record<string, string> = {
     'ID команды "${this.commandId}" уже существует',
   "Result:": "Результат:",
   "All settings": "Все настройки",
-  "Following style only": "Только стиль Following",
   "Top style only": "Только стиль Top",
   "Main Menu Commands": "Команды главного меню",
-  "Following Style Commands": "Команды стиля следования",
   "Top Style Commands": "Команды верхнего стиля",
   "Warning: Overwrite mode will completely replace your current settings with the imported ones.":
     "Предупреждение: режим перезаписи полностью заменит текущие настройки импортированными.",
@@ -206,7 +188,6 @@ export const commandNames: Record<string, string> = {
   "section!": "разделе сообщества!",
   "Custom theme": "Пользовательская тема",
   "Insert link": "Вставить ссылку",
-  "Following Toolbar": "Следующая за курсором панель",
   "Get plain text": "Получить обычный текст",
   "Remove blank lines": "Удалить пустые строки",
   "Line operations": "Операции со строками",
@@ -267,8 +248,6 @@ export const commandNames: Record<string, string> = {
   "Template name and content cannot be empty":
     "Название и содержимое шаблона не могут быть пустыми",
   "Manage Templates": "Управление шаблонами",
-  following: "Плавающая",
-  top: "Сверху",
   "Optional. Leave empty unless your server requires authentication.":
     "Необязательно. Оставьте пустым, если ваш сервер не требует авторизации.",
   "Get Models": "Получить список",

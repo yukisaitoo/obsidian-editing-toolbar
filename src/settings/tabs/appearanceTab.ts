@@ -1,11 +1,8 @@
 import { ButtonComponent, setIcon, Setting } from "obsidian";
-import type { ToolbarStyleKey } from "src/settings/settingsData";
 import {
   applyAppearanceVars,
   getAppearanceBucket,
   getAppearanceValue,
-  POSITION_STYLES,
-  STYLE_LABELS,
 } from "src/settings/settingsData";
 import type { SettingsTabContext } from "src/settings/settingsTab";
 import { SHARED_BAR_CLASS } from "src/toolbar/toolbarDom";
@@ -32,37 +29,12 @@ const PREVIEW_COMMANDS = [
   { name: "Insert callout", icon: "lucide-quote" },
 ];
 
-const PREVIEW_LAYOUT_CLASS: Record<ToolbarStyleKey, string> = {
-  top: "top",
-  following: "editingToolbarFlex",
-};
-
 export function renderAppearanceTab(
   ctx: SettingsTabContext,
   containerEl: HTMLElement,
 ): void {
-  const editingStyle = ctx.plugin.resolveActiveStyle();
-  ctx.plugin.appearanceEditStyle = editingStyle;
-
-  const styleContainer = containerEl.createDiv("appearanceSetting-container");
-  new Setting(styleContainer)
-    .setName(strings.toolbarSettings)
-    .setDesc(strings.chooseWhichToolbarStyleS)
-    .addDropdown((dropdown) => {
-      POSITION_STYLES.forEach((style) =>
-        dropdown.addOption(style, STYLE_LABELS[style]),
-      );
-      // Only the edit target moves. Writing positionStyle here would repoint the
-      // live toolbar as a side effect of choosing which one to restyle, which is
-      // exactly what appearanceEditStyle exists to avoid.
-      dropdown.setValue(editingStyle).onChange((value) => {
-        ctx.plugin.appearanceEditStyle = value as ToolbarStyleKey;
-        ctx.refresh();
-      });
-    });
-
   const toolbarContainer = containerEl.createDiv("custom-toolbar-container");
-  renderColorSetting(ctx, toolbarContainer, editingStyle, {
+  renderColorSetting(ctx, toolbarContainer, {
     name: strings.toolbarBackgroundColor,
     desc: strings.setBackgroundColorToolbar,
     cls: "toolbar_background",
@@ -70,7 +42,7 @@ export function renderAppearanceTab(
     cssProperty: "--editing-toolbar-background-color",
     swatches: BACKGROUND_SWATCHES,
   });
-  renderColorSetting(ctx, toolbarContainer, editingStyle, {
+  renderColorSetting(ctx, toolbarContainer, {
     name: strings.toolbarIconColor,
     desc: strings.setColorToolbarIcon,
     cls: "toolbar_icon",
@@ -84,33 +56,22 @@ export function renderAppearanceTab(
     .setDesc(strings.setSizeToolbarIconPx)
     .addSlider((slider) => {
       slider
-        .setValue(
-          getAppearanceValue(
-            ctx.plugin.settings,
-            "toolbarIconSize",
-            editingStyle,
-          ),
-        )
+        .setValue(getAppearanceValue(ctx.plugin.settings, "toolbarIconSize"))
         .setLimits(12, 32, 1)
         .setDynamicTooltip()
         .onChange(async (value) => {
-          getAppearanceBucket(
-            ctx.plugin.settings,
-            editingStyle,
-          ).toolbarIconSize = value;
+          getAppearanceBucket(ctx.plugin.settings).toolbarIconSize = value;
 
-          if (ctx.plugin.liveStyle === editingStyle) {
-            activeWindow.document.documentElement.style.setProperty(
-              "--toolbar-icon-size",
-              `${value}px`,
-            );
-          }
+          activeWindow.document.documentElement.style.setProperty(
+            "--toolbar-icon-size",
+            `${value}px`,
+          );
           await ctx.plugin.saveSettings();
           ctx.rebuildToolbar();
         });
     });
 
-  renderPreview(ctx, toolbarContainer, editingStyle);
+  renderPreview(ctx, toolbarContainer);
 }
 
 interface ColorSettingConfig {
@@ -124,16 +85,13 @@ interface ColorSettingConfig {
 
 function applyColor(
   ctx: SettingsTabContext,
-  editingStyle: ToolbarStyleKey,
   config: ColorSettingConfig,
   color: string,
 ): void {
-  if (ctx.plugin.liveStyle === editingStyle) {
-    activeWindow.document.documentElement.style.setProperty(
-      config.cssProperty,
-      color,
-    );
-  }
+  activeWindow.document.documentElement.style.setProperty(
+    config.cssProperty,
+    color,
+  );
   void ctx.plugin.saveSettings();
   // No refresh() here: inside a Pickr callback a synchronous re-render would
   // destroyAndRemove() the instance still dispatching. The rebuild does it on a timer.
@@ -143,7 +101,6 @@ function applyColor(
 function renderColorSetting(
   ctx: SettingsTabContext,
   containerEl: HTMLElement,
-  editingStyle: ToolbarStyleKey,
   config: ColorSettingConfig,
 ): void {
   new Setting(containerEl)
@@ -160,25 +117,17 @@ function renderColorSetting(
         container: pickerContainer,
         swatches: config.swatches,
         opacity: false,
-        defaultColor: getAppearanceValue(
-          ctx.plugin.settings,
-          config.key,
-          editingStyle,
-        ),
+        defaultColor: getAppearanceValue(ctx.plugin.settings, config.key),
         onSave: (hexColor) => {
-          getAppearanceBucket(ctx.plugin.settings, editingStyle)[config.key] =
-            hexColor;
-          applyColor(ctx, editingStyle, config, hexColor);
+          getAppearanceBucket(ctx.plugin.settings)[config.key] = hexColor;
+          applyColor(ctx, config, hexColor);
         },
         onClear: () => {
-          delete getAppearanceBucket(ctx.plugin.settings, editingStyle)[
-            config.key
-          ];
+          delete getAppearanceBucket(ctx.plugin.settings)[config.key];
           applyColor(
             ctx,
-            editingStyle,
             config,
-            getAppearanceValue(ctx.plugin.settings, config.key, editingStyle),
+            getAppearanceValue(ctx.plugin.settings, config.key),
           );
         },
       });
@@ -188,7 +137,6 @@ function renderColorSetting(
 function renderPreview(
   ctx: SettingsTabContext,
   containerEl: HTMLElement,
-  editingStyle: ToolbarStyleKey,
 ): void {
   const previewContainer = containerEl.createDiv("toolbar-preview-section");
   previewContainer.createEl("h3", {
@@ -201,7 +149,6 @@ function renderPreview(
   const previewBar = wrapper.createDiv();
   previewBar.addClass("editing-toolbar-preview");
   previewBar.addClass("editingToolbarDefaultAesthetic");
-  previewBar.addClass(PREVIEW_LAYOUT_CLASS[editingStyle]);
   // The shared chrome class, but not the live-instance one: the toolbar lifecycle
   // (selfDestruct, getExistingToolbar) must never see the preview.
   previewBar.addClass(SHARED_BAR_CLASS);
@@ -213,5 +160,5 @@ function renderPreview(
     setIcon(button.buttonEl, command.icon);
   });
 
-  applyAppearanceVars(previewBar, ctx.plugin.settings, editingStyle);
+  applyAppearanceVars(previewBar, ctx.plugin.settings);
 }

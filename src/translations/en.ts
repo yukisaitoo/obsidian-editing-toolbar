@@ -6,9 +6,7 @@ export const en = {
   addCommandOntoEditingToolbar:
     "Add a command onto Editing Toolbar from Obsidian's commands library. To reorder the commands, drag and drop the command items. To delete them, use the delete button to the right of the command item.",
   appearance: "Appearance",
-  clearAllFollowingStyleCommands: "Clear all Selection Commands",
-  clearAllTopStyleCommands: "Clear all Top Commands",
-  editingCommandsFor: 'Currently editing commands for "{style}" configuration',
+  clearAllCommands: "Clear all toolbar commands",
   backgroundColor: "Background color",
   buttonSubmenu: "Button Submenu",
   calloutType: "Callout Type",
@@ -18,10 +16,6 @@ export const en = {
   chooseCommand: "Choose a command",
   chooseIcon2: "Choose an icon",
   chooseHowImportConfiguration: "Choose how to import the configuration",
-  chooseWhichToolbarStyleS:
-    "Choose which toolbar style's appearance you want to edit.",
-  chooseWhichToolbarStyleCommand:
-    "Choose which toolbar style's command you want to edit.",
   closed: "Closed",
   collapseState: "Collapse State",
   default: "Default",
@@ -50,9 +44,6 @@ export const en = {
   dragCommandsHere: "Drag it here",
   dropdownMenu: "Dropdown Menu",
   editingToolbarCommands: "Editing Toolbar Commands",
-  enableToolbarPositionedTop: "Enable the toolbar positioned at the top.",
-  enableToolbarAppearsUponText:
-    "Enable the toolbar that appears upon text selection.",
   endString: "End String",
   enterEndString: "Enter end string",
   enterPrefix: "Enter prefix",
@@ -69,7 +60,6 @@ export const en = {
   extractedMatches: "Extracted {count} matches",
   extractionFailed: "Extraction failed",
   failedCopyConfiguration: "Failed to copy configuration",
-  followingToolbar: "Selection",
   fontColors: "Font Colors",
   fullHalfConverter: "Convert punctuation width",
   general: "General",
@@ -100,8 +90,7 @@ export const en = {
   matchesFound: "No matches found",
   obviousSeparatorListPatternDetected:
     "No obvious separator or list pattern detected",
-  updateFollowingStyleCommands: "Update Selection Commands",
-  updateTopStyleCommands: "Update Top Commands",
+  updateCommands: "Update toolbar commands",
   validConfigurationFoundImportData:
     "No valid configuration found in import data",
   numberLinesCustom: "Number lines (custom)",
@@ -136,7 +125,6 @@ export const en = {
   separatorLeaveEmptySmartSpacing: "Separator (leave empty for smart spacing)",
   unreadableSettingsFile:
     "Settings file could not be read — defaults loaded. Back up data.json before changing any setting.",
-  setPositionStyle: "Set Position Style to:",
   setBackgroundColorToolbar: "Set the background color of the toolbar.",
   setColorToolbarIcon: "Set the color of the toolbar icon.",
   setSizeToolbarIconPx: "Set the size of the toolbar icon (px); default: 18px",
@@ -160,8 +148,6 @@ export const en = {
   toolbarIconSize: "Toolbar Icon Size",
   toolbarPreviewHypotheticalCommandConfigurati:
     "Toolbar Preview (with hypothetical command configuration)",
-  toolbarSettings: "Toolbar Settings",
-  topToolbar: "Top",
   trimLineEnds: "Trim line ends",
   updateImport: "Update Import",
   updateModeAddNewItems: "Update Mode (Add new items and update existing ones)",

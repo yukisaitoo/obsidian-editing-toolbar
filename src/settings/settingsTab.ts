@@ -10,7 +10,6 @@ import Sortable from "sortablejs";
 import type EditingToolbarPlugin from "src/plugin/main";
 import type { ColorPickrOptions } from "src/settings/pickr";
 import { createColorPickr } from "src/settings/pickr";
-import type { ToolbarStyleKey } from "src/settings/settingsData";
 import { renderAppearanceTab } from "src/settings/tabs/appearanceTab";
 import { renderCommandsTab } from "src/settings/tabs/commandsTab";
 import { renderGeneralTab } from "src/settings/tabs/generalTab";
@@ -54,12 +53,10 @@ export class EditingToolbarSettingTab extends PluginSettingTab {
   private isOpen = false;
   private pickrs: Pickr[] = [];
   private sortables: Sortable[] = [];
-  private commandStyle: ToolbarStyleKey;
 
   constructor(app: App, plugin: EditingToolbarPlugin) {
     super(app, plugin);
     this.plugin = plugin;
-    this.commandStyle = plugin.liveStyle;
 
     this.plugin.register(
       this.plugin.onRebuild(() => {
@@ -110,13 +107,7 @@ export class EditingToolbarSettingTab extends PluginSettingTab {
         renderAppearanceTab(ctx, contentEl);
         break;
       case "commands":
-        renderCommandsTab(ctx, contentEl, {
-          style: this.commandStyle,
-          onStyleChange: (style) => {
-            this.commandStyle = style;
-            this.display();
-          },
-        });
+        renderCommandsTab(ctx, contentEl);
         break;
       case "importexport":
         renderImportExportTab(ctx, contentEl);
@@ -127,9 +118,6 @@ export class EditingToolbarSettingTab extends PluginSettingTab {
   hide(): void {
     this.isOpen = false;
     this.destroyTabResources();
-    // The style being edited must not outlive the pane, or resolveActiveStyle()
-    // keeps reporting it after the workspace has moved on.
-    this.plugin.appearanceEditStyle = null;
     this.rebuildToolbar();
   }
 

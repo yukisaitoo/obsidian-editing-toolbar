@@ -1,19 +1,6 @@
 import type { Command } from "obsidian";
 
-import {
-  DEFAULT_FOLLOWING_COMMANDS,
-  DEFAULT_TOOLBAR_COMMANDS,
-} from "src/settings/defaultCommands";
-import { strings } from "src/translations/helper";
-
-export type ToolbarStyleKey = "top" | "following";
-
-export const POSITION_STYLES: ToolbarStyleKey[] = ["top", "following"];
-
-export const STYLE_LABELS: Record<ToolbarStyleKey, string> = {
-  top: strings.topToolbar,
-  following: strings.followingToolbar,
-};
+import { DEFAULT_TOOLBAR_COMMANDS } from "src/settings/defaultCommands";
 
 export interface AppearanceSettings {
   toolbarBackgroundColor: string;
@@ -21,11 +8,7 @@ export interface AppearanceSettings {
   toolbarIconSize: number;
 }
 
-export type StyleAppearanceSettings = Partial<AppearanceSettings>;
-
-export interface AppearanceByStyle {
-  [style: string]: StyleAppearanceSettings;
-}
+export type AppearanceOverrides = Partial<AppearanceSettings>;
 
 export const DEFAULT_APPEARANCE: AppearanceSettings = {
   toolbarBackgroundColor: "var(--background-primary)",
@@ -36,59 +19,33 @@ export const DEFAULT_APPEARANCE: AppearanceSettings = {
 export function getAppearanceValue<K extends keyof AppearanceSettings>(
   settings: EditingToolbarSettings,
   key: K,
-  style: string,
 ): AppearanceSettings[K] {
-  return settings.appearanceByStyle?.[style]?.[key] ?? DEFAULT_APPEARANCE[key];
+  return settings.appearance?.[key] ?? DEFAULT_APPEARANCE[key];
 }
 
-// Writable bucket for `style`, created on demand. Keys left out of it fall back
-// to DEFAULT_APPEARANCE via getAppearanceValue().
+// The writable bucket, created on demand. Keys left out of it fall back to
+// DEFAULT_APPEARANCE via getAppearanceValue().
 export function getAppearanceBucket(
   settings: EditingToolbarSettings,
-  style: string,
-): StyleAppearanceSettings {
-  const store = (settings.appearanceByStyle ??= {});
-  return (store[style] ??= {});
+): AppearanceOverrides {
+  return (settings.appearance ??= {});
 }
 
 export function applyAppearanceVars(
   el: HTMLElement,
   settings: EditingToolbarSettings,
-  style: string,
 ): void {
   el.style.setProperty(
     "--editing-toolbar-background-color",
-    getAppearanceValue(settings, "toolbarBackgroundColor", style),
+    getAppearanceValue(settings, "toolbarBackgroundColor"),
   );
   el.style.setProperty(
     "--editing-toolbar-icon-color",
-    getAppearanceValue(settings, "toolbarIconColor", style),
+    getAppearanceValue(settings, "toolbarIconColor"),
   );
   el.style.setProperty(
     "--toolbar-icon-size",
-    `${getAppearanceValue(settings, "toolbarIconSize", style)}px`,
-  );
-}
-
-// Which style owns "primary" after a toggle, or null to leave it alone: enabling one
-// makes it primary, disabling the primary promotes the next enabled style.
-export function resolveNextPositionStyle(
-  settings: EditingToolbarSettings,
-  toggledStyle: ToolbarStyleKey,
-  enabled: boolean,
-  prevStyle: ToolbarStyleKey | null,
-): ToolbarStyleKey | null {
-  if (enabled) return toggledStyle;
-  if (prevStyle !== toggledStyle) return null;
-
-  const enabledFlags: Record<ToolbarStyleKey, boolean> = {
-    top: settings.enableTopToolbar,
-    following: settings.enableFollowingToolbar,
-  };
-  return (
-    POSITION_STYLES.find(
-      (style) => style !== toggledStyle && enabledFlags[style],
-    ) ?? null
+    `${getAppearanceValue(settings, "toolbarIconSize")}px`,
   );
 }
 
@@ -107,11 +64,7 @@ export type CustomColorKey =
 export interface EditingToolbarSettings {
   lastFontColor: string;
   lastHighlightColor: string;
-  positionStyle: ToolbarStyleKey;
-  followingCommands: Command[];
-  topCommands: Command[];
-  enableTopToolbar: boolean;
-  enableFollowingToolbar: boolean;
+  commands: Command[];
   toolbarVisible: boolean;
   custom_bg1: string;
   custom_bg2: string;
@@ -124,17 +77,13 @@ export interface EditingToolbarSettings {
   custom_fc4: string;
   custom_fc5: string;
 
-  appearanceByStyle?: AppearanceByStyle;
+  appearance?: AppearanceOverrides;
 }
 
-// The command lists are seeded by createDefaultSettings() rather than here, so a
+// The command list is seeded by createDefaultSettings() rather than here, so a
 // list the user deliberately cleared is not re-filled on every load.
 export const DEFAULT_SETTINGS: EditingToolbarSettings = {
-  positionStyle: "top",
-  followingCommands: [],
-  topCommands: [],
-  enableTopToolbar: true,
-  enableFollowingToolbar: false,
+  commands: [],
   toolbarVisible: true,
   lastFontColor: "#2DC26B",
   lastHighlightColor: "#d3f8b6",
@@ -150,19 +99,10 @@ export const DEFAULT_SETTINGS: EditingToolbarSettings = {
   custom_fc5: "#646A73",
 };
 
-export const DEFAULT_COMMANDS_BY_STYLE: Record<ToolbarStyleKey, Command[]> = {
-  top: DEFAULT_TOOLBAR_COMMANDS,
-  following: DEFAULT_FOLLOWING_COMMANDS,
-};
-
 // Cloned, because the defaults above are shared module constants and callers
 // mutate what they get back.
 export function createDefaultSettings(): EditingToolbarSettings {
   const settings = structuredClone(DEFAULT_SETTINGS);
-  for (const style of POSITION_STYLES) {
-    settings[`${style}Commands`] = structuredClone(
-      DEFAULT_COMMANDS_BY_STYLE[style],
-    );
-  }
+  settings.commands = structuredClone(DEFAULT_TOOLBAR_COMMANDS);
   return settings;
 }

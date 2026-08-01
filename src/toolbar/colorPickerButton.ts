@@ -5,7 +5,6 @@ import {
 } from "src/icons/customIcons";
 import type EditingToolbarPlugin from "src/plugin/main";
 import { ownCommand, PLUGIN_ID } from "src/plugin/pluginId";
-import type { ToolbarStyleKey } from "src/settings/settingsData";
 import { attachFlyoutClamp } from "src/toolbar/geometry";
 import { applyButtonIcon, SUBMENU_BUTTON_CLASS } from "src/toolbar/toolbarDom";
 import { syncToolbarState } from "src/toolbar/toolbarVisibility";
@@ -53,7 +52,6 @@ export function createColorPickerButton(
   app: App,
   plugin: EditingToolbarPlugin,
   bar: HTMLElement,
-  style: ToolbarStyleKey,
   item: Command,
 ): void {
   const variant = VARIANTS[item.id];
@@ -67,7 +65,7 @@ export function createColorPickerButton(
       if (target?.closest(".x-color-picker-wrapper, .subitem")) return;
 
       app.commands.executeCommandById(item.id);
-      syncToolbarState(plugin, bar, style);
+      syncToolbarState(plugin, bar);
     });
 
   // On the icon, not the button: the swatch panel below is a child of the button.

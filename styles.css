@@ -9,79 +9,49 @@
 }
 
 /* ==========================================================================
-   2. TOOLBAR — shared base. Two hooks are in play throughout §2-§5:
+   2. TOOLBAR — the bar itself. Two hooks are in play throughout §2-§4:
 
-     .editing-toolbar-bar        chrome only. Worn by the real bar AND by the
-                                 settings preview, which is a plain div in
+     .editing-toolbar-bar        chrome and layout. Worn by the real bar AND by
+                                 the settings preview, which is a plain div in
                                  normal flow.
      .editingToolbarModalBar     a LIVE bar in the workspace. Also what every JS
      .editingToolbarPopoverBar   lifecycle query matches, so the preview must
                                  never wear it. Anything that would misplace a
-                                 static preview — position, stacking, hiding —
-                                 belongs here rather than on the shared class.
-
-   Mode-specific overrides follow in §3/§4.
+                                 static preview — stacking, hiding — belongs
+                                 here rather than on the shared class.
    ========================================================================== */
 
-/* The only way a bar is hidden. `display` is reserved for choosing its layout
-   (grid / flex / top), so hiding must not touch it. */
+/* The only way a bar is hidden. `display` carries the bar's flex layout, so
+   hiding must not touch it. */
 .editingToolbarModalBar.is-hidden {
   visibility: hidden;
 }
 
 .editing-toolbar-bar {
-  display: grid;
-  min-width: fit-content;
+  position: relative;
+  display: flex;
+  height: calc(var(--toolbar-icon-size) + 18px);
+  /* The bar can't grow wider than the pane (which is what pushed icons
+     off-screen). Keep it pinned to the pane width and let JS
+     (reflowToolbarOverflow) move the excess into the "more" popover. Overflow
+     must stay visible: the §4 submenu flyouts hang below the bar's box, so any
+     clipping here reduces them to a hairline. */
+  min-width: 0;
+  max-width: 100%;
+  overflow: visible;
   border: none;
   border-radius: var(--radius-m);
   backdrop-filter: none;
+  gap: 10px;
+  flex-wrap: nowrap;
   align-items: center;
-  justify-items: center;
-  justify-content: space-around;
+  justify-content: center;
   user-select: none;
-  transition: 100ms cubic-bezier(0.92, -0.53, 0.65, 1.21);
+  transition: all 0.2s linear;
 }
 
-/* Live bars float over the note; §3 puts top mode back into the pane's flow. */
 .editingToolbarModalBar {
-  position: absolute;
-  z-index: var(--layer-modal);
-}
-
-/* Obsidian's app.css sizes every direct child of the root split:
-   `.workspace-split.mod-vertical > * { height: 100%; width: 0; flex: 1 0 0 }`
-   at 0-2-0. Both non-top bars mount there, so their own box has to out-specify
-   that or the bar inflates to the full pane height — which in turn makes
-   followingBarTop() reject the slot above the selection and drop the bar
-   underneath it. The `#id` selectors this file used to carry won this by
-   accident; classes have to say it. `fit-content` suits both: the modal bar
-   shrink-wraps via min-width anyway, and it restores the popover's own value. */
-.workspace-split.mod-vertical > :is(.editingToolbarModalBar, .editingToolbarPopoverBar) {
-  height: auto;
-  width: fit-content;
-  flex: none;
-}
-
-/* Following mode re-anchors the bar on every cursor move; animating that
-   makes it visibly lag the caret. */
-.editingToolbarModalBar[data-toolbar-style="following"] {
-  transition: none !important;
-}
-
-/* The selection bar shrink-wraps its buttons, so it needs its own padding to
-   keep icons off the edge — the top bar gets that from its taller box and
-   centred layout. Height stays auto so it grows with the icon size. */
-.editing-toolbar-bar.editingToolbarFlex {
-  display: flex;
-  padding: 4px 6px;
-  gap: 4px;
-  transform: none;
-}
-
-/* Spacing comes from the container's gap here, not per-button margins. */
-.editing-toolbar-bar.editingToolbarFlex :is(.editingToolbarCommandItem, button.editingToolbarCommandsubItem) {
-  min-width: 20px;
-  margin: auto 0;
+  z-index: var(--layer-status-bar);
 }
 
 .editing-toolbar-bar .editingToolbarCommandItem {
@@ -101,7 +71,7 @@
 }
 
 /* Button chrome shared by both bars. Dividers deliberately match here too, so
-   they inherit border/box-shadow resets; §5 narrows their box afterwards and
+   they inherit border/box-shadow resets; §4 narrows their box afterwards and
    relies on source order to win (equal specificity). */
 :is(.editing-toolbar-bar, .editingToolbarPopoverBar) :is(.editingToolbarCommandItem, button.editingToolbarCommandsubItem) {
   display: inline-flex;
@@ -155,27 +125,8 @@
   background-color: var(--editing-toolbar-background-color);
 }
 
-.editing-toolbar-bar.editingToolbarDefaultAesthetic.top {
+.editing-toolbar-bar.editingToolbarDefaultAesthetic {
   border-bottom: 1px solid var(--background-modifier-border);
-}
-
-.editing-toolbar-bar.editingToolbarDefaultAesthetic:not(.top) {
-  border: 1px solid var(--background-modifier-border);
-  background-clip: padding-box;
-  box-shadow: var(--shadow-s);
-}
-
-.editing-toolbar-bar.editingToolbarDefaultAesthetic:not(.top) :is(.editingToolbarCommandItem, button.editingToolbarCommandsubItem) {
-  min-height: max(28px, calc(var(--toolbar-icon-size) + 10px));
-}
-
-.editing-toolbar-bar.editingToolbarDefaultAesthetic:not(.top) button.editingToolbarCommandsubItem {
-  margin: auto;
-  padding: 6px;
-  border: none;
-  background-color: transparent;
-  box-shadow: none;
-  place-items: center;
 }
 
 /* Toolbar icons honor the configured icon colour and size. */
@@ -194,32 +145,7 @@
 }
 
 /* ==========================================================================
-   3. TOOLBAR — top mode. Must stay after §2 (overrides the base bar).
-   ========================================================================== */
-
-.editing-toolbar-bar.top {
-  position: relative;
-  display: flex;
-  height: calc(var(--toolbar-icon-size) + 18px);
-  /* Override the base rule's min-width:fit-content so the bar can't grow wider
-     than the pane (which is what pushed icons off-screen). Keep it pinned to
-     the pane width and let JS (reflowToolbarOverflow) move the excess into the
-     "more" popover. Overflow must stay visible: the §5 submenu flyouts hang
-     below the bar's box, so any clipping here reduces them to a hairline. */
-  min-width: 0;
-  max-width: 100%;
-  overflow: visible;
-  gap: 10px;
-  flex-wrap: nowrap;
-  align-items: center;
-  justify-content: center;
-  transform: none;
-  transition: all 0.2s linear;
-  z-index: var(--layer-status-bar);
-}
-
-/* ==========================================================================
-   4. TOOLBAR — overflow popover bar.
+   3. TOOLBAR — overflow popover bar.
    ========================================================================== */
 
 .editingToolbarPopoverBar:not(.editing-toolbar-more-open) {
@@ -245,7 +171,7 @@
 }
 
 /* ==========================================================================
-   5. SUBMENUS, DIVIDERS AND COLOUR PICKERS
+   4. SUBMENUS, DIVIDERS AND COLOUR PICKERS
    ========================================================================== */
 
 /* Chevron affordance on any button that opens a submenu. */
@@ -314,13 +240,12 @@ button.editingToolbarCommandsubItem::after {
 }
 
 /* --- Dividers ------------------------------------------------------------
-   Only top mode has the horizontal room to show separators in the bar itself;
-   everywhere else they collapse. Scoped to direct children so dividers inside
-   a submenu flyout — which has room in every mode — keep showing. These rules
-   must stay after §2 — the second selector ties the base button rule on
-   specificity and wins on source order alone. */
+   The bar has the horizontal room to show separators; the popover, which wraps,
+   does not. Scoped to direct children so dividers inside a submenu flyout keep
+   showing. These rules must stay after §2 — the second selector ties the base
+   button rule on specificity and wins on source order alone. */
 
-:is(.editing-toolbar-bar:not(.top), .editingToolbarPopoverBar)>button.editingToolbar-Divider-Line {
+.editingToolbarPopoverBar>button.editingToolbar-Divider-Line {
   display: none;
 }
 
@@ -452,18 +377,17 @@ button.editingToolbarCommandsubItem::after {
    autocomplete popup opened under a top-mode bar renders behind it. Scoped to
    panes that actually have the bar — unscoped this reordered every CodeMirror
    tooltip in the app, including ones this plugin has nothing to do with. */
-.workspace-leaf-content:has(.editingToolbarModalBar.top) .cm-tooltip {
+.workspace-leaf-content:has(.editingToolbarModalBar) .cm-tooltip {
   z-index: 1000;
 }
 
 /* ==========================================================================
-   6. SETTINGS TAB
+   5. SETTINGS TAB
    ========================================================================== */
 
 .editing-toolbar-tabs {
   display: flex;
   margin-bottom: 24px;
-  padding: 0 8px;
   border-bottom: 2px solid var(--background-modifier-border);
 }
 
@@ -488,10 +412,6 @@ button.editingToolbarCommandsubItem::after {
   color: var(--text-accent);
 }
 
-.editing-toolbar-content {
-  padding: 0 8px;
-}
-
 .editing-toolbar-content .setting-item {
   align-items: center;
 }
@@ -511,10 +431,8 @@ button.editingToolbarCommandsubItem::after {
 
 /* --- Section containers --------------------------------------------------- */
 
-.editing-toolbar-settings .generalSetting-container,
 .editing-toolbar-settings .custom-paintbrush-container,
-.editing-toolbar-settings .appearanceSetting-container,
-.editing-toolbar-settings .commandSetting-container,
+.editing-toolbar-settings .command-lists-container,
 .editing-toolbar-settings .import-export-container {
   margin-bottom: 20px;
   padding: 16px;
@@ -528,46 +446,10 @@ button.editingToolbarCommandsubItem::after {
   background-color: var(--background-secondary);
 }
 
-.editing-toolbar-settings .command-lists-container {
-  padding: 16px;
-  border-radius: 8px;
-}
-
-/* The command list is tinted to match the position-style banner above it. */
-.command-lists-container.following {
-  border: 1px solid rgba(var(--color-green-rgb), 0.3);
-  background-color: rgba(var(--color-green-rgb), 0.1);
-}
-
-.command-lists-container.top {
-  border: 1px solid rgba(var(--color-yellow-rgb), 0.3);
-  background-color: rgba(var(--color-yellow-rgb), 0.1);
-}
-
-.position-style-info {
-  position: sticky;
-  top: 0;
-  margin-bottom: 1rem;
-  padding: 0.5rem;
-  border-radius: 4px;
-  background-color: rgba(var(--color-purple-rgb), 0.8);
-  color: white;
-  font-weight: bold;
-  text-align: center;
-  z-index: 1;
-}
-
-.position-style-info.following {
-  background-color: rgba(var(--color-green-rgb), 0.8);
-}
-
-.position-style-info.top {
-  background-color: rgba(var(--color-yellow-rgb), 0.8);
-}
-
 /* --- Command list rows and drag-and-drop ---------------------------------- */
 
 .editingToolbarSettingsTabsContainer {
+  padding-top: var(--size-4-2);
   border-top: 1px solid var(--background-modifier-border);
   border-bottom: 1px solid var(--background-modifier-border);
 }
@@ -781,7 +663,7 @@ button.editingToolbarSettingsButton {
    `.toolbar_background`/`.toolbar_icon` in Appearance) — an enumeration new rows
    kept falling out of. No sizing here: Pickr replaces the `div.picker` it is
    handed with its own `div.pickr`, so the swatch box comes from the vendored
-   `.pcr-button` in §9. */
+   `.pcr-button` in §8. */
 .setting-item .pickr-container {
   display: flex;
   gap: 8px;
@@ -805,14 +687,6 @@ button.editingToolbarSettingsButton {
 
 .editing-toolbar-settings .preview-toolbar-wrapper {
   padding: 15px;
-}
-
-/* The real selection/floating bars are absolutely positioned, so they shrink to
-   fit their buttons. In the settings pane the preview is in normal flow, where
-   it would otherwise stretch to the full pane width and let the bar's
-   space-around fan the buttons out. Top mode is meant to span its pane. */
-.editing-toolbar-preview:not(.top) {
-  width: fit-content;
 }
 
 /* --- Import / export panels ----------------------------------------------- */
@@ -847,7 +721,7 @@ button.editingToolbarSettingsButton {
 }
 
 /* ==========================================================================
-   7. MODALS
+   6. MODALS
    ========================================================================== */
 
 /* The toolbar's own popup modals (resize handle, etc.) float over the note
@@ -979,7 +853,7 @@ body.theme-dark .modal-container.editingToolbar-Modal .modal input[type='range']
 }
 
 /* ==========================================================================
-   8. EDITOR AND HOST INTEGRATIONS
+   7. EDITOR AND HOST INTEGRATIONS
    ========================================================================== */
 
 /* --- Highlights written by setBackgroundColor() --------------------------- */
@@ -1006,7 +880,7 @@ mark.editing-toolbar-highlight {
 }
 
 /* ==========================================================================
-   9. VENDORED — Pickr 1.8.4 "nano" theme (@simonwep/pickr/dist/themes/nano.min.css)
+   8. VENDORED — Pickr 1.8.4 "nano" theme (@simonwep/pickr/dist/themes/nano.min.css)
    Inlined because the plugin ships styles.css directly to the vault and no
    longer bundles CSS through the build. Update if the pinned pickr version changes.
    ========================================================================== */

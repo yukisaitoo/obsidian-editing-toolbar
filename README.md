@@ -9,25 +9,26 @@ This fork is not affiliated with or endorsed by the original author, and is **no
 
 ## What this does
 
-This is a Word-style editing toolbar for Obsidian.
+This is a Word-style editing toolbar for Obsidian. It sits at the top of the
+editing pane.
 
-**Top toolbar**
-
-![Top toolbar](docs/images/top-toolbar.png)
-
-**Selection toolbar**
-
-![Selection toolbar](docs/images/selection-toolbar.png)
+<center>
+  <img src="docs/images/top-toolbar.png" width="80%" alt="Toolbar">
+</center>
 
 Config in **Settings → Editing Toolbar**:
 
 **Appearance**
 
-![Appearance settings](docs/images/settings-appearance.png)
+<center>
+  <img src="docs/images/settings-appearance.png" width="80%" alt="Appearance settings">
+</center>
 
 **Toolbar Commands**
 
-![Toolbar Commands settings](docs/images/settings-commands.png)
+<center>
+  <img src="docs/images/settings-commands.png" width="80%" alt="Toolbar Commands settings">
+</center>
 
 ## Install
 

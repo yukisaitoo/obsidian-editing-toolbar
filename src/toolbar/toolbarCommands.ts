@@ -1,6 +1,5 @@
-import { App, ButtonComponent, Command, Menu, TooltipOptions } from "obsidian";
+import { App, ButtonComponent, Command, Menu } from "obsidian";
 import type EditingToolbarPlugin from "src/plugin/main";
-import type { ToolbarStyleKey } from "src/settings/settingsData";
 import {
   createColorPickerButton,
   isColorPickerCommand,
@@ -22,7 +21,6 @@ interface RenderContext {
   app: App;
   plugin: EditingToolbarPlugin;
   bar: HTMLElement;
-  style: ToolbarStyleKey;
 }
 
 export function renderToolbarCommands(
@@ -40,7 +38,7 @@ export function renderToolbarCommands(
     }
 
     if (isColorPickerCommand(item.id)) {
-      createColorPickerButton(ctx.app, ctx.plugin, ctx.bar, ctx.style, item);
+      createColorPickerButton(ctx.app, ctx.plugin, ctx.bar, item);
       return;
     }
 
@@ -50,7 +48,7 @@ export function renderToolbarCommands(
 
 function renderPlainButton(ctx: RenderContext, item: Command) {
   const button = new ButtonComponent(ctx.bar)
-    .setTooltip(tooltipFor(ctx.app, item), tooltipOptions(ctx))
+    .setTooltip(tooltipFor(ctx.app, item))
     .onClick(() => runCommand(ctx, item.id));
 
   button.setClass("editingToolbarCommandItem");
@@ -62,7 +60,7 @@ function renderDropdown(ctx: RenderContext, item: SubmenuCommand) {
   const parent = new ButtonComponent(ctx.bar);
   parent.setClass(SUBMENU_BUTTON_CLASS);
   applyButtonIcon(parent, item.icon);
-  parent.setTooltip(tooltipFor(ctx.app, item), tooltipOptions(ctx));
+  parent.setTooltip(tooltipFor(ctx.app, item));
 
   parent.onClick((evt: MouseEvent) => {
     const menu = new Menu();
@@ -103,7 +101,7 @@ function renderFlyout(ctx: RenderContext, item: SubmenuCommand) {
 
   item.SubmenuCommands.forEach((subitem) => {
     const subBtn = new ButtonComponent(submenu)
-      .setTooltip(tooltipFor(ctx.app, subitem), tooltipOptions(ctx))
+      .setTooltip(tooltipFor(ctx.app, subitem))
       .setClass("menu-item")
       .onClick(() => runCommand(ctx, subitem.id));
 
@@ -116,16 +114,11 @@ function renderFlyout(ctx: RenderContext, item: SubmenuCommand) {
 
 function runCommand(ctx: RenderContext, commandId: string): void {
   ctx.app.commands.executeCommandById(commandId);
-  syncToolbarState(ctx.plugin, ctx.bar, ctx.style);
+  syncToolbarState(ctx.plugin, ctx.bar);
 }
 
 function tooltipFor(app: App, item: Command): string {
   const label = t(item.name);
   const hotkey = getHotkey(app, item.id);
   return hotkey === NO_HOTKEY ? label : `${label}(${hotkey})`;
-}
-
-// A floating bar sits over the text it acts on, so its tooltips go above it.
-function tooltipOptions(ctx: RenderContext): TooltipOptions {
-  return ctx.style === "top" ? {} : { placement: "top" };
 }

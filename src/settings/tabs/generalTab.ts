@@ -1,38 +1,14 @@
 import { Setting } from "obsidian";
 import { ConfirmModal } from "src/modals/confirmModal";
 import type { CustomColorKey } from "src/settings/settingsData";
-import {
-  DEFAULT_SETTINGS,
-  POSITION_STYLES,
-  STYLE_LABELS,
-} from "src/settings/settingsData";
+import { DEFAULT_SETTINGS } from "src/settings/settingsData";
 import type { SettingsTabContext } from "src/settings/settingsTab";
 import { strings } from "src/translations/helper";
-
-const STYLE_DESCRIPTIONS: Record<string, string> = {
-  top: strings.enableToolbarPositionedTop,
-  following: strings.enableToolbarAppearsUponText,
-};
 
 export function renderGeneralTab(
   ctx: SettingsTabContext,
   containerEl: HTMLElement,
 ): void {
-  const toggleContainer = containerEl.createDiv("generalSetting-container");
-  POSITION_STYLES.forEach((style) => {
-    new Setting(toggleContainer)
-      .setName(STYLE_LABELS[style])
-      .setDesc(STYLE_DESCRIPTIONS[style])
-      .addToggle((toggle) => {
-        toggle
-          .setValue(ctx.plugin.isToolbarStyleEnabled(style))
-          .onChange(async (enabled) => {
-            await ctx.plugin.setToolbarStyleEnabled(style, enabled);
-            ctx.refresh();
-          });
-      });
-  });
-
   const paintbrushContainer = containerEl.createDiv(
     "custom-paintbrush-container",
   );

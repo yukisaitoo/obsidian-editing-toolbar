@@ -10,10 +10,6 @@ const ui: Partial<Record<keyof typeof en, string>> = {
   addCommandOntoEditingToolbar:
     "Adicione um comando na Barra de Ferramentas a partir da biblioteca de comandos do Obsidian. Para reordenar os comandos, arraste e solte os itens do comando. Para deletar, use o botão de deletar à direita do item do comando.",
   appearance: "Aparência",
-  clearAllFollowingStyleCommands:
-    "Limpar todos os Comandos de Estilo Contextual",
-  clearAllTopStyleCommands: "Limpar todos os Comandos de Estilo de Topo",
-  editingCommandsFor: 'Atualmente editando comandos para a configuração "{style}"',
   backgroundColor: "Cor de Fundo",
   calloutType: "Tipo de Callout",
   cancel: "Cancelar",
@@ -21,10 +17,6 @@ const ui: Partial<Record<keyof typeof en, string>> = {
   chooseCommand: "Escolha um comando",
   chooseIcon2: "Escolha um ícone",
   chooseHowImportConfiguration: "Escolha como importar a configuração",
-  chooseWhichToolbarStyleS:
-    "Escolha qual estilo de barra de ferramentas você deseja editar.",
-  chooseWhichToolbarStyleCommand:
-    "Escolha o comando de qual estilo de barra de ferramentas você deseja editar.",
   closed: "Fechado",
   collapseState: "Estado de Colapso",
   default: "Padrão",
@@ -46,10 +38,6 @@ const ui: Partial<Record<keyof typeof en, string>> = {
   delete: "Deletar",
   doWantContinue: "Deseja continuar?",
   editingToolbarCommands: "Comandos da Barra de Ferramentas",
-  enableToolbarPositionedTop:
-    "Habilitar a barra de ferramentas posicionada no topo.",
-  enableToolbarAppearsUponText:
-    "Habilitar a barra de ferramentas que aparece ao selecionar texto.",
   error: "Erro: ",
   export: "Exportar",
   exportConfiguration: "Exportar Configuração",
@@ -74,8 +62,6 @@ const ui: Partial<Record<keyof typeof en, string>> = {
   invalidImportDataFormat: "Formato de dados de importação inválido",
   loading: "Carregando...",
   more: "Mais",
-  updateFollowingStyleCommands: "Atualizar Comandos de Estilo Contextual",
-  updateTopStyleCommands: "Atualizar Comandos de Estilo de Topo",
   validConfigurationFoundImportData:
     "Nenhuma configuração válida encontrada nos dados de importação",
   open: "Abrir",
@@ -92,7 +78,6 @@ const ui: Partial<Record<keyof typeof en, string>> = {
   prefix: "Prefixo",
   renumberList: "Renumerar Lista",
   reset: "Reiniciar",
-  setPositionStyle: "Definir Estilo de Posição para:",
   setBackgroundColorToolbar: "Definir a cor de fundo da barra de ferramentas.",
   setColorToolbarIcon: "Definir a cor do ícone da barra de ferramentas.",
   setSizeToolbarIconPx:
@@ -107,8 +92,6 @@ const ui: Partial<Record<keyof typeof en, string>> = {
   toolbarIconSize: "Tamanho do Ícone da Barra de Ferramentas",
   toolbarPreviewHypotheticalCommandConfigurati:
     "Visualização da barra de ferramentas (com uma configuração de comandos hipotética).",
-  toolbarSettings: "Configurações da Barra de Ferramentas",
-  topToolbar: "Barra de Ferramentas de Topo",
   updateImport: "Atualizar Importação",
   updateModeAddNewItems:
     "Modo de Atualização (Adicionar novos itens e atualizar os existentes)",
@@ -134,5 +117,4 @@ export default ui;
 
 export const commandNames: Record<string, string> = {
   "All commands": "Todos os Comandos",
-  "Following Toolbar": "Barra de Ferramentas Contextual",
 };

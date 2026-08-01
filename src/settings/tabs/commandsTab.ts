@@ -5,11 +5,9 @@ import {
   ChooseFromIconList,
   CommandPicker,
 } from "src/modals/suggesterModals";
-import type { ToolbarStyleKey } from "src/settings/settingsData";
-import { POSITION_STYLES, STYLE_LABELS } from "src/settings/settingsData";
 import type { SettingsTabContext } from "src/settings/settingsTab";
 import { applyButtonIcon, SUBMENU_BUTTON_CLASS } from "src/toolbar/toolbarDom";
-import { format, strings, t } from "src/translations/helper";
+import { strings, t } from "src/translations/helper";
 import {
   DIVIDER_COMMAND_ID,
   isDivider,
@@ -36,36 +34,11 @@ const SHARED_SORTABLE_OPTIONS: Sortable.Options = {
   touchStartThreshold: 5,
 };
 
-export interface CommandsTabState {
-  style: ToolbarStyleKey;
-  onStyleChange(style: ToolbarStyleKey): void;
-}
-
 export function renderCommandsTab(
   ctx: SettingsTabContext,
   containerEl: HTMLElement,
-  state: CommandsTabState,
 ): void {
-  new Setting(containerEl.createDiv("commandSetting-container"))
-    .setName(strings.toolbarSettings)
-    .setDesc(strings.chooseWhichToolbarStyleCommand)
-    .addDropdown((dropdown) => {
-      POSITION_STYLES.forEach((style) =>
-        dropdown.addOption(style, STYLE_LABELS[style]),
-      );
-      dropdown
-        .setValue(state.style)
-        .onChange((value) => state.onStyleChange(value as ToolbarStyleKey));
-    });
-
   const listContainer = containerEl.createDiv("command-lists-container");
-  listContainer.addClass(state.style);
-  listContainer.createEl("div", {
-    cls: `position-style-info ${state.style}`,
-    text: format(strings.editingCommandsFor, {
-      style: STYLE_LABELS[state.style],
-    }),
-  });
 
   new Setting(listContainer)
     .setName(strings.editingToolbarCommands)
@@ -76,18 +49,18 @@ export function renderCommandsTab(
         .setTooltip(strings.add)
         // No rebuild here: this fires when the picker *opens*, long before a
         // command is chosen. CommandPicker rebuilds once it has one.
-        .onClick(() => new CommandPicker(ctx.plugin, state.style).open());
+        .onClick(() => new CommandPicker(ctx.plugin).open());
     });
 
-  renderCommandList(ctx, listContainer, state.style);
+  renderCommandList(ctx, listContainer);
 }
 
 function renderCommandList(
   ctx: SettingsTabContext,
   containerEl: HTMLElement,
-  style: ToolbarStyleKey,
 ): void {
-  const commands = ctx.plugin.getCurrentCommands(style);
+  // The live settings array — the handlers below mutate it in place, then save.
+  const commands = ctx.plugin.settings.commands;
   const listEl = containerEl.createEl("div", {
     cls: TOP_LEVEL_CONTAINER_CLASS,
   });
@@ -125,9 +98,9 @@ function renderCommandList(
   commands.forEach((command, index) => {
     const setting = new Setting(listEl);
     if (hasSubmenu(command)) {
-      renderSubmenuRow(ctx, setting, { command, commands, style });
+      renderSubmenuRow(ctx, setting, { command, commands });
     } else {
-      renderCommandRow(ctx, setting, { command, index, commands, style });
+      renderCommandRow(ctx, setting, { command, index, commands });
     }
   });
 }
@@ -136,7 +109,6 @@ interface RowContext {
   command: Command;
   index: number;
   commands: Command[];
-  style: ToolbarStyleKey;
 }
 
 function renderCommandRow(
@@ -144,10 +116,10 @@ function renderCommandRow(
   setting: Setting,
   row: RowContext,
 ): void {
-  const { command, index, commands, style } = row;
+  const { command, index, commands } = row;
 
   setting.addButton((iconButton) =>
-    configureIconButton(ctx, iconButton, command, false, style),
+    configureIconButton(ctx, iconButton, command, false),
   );
 
   if (isDivider(command.id)) {
@@ -158,7 +130,7 @@ function renderCommandRow(
 
   if (isDivider(command.id)) {
     setting.addButton((renameButton) =>
-      configureRenameButton(ctx, renameButton, command, false, style),
+      configureRenameButton(ctx, renameButton, command, false),
     );
   }
 
@@ -200,7 +172,6 @@ function renderCommandRow(
 interface SubmenuRowContext {
   command: SubmenuCommand;
   commands: Command[];
-  style: ToolbarStyleKey;
 }
 
 function renderSubmenuRow(
@@ -208,7 +179,7 @@ function renderSubmenuRow(
   setting: Setting,
   row: SubmenuRowContext,
 ): void {
-  const { command, commands, style } = row;
+  const { command, commands } = row;
 
   setting.settingEl.setAttribute("data-id", command.id);
   setting
@@ -216,10 +187,10 @@ function renderSubmenuRow(
     .setClass(SUBMENU_BUTTON_CLASS)
     .setName(t(command.name))
     .addButton((iconButton) =>
-      configureIconButton(ctx, iconButton, command, false, style),
+      configureIconButton(ctx, iconButton, command, false),
     )
     .addButton((renameButton) =>
-      configureRenameButton(ctx, renameButton, command, false, style, true),
+      configureRenameButton(ctx, renameButton, command, false, true),
     )
     .addDropdown((dropdown) => {
       dropdown
@@ -295,13 +266,13 @@ function renderSubmenuRow(
     const subSetting = new Setting(subListEl)
       .setClass("editingToolbarCommandItem")
       .addButton((iconButton) =>
-        configureIconButton(ctx, iconButton, subCommand, true, style),
+        configureIconButton(ctx, iconButton, subCommand, true),
       )
       .setName(t(subCommand.name));
 
     if (isDivider(subCommand.id)) {
       subSetting.addButton((renameButton) =>
-        configureRenameButton(ctx, renameButton, subCommand, true, style),
+        configureRenameButton(ctx, renameButton, subCommand, true),
       );
     }
 
@@ -364,16 +335,9 @@ function configureIconButton(
   button: ButtonComponent,
   command: Command,
   isSubmenuItem: boolean,
-  style: ToolbarStyleKey,
 ): void {
   button.setClass("editingToolbarSettingsIcon").onClick(() => {
-    new ChooseFromIconList(
-      ctx.plugin,
-      command,
-      isSubmenuItem,
-      undefined,
-      style,
-    ).open();
+    new ChooseFromIconList(ctx.plugin, command, isSubmenuItem).open();
   });
 
   applyButtonIcon(button, command.icon);
@@ -384,7 +348,6 @@ function configureRenameButton(
   button: ButtonComponent,
   command: Command,
   isSubmenuItem: boolean,
-  style: ToolbarStyleKey,
   isSubmenuParent = false,
 ): void {
   button
@@ -394,6 +357,6 @@ function configureRenameButton(
     )
     .setClass("editingToolbarSettingsButton")
     .onClick(() => {
-      new ChangeCmdname(ctx.plugin, command, isSubmenuItem, style).open();
+      new ChangeCmdname(ctx.plugin, command, isSubmenuItem).open();
     });
 }
