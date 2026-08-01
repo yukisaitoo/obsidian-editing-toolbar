@@ -10,14 +10,14 @@ type PickerRow = { header: string } | { spacer: true } | { colors: string[] };
 // wireSwatches already skips — an interpolated string would make it markup.
 function renderColorPicker(
   parent: HTMLElement,
-  tableId: string,
+  variantCls: string,
   colspan: number,
   rows: PickerRow[],
 ): void {
   const wrapper = parent.createDiv({ cls: "x-color-picker-wrapper" });
   const table = wrapper
     .createDiv({ cls: "x-color-picker" })
-    .createEl("table", { cls: "x-color-picker-table", attr: { id: tableId } });
+    .createEl("table", { cls: ["x-color-picker-table", variantCls] });
   const body = table.createEl("tbody");
 
   for (const row of rows) {
@@ -50,7 +50,7 @@ export function renderFontColorPicker(
   plugin: { settings: EditingToolbarSettings },
 ): void {
   const s = plugin.settings;
-  renderColorPicker(parent, "x-color-picker-table", 10, [
+  renderColorPicker(parent, "x-font-color-picker-table", 10, [
     { header: strings.themeColors },
     {
       colors: [
@@ -171,7 +171,7 @@ export function renderBackgroundColorPicker(
   plugin: { settings: EditingToolbarSettings },
 ): void {
   const s = plugin.settings;
-  renderColorPicker(parent, "x-backgroundcolor-picker-table", 5, [
+  renderColorPicker(parent, "x-background-color-picker-table", 5, [
     { header: strings.translucentColors },
     {
       colors: [

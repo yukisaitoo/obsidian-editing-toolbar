@@ -353,7 +353,7 @@ button[class^=editingToolbarCommandsubItem]::after {
   font-weight: 400;
 }
 
-.x-color-picker-wrapper table.x-color-picker-table:is(#x-color-picker-table, #x-backgroundcolor-picker-table) {
+.x-color-picker-wrapper table.x-color-picker-table {
   width: unset;
   margin: auto !important;
   border-collapse: separate;
@@ -368,7 +368,7 @@ button[class^=editingToolbarCommandsubItem]::after {
   text-align: left;
 }
 
-.x-color-picker-wrapper :is(#x-color-picker-table, #x-backgroundcolor-picker-table) td {
+.x-color-picker-wrapper .x-color-picker-table td {
   padding: 9px;
   border: solid 1px var(--background-modifier-border);
   /* The cell is a colour swatch; 1px text keeps it from being stretched by
@@ -377,7 +377,7 @@ button[class^=editingToolbarCommandsubItem]::after {
   cursor: default;
 }
 
-.x-color-picker-wrapper #x-backgroundcolor-picker-table td {
+.x-color-picker-wrapper .x-background-color-picker-table td {
   border-radius: 50%;
 }
 

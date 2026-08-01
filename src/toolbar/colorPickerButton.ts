@@ -20,7 +20,6 @@ import { setBackgroundColor, setFontColor } from "src/util/text/inlineColor";
 interface PickerVariant {
   tooltip: string;
   customTooltip: string;
-  tableId: string;
   iconClass: string;
   render: (parent: HTMLElement, plugin: EditingToolbarPlugin) => void;
   settingsKey: "lastFontColor" | "lastHighlightColor";
@@ -31,7 +30,6 @@ const VARIANTS: Record<string, PickerVariant> = {
   [ownCommand("change-font-color")]: {
     tooltip: strings.fontColors,
     customTooltip: strings.customFontColor,
-    tableId: "x-color-picker-table",
     iconClass: FONT_COLOR_ICON_CLASS,
     render: renderFontColorPicker,
     settingsKey: "lastFontColor",
@@ -40,7 +38,6 @@ const VARIANTS: Record<string, PickerVariant> = {
   [ownCommand("change-background-color")]: {
     tooltip: strings.backgroundColor,
     customTooltip: strings.customBackgroundColor,
-    tableId: "x-backgroundcolor-picker-table",
     iconClass: BACKGROUND_COLOR_ICON_CLASS,
     render: renderBackgroundColorPicker,
     settingsKey: "lastHighlightColor",
@@ -97,7 +94,7 @@ function wireSwatches(
   root: ParentNode,
   variant: PickerVariant,
 ): void {
-  const table = root.querySelector<HTMLTableElement>(`#${variant.tableId}`);
+  const table = root.querySelector<HTMLTableElement>(".x-color-picker-table");
   if (!table) return;
 
   // Every cell, header rows included: a header `th` carries no background colour,

@@ -386,7 +386,9 @@ export default class EditingToolbarPlugin extends Plugin {
 
     this.registerDomEvent(container, "keyup", this.handleKeyboardSelection);
 
-    this.registerScrollEvents(container);
+    this.registerDomEvent(container, "wheel", () =>
+      hideFollowingBar(this.app, this, container),
+    );
   }
 
   public getCachedToolbar(style: ToolbarStyleKey): HTMLElement | null {
@@ -427,15 +429,6 @@ export default class EditingToolbarPlugin extends Plugin {
     }
   };
 
-  private registerScrollEvents(container: Document) {
-    const hideOnScroll = throttle(
-      () => hideFollowingBar(this.app, this, container),
-      200,
-    );
-
-    this.registerDomEvent(container, "wheel", hideOnScroll);
-  }
-
   private handleTextSelection() {
     const editor = this.commandsManager.getActiveEditor();
     if (!this.isView() || !editor?.hasFocus()) return;
@@ -446,16 +439,4 @@ export default class EditingToolbarPlugin extends Plugin {
     this.settings.positionStyle = newStyle;
     this.rebuildToolbars();
   }
-}
-
-// Fires immediately, then ignores calls for `limit` ms. The pending timer only
-// resets a local flag, so it is safe to leave running past unload.
-function throttle(func: () => void, limit: number): () => void {
-  let inThrottle = false;
-  return () => {
-    if (inThrottle) return;
-    func();
-    inThrottle = true;
-    setTimeout(() => (inThrottle = false), limit);
-  };
 }
