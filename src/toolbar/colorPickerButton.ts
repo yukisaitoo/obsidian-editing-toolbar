@@ -112,6 +112,8 @@ function wireSwatches(
         if (!editor || !raw) return;
 
         const color = toHexColor(raw);
+        if (!color) return;
+
         plugin.settings[variant.settingsKey] = color;
         variant.apply(color, editor);
         paintColorIcons(cell.ownerDocument, variant.iconClass, color);

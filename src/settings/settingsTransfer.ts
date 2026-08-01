@@ -11,6 +11,7 @@ import {
   DEFAULT_SETTINGS,
   POSITION_STYLES,
 } from "src/settings/settingsData";
+import { toHexColor } from "src/util/color";
 import { hasSubmenu, parseCommandList } from "src/util/commandStorage";
 
 // Import/export crosses a JSON boundary with no schema: every payload below is
@@ -41,6 +42,23 @@ export const GENERAL_SETTING_KEYS: (keyof EditingToolbarSettings)[] = [
   "custom_fc5",
 ];
 
+// Every key holding a colour. All of them reach note markup: the `last*` pair
+// directly, the custom swatches by way of a click.
+const COLOR_SETTING_KEYS = new Set<keyof EditingToolbarSettings>([
+  "lastFontColor",
+  "lastHighlightColor",
+  "custom_bg1",
+  "custom_bg2",
+  "custom_bg3",
+  "custom_bg4",
+  "custom_bg5",
+  "custom_fc1",
+  "custom_fc2",
+  "custom_fc3",
+  "custom_fc4",
+  "custom_fc5",
+]);
+
 const APPEARANCE_KEYS: (keyof StyleAppearanceSettings)[] = [
   "toolbarBackgroundColor",
   "toolbarIconColor",
@@ -69,7 +87,10 @@ export function parseImport(data: JsonPayload): ParsedImport | null {
     const value = data[key];
     if (value === undefined) continue;
     if (typeof value !== typeof DEFAULT_SETTINGS[key]) return null;
-    (general as JsonPayload)[key] = value;
+
+    (general as JsonPayload)[key] = COLOR_SETTING_KEYS.has(key)
+      ? (toHexColor(value) ?? DEFAULT_SETTINGS[key])
+      : value;
   }
 
   // The only general key whose values are a closed set.

@@ -6,7 +6,7 @@ interface Rgba {
 }
 
 // Accepts `#rgb`, `#rgba`, `#rrggbb`, `#rrggbbaa`, `rgb()` and `rgba()`. Anything
-// else (a `var()`, a named colour) returns null for the caller to pass through.
+// else (a `var()`, a named colour) is not a colour we can serialise, so null.
 function parseColor(color: string): Rgba | null {
   const hex = color.trim().match(/^#([0-9a-fA-F]+)$/);
   if (hex) {
@@ -41,11 +41,11 @@ function parseColor(color: string): Rgba | null {
   };
 }
 
-// Serialises back to hex, keeping alpha as the 8-digit form. Colours that
-// parseColor does not understand are returned untouched.
-export function toHexColor(color: string): string {
+// Serialises back to hex, keeping alpha as the 8-digit form. Null for anything
+// parseColor does not understand, which makes this the colour validator too.
+export function toHexColor(color: string): string | null {
   const rgba = parseColor(color);
-  if (!rgba) return color;
+  if (!rgba) return null;
 
   const channel = (value: number) =>
     Math.max(0, Math.min(255, Math.round(value)))
