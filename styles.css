@@ -497,9 +497,10 @@ button.editingToolbarCommandsubItem::after {
   padding-right: 1em;
 }
 
-/* Doubled class beats Obsidian's `.setting-item .setting-item-*` rules, which
+/* Doubled class beats Obsidian's `.setting-item .setting-item-*` rules, which 
    otherwise force the command row onto a single non-wrapping line. */
 .editing-toolbar-content .editingToolbarCommandItem.editingToolbarCommandItem {
+  align-items: center;
   flex-wrap: wrap;
 }
 
@@ -555,6 +556,7 @@ button.editingToolbarCommandsubItem::after {
   color: white;
   font-weight: bold;
   text-align: center;
+  z-index: 1;
 }
 
 .position-style-info.following {
