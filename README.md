@@ -1,6 +1,6 @@
-# Editing Toolbar (personal)
+# Editing Toolbar
 
-This fork is not affiliated with or endorsed by the original author, and will **not** be distributed through the Obsidian community plugin store. For the real thing, see [original plugin](https://github.com/cumany/obsidian-editing-toolbar).
+_This fork is not affiliated with or endorsed by the original author, and will **not** be distributed through the Obsidian community plugin store. For the real thing, see [original plugin](https://github.com/cumany/obsidian-editing-toolbar)._
 
 ## Contents
 
@@ -9,7 +9,7 @@ This fork is not affiliated with or endorsed by the original author, and will **
 
 ## What this does
 
-This is a Word-style editing toolbar for Obsidian. It sits at the top of the
+This project adds a Word-style editing toolbar to Obsidian. It sits at the top of the
 editing pane.
 
 <center>
@@ -32,7 +32,7 @@ Config in **Settings → Editing Toolbar**:
 
 ## Install
 
-Build and deploy it into your vault yourself.
+Will need to build and deploy it into your vault manually.
 
 1. Clone the repo and install dependencies:
 
@@ -62,5 +62,4 @@ Build and deploy it into your vault yourself.
 
 ---
 
-_I consider this project feature-complete (at least for how I use it), and have no plans for further enhancements.
-That said, if you enjoy it and run into bugs, feel free to [open an issue](https://github.com/yukisaitoo/obsidian-editing-toolbar/issues)._
+_I consider this feature-complete and only plan to fix bugs from here. Found a bug? [Open an issue](https://github.com/yukisaitoo/obsidian-editing-toolbar/issues) Enjoying it? A ⭐ never hurts._
