@@ -4,7 +4,7 @@ import {
   FONT_COLOR_ICON_CLASS,
 } from "src/icons/customIcons";
 import type EditingToolbarPlugin from "src/plugin/main";
-import { ownCommand, PLUGIN_ID } from "src/plugin/pluginId";
+import { ownCommand, PLUGIN_ID, runCommandById } from "src/plugin/pluginId";
 import { attachFlyoutClamp } from "src/toolbar/geometry";
 import { applyButtonIcon, SUBMENU_BUTTON_CLASS } from "src/toolbar/toolbarDom";
 import { syncToolbarState } from "src/toolbar/toolbarVisibility";
@@ -64,7 +64,7 @@ export function createColorPickerButton(
       const target = event.target as HTMLElement | null;
       if (target?.closest(".x-color-picker-wrapper, .subitem")) return;
 
-      app.commands.executeCommandById(item.id);
+      runCommandById(app, item.id);
       syncToolbarState(plugin, bar);
     });
 

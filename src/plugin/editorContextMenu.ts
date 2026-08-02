@@ -1,13 +1,7 @@
 import { App, Editor, Menu } from "obsidian";
 import type EditingToolbarPlugin from "src/plugin/main";
-import { ownCommand } from "src/plugin/pluginId";
-import { strings } from "src/translations/helper";
-
-interface EditorContextMenuAction {
-  title: string;
-  commandId?: string;
-  callback?: () => void;
-}
+import { ownCommand, runCommandById } from "src/plugin/pluginId";
+import { strings, t } from "src/translations/helper";
 
 export function registerEditorContextMenu(plugin: EditingToolbarPlugin): void {
   plugin.registerEvent(
@@ -17,30 +11,21 @@ export function registerEditorContextMenu(plugin: EditingToolbarPlugin): void {
         menu,
         strings.textTools,
         "whole-word",
-        buildTextContextActions(editor),
+        buildTextContextIds(editor),
       );
     }),
   );
 }
 
-function addEditorContextAction(
-  app: App,
-  menu: Menu,
-  action: EditorContextMenuAction,
-): void {
+// Title and existence both come from the command registry, so a renamed id drops
+// the entry instead of rendering one that does nothing.
+function addCommandItem(app: App, menu: Menu, id: string): void {
+  const command = app.commands.findCommand(ownCommand(id));
+  if (!command) return;
+
   menu.addItem((item) => {
-    item.setTitle(action.title);
-
-    item.onClick(() => {
-      if (action.callback) {
-        action.callback();
-        return;
-      }
-
-      if (action.commandId) {
-        app.commands.executeCommandById(ownCommand(action.commandId));
-      }
-    });
+    item.setTitle(t(command.name));
+    item.onClick(() => runCommandById(app, command.id));
   });
 }
 
@@ -49,19 +34,19 @@ function addEditorContextSubmenu(
   menu: Menu,
   title: string,
   icon: string,
-  actions: EditorContextMenuAction[],
+  commandIds: string[],
 ): void {
   menu.addItem((item) => {
     item.setTitle(title).setIcon(icon);
     item.setSection("info");
 
     const submenu = item.setSubmenu();
-    actions.forEach((action) => addEditorContextAction(app, submenu, action));
+    commandIds.forEach((id) => addCommandItem(app, submenu, id));
   });
 }
 
-function buildTextContextActions(editor: Editor): EditorContextMenuAction[] {
-  const actions: EditorContextMenuAction[] = [];
+function buildTextContextIds(editor: Editor): string[] {
+  const ids: string[] = [];
   const hasSelection = editor.somethingSelected();
   const cursor = editor.getCursor();
   const lineText = editor.getLine(cursor.line);
@@ -69,42 +54,30 @@ function buildTextContextActions(editor: Editor): EditorContextMenuAction[] {
   const isTableContext = lineText.includes("|");
 
   if (hasSelection) {
-    actions.push(
-      { title: strings.splitLines, commandId: "split-lines" },
-      { title: strings.mergeLines, commandId: "merge-lines" },
-      { title: strings.fullHalfConverter, commandId: "smart-symbols" },
-      { title: strings.dedupeLines, commandId: "dedupe-lines" },
-      { title: strings.addPrefixSuffix, commandId: "add-wrap" },
-      { title: strings.numberLinesCustom, commandId: "number-lines" },
-      { title: strings.trimLineEnds, commandId: "remove-whitespace-trim" },
-      {
-        title: strings.shrinkExtraSpaces,
-        commandId: "remove-whitespace-compress",
-      },
-      {
-        title: strings.removeAllWhitespace,
-        commandId: "remove-whitespace-all",
-      },
-      { title: strings.extractBetweenStrings, commandId: "extract-between" },
-      { title: strings.listTable, commandId: "list-to-table" },
-      { title: strings.tableList, commandId: "table-to-list" },
+    ids.push(
+      "split-lines",
+      "merge-lines",
+      "smart-symbols",
+      "dedupe-lines",
+      "add-wrap",
+      "number-lines",
+      "remove-whitespace-trim",
+      "remove-whitespace-compress",
+      "remove-whitespace-all",
+      "extract-between",
+      "list-to-table",
+      "table-to-list",
     );
   } else {
-    actions.push(
-      { title: strings.addPrefixSuffix, commandId: "add-wrap" },
-      { title: strings.insertBlankLines, commandId: "insert-blank-lines" },
-    );
+    ids.push("add-wrap", "insert-blank-lines");
     if (isTableContext) {
-      actions.push({ title: strings.tableList, commandId: "table-to-list" });
+      ids.push("table-to-list");
     }
   }
 
   if (isOrderedListLine) {
-    actions.push({
-      title: strings.renumberList,
-      commandId: "renumber-ordered-list",
-    });
+    ids.push("renumber-ordered-list");
   }
 
-  return actions;
+  return ids;
 }

@@ -55,13 +55,6 @@ export function applyAppearanceVars(
   );
 }
 
-declare module "obsidian" {
-  export interface Command {
-    SubmenuCommands?: Command[];
-    menuType?: "submenu" | "dropdown";
-  }
-}
-
 // All hold hex strings.
 export type CustomColorKey =
   | `custom_bg${1 | 2 | 3 | 4 | 5}`

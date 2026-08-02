@@ -13,7 +13,6 @@ declare module "obsidian" {
   }
 
   interface SettingsManager {
-    activeTab: SettingTab | null;
     openTabById(id: string): SettingTab | null;
     open(): void;
   }
@@ -34,10 +33,9 @@ declare module "obsidian" {
     listCommands(): Command[];
   }
 
-  export interface EditorCoords {
-    top: number;
-    left: number;
-    bottom: number;
+  export interface Command {
+    SubmenuCommands?: Command[];
+    menuType?: "submenu" | "dropdown";
   }
 
   interface Workspace {
@@ -49,11 +47,6 @@ declare module "obsidian" {
   }
 
   interface Editor {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- CodeMirror editor handle, untyped by Obsidian
-    cm: any;
-    containerEl: HTMLElement;
-    // null when `pos` falls outside CodeMirror's rendered viewport.
-    coordsAtPos(pos: EditorPosition): EditorCoords | null;
     // Undocumented internal editing commands exposed by Obsidian's editor
     indentList(): void;
     unindentList(): void;

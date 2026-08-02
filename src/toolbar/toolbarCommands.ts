@@ -1,5 +1,6 @@
 import { App, ButtonComponent, Command, Menu } from "obsidian";
 import type EditingToolbarPlugin from "src/plugin/main";
+import { runCommandById } from "src/plugin/pluginId";
 import {
   createColorPickerButton,
   isColorPickerCommand,
@@ -113,7 +114,7 @@ function renderFlyout(ctx: RenderContext, item: SubmenuCommand) {
 }
 
 function runCommand(ctx: RenderContext, commandId: string): void {
-  ctx.app.commands.executeCommandById(commandId);
+  runCommandById(ctx.app, commandId);
   syncToolbarState(ctx.plugin, ctx.bar);
 }
 

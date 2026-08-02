@@ -152,7 +152,7 @@
   display: none;
 }
 
-/* left/top come from positionMorePopover(), measured off the » button. Fixed
+/* left/top come from anchorPopoverToButton(), measured off the » button. Fixed
    rather than absolute on purpose: the bar is inserted into whichever element
    the view type maps to, and none of those is a guaranteed positioned ancestor,
    so CSS offsets here would resolve against something arbitrary. */
@@ -724,35 +724,10 @@ button.editingToolbarSettingsButton {
    6. MODALS
    ========================================================================== */
 
-/* The toolbar's own popup modals (resize handle, etc.) float over the note
-   instead of dimming it, so the backdrop is neutralised. The rename modal is
-   excluded — that one is an ordinary centred dialog. */
-div.modal-container.editingToolbar-Modal:not(.changename) .modal-bg {
-  position: relative;
-  background-color: transparent !important;
-  backdrop-filter: none !important;
-}
+/* --- Rename modal (ChangeCmdname) ---------------------------------------- */
 
-.modal-container.editingToolbar-Modal:not(.changename) .modal {
-  position: absolute;
-  right: 0.5em;
-  bottom: 2em;
-  width: 220px;
-  padding: 10px 20px;
-  background-color: rgb(var(--mono-rgb-0), 0.65);
-  backdrop-filter: blur(2px);
-}
-
-.modal-container.editingToolbar-Modal .modal-title {
+.modal-container.changename .modal-title {
   display: none;
-}
-
-.modal-container.editingToolbar-Modal .modal input[type='range'] {
-  width: 90%;
-}
-
-body.theme-dark .modal-container.editingToolbar-Modal .modal input[type='range'] {
-  background-color: var(--background-secondary);
 }
 
 .modal-container.changename .modal-content > b {

@@ -143,7 +143,6 @@ export class ChangeCmdname extends Modal {
     this.plugin = plugin;
     this.item = item;
     this.isSubmenuItem = isSubmenuItem;
-    this.containerEl.addClass("editingToolbar-Modal");
     this.containerEl.addClass("changename");
   }
   private async commitName(value: string): Promise<void> {
