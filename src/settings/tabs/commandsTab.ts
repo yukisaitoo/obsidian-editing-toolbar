@@ -157,7 +157,7 @@ function renderCommandRow(
         .onClick(() =>
           insertAfter(ctx, commands, index, {
             id: newDividerId(),
-            name: strings.verticalSplit,
+            name: "Vertical split",
             icon: "vertical-split",
           }),
         );

@@ -34,8 +34,8 @@ export const registerTextToolCommands: Registrar = ({
   add("insert-blank-lines", "Insert blank lines", insertBlankLines);
   add("split-lines", "Split lines", splitLines);
   add("smart-symbols", "Convert punctuation width", smartTypography);
-  add("list-to-table", strings.listTable, convertListToTableMultiDim);
-  add("table-to-list", strings.tableList, convertTableToList);
+  add("list-to-table", "List to table", convertListToTableMultiDim);
+  add("table-to-list", "Table to list", convertTableToList);
 
   add("remove-blank-lines", "Remove blank lines", (editor) =>
     processWhitespace(editor, { removeEmptyLines: true }),
@@ -103,7 +103,7 @@ export const registerTextToolCommands: Registrar = ({
     if (result) extractBetween(editor, result.start, result.end);
   });
 
-  add("merge-lines", strings.mergeLines, async (editor) => {
+  add("merge-lines", "Merge lines", async (editor) => {
     const result = await prompt(strings.mergeLinesSettings, [
       {
         key: "sep",
