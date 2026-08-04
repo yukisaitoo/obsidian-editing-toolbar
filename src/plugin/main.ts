@@ -17,7 +17,7 @@ import { closeMoreOverflowPopovers } from "src/toolbar/morePopover";
 import {
   ensureToolbar,
   getExistingToolbar,
-  selfDestruct,
+  removeAllToolbars,
 } from "src/toolbar/toolbarBuilder";
 import {
   applyToolbarState,
@@ -97,7 +97,7 @@ export default class EditingToolbarPlugin extends Plugin {
   }
 
   onunload(): void {
-    selfDestruct(this);
+    removeAllToolbars(this);
   }
 
   // Safe to call as often as the workspace fires events: builds only what is
@@ -116,7 +116,7 @@ export default class EditingToolbarPlugin extends Plugin {
   };
 
   rebuildToolbars(): void {
-    selfDestruct(this);
+    removeAllToolbars(this);
     this.applyRootAppearanceVars();
     this.handleEditingToolbar();
     this.rebuildListeners.forEach((listener) => listener());

@@ -47,11 +47,10 @@ export function ensureToolbar(
     return null;
   }
 
-  const doc = resolveToolbarDocument(app);
   const commands = plugin.settings.commands;
 
   if (!commands.length) {
-    disposeToolbar(app, doc);
+    removeAllToolbars(plugin);
     return null;
   }
 
@@ -61,6 +60,7 @@ export function ensureToolbar(
     return existing;
   }
 
+  const doc = resolveToolbarDocument(app);
   const bars = mountBars(app, plugin.settings, doc);
   if (!bars) return null;
 
@@ -73,12 +73,7 @@ export function ensureToolbar(
   return bars.bar;
 }
 
-function disposeToolbar(app: App, doc: Document): void {
-  getExistingToolbar(app)?.remove();
-  doc.querySelectorAll(POPOVER_SELECTOR).forEach((el) => el.remove());
-}
-
-export function selfDestruct(plugin: EditingToolbarPlugin): void {
+export function removeAllToolbars(plugin: EditingToolbarPlugin): void {
   closeMoreOverflowPopovers();
   disconnectToolbarResizeObservers();
 
