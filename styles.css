@@ -40,7 +40,7 @@
   max-width: 100%;
   overflow: visible;
   border: none;
-  border-radius: var(--radius-m);
+  border-radius: 0 0 var(--radius-m) var(--radius-m);
   backdrop-filter: none;
   gap: 10px;
   flex-wrap: nowrap;
