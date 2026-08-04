@@ -1,5 +1,6 @@
 import {
   DropdownComponent,
+  Editor,
   Modal,
   Platform,
   Setting,
@@ -11,6 +12,7 @@ import { buildCalloutOptions } from "src/modals/callout/calloutTypes";
 import { focusAfterOpen } from "src/modals/modalFocus";
 import EditingToolbarPlugin from "src/plugin/main";
 import { strings } from "src/translations/helper";
+import type { CalloutSpec } from "src/util/text/callout";
 
 const SEPARATOR_VALUE = "---separator---";
 
@@ -23,19 +25,18 @@ export class InsertCalloutModal extends Modal {
   private contentTextArea!: HTMLTextAreaElement;
   private allCalloutOptions: CalloutTypeInfo[] = [];
   private iconContainerEl!: HTMLElement;
+  private inserted = false;
+  private resolve!: (spec: CalloutSpec | null) => void;
 
-  constructor(private plugin: EditingToolbarPlugin) {
+  private constructor(plugin: EditingToolbarPlugin, editor: Editor) {
     super(plugin.app);
     this.containerEl.addClass("insert-callout-modal");
     this.allCalloutOptions = buildCalloutOptions(
-      this.plugin.admonitionDefinitions ?? undefined,
+      plugin.admonitionDefinitions ?? undefined,
     );
-    const editor = this.plugin.commandsManager.getActiveEditor();
-    if (editor) {
-      const selectedText = editor.getSelection();
-      if (selectedText) {
-        this.content = selectedText;
-      }
+    const selectedText = editor.getSelection();
+    if (selectedText) {
+      this.content = selectedText;
     }
     if (!this.allCalloutOptions.find((opt) => opt.type === this.type)) {
       this.type =
@@ -44,6 +45,19 @@ export class InsertCalloutModal extends Modal {
           : "note";
     }
   }
+
+  /** Resolves with the callout to insert, or null if the modal was dismissed. */
+  static prompt(
+    plugin: EditingToolbarPlugin,
+    editor: Editor,
+  ): Promise<CalloutSpec | null> {
+    const modal = new InsertCalloutModal(plugin, editor);
+    return new Promise((resolve) => {
+      modal.resolve = resolve;
+      modal.open();
+    });
+  }
+
   onOpen() {
     this.display();
   }
@@ -150,7 +164,7 @@ export class InsertCalloutModal extends Modal {
           .setButtonText(strings.insert)
           .setCta()
           .onClick(() => {
-            this.insertCallout();
+            this.inserted = true;
             this.close();
           });
         this.insertButton = btn.buttonEl;
@@ -200,31 +214,17 @@ export class InsertCalloutModal extends Modal {
     setIcon(iconContainer, renderable ? icon.name : "lucide-box");
   }
 
-  private insertCallout() {
-    const editor = this.plugin.commandsManager.getActiveEditor();
-    if (!editor) return;
-
-    let calloutText = `> [!${this.type}]`;
-    if (this.collapse !== "none") {
-      calloutText += `${this.collapse === "open" ? "+" : "-"}`;
-    }
-    if (this.title) {
-      calloutText += ` ${this.title}`;
-    }
-
-    calloutText += `\n> ${this.content.replace(/\n/g, "\n> ")}`;
-
-    const from = editor.getCursor("from");
-    if (editor.getLine(from.line).slice(0, from.ch).trim() !== "") {
-      calloutText = "\n" + calloutText;
-    }
-
-    // The trailing newline leaves the cursor on a fresh line below the callout and
-    // pushes any text that followed the cursor down with it.
-    editor.replaceSelection(calloutText + "\n");
-
-    // Modal.close() runs right after this and synchronously hands focus back to
-    // whatever held it when the modal opened — the toolbar button, not the editor.
-    void Promise.resolve().then(() => editor.focus());
+  onClose() {
+    this.contentEl.empty();
+    this.resolve(
+      this.inserted
+        ? {
+            type: this.type,
+            title: this.title,
+            collapse: this.collapse,
+            content: this.content,
+          }
+        : null,
+    );
   }
 }

@@ -5,8 +5,10 @@ interface Rgba {
   a: number;
 }
 
-// Accepts `#rgb`, `#rgba`, `#rrggbb`, `#rrggbbaa`, `rgb()` and `rgba()`. Anything
-// else is not a colour we can serialise, so null.
+// Accepts `#rgb`, `#rgba`, `#rrggbb`, `#rrggbbaa`, and the plain-number forms of
+// `rgb()` / `rgba()`. Percentage and named colours are out of scope: nothing here
+// writes them — pickr emits hex, swatch clicks read back CSSOM `rgb()` — so they
+// only arrive from a hand-edited config, where landing in `skipped` is correct.
 function parseColor(color: string): Rgba | null {
   const hex = color.trim().match(/^#([0-9a-fA-F]+)$/);
   if (hex) {

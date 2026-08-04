@@ -6,33 +6,40 @@ interface ITextInputResult {
   [key: string]: string;
 }
 
-interface ITextInputField {
+export interface ITextInputField {
   key: string;
   label: string;
   placeholder?: string;
   defaultValue?: string;
-  multiline?: boolean;
 }
 
 export class TextInputModal extends Modal {
   private result: ITextInputResult = {};
-  private onSubmit: (result: ITextInputResult) => void | Promise<void>;
-  private fields: ITextInputField[];
-  private title: string;
+  private submitted = false;
+  private resolve!: (result: ITextInputResult | null) => void;
 
-  constructor(
+  private constructor(
     app: App,
-    title: string,
-    fields: ITextInputField[],
-    onSubmit: (result: ITextInputResult) => void | Promise<void>,
+    private title: string,
+    private fields: ITextInputField[],
   ) {
     super(app);
-    this.title = title;
-    this.fields = fields;
-    this.onSubmit = onSubmit;
 
     fields.forEach((field) => {
       this.result[field.key] = field.defaultValue || "";
+    });
+  }
+
+  /** Resolves with the field values, or null if the modal was dismissed. */
+  static prompt(
+    app: App,
+    title: string,
+    fields: ITextInputField[],
+  ): Promise<ITextInputResult | null> {
+    const modal = new TextInputModal(app, title, fields);
+    return new Promise((resolve) => {
+      modal.resolve = resolve;
+      modal.open();
     });
   }
 
@@ -43,35 +50,7 @@ export class TextInputModal extends Modal {
     contentEl.createEl("h2", { text: this.title });
 
     this.fields.forEach((field) => {
-      const setting = new Setting(contentEl).setName(field.label);
-
-      if (field.multiline) {
-        setting.addTextArea((textarea) => {
-          textarea
-            .setPlaceholder(field.placeholder || "")
-            .setValue(field.defaultValue || "")
-            .onChange((value) => {
-              this.result[field.key] = value;
-            });
-
-          textarea.inputEl.rows = 5;
-          textarea.inputEl.addClass("editing-toolbar-textarea-input");
-
-          if (field === this.fields[0]) {
-            focusAfterOpen(textarea.inputEl);
-          }
-
-          textarea.inputEl.addEventListener("keydown", (e) => {
-            if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
-              e.preventDefault();
-              void this.submit();
-            }
-          });
-        });
-        return;
-      }
-
-      setting.addText((text) => {
+      new Setting(contentEl).setName(field.label).addText((text) => {
         text
           .setPlaceholder(field.placeholder || "")
           .setValue(field.defaultValue || "")
@@ -86,7 +65,7 @@ export class TextInputModal extends Modal {
         text.inputEl.addEventListener("keydown", (e) => {
           if (e.key === "Enter") {
             e.preventDefault();
-            void this.submit();
+            this.submit();
           }
         });
       });
@@ -97,9 +76,7 @@ export class TextInputModal extends Modal {
         btn
           .setButtonText(strings.confirm)
           .setCta()
-          .onClick(() => {
-            void this.submit();
-          }),
+          .onClick(() => this.submit()),
       )
       .addButton((btn) =>
         btn.setButtonText(strings.cancel).onClick(() => {
@@ -108,13 +85,13 @@ export class TextInputModal extends Modal {
       );
   }
 
-  private async submit() {
-    await this.onSubmit(this.result);
+  private submit() {
+    this.submitted = true;
     this.close();
   }
 
   onClose() {
-    const { contentEl } = this;
-    contentEl.empty();
+    this.contentEl.empty();
+    this.resolve(this.submitted ? this.result : null);
   }
 }

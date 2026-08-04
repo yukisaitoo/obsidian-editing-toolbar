@@ -1,5 +1,6 @@
-import { App, Editor } from "obsidian";
+import { Editor } from "obsidian";
 import type { Registrar } from "src/commands/registrars/types";
+import type { ITextInputField } from "src/modals/textInputModal";
 import { TextInputModal } from "src/modals/textInputModal";
 import { strings } from "src/translations/helper";
 import {
@@ -23,8 +24,11 @@ export const registerTextToolCommands: Registrar = ({
   plugin,
   runOnEditor,
 }) => {
-  const add = (id: string, name: string, run: (editor: Editor) => void) =>
+  const add = (id: string, name: string, run: (editor: Editor) => unknown) =>
     plugin.addCommand({ id, name, callback: () => runOnEditor(run) });
+
+  const prompt = (title: string, fields: ITextInputField[]) =>
+    TextInputModal.prompt(plugin.app, title, fields);
 
   add("get-plain-text", "Get plain text", copySelectionAsPlainText);
   add("insert-blank-lines", "Insert blank lines", insertBlankLines);
@@ -49,111 +53,70 @@ export const registerTextToolCommands: Registrar = ({
     dedupe(editor, { trimBeforeCompare: true }),
   );
 
-  add("add-wrap", "Add prefix/suffix", (editor) =>
-    promptFields(
-      plugin.app,
-      strings.addPrefixSuffix,
-      [
-        {
-          key: "prefix",
-          label: strings.prefix,
-          placeholder: strings.enterPrefix,
-        },
-        {
-          key: "suffix",
-          label: strings.suffix,
-          placeholder: strings.enterSuffix,
-        },
-      ],
-      (result) => addWrap(editor, result.prefix, result.suffix, true),
-    ),
-  );
+  add("add-wrap", "Add prefix/suffix", async (editor) => {
+    const result = await prompt(strings.addPrefixSuffix, [
+      {
+        key: "prefix",
+        label: strings.prefix,
+        placeholder: strings.enterPrefix,
+      },
+      {
+        key: "suffix",
+        label: strings.suffix,
+        placeholder: strings.enterSuffix,
+      },
+    ]);
+    if (result) addWrap(editor, result.prefix, result.suffix, true);
+  });
 
-  add("number-lines", "Number lines (custom)", (editor) =>
-    promptFields(
-      plugin.app,
-      strings.numberLinesConfiguration,
-      [
-        { key: "start", label: strings.startNumber, defaultValue: "1" },
-        { key: "step", label: strings.step, defaultValue: "1" },
-        { key: "sep", label: strings.separator, defaultValue: ". " },
-      ],
-      (result) =>
-        numberList(
-          editor,
-          parseInt(result.start) || 1,
-          parseInt(result.step) || 1,
-          result.sep || ". ",
-          "",
-        ),
-    ),
-  );
+  add("number-lines", "Number lines (custom)", async (editor) => {
+    const result = await prompt(strings.numberLinesConfiguration, [
+      { key: "start", label: strings.startNumber, defaultValue: "1" },
+      { key: "step", label: strings.step, defaultValue: "1" },
+      { key: "sep", label: strings.separator, defaultValue: ". " },
+    ]);
+    if (!result) return;
+    numberList(
+      editor,
+      parseInt(result.start) || 1,
+      parseInt(result.step) || 1,
+      result.sep || ". ",
+      "",
+    );
+  });
 
-  add("extract-between", "Extract between strings", (editor) =>
-    promptFields(
-      plugin.app,
-      strings.extractBetweenStrings,
-      [
-        {
-          key: "start",
-          label: strings.startString,
-          placeholder: strings.enterStartString,
-          defaultValue: "[",
-        },
-        {
-          key: "end",
-          label: strings.endString,
-          placeholder: strings.enterEndString,
-          defaultValue: "]",
-        },
-      ],
-      (result) => extractBetween(editor, result.start, result.end),
-    ),
-  );
+  add("extract-between", "Extract between strings", async (editor) => {
+    const result = await prompt(strings.extractBetweenStrings, [
+      {
+        key: "start",
+        label: strings.startString,
+        placeholder: strings.enterStartString,
+        defaultValue: "[",
+      },
+      {
+        key: "end",
+        label: strings.endString,
+        placeholder: strings.enterEndString,
+        defaultValue: "]",
+      },
+    ]);
+    if (result) extractBetween(editor, result.start, result.end);
+  });
 
-  add("merge-lines", strings.mergeLines, (editor) =>
-    promptFields(
-      plugin.app,
-      strings.mergeLinesSettings,
-      [
-        {
-          key: "sep",
-          label: strings.separatorLeaveEmptySmartSpacing,
-          placeholder: strings.eGCommaPipeArrow,
-        },
-      ],
-      (result) =>
-        mergeLines(editor, {
-          separator: result.sep,
-          // No separator given means "join naturally", which keeps paragraphs.
-          preserveParagraphs: result.sep === "",
-          trimLines: true,
-        }),
-    ),
-  );
+  add("merge-lines", strings.mergeLines, async (editor) => {
+    const result = await prompt(strings.mergeLinesSettings, [
+      {
+        key: "sep",
+        label: strings.separatorLeaveEmptySmartSpacing,
+        placeholder: strings.eGCommaPipeArrow,
+      },
+    ]);
+    if (!result) return;
+    mergeLines(editor, {
+      separator: result.sep,
+      // No separator given means "join naturally", which keeps paragraphs.
+      preserveParagraphs: result.sep === "",
+      trimLines: true,
+    });
+  });
 };
-
-interface PromptField {
-  key: string;
-  label: string;
-  placeholder?: string;
-  defaultValue?: string;
-}
-
-function promptFields(
-  app: App,
-  title: string,
-  fields: PromptField[],
-  onSubmit: (result: Record<string, string>) => void,
-): void {
-  new TextInputModal(
-    app,
-    title,
-    fields.map((field) => ({
-      placeholder: "",
-      defaultValue: "",
-      ...field,
-    })),
-    onSubmit,
-  ).open();
-}
