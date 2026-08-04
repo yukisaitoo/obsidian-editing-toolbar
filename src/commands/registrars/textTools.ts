@@ -66,7 +66,8 @@ export const registerTextToolCommands: Registrar = ({
         placeholder: strings.enterSuffix,
       },
     ]);
-    if (result) addWrap(editor, result.prefix, result.suffix, true);
+    if (result?.prefix || result?.suffix)
+      addWrap(editor, result.prefix, result.suffix, true);
   });
 
   add("number-lines", "Number lines (custom)", async (editor) => {

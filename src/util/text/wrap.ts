@@ -1,6 +1,6 @@
 import { Editor, Notice } from "obsidian";
 import { format, strings } from "src/translations/helper";
-import { replaceDocument, requireSelection } from "src/util/text/selection";
+import { requireSelection, selectionOrParagraph } from "src/util/text/selection";
 
 export function addWrap(
   editor: Editor,
@@ -8,23 +8,17 @@ export function addWrap(
   suffix = "",
   excludeEmpty = true,
 ): void {
-  const selection = editor.getSelection();
-  const useSelection = selection.trim() !== "";
-  const text = useSelection ? selection : editor.getValue();
-  if (!text) return;
+  const text = selectionOrParagraph(editor);
+  if (text === null) return;
 
-  const result = text
-    .split("\n")
-    .map((line) =>
-      excludeEmpty && line.trim() === "" ? line : `${prefix}${line}${suffix}`,
-    )
-    .join("\n");
-
-  if (useSelection) {
-    editor.replaceSelection(result);
-  } else {
-    replaceDocument(editor, result);
-  }
+  editor.replaceSelection(
+    text
+      .split("\n")
+      .map((line) =>
+        excludeEmpty && line.trim() === "" ? line : `${prefix}${line}${suffix}`,
+      )
+      .join("\n"),
+  );
   new Notice(strings.prefixSuffixAdded);
 }
 

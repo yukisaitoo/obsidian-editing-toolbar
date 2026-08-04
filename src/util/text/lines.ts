@@ -1,20 +1,11 @@
 import { Editor, Notice } from "obsidian";
 import { format, strings } from "src/translations/helper";
-import { replaceDocument, requireSelection } from "src/util/text/selection";
+import { requireSelection, selectionOrParagraph } from "src/util/text/selection";
 
 export function insertBlankLines(editor: Editor): void {
-  const selection = editor.getSelection();
-  const spaceOut = (text: string) =>
-    text.replace(/([^\n])\n(?=[^\n])/g, "$1\n\n");
-
-  if (selection) {
-    editor.replaceSelection(spaceOut(selection));
-    return;
-  }
-
-  const text = editor.getValue();
-  if (!text) return;
-  replaceDocument(editor, spaceOut(text));
+  const text = selectionOrParagraph(editor);
+  if (text === null) return;
+  editor.replaceSelection(text.replace(/([^\n])\n(?=[^\n])/g, "$1\n\n"));
 }
 
 export function splitLines(editor: Editor): void {
