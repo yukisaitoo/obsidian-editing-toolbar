@@ -58,7 +58,6 @@ declare module "obsidian" {
 
   interface View {
     editor: Editor | undefined;
-    getMode: () => string;
   }
 
   interface Menu {

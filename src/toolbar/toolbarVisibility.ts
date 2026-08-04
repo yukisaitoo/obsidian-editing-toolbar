@@ -1,6 +1,10 @@
-import { ItemView, View } from "obsidian";
+import { ItemView } from "obsidian";
 import type EditingToolbarPlugin from "src/plugin/main";
-import { isAllowedViewType, isSourceMode } from "src/util/viewUtils";
+import {
+  isAllowedViewType,
+  isReadingMode,
+  isSourceMode,
+} from "src/util/viewUtils";
 
 export type ToolbarState = "visible" | "hidden";
 
@@ -42,12 +46,7 @@ export function resolveToolbarDecision(
   return "visible";
 }
 
-function isReadingMode(view: View | null): boolean {
-  return view?.getViewType() === "markdown" && !isSourceMode(view);
-}
-
 function isMainAreaEditable(plugin: EditingToolbarPlugin): boolean {
   const view = plugin.app.workspace.getMostRecentLeaf()?.view ?? null;
-  const type = view?.getViewType();
-  return type === "canvas" || (type === "markdown" && isSourceMode(view));
+  return view?.getViewType() === "canvas" || isSourceMode(view);
 }

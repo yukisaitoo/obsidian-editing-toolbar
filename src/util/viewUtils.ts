@@ -1,4 +1,4 @@
-import { View } from "obsidian";
+import { MarkdownView, View } from "obsidian";
 
 const ALLOWED_VIEW_TYPES = ["markdown", "canvas"];
 
@@ -7,5 +7,9 @@ export function isAllowedViewType(view: View | null): boolean {
 }
 
 export function isSourceMode(view: View | null): boolean {
-  return view?.getMode() === "source";
+  return view instanceof MarkdownView && view.getMode() === "source";
+}
+
+export function isReadingMode(view: View | null): boolean {
+  return view instanceof MarkdownView && view.getMode() === "preview";
 }
