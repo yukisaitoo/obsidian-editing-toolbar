@@ -39,11 +39,7 @@ declare module "obsidian" {
   }
 
   interface Workspace {
-    floatingSplit?: { children: WorkspaceItem[] };
-  }
-
-  interface WorkspaceItem {
-    containerEl: HTMLElement;
+    floatingSplit?: { children: WorkspaceWindow[] };
   }
 
   interface Editor {

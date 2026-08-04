@@ -19,6 +19,7 @@ import {
   getExistingToolbar,
   removeAllToolbars,
 } from "src/toolbar/toolbarBuilder";
+import { toolbarDocuments } from "src/toolbar/toolbarHost";
 import {
   applyToolbarState,
   resolveToolbarDecision,
@@ -61,6 +62,12 @@ export default class EditingToolbarPlugin extends Plugin {
     this.registerEvent(
       this.app.workspace.on("layout-change", this.handleEditingToolbar),
     );
+    // A window born after the last rebuild has none of the root vars yet.
+    this.registerEvent(
+      this.app.workspace.on("window-open", (win) =>
+        applyAppearanceVars(win.doc.documentElement, this.settings),
+      ),
+    );
     this.applyRootAppearanceVars();
     this.app.workspace.onLayoutReady(() => this.rebuildToolbars());
     this.app.workspace.onLayoutReady(() => {
@@ -71,8 +78,10 @@ export default class EditingToolbarPlugin extends Plugin {
   }
 
   // Document-level fallback for anything outside a bar.
-  private applyRootAppearanceVars(): void {
-    applyAppearanceVars(activeWindow.document.documentElement, this.settings);
+  applyRootAppearanceVars(): void {
+    toolbarDocuments(this.app).forEach((doc) =>
+      applyAppearanceVars(doc.documentElement, this.settings),
+    );
   }
 
   async loadSettings(): Promise<void> {

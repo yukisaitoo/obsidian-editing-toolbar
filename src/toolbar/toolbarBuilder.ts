@@ -17,7 +17,11 @@ import {
   POPOVER_SELECTOR,
   SHARED_BAR_CLASS,
 } from "src/toolbar/toolbarDom";
-import { resolveToolbarDocument, windowOf } from "src/toolbar/toolbarHost";
+import {
+  resolveToolbarDocument,
+  toolbarDocuments,
+  windowOf,
+} from "src/toolbar/toolbarHost";
 import { isAllowedViewType } from "src/util/viewUtils";
 
 const VIEW_TYPE_MOUNT_SELECTORS: Record<string, string> = {
@@ -77,17 +81,8 @@ export function removeAllToolbars(plugin: EditingToolbarPlugin): void {
   closeMoreOverflowPopovers();
   disconnectToolbarResizeObservers();
 
-  const roots: ParentNode[] = [activeWindow.document];
-
-  const rootSplit = plugin.app.workspace.rootSplit;
-  if (rootSplit?.containerEl) roots.push(rootSplit.containerEl);
-
-  plugin.app.workspace.floatingSplit?.children.forEach((child) => {
-    if (child.containerEl) roots.push(child.containerEl);
-  });
-
-  roots.forEach((root) =>
-    root
+  toolbarDocuments(plugin.app).forEach((doc) =>
+    doc
       .querySelectorAll(`${BAR_SELECTOR}, ${POPOVER_SELECTOR}`)
       .forEach((el) => el.remove()),
   );

@@ -1,6 +1,5 @@
 import { ButtonComponent } from "obsidian";
 import { anchorPopoverToButton } from "src/toolbar/geometry";
-import { POPOVER_SELECTOR } from "src/toolbar/toolbarDom";
 import { strings } from "src/translations/helper";
 
 // A class rather than inline visibility: a hovered flyout inside the popover sets
@@ -75,12 +74,12 @@ export class MorePopover {
   }
 
   private onPointerDown = (evt: PointerEvent) => {
-    const target = evt.target as Node | null;
+    const target = evt.target as (Node & Partial<Element>) | null;
     if (!target) return;
     if (
       this.popoverBar.contains(target) ||
       this.el.contains(target) ||
-      (target instanceof Element && target.closest(DETACHED_POPUP_SELECTOR))
+      target.closest?.(DETACHED_POPUP_SELECTOR)
     ) {
       return;
     }
@@ -102,8 +101,4 @@ export function morePopoverFor(
 // it floating over the note.
 export function closeMoreOverflowPopovers(): void {
   openPopovers.forEach((popover) => popover.close());
-  // A bar rebuilt while open leaves the class on a popover whose instance is gone.
-  activeWindow.document
-    .querySelectorAll(`${POPOVER_SELECTOR}.${OPEN_CLASS}`)
-    .forEach((el) => el.removeClass(OPEN_CLASS));
 }

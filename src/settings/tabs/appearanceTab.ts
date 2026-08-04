@@ -41,7 +41,6 @@ export function renderAppearanceTab(
     desc: strings.setBackgroundColorToolbar,
     cls: "toolbar_background",
     key: "toolbarBackgroundColor",
-    cssProperty: "--editing-toolbar-background-color",
     swatches: BACKGROUND_SWATCHES,
   });
   renderColorSetting(ctx, toolbarContainer, {
@@ -49,7 +48,6 @@ export function renderAppearanceTab(
     desc: strings.setColorToolbarIcon,
     cls: "toolbar_icon",
     key: "toolbarIconColor",
-    cssProperty: "--editing-toolbar-icon-color",
     swatches: ICON_SWATCHES,
   });
 
@@ -64,10 +62,7 @@ export function renderAppearanceTab(
         .onChange(async (value) => {
           getAppearanceBucket(ctx.plugin.settings).toolbarIconSize = value;
 
-          activeWindow.document.documentElement.style.setProperty(
-            "--toolbar-icon-size",
-            `${value}px`,
-          );
+          ctx.plugin.applyRootAppearanceVars();
           await ctx.plugin.saveSettings();
           ctx.rebuildToolbar();
         });
@@ -81,19 +76,11 @@ interface ColorSettingConfig {
   desc: string;
   cls: string;
   key: "toolbarBackgroundColor" | "toolbarIconColor";
-  cssProperty: string;
   swatches: string[];
 }
 
-function applyColor(
-  ctx: SettingsTabContext,
-  config: ColorSettingConfig,
-  color: string,
-): void {
-  activeWindow.document.documentElement.style.setProperty(
-    config.cssProperty,
-    color,
-  );
+function applyColor(ctx: SettingsTabContext): void {
+  ctx.plugin.applyRootAppearanceVars();
   void ctx.plugin.saveSettings();
   // No refresh() here: inside a Pickr callback a synchronous re-render would
   // destroyAndRemove() the instance still dispatching. The rebuild does it on a timer.
@@ -122,15 +109,11 @@ function renderColorSetting(
         defaultColor: getAppearanceValue(ctx.plugin.settings, config.key),
         onSave: (hexColor) => {
           getAppearanceBucket(ctx.plugin.settings)[config.key] = hexColor;
-          applyColor(ctx, config, hexColor);
+          applyColor(ctx);
         },
         onClear: () => {
           delete getAppearanceBucket(ctx.plugin.settings)[config.key];
-          applyColor(
-            ctx,
-            config,
-            getAppearanceValue(ctx.plugin.settings, config.key),
-          );
+          applyColor(ctx);
         },
       });
     });
