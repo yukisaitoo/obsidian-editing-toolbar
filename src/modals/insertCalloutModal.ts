@@ -59,21 +59,15 @@ export class InsertCalloutModal extends Modal {
   }
 
   onOpen() {
-    this.display();
+    this.scope.register(["Mod"], "Enter", () => {
+      this.insertButton?.click();
+      return false;
+    });
+    this.buildForm();
   }
 
-  private display() {
+  private buildForm() {
     const { contentEl } = this;
-    contentEl.empty();
-
-    contentEl.addEventListener("keydown", (event) => {
-      if (event.key === "Enter" && (event.ctrlKey || event.metaKey)) {
-        event.preventDefault();
-        if (this.insertButton) {
-          this.insertButton.click();
-        }
-      }
-    });
 
     const typeContainer = contentEl.createDiv("callout-type-container");
     this.iconContainerEl = typeContainer.createDiv("callout-icon-container");
