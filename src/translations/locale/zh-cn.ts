@@ -107,7 +107,6 @@ export const commandNames: Record<string, string> = {
   "Top Style Commands": "顶部样式命令",
   "Warning: Overwrite mode will completely replace your current settings with the imported ones.":
     "警告：覆盖模式将完全替换您当前的设置与导入的设置。",
-  "All commands": "所有命令",
   "section!": "社区！",
   "Custom theme": "自定义主题",
   "Insert link": "插入链接",
@@ -164,4 +163,11 @@ export const commandNames: Record<string, string> = {
   "Enter template name": "输入模板名称",
   "Template name and content cannot be empty": "模板名称和内容不能为空",
   "Manage Templates": "管理模板",
+  Headings: "标题",
+  Edit: "编辑",
+  Quotes: "引用",
+  Callout: "标注",
+  "Markdown syntax": "Markdown 语法",
+  Lists: "列表",
+  Alignment: "对齐",
 };

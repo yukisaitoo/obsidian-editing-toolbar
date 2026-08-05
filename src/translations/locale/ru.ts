@@ -122,7 +122,6 @@ export const commandNames: Record<string, string> = {
   "Top Style Commands": "Команды верхнего стиля",
   "Warning: Overwrite mode will completely replace your current settings with the imported ones.":
     "Предупреждение: режим перезаписи полностью заменит текущие настройки импортированными.",
-  "All commands": "Все команды",
   "section!": "разделе сообщества!",
   "Custom theme": "Пользовательская тема",
   "Insert link": "Вставить ссылку",
@@ -180,4 +179,11 @@ export const commandNames: Record<string, string> = {
   "Template name and content cannot be empty":
     "Название и содержимое шаблона не могут быть пустыми",
   "Manage Templates": "Управление шаблонами",
+  Headings: "Заголовки",
+  Edit: "Правка",
+  Quotes: "Цитаты",
+  Callout: "Выноска",
+  "Markdown syntax": "Синтаксис Markdown",
+  Lists: "Списки",
+  Alignment: "Выравнивание",
 };

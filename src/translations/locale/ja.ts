@@ -69,4 +69,10 @@ export const commandNames: Record<string, string> = {
   "Center text": "中央揃え",
   "Change font color": "文字色を変更",
   "Change background color": "背景色を変更",
+  Headings: "見出し",
+  Edit: "編集",
+  Quotes: "引用",
+  "Markdown syntax": "Markdown記法",
+  Lists: "リスト",
+  Alignment: "文字揃え",
 };

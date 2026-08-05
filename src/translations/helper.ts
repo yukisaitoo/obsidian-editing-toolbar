@@ -29,13 +29,7 @@ export const strings = { ...en, ...active?.ui } as {
   readonly [K in UiKey]: string;
 };
 
-const commandTranslations: { [english: string]: string } = {};
-if (active) {
-  for (const [id, translated] of Object.entries(active.ui)) {
-    commandTranslations[en[id as UiKey]] = translated as string;
-  }
-  Object.assign(commandTranslations, active.commands);
-}
+const commandTranslations: Record<string, string> = active?.commands ?? {};
 
 export function t(name: string): string {
   if (typeof name !== "string" || name.length === 0) {

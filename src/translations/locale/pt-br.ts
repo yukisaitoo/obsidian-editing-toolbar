@@ -110,6 +110,4 @@ const ui: Partial<Record<keyof typeof en, string>> = {
 
 export default ui;
 
-export const commandNames: Record<string, string> = {
-  "All commands": "Todos os Comandos",
-};
+export const commandNames: Record<string, string> = {};
