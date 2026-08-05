@@ -131,7 +131,7 @@ function renderPreview(
   previewBar.addClass("editing-toolbar-preview");
   previewBar.addClass("editingToolbarDefaultAesthetic");
   // The shared chrome class, but not the live-instance one: the toolbar lifecycle
-  // (removeAllToolbars, getExistingToolbar) must never see the preview.
+  // (removeAllToolbars, toolbarIn) must never see the preview.
   previewBar.addClass(SHARED_BAR_CLASS);
 
   PREVIEW_COMMANDS.forEach((command) => {

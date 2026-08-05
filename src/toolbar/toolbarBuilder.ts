@@ -1,4 +1,4 @@
-import { App, ItemView } from "obsidian";
+import { MarkdownView, View } from "obsidian";
 import type EditingToolbarPlugin from "src/plugin/main";
 import {
   applyAppearanceVars,
@@ -16,53 +16,61 @@ import {
   POPOVER_SELECTOR,
   SHARED_BAR_CLASS,
 } from "src/toolbar/toolbarDom";
+import { toolbarDocuments, windowOf } from "src/toolbar/toolbarHost";
 import {
-  resolveToolbarDocument,
-  toolbarDocuments,
-  windowOf,
-} from "src/toolbar/toolbarHost";
-import { isAllowedViewType } from "src/util/viewUtils";
+  applyToolbarState,
+  toolbarStateFor,
+} from "src/toolbar/toolbarVisibility";
 
 // Bars are per view, so each one needs its own observer.
 const toolbarResizeObservers = new Map<HTMLElement, ResizeObserver>();
 
-// One bar per pane, so it is found by walking the active leaf.
-export function getExistingToolbar(app: App): HTMLElement | null {
-  return (
-    app.workspace
-      .getActiveViewOfType(ItemView)
-      ?.containerEl?.querySelector<HTMLElement>(BAR_SELECTOR) ?? null
-  );
+// Teardown sweeps every document, so restoration has to reach just as far: a bar
+// belongs to its leaf, and its state is a function of that leaf's own mode.
+export function syncToolbars(plugin: EditingToolbarPlugin): void {
+  if (!plugin.settings.commands.length) {
+    removeAllToolbars(plugin);
+    return;
+  }
+
+  for (const leaf of plugin.app.workspace.getLeavesOfType("markdown")) {
+    // A deferred leaf has no rendered view to mount into; loading it fires
+    // layout-change, which brings us back here.
+    if (leaf.isDeferred || !(leaf.view instanceof MarkdownView)) continue;
+
+    const view = leaf.view;
+    const state = toolbarStateFor(plugin, view);
+    // Only build when visible: a reading-mode pane may not have a source view to
+    // mount into yet.
+    const bar =
+      state === "visible" ? ensureToolbar(plugin, view) : toolbarIn(view);
+    if (bar) applyToolbarState(bar, state);
+  }
 }
 
-// Idempotent: calling twice cannot produce a duplicate bar. Null means there is
-// nothing to show (disallowed view or an empty command list).
+// One bar per pane, mounted inside the view it belongs to.
+export function toolbarIn(view: View): HTMLElement | null {
+  return view.containerEl.querySelector<HTMLElement>(BAR_SELECTOR);
+}
+
+// Idempotent: calling twice cannot produce a duplicate bar.
 export function ensureToolbar(
-  app: App,
   plugin: EditingToolbarPlugin,
+  view: MarkdownView,
 ): HTMLElement | null {
-  if (!isAllowedViewType(app.workspace.getActiveViewOfType(ItemView))) {
-    return null;
-  }
-
-  const commands = plugin.settings.commands;
-
-  if (!commands.length) {
-    removeAllToolbars(plugin);
-    return null;
-  }
-
-  const existing = getExistingToolbar(app);
+  const existing = toolbarIn(view);
   if (existing) {
     applyAppearanceVars(existing, plugin.settings);
     return existing;
   }
 
-  const doc = resolveToolbarDocument(app);
-  const bars = mountBars(app, plugin.settings, doc);
+  const bars = mountBars(plugin.settings, view);
   if (!bars) return null;
 
-  renderToolbarCommands({ app, plugin, bar: bars.bar }, commands);
+  renderToolbarCommands(
+    { app: plugin.app, plugin, bar: bars.bar },
+    plugin.settings.commands,
+  );
 
   refreshOverflow(bars.bar, bars.popoverBar);
   observeToolbarResize(bars.bar, bars.popoverBar);
@@ -87,10 +95,12 @@ interface MountedBars {
 }
 
 function mountBars(
-  app: App,
   settings: EditingToolbarSettings,
-  doc: Document,
+  view: View,
 ): MountedBars | null {
+  // A note popped out into its own window has its own Document.
+  const doc = view.containerEl.ownerDocument;
+
   const bar = createBarEl(doc, "editingToolbarModalBar");
   bar.addClass(SHARED_BAR_CLASS);
 
@@ -99,7 +109,7 @@ function mountBars(
   applyAppearanceVars(bar, settings);
   applyAppearanceVars(popoverBar, settings);
 
-  return mountInActiveView(app, bar, popoverBar) ? { bar, popoverBar } : null;
+  return mountInView(view, bar, popoverBar) ? { bar, popoverBar } : null;
 }
 
 function createBarEl(doc: Document, className: string): HTMLElement {
@@ -109,15 +119,12 @@ function createBarEl(doc: Document, className: string): HTMLElement {
   return el;
 }
 
-function mountInActiveView(
-  app: App,
+function mountInView(
+  view: View,
   bar: HTMLElement,
   popoverBar: HTMLElement,
 ): boolean {
-  const container = app.workspace.getActiveViewOfType(ItemView)?.containerEl;
-  if (!container) return false;
-
-  const target = findMountTarget(container);
+  const target = findMountTarget(view.containerEl);
   if (!target) return false;
   target.insertAdjacentElement("afterbegin", bar);
 

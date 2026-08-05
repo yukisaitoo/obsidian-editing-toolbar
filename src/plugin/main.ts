@@ -11,16 +11,8 @@ import {
   parseImport,
 } from "src/settings/settingsTransfer";
 import { closeMoreOverflowPopovers } from "src/toolbar/morePopover";
-import {
-  ensureToolbar,
-  getExistingToolbar,
-  removeAllToolbars,
-} from "src/toolbar/toolbarBuilder";
+import { removeAllToolbars, syncToolbars } from "src/toolbar/toolbarBuilder";
 import { toolbarDocuments } from "src/toolbar/toolbarHost";
-import {
-  applyToolbarState,
-  resolveToolbarDecision,
-} from "src/toolbar/toolbarVisibility";
 import { strings } from "src/translations/helper";
 import { EditingToolbarSettingTab } from "../settings/settingsTab";
 
@@ -99,18 +91,11 @@ export default class EditingToolbarPlugin extends Plugin {
   }
 
   // Safe to call as often as the workspace fires events: builds only what is
-  // missing, and defers to resolveToolbarDecision for every visibility decision.
+  // missing. Popovers close here rather than in syncToolbars, so clicking a
+  // command inside the » popover does not close it out from under the user.
   handleEditingToolbar = () => {
     closeMoreOverflowPopovers();
-
-    const decision = resolveToolbarDecision(this);
-    if (decision === "leave") return;
-
-    const bar =
-      decision === "visible"
-        ? ensureToolbar(this.app, this)
-        : getExistingToolbar(this.app);
-    if (bar) applyToolbarState(bar, decision);
+    syncToolbars(this);
   };
 
   rebuildToolbars(): void {
