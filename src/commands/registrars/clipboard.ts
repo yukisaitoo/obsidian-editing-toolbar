@@ -32,16 +32,20 @@ export const registerClipboardAndHistoryCommands: Registrar = ({
       callback: () => runOnEditor(run),
     });
 
-  addClipboardCommand("editor-copy", "Copy", "lucide-copy", (editor) =>
-    navigator.clipboard.writeText(editor.getSelection()),
-  );
+  addClipboardCommand("editor-copy", "Copy", "lucide-copy", async (editor) => {
+    const text = editor.getSelection();
+    if (!text) return;
+    await navigator.clipboard.writeText(text);
+  });
 
   addClipboardCommand(
     "editor-cut",
     "Cut",
     "lucide-scissors",
     async (editor) => {
-      await navigator.clipboard.writeText(editor.getSelection());
+      const text = editor.getSelection();
+      if (!text) return;
+      await navigator.clipboard.writeText(text);
       editor.replaceSelection("");
     },
   );
