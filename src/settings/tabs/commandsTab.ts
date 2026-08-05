@@ -68,38 +68,19 @@ function renderCommandList(
   const listEl = containerEl.createEl("div", {
     cls: TOP_LEVEL_CONTAINER_CLASS,
   });
+  const dragList = createDragList(ctx);
 
-  const save = () => void ctx.plugin.saveSettings();
-
-  ctx.createSortable(listEl, {
-    ...SHARED_SORTABLE_OPTIONS,
+  dragList(listEl, commands, {
     group: "item",
     animation: 500,
     onChoose: (evt) => evt.item.classList.add("sortable-chosen-feedback"),
     onUnchoose: (evt) => evt.item.classList.remove("sortable-chosen-feedback"),
-    onSort: (evt) => {
-      if (evt.oldIndex == null || evt.newIndex == null) return;
-      // Sortable fires onSort on BOTH lists for a cross-list drag. The
-      // destination owns the move so it is applied exactly once.
-      if (evt.to !== listEl) return;
-
-      if (evt.from === listEl) {
-        moveWithin(commands, evt.oldIndex, evt.newIndex);
-      } else {
-        const source = submenuFor(evt.from, commands);
-        if (!source || evt.oldIndex >= source.length) return;
-        commands.splice(evt.newIndex, 0, source.splice(evt.oldIndex, 1)[0]);
-      }
-
-      save();
-      ctx.applyChanges();
-    },
   });
 
   commands.forEach((command, index) => {
     const setting = new Setting(listEl);
     if (hasSubmenu(command)) {
-      renderSubmenuRow(ctx, setting, { command, commands });
+      renderSubmenuRow(ctx, setting, { command, commands, dragList });
     } else {
       renderCommandRow(ctx, setting, { command, index, commands });
     }
@@ -170,7 +151,9 @@ function renderCommandRow(
 
 interface SubmenuRowContext {
   command: SubmenuCommand;
+  // The list owning this row, for the icon/rename/delete writes — not for drags.
   commands: Command[];
+  dragList: DragList;
 }
 
 function renderSubmenuRow(
@@ -178,9 +161,8 @@ function renderSubmenuRow(
   setting: Setting,
   row: SubmenuRowContext,
 ): void {
-  const { command, commands } = row;
+  const { command, commands, dragList } = row;
 
-  setting.settingEl.setAttribute("data-id", command.id);
   setting
     .setClass("editingToolbarCommandItem")
     .setClass(SUBMENU_BUTTON_CLASS)
@@ -227,8 +209,7 @@ function renderSubmenuRow(
     JSON.stringify(`✖️${strings.dragCommandsHere}`),
   );
 
-  ctx.createSortable(subListEl, {
-    ...SHARED_SORTABLE_OPTIONS,
+  dragList(subListEl, command.SubmenuCommands, {
     animation: 150,
     group: {
       name: "item",
@@ -236,28 +217,6 @@ function renderSubmenuRow(
       // Submenus take plain commands only — never another submenu.
       put: (_to, _from, dragEl) =>
         !dragEl.classList.contains(SUBMENU_BUTTON_CLASS),
-    },
-    onSort: (evt) => {
-      if (evt.oldIndex == null || evt.newIndex == null) return;
-      // Destination owns the move, as in the top-level list above. Without this
-      // both submenus in a submenu-to-submenu drag reorder themselves instead.
-      if (evt.to !== subListEl) return;
-
-      const submenu = command.SubmenuCommands;
-
-      if (evt.from === subListEl) {
-        moveWithin(submenu, evt.oldIndex, evt.newIndex);
-      } else if (evt.from.classList.contains(TOP_LEVEL_CONTAINER_CLASS)) {
-        if (evt.oldIndex >= commands.length) return;
-        submenu.splice(evt.newIndex, 0, commands.splice(evt.oldIndex, 1)[0]);
-      } else {
-        const source = submenuFor(evt.from, commands);
-        if (!source || evt.oldIndex >= source.length) return;
-        submenu.splice(evt.newIndex, 0, source.splice(evt.oldIndex, 1)[0]);
-      }
-
-      void ctx.plugin.saveSettings();
-      ctx.applyChanges();
     },
   });
 
@@ -295,20 +254,39 @@ function renderSubmenuRow(
   });
 }
 
-// The submenu a sub-list element belongs to. Each sub-list is a child of the
-// parent command's row, which carries its id in `data-id`.
-function submenuFor(listEl: HTMLElement, commands: Command[]) {
-  const parentId = listEl.parentElement?.dataset?.["id"];
-  if (!parentId) {
-    console.error("editing-toolbar: drag source has no parent command id");
-    return null;
-  }
-  const parent = commands.find((command) => command.id === parentId);
-  if (!parent || !hasSubmenu(parent)) {
-    console.error("editing-toolbar: no submenu for command", parentId);
-    return null;
-  }
-  return parent.SubmenuCommands;
+// Every drag list is registered with the array it renders, so a drop reads that
+// array back off the element instead of reconstructing it from the DOM.
+type DragList = (
+  listEl: HTMLElement,
+  list: Command[],
+  options: Sortable.Options,
+) => void;
+
+function createDragList(ctx: SettingsTabContext): DragList {
+  const listsByEl = new WeakMap<HTMLElement, Command[]>();
+
+  return (listEl, list, options) => {
+    listsByEl.set(listEl, list);
+
+    ctx.createSortable(listEl, {
+      ...SHARED_SORTABLE_OPTIONS,
+      ...options,
+      // Sortable fires onSort on BOTH lists of a cross-list drag; the destination
+      // owns the move so it lands exactly once. Within one list source === target,
+      // where the splice pair is already a move.
+      onSort: (evt) => {
+        if (evt.oldIndex == null || evt.newIndex == null) return;
+        if (evt.to !== listEl) return;
+
+        const source = listsByEl.get(evt.from);
+        if (!source || evt.oldIndex >= source.length) return;
+
+        list.splice(evt.newIndex, 0, source.splice(evt.oldIndex, 1)[0]);
+        void ctx.plugin.saveSettings();
+        ctx.applyChanges();
+      },
+    });
+  };
 }
 
 async function removeCommand(
@@ -319,10 +297,6 @@ async function removeCommand(
   commands.remove(command);
   await ctx.plugin.saveSettings();
   ctx.applyChanges();
-}
-
-function moveWithin(items: Command[], from: number, to: number): void {
-  items.splice(to, 0, items.splice(from, 1)[0]);
 }
 
 async function insertAfter(
