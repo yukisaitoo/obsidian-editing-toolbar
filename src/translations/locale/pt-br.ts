@@ -1,5 +1,7 @@
 // Português (Brasil)
 
+import type { CommandName } from "src/settings/defaultCommands";
+
 import type { en } from "../en";
 
 const ui: Partial<Record<keyof typeof en, string>> = {
@@ -110,4 +112,57 @@ const ui: Partial<Record<keyof typeof en, string>> = {
 
 export default ui;
 
-export const commandNames: Record<string, string> = {};
+export const commandNames: Record<CommandName, string> = {
+  "Undo edit": "Desfazer",
+  "Redo edit": "Refazer",
+  "Clear text formatting": "Limpar formatação",
+  "Header 1": "Título 1",
+  "Header 2": "Título 2",
+  "Header 3": "Título 3",
+  "Header 4": "Título 4",
+  "Header 5": "Título 5",
+  "Header 6": "Título 6",
+  Headings: "Títulos",
+  Bold: "Negrito",
+  Italic: "Itálico",
+  Strikethrough: "Tachado",
+  Underline: "Sublinhado",
+  Highlight: "Destacar",
+  Edit: "Editar",
+  Cut: "Recortar",
+  Copy: "Copiar",
+  Paste: "Colar",
+  "Swap line up": "Mover linha para cima",
+  "Swap line down": "Mover linha para baixo",
+  "Attach file": "Anexar arquivo",
+  "Insert table": "Inserir tabela",
+  "Cycle list and checklist": "Alternar lista e lista de tarefas",
+  Quotes: "Citações",
+  Blockquote: "Citação",
+  Callout: "Callout",
+  "Markdown syntax": "Sintaxe Markdown",
+  Superscript: "Sobrescrito",
+  Subscript: "Subscrito",
+  "Inline code": "Código em linha",
+  "Code block": "Bloco de código",
+  Wikilink: "Link interno",
+  Embed: "Incorporar",
+  "Horizontal rule": "Linha horizontal",
+  "Inline math": "Fórmula em linha",
+  "Math block": "Bloco de fórmula",
+  Lists: "Listas",
+  Checklist: "Lista de tarefas",
+  "Ordered list": "Lista numerada",
+  "Unordered list": "Lista com marcadores",
+  "Unindent list": "Diminuir recuo da lista",
+  "Indent list": "Aumentar recuo da lista",
+  Alignment: "Alinhamento",
+  "Justify text": "Justificar",
+  "Align text left": "Alinhar à esquerda",
+  "Center text": "Centralizar",
+  "Align text right": "Alinhar à direita",
+  "Change font color": "Alterar cor do texto",
+  "Change background color": "Alterar cor de fundo",
+  Submenu: "Submenu",
+  "Vertical split": "Separador",
+};

@@ -5,6 +5,7 @@ import {
   ChooseFromIconList,
   CommandPicker,
 } from "src/modals/suggesterModals";
+import { DIVIDER_NAME, SUBMENU_NAME } from "src/settings/defaultCommands";
 import type { SettingsTabContext } from "src/settings/settingsTab";
 import { applyButtonIcon, SUBMENU_BUTTON_CLASS } from "src/toolbar/toolbarDom";
 import { strings, t } from "src/translations/helper";
@@ -141,7 +142,7 @@ function renderCommandRow(
         .onClick(() =>
           insertAfter(ctx, commands, index, {
             id: newSubmenuId(),
-            name: "Submenu",
+            name: SUBMENU_NAME,
             icon: "remix-Filter3Line",
             SubmenuCommands: [],
           }),
@@ -155,7 +156,7 @@ function renderCommandRow(
         .onClick(() =>
           insertAfter(ctx, commands, index, {
             id: newDividerId(),
-            name: "Vertical split",
+            name: DIVIDER_NAME,
             icon: "vertical-split",
           }),
         );

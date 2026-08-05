@@ -1,5 +1,7 @@
 // 日本語
 
+import type { CommandName } from "src/settings/defaultCommands";
+
 import type { en } from "../en";
 
 const ui: Partial<Record<keyof typeof en, string>> = {
@@ -22,7 +24,7 @@ const ui: Partial<Record<keyof typeof en, string>> = {
 
 export default ui;
 
-export const commandNames: Record<string, string> = {
+export const commandNames: Record<CommandName, string> = {
   "Align text right": "右揃え",
   Bold: "太字",
   Checklist: "チェックリスト",
@@ -41,7 +43,6 @@ export const commandNames: Record<string, string> = {
   "Indent list": "リストのインデントを増やす",
   "Inline math": "インライン数式",
   Italic: "斜体",
-  Link: "リンク",
   "Math block": "数式ブロック",
   "Ordered list": "番号付きリスト",
   Paste: "貼り付け",
@@ -56,7 +57,6 @@ export const commandNames: Record<string, string> = {
   "Swap line down": "行を下へ移動",
   "Attach file": "ファイルを添付",
   "Cycle list and checklist": "リスト形式を切り替え",
-  "Toggle checklist status": "チェックリスト状態を切り替え",
   Blockquote: "引用",
   Callout: "コールアウト",
   Superscript: "上付き文字",
@@ -75,4 +75,6 @@ export const commandNames: Record<string, string> = {
   "Markdown syntax": "Markdown記法",
   Lists: "リスト",
   Alignment: "文字揃え",
+  Submenu: "サブメニュー",
+  "Vertical split": "区切り線",
 };

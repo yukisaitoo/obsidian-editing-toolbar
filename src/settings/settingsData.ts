@@ -1,6 +1,6 @@
 import type { Command } from "obsidian";
 
-import { DEFAULT_TOOLBAR_COMMANDS } from "src/settings/defaultCommands";
+import { defaultToolbarCommands } from "src/settings/defaultCommands";
 
 export interface AppearanceSettings {
   toolbarBackgroundColor: string;
@@ -122,6 +122,6 @@ export const DEFAULT_SETTINGS: EditingToolbarSettings = {
 // mutate what they get back.
 export function createDefaultSettings(): EditingToolbarSettings {
   const settings = structuredClone(DEFAULT_SETTINGS);
-  settings.commands = structuredClone(DEFAULT_TOOLBAR_COMMANDS);
+  settings.commands = defaultToolbarCommands();
   return settings;
 }

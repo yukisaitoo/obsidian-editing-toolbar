@@ -1,5 +1,7 @@
 // 简体中文
 
+import type { CommandName } from "src/settings/defaultCommands";
+
 import type { en } from "../en";
 
 const ui: Partial<Record<keyof typeof en, string>> = {
@@ -99,17 +101,7 @@ const ui: Partial<Record<keyof typeof en, string>> = {
 
 export default ui;
 
-export const commandNames: Record<string, string> = {
-  "Result:": "结果：",
-  "All settings": "所有设置",
-  "Top style only": "顶部样式",
-  "Main Menu Commands": "主菜单命令",
-  "Top Style Commands": "顶部样式命令",
-  "Warning: Overwrite mode will completely replace your current settings with the imported ones.":
-    "警告：覆盖模式将完全替换您当前的设置与导入的设置。",
-  "section!": "社区！",
-  "Custom theme": "自定义主题",
-  "Insert link": "插入链接",
+export const commandNames: Record<CommandName, string> = {
   "Align text right": "右对齐",
   Bold: "加粗",
   Checklist: "清单",
@@ -128,7 +120,6 @@ export const commandNames: Record<string, string> = {
   "Indent list": "增加列表缩进",
   "Inline math": "行内公式",
   Italic: "斜体",
-  Link: "链接",
   "Math block": "数学公式块",
   "Ordered list": "有序列表",
   Paste: "粘贴",
@@ -143,7 +134,6 @@ export const commandNames: Record<string, string> = {
   "Swap line down": "下移当前行",
   "Attach file": "附加文件",
   "Cycle list and checklist": "循环切换列表与清单",
-  "Toggle checklist status": "切换清单状态",
   Blockquote: "引用块",
   Superscript: "上标",
   Subscript: "下标",
@@ -155,14 +145,6 @@ export const commandNames: Record<string, string> = {
   "Center text": "居中对齐",
   "Change font color": "更改字体颜色",
   "Change background color": "更改背景颜色",
-  History: "历史记录",
-  "No history": "暂无历史记录",
-  "Edit Template": "编辑模板",
-  "Add Template": "添加模板",
-  "Template Name": "模板名称",
-  "Enter template name": "输入模板名称",
-  "Template name and content cannot be empty": "模板名称和内容不能为空",
-  "Manage Templates": "管理模板",
   Headings: "标题",
   Edit: "编辑",
   Quotes: "引用",
@@ -170,4 +152,6 @@ export const commandNames: Record<string, string> = {
   "Markdown syntax": "Markdown 语法",
   Lists: "列表",
   Alignment: "对齐",
+  Submenu: "子菜单",
+  "Vertical split": "分隔线",
 };

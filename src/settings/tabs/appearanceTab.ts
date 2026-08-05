@@ -1,4 +1,5 @@
 import { ButtonComponent, setIcon, Setting } from "obsidian";
+import type { CommandName } from "src/settings/defaultCommands";
 import {
   applyAppearanceVars,
   getAppearanceBucket,
@@ -22,15 +23,15 @@ const BACKGROUND_SWATCHES = [
 
 const ICON_SWATCHES = ["#4A5568", "#D4AF37", "#2D3033", "#6D5846", "#4C2A55"];
 
-const PREVIEW_COMMANDS = [
-  { name: "Bold", icon: "bold" },
-  { name: "Italics", icon: "italic" },
-  { name: "Strikethrough", icon: "strikethrough" },
-  { name: "Code", icon: "code" },
-  { name: "Blockquote", icon: "quote-glyph" },
-  { name: "Link", icon: "link" },
-  { name: "Checklist status", icon: "checkbox-glyph" },
-  { name: "Insert callout", icon: "lucide-quote" },
+const PREVIEW_COMMANDS: { name: CommandName; icon: string }[] = [
+  { name: "Bold", icon: "bold-glyph" },
+  { name: "Italic", icon: "italic-glyph" },
+  { name: "Strikethrough", icon: "strikethrough-glyph" },
+  { name: "Inline code", icon: "code-glyph" },
+  { name: "Blockquote", icon: "lucide-text-quote" },
+  { name: "Wikilink", icon: "wikilink" },
+  { name: "Checklist", icon: "checkbox-glyph" },
+  { name: "Callout", icon: "lucide-quote" },
 ];
 
 export function renderAppearanceTab(

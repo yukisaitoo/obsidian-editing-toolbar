@@ -1,5 +1,7 @@
 // Русский
 
+import type { CommandName } from "src/settings/defaultCommands";
+
 import type { en } from "../en";
 
 const ui: Partial<Record<keyof typeof en, string>> = {
@@ -112,19 +114,7 @@ const ui: Partial<Record<keyof typeof en, string>> = {
 
 export default ui;
 
-export const commandNames: Record<string, string> = {
-  'Command ID "${this.commandId}" already exists':
-    'ID команды "${this.commandId}" уже существует',
-  "Result:": "Результат:",
-  "All settings": "Все настройки",
-  "Top style only": "Только стиль Top",
-  "Main Menu Commands": "Команды главного меню",
-  "Top Style Commands": "Команды верхнего стиля",
-  "Warning: Overwrite mode will completely replace your current settings with the imported ones.":
-    "Предупреждение: режим перезаписи полностью заменит текущие настройки импортированными.",
-  "section!": "разделе сообщества!",
-  "Custom theme": "Пользовательская тема",
-  "Insert link": "Вставить ссылку",
+export const commandNames: Record<CommandName, string> = {
   "Align text right": "Выровнять по правому краю",
   Bold: "Жирный",
   Checklist: "Чек-лист",
@@ -143,7 +133,6 @@ export const commandNames: Record<string, string> = {
   "Indent list": "Увеличить отступ списка",
   "Inline math": "Встроенная формула",
   Italic: "Курсив",
-  Link: "Ссылка",
   "Math block": "Блок формул",
   "Ordered list": "Нумерованный список",
   Paste: "Вставить",
@@ -158,7 +147,6 @@ export const commandNames: Record<string, string> = {
   "Swap line down": "Переместить строку вниз",
   "Attach file": "Прикрепить файл",
   "Cycle list and checklist": "Переключать список и чек-лист",
-  "Toggle checklist status": "Переключить статус чек-листа",
   Blockquote: "Цитата",
   Superscript: "Верхний индекс",
   Subscript: "Нижний индекс",
@@ -170,15 +158,6 @@ export const commandNames: Record<string, string> = {
   "Center text": "Выровнять по центру",
   "Change font color": "Изменить цвет текста",
   "Change background color": "Изменить цвет фона",
-  History: "История",
-  "No history": "История пуста",
-  "Edit Template": "Редактировать шаблон",
-  "Add Template": "Добавить шаблон",
-  "Template Name": "Название шаблона",
-  "Enter template name": "Введите название шаблона",
-  "Template name and content cannot be empty":
-    "Название и содержимое шаблона не могут быть пустыми",
-  "Manage Templates": "Управление шаблонами",
   Headings: "Заголовки",
   Edit: "Правка",
   Quotes: "Цитаты",
@@ -186,4 +165,6 @@ export const commandNames: Record<string, string> = {
   "Markdown syntax": "Синтаксис Markdown",
   Lists: "Списки",
   Alignment: "Выравнивание",
+  Submenu: "Подменю",
+  "Vertical split": "Разделитель",
 };

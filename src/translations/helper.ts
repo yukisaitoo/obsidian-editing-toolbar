@@ -2,6 +2,8 @@
 
 import { moment } from "obsidian";
 
+import type { CommandName } from "src/settings/defaultCommands";
+
 import { en } from "./en";
 import ja, { commandNames as jaCommands } from "./locale/ja";
 import ptBR, { commandNames as ptBRCommands } from "./locale/pt-br";
@@ -12,7 +14,7 @@ import zhTW, { commandNames as zhTWCommands } from "./locale/zh-tw";
 type UiKey = keyof typeof en;
 type Locale = {
   ui: Partial<Record<UiKey, string>>;
-  commands: Record<string, string>;
+  commands: Record<CommandName, string>;
 };
 
 const localeMap: { [k: string]: Locale } = {
@@ -29,10 +31,12 @@ export const strings = { ...en, ...active?.ui } as {
   readonly [K in UiKey]: string;
 };
 
-const commandTranslations: Record<string, string> = active?.commands ?? {};
+const commandTranslations = active?.commands;
 
+// Callers pass a runtime command name, which may be a renamed or third-party one
+// outside the vocabulary. Those fall through untranslated.
 export function t(name: string): string {
-  return commandTranslations[name] ?? name;
+  return commandTranslations?.[name as CommandName] ?? name;
 }
 
 export function format(

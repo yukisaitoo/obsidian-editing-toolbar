@@ -2,7 +2,16 @@ import type { Command } from "obsidian";
 
 import { ownCommand } from "src/plugin/pluginId";
 
-export const DEFAULT_TOOLBAR_COMMANDS: Command[] = [
+// Obsidian's Command types SubmenuCommands as a mutable array, which an `as const`
+// list cannot satisfy. This shape keeps the literal names for CommandName below.
+type DefaultCommand = {
+  readonly id: string;
+  readonly name: string;
+  readonly icon: string;
+  readonly SubmenuCommands?: readonly DefaultCommand[];
+};
+
+export const DEFAULT_TOOLBAR_COMMANDS = [
   {
     id: ownCommand("editor-undo"),
     name: "Undo edit",
@@ -265,4 +274,24 @@ export const DEFAULT_TOOLBAR_COMMANDS: Command[] = [
     name: "Change background color",
     icon: "background-color",
   },
-];
+] as const satisfies readonly DefaultCommand[];
+
+// Names the settings UI creates on demand rather than shipping in the defaults.
+export const SUBMENU_NAME = "Submenu";
+export const DIVIDER_NAME = "Vertical split";
+
+type NamesOf<T> = T extends { name: infer N; SubmenuCommands?: readonly (infer C)[] }
+  ? N | NamesOf<C>
+  : never;
+
+// Every display name the toolbar can show, submenu children included. Command name
+// translations are keyed by it, so a name that is not here cannot be translated.
+export type CommandName =
+  | NamesOf<(typeof DEFAULT_TOOLBAR_COMMANDS)[number]>
+  | typeof SUBMENU_NAME
+  | typeof DIVIDER_NAME;
+
+// The clone is genuinely mutable; only `as const`'s readonly type has to be shed.
+export function defaultToolbarCommands(): Command[] {
+  return structuredClone(DEFAULT_TOOLBAR_COMMANDS) as unknown as Command[];
+}
