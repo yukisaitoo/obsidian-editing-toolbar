@@ -51,8 +51,7 @@ export const WRAP_COMMAND_NAMES: Record<string, string> = {
   codeblock: "Toggle code block",
 };
 
-// Re-registered under the toolbar's own ids so they can carry an icon and a
-// cursor-offset fixup.
+// Re-registered under the toolbar's own ids so they can carry an icon.
 export const CORE_EDITOR_COMMANDS: Command[] = [
   {
     id: "editor:insert-embed",
