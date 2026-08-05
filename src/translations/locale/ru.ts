@@ -37,10 +37,6 @@ const ui: Partial<Record<keyof typeof en, string>> = {
   translucentColors: "Полупрозрачные цвета",
   highlighterColors: "Цвета маркера",
   delete: "Удалить",
-  detectedCjkContextConvertedFull:
-    "Обнаружен контекст CJK: символы преобразованы в полноширинные",
-  detectedCodeEnglishContextConverted:
-    "Обнаружен код/английский текст: символы преобразованы в полуширинные",
   doWantContinue: "Вы хотите продолжить?",
   dropdownMenu: "Выпадающее меню",
   editingToolbarCommands: "Команды панели инструментов",
@@ -53,7 +49,6 @@ const ui: Partial<Record<keyof typeof en, string>> = {
     "Экспорт: создаёт JSON-конфигурацию, которую можно сохранить или отправить другим.",
   failedCopyConfiguration: "Не удалось скопировать конфигурацию",
   fontColors: "Цвета шрифта",
-  fullHalfConverter: "Преобразование полуширинных/полноширинных символов",
   general: "Основные",
   import: "Импорт",
   importConfiguration: "Импорт конфигурации",
@@ -81,8 +76,6 @@ const ui: Partial<Record<keyof typeof en, string>> = {
   pasteConfigurationHere: "Вставьте конфигурацию сюда...",
   pleaseEnterNewName: "Введите новое название: ",
   pleasePasteConfigurationDataFirst: "Сначала вставьте данные конфигурации",
-  pleaseSelectTextFirst: "Сначала выделите текст",
-  renumberList: "Перенумеровать список",
   reset: "Сбросить",
   setBackgroundColorToolbar: "Установить цвет фона панели инструментов.",
   setColorToolbarIcon: "Установить цвет значков панели инструментов.",
@@ -102,7 +95,6 @@ const ui: Partial<Record<keyof typeof en, string>> = {
     "Режим обновления (добавить новые элементы и обновить существующие)",
   updateGeneralSettings: "Обновить основные настройки",
   usageInstructions: "Инструкция по использованию",
-  verticalSplit: "Вертикальное разделение",
   warningImportingConfigurationOverwriteCurren:
     "Предупреждение: импорт конфигурации перезапишет текущие настройки. Рекомендуется сначала экспортировать текущую конфигурацию в качестве резервной копии.",
   warningOverwriteModeReplaceExisting:
@@ -179,7 +171,6 @@ export const commandNames: Record<string, string> = {
   "Center text": "Выровнять по центру",
   "Change font color": "Изменить цвет текста",
   "Change background color": "Изменить цвет фона",
-  "Renumber ordered list": "Перенумеровать нумерованный список",
   History: "История",
   "No history": "История пуста",
   "Edit Template": "Редактировать шаблон",

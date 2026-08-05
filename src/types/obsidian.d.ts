@@ -58,6 +58,5 @@ declare module "obsidian" {
   interface MenuItem {
     dom: HTMLElement;
     iconEl: HTMLElement;
-    setSubmenu(): Menu;
   }
 }

@@ -19,9 +19,6 @@ const REGISTRARS: Registrar[] = [
   registerInsertCommands,
 ];
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any -- untyped Obsidian canvas view
-type CanvasView = any;
-
 export class CommandsManager {
   constructor(private plugin: EditingToolbarPlugin) {}
 
@@ -30,7 +27,6 @@ export class CommandsManager {
       plugin: this.plugin,
       runOnEditor: this.runOnEditor,
       applyCommand: this.applyCommand,
-      runHistoryAction: this.runHistoryAction,
     };
     REGISTRARS.forEach((register) => register(ctx));
   }
@@ -57,50 +53,6 @@ export class CommandsManager {
       }
     })();
   };
-
-  private runHistoryAction = (action: "undo" | "redo"): void => {
-    if (this.runCanvasHistoryAction(action)) return;
-
-    this.runOnEditor((editor) =>
-      action === "undo" ? editor.undo() : editor.redo(),
-    );
-  };
-
-  /** Canvas exposes undo/redo under two different names across versions. */
-  private runCanvasHistoryAction(action: "undo" | "redo"): boolean {
-    const view = this.getActiveCanvasView();
-    if (!view) return false;
-
-    view.canvas?.wrapperEl?.focus?.({ preventScroll: true });
-
-    const candidates = [
-      { owner: view.canvas, method: action },
-      {
-        owner: view.canvas?.history,
-        method: action === "undo" ? "back" : "forward",
-      },
-    ];
-
-    for (const { owner, method } of candidates) {
-      const fn = owner?.[method];
-      if (typeof fn === "function") {
-        fn.call(owner);
-        return true;
-      }
-    }
-    return false;
-  }
-
-  private getActiveCanvasView(): CanvasView | null {
-    const active = this.plugin.app.workspace.getActiveViewOfType(ItemView);
-    if (active?.getViewType?.() === "canvas") return active;
-
-    const leaves = this.plugin.app.workspace.getLeavesOfType?.("canvas") ?? [];
-    return (
-      leaves.find((leaf) => leaf?.view?.getViewType?.() === "canvas")?.view ??
-      null
-    );
-  }
 
   // Wraps the selection in `command`'s prefix/suffix, or unwraps it when the text
   // already matches — the toggle behind bold, italics and friends.

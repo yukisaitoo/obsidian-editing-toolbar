@@ -74,8 +74,6 @@ const ui: Partial<Record<keyof typeof en, string>> = {
   pleaseEnterNewName: "Por favor, digite um novo nome: ",
   pleasePasteConfigurationDataFirst:
     "Por favor coloque os dados da configuração primeiro",
-  pleaseSelectTextFirst: "Por favor selecione o texto primeiro",
-  renumberList: "Renumerar Lista",
   reset: "Reiniciar",
   setBackgroundColorToolbar: "Definir a cor de fundo da barra de ferramentas.",
   setColorToolbarIcon: "Definir a cor do ícone da barra de ferramentas.",
@@ -95,7 +93,6 @@ const ui: Partial<Record<keyof typeof en, string>> = {
     "Modo de Atualização (Adicionar novos itens e atualizar os existentes)",
   updateGeneralSettings: "Atualizar configurações gerais",
   usageInstructions: "Instruções de Uso",
-  verticalSplit: "Divisão Vertical",
   warningImportingConfigurationOverwriteCurren:
     "Aviso: A importação de configuração irá sobrescrever suas configurações atuais. Considere exportar sua configuração atual primeiro como backup.",
   warningOverwriteModeReplaceExisting:

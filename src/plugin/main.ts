@@ -1,7 +1,6 @@
 import { Notice, Plugin } from "obsidian";
 import { CommandsManager } from "src/commands/commands";
 import addIcons from "src/icons/customIcons";
-import { registerEditorContextMenu } from "src/plugin/editorContextMenu";
 import {
   applyAppearanceVars,
   createDefaultSettings,
@@ -66,8 +65,6 @@ export default class EditingToolbarPlugin extends Plugin {
     );
     this.applyRootAppearanceVars();
     this.app.workspace.onLayoutReady(() => this.rebuildToolbars());
-
-    registerEditorContextMenu(this);
   }
 
   // Document-level fallback for anything outside a bar.

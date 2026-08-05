@@ -9,7 +9,6 @@ export interface RegistrarContext {
   plugin: EditingToolbarPlugin;
   runOnEditor(action: (editor: Editor) => unknown): void;
   applyCommand(command: CommandPlot, editor: Editor): void;
-  runHistoryAction(action: "undo" | "redo"): void;
 }
 
 export type Registrar = (ctx: RegistrarContext) => void;

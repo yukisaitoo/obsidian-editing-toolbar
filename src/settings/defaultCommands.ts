@@ -19,11 +19,6 @@ export const DEFAULT_TOOLBAR_COMMANDS: Command[] = [
     icon: "eraser",
   },
   {
-    id: ownCommand("smart-symbols"),
-    name: "Convert punctuation width",
-    icon: "lucide-at-sign",
-  },
-  {
     id: ownCommand("header2-text"),
     name: "Header 2",
     icon: "header-2",
@@ -210,11 +205,6 @@ export const DEFAULT_TOOLBAR_COMMANDS: Command[] = [
         id: ownCommand("editor:toggle-checklist-status"),
         name: "Checklist",
         icon: "checkbox-glyph",
-      },
-      {
-        id: ownCommand("renumber-ordered-list"),
-        name: "Renumber ordered list",
-        icon: "list-restart",
       },
       {
         id: ownCommand("toggle-numbered-list"),

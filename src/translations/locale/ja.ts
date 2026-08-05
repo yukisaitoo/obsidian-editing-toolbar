@@ -16,7 +16,6 @@ const ui: Partial<Record<keyof typeof en, string>> = {
   translucentColors: "半透明の色",
   highlighterColors: "蛍光ペンの色",
   fontColors: "文字色",
-  fullHalfConverter: "全角／半角を変換",
   loading: "読み込み中...",
   more: "その他",
 };
@@ -70,5 +69,4 @@ export const commandNames: Record<string, string> = {
   "Center text": "中央揃え",
   "Change font color": "文字色を変更",
   "Change background color": "背景色を変更",
-  "Renumber ordered list": "番号付きリストを振り直す",
 };

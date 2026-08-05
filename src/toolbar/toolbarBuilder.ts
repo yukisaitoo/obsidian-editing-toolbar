@@ -24,11 +24,6 @@ import {
 } from "src/toolbar/toolbarHost";
 import { isAllowedViewType } from "src/util/viewUtils";
 
-const VIEW_TYPE_MOUNT_SELECTORS: Record<string, string> = {
-  markdown: ".markdown-source-view",
-  canvas: ".canvas-wrapper",
-};
-
 // Bars are per view, so each one needs its own observer.
 const toolbarResizeObservers = new Map<HTMLElement, ResizeObserver>();
 
@@ -121,34 +116,19 @@ function mountInActiveView(
   bar: HTMLElement,
   popoverBar: HTMLElement,
 ): boolean {
-  const view = app.workspace.getActiveViewOfType(ItemView);
-  const container = view?.containerEl;
-  if (!view || !container) return false;
+  const container = app.workspace.getActiveViewOfType(ItemView)?.containerEl;
+  if (!container) return false;
 
-  const viewType = view.getViewType();
-
-  // Canvas has no scrollable source view to sit inside, so the bar mounts as a
-  // sibling above .view-content instead of within it.
-  if (viewType === "canvas") {
-    const viewContent = container.querySelector<HTMLElement>(".view-content");
-    if (!viewContent) return false;
-    viewContent.insertAdjacentElement("beforebegin", bar);
-  } else {
-    const target = findMountTarget(container, viewType);
-    if (!target) return false;
-    target.insertAdjacentElement("afterbegin", bar);
-  }
+  const target = findMountTarget(container);
+  if (!target) return false;
+  target.insertAdjacentElement("afterbegin", bar);
 
   bar.insertAdjacentElement("afterend", popoverBar);
   return true;
 }
 
-function findMountTarget(
-  container: HTMLElement,
-  viewType: string,
-): HTMLElement | null {
-  const known = VIEW_TYPE_MOUNT_SELECTORS[viewType];
-  const target = known ? container.querySelector<HTMLElement>(known) : null;
+function findMountTarget(container: HTMLElement): HTMLElement | null {
+  const target = container.querySelector<HTMLElement>(".markdown-source-view");
   if (target) return target;
 
   const viewContent = container.querySelector<HTMLElement>(".view-content");

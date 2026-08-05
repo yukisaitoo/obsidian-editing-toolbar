@@ -33,10 +33,6 @@ export const en = {
   themeColors: "Theme Colors",
   translucentColors: "Translucent Colors",
   delete: "Delete",
-  detectedCjkContextConvertedFull:
-    "Detected CJK context: converted to full-width symbols",
-  detectedCodeEnglishContextConverted:
-    "Detected code/English context: converted to half-width symbols",
   doWantContinue: "Do you want to continue?",
   dragCommandsHere: "Drag it here",
   dropdownMenu: "Dropdown Menu",
@@ -50,7 +46,6 @@ export const en = {
     "Export: Generate a JSON configuration that you can save or share.",
   failedCopyConfiguration: "Failed to copy configuration",
   fontColors: "Font Colors",
-  fullHalfConverter: "Convert punctuation width",
   general: "General",
   import: "Import",
   importConfiguration: "Import Configuration",
@@ -77,8 +72,6 @@ export const en = {
   pasteConfigurationHere: "Paste configuration here...",
   pleaseEnterNewName: "Please enter a new name: ",
   pleasePasteConfigurationDataFirst: "Please paste configuration data first",
-  pleaseSelectTextFirst: "Please select text first",
-  renumberList: "Renumber ordered list",
   reset: "Reset",
   resetConfiguration: "Reset configuration",
   resetConfigurationDesc:
@@ -106,7 +99,6 @@ export const en = {
   updateModeAddNewItems: "Update Mode (Add new items and update existing ones)",
   updateGeneralSettings: "Update general settings",
   usageInstructions: "Usage Instructions",
-  verticalSplit: "Vertical split",
   warningImportingConfigurationOverwriteCurren:
     "Warning: Importing configuration will overwrite your current settings. Consider exporting your current configuration first as a backup.",
   warningOverwriteModeReplaceExisting:

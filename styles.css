@@ -842,12 +842,6 @@ mark.editing-toolbar-highlight {
   color: inherit;
 }
 
-/* --- Obsidian canvas ------------------------------------------------------ */
-
-.editingToolbarModalBar ~ .canvas-controls {
-  top: calc(var(--size-4-2) + 50px);
-}
-
 /* ==========================================================================
    8. VENDORED — Pickr 1.8.4 "nano" theme (@simonwep/pickr/dist/themes/nano.min.css)
    Inlined because the plugin ships styles.css directly to the vault and no

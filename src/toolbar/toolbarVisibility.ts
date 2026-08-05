@@ -48,5 +48,5 @@ export function resolveToolbarDecision(
 
 function isMainAreaEditable(plugin: EditingToolbarPlugin): boolean {
   const view = plugin.app.workspace.getMostRecentLeaf()?.view ?? null;
-  return view?.getViewType() === "canvas" || isSourceMode(view);
+  return isSourceMode(view);
 }

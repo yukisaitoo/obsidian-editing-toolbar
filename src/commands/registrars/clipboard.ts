@@ -4,20 +4,19 @@ import type { Registrar } from "src/commands/registrars/types";
 export const registerClipboardAndHistoryCommands: Registrar = ({
   plugin,
   runOnEditor,
-  runHistoryAction,
 }) => {
   plugin.addCommand({
     id: "editor-undo",
     name: "Undo edit",
     icon: "undo-glyph",
-    callback: () => runHistoryAction("undo"),
+    callback: () => runOnEditor((editor) => editor.undo()),
   });
 
   plugin.addCommand({
     id: "editor-redo",
     name: "Redo edit",
     icon: "redo-glyph",
-    callback: () => runHistoryAction("redo"),
+    callback: () => runOnEditor((editor) => editor.redo()),
   });
 
   const addClipboardCommand = (
