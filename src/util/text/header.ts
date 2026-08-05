@@ -7,25 +7,37 @@ const BLOCK_PREFIX = /^\s*(?:>\s*)*(?:\[!\w+\]\s*)?/;
 // Heading, bullet, ordered and task markers all give way to a new heading.
 const LINE_MARKERS =
   /^(?:(?:#{1,6}\s+)|(?:[-+*]\s+)|(?:\d+\.\s+)|(?:\[[ xX]\]\s+))+/;
+const HEADING = /^#{1,6}\s+/;
+
+function parse(lineText: string) {
+  const prefix = lineText.match(BLOCK_PREFIX)?.[0] ?? "";
+  const body = lineText.slice(prefix.length);
+  return { prefix, body, heading: body.match(HEADING)?.[0].trim() ?? "" };
+}
 
 // from https://github.com/obsidian-canzi/Enhanced-editing
 export function setHeader(marker: string, editor: Editor) {
-  const cursor = editor.getCursor();
-  const lineText = editor.getLine(cursor.line);
-  const blockPrefix = lineText.match(BLOCK_PREFIX)?.[0] ?? "";
-  const body = lineText.slice(blockPrefix.length);
-  const heading = body.match(/^(#{1,6})\s+/);
+  // Repeating a level clears it, but only where every line already has it — a
+  // mixed selection levels up instead of half-clearing.
+  let uniform = true;
 
-  const newText =
-    marker === "" || marker === heading?.[1]
-      ? blockPrefix + body.slice(heading?.[0].length ?? 0)
-      : `${blockPrefix}${marker} ${body.replace(LINE_MARKERS, "").trimStart()}`;
+  editor.processLines(
+    (_line, lineText) => {
+      if (parse(lineText).heading !== marker) uniform = false;
+      return true;
+    },
+    (line, lineText) => {
+      const { prefix, body } = parse(lineText);
+      const removing = marker === "" || uniform;
+      const stripped = removing
+        ? (body.match(HEADING)?.[0].length ?? 0)
+        : (body.match(LINE_MARKERS)?.[0].length ?? 0);
 
-  // Hold the cursor the same distance from the end of the line.
-  const textAfterCursor = lineText.slice(cursor.ch);
-  editor.setLine(cursor.line, newText);
-  editor.setCursor({
-    line: cursor.line,
-    ch: Math.max(0, newText.length - textAfterCursor.length),
-  });
+      return {
+        from: { line, ch: prefix.length },
+        to: { line, ch: prefix.length + stripped },
+        text: removing ? "" : `${marker} `,
+      };
+    },
+  );
 }
