@@ -17,10 +17,10 @@ import type { CalloutSpec } from "src/util/text/callout";
 const SEPARATOR_VALUE = "---separator---";
 
 export class InsertCalloutModal extends Modal {
-  public type: string = "note";
-  public title: string = "";
-  public content: string = "";
-  public collapse: "none" | "open" | "closed" = "none";
+  private type: string = "note";
+  private title: string = "";
+  private content: string = "";
+  private collapse: "none" | "open" | "closed" = "none";
   private insertButton!: HTMLElement;
   private contentTextArea!: HTMLTextAreaElement;
   private allCalloutOptions: CalloutTypeInfo[] = [];

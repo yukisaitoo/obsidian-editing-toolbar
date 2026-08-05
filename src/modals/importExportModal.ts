@@ -17,12 +17,12 @@ import {
 import { strings } from "src/translations/helper";
 
 export class ImportExportModal extends Modal {
-  plugin: EditingToolbarPlugin;
-  mode: "import" | "export";
-  importMode: ImportMode;
-  textArea!: TextAreaComponent;
-  importButton!: ButtonComponent;
-  warningContent!: HTMLElement;
+  private plugin: EditingToolbarPlugin;
+  private mode: "import" | "export";
+  private importMode: ImportMode;
+  private textArea!: TextAreaComponent;
+  private importButton!: ButtonComponent;
+  private warningContent!: HTMLElement;
 
   constructor(
     app: App,
@@ -48,97 +48,101 @@ export class ImportExportModal extends Modal {
     });
 
     if (this.mode === "export") {
-      const exportContainer = contentEl.createDiv("export-container");
-
-      this.textArea = new TextAreaComponent(exportContainer);
-      this.textArea
-        .setValue("")
-        .setPlaceholder(strings.loading)
-        .then((textArea) => {
-          textArea.inputEl.addClass("import-export-textarea");
-        });
-
-      this.updateExportContent();
-      const buttonContainer = contentEl.createDiv(
-        "import-export-button-container",
-      );
-
-      const copyButton = buttonContainer.createEl("button", {
-        text: strings.copyClipboard,
-        cls: "mod-cta",
-      });
-
-      copyButton.addEventListener("click", () => {
-        navigator.clipboard
-          .writeText(this.textArea.getValue())
-          .then(() => {
-            new Notice(strings.configurationCopiedClipboard);
-          })
-          .catch((err) => {
-            console.error("editing-toolbar: failed to copy configuration", err);
-            new Notice(strings.failedCopyConfiguration);
-          });
-      });
+      this.renderExport(contentEl);
     } else {
-      new Setting(contentEl)
-        .setName(strings.importMode)
-        .setDesc(strings.chooseHowImportConfiguration)
-        .addDropdown((dropdown) => {
-          dropdown
-            .addOption("update", strings.updateModeAddNewItems)
-            .addOption(
-              "overwrite",
-              strings.overwriteModeReplaceSettingsImported,
-            )
-            .setValue(this.importMode)
-            .onChange((value) => {
-              this.importMode = value as ImportMode;
-              this.importButton.setButtonText(
-                this.importMode === "overwrite"
-                  ? strings.overwriteImport
-                  : strings.updateImport,
-              );
-              this.warningContent.setText(
-                this.importMode === "overwrite"
-                  ? strings.warningOverwriteModeReplaceExisting
-                  : strings.warningUpdateModeAddNew,
-              );
-            });
-        });
-      const importContainer = contentEl.createDiv("import-container");
-
-      this.textArea = new TextAreaComponent(importContainer);
-      this.textArea
-        .setValue("")
-        .setPlaceholder(strings.pasteConfigurationHere)
-        .then((textArea) => {
-          textArea.inputEl.addClass("import-export-textarea");
-        });
-
-      const buttonContainer = contentEl.createDiv(
-        "import-export-button-container",
-      );
-
-      new Setting(buttonContainer).addButton((button) => {
-        this.importButton = button
-          .setIcon("import")
-          .setButtonText(strings.importConfiguration)
-          .onClick(() => {
-            this.importConfiguration();
-          });
-      });
-
-      const warningDiv = contentEl.createDiv("import-export-warning");
-
-      const warningParagraph = warningDiv.createEl("p", {
-        text: strings.warningUpdateModeAddNew,
-        cls: "warning-text",
-      });
-      this.warningContent = warningParagraph;
+      this.renderImport(contentEl);
     }
   }
 
-  updateExportContent() {
+  private renderExport(contentEl: HTMLElement) {
+    const exportContainer = contentEl.createDiv("export-container");
+
+    this.textArea = new TextAreaComponent(exportContainer);
+    this.textArea
+      .setValue("")
+      .setPlaceholder(strings.loading)
+      .then((textArea) => {
+        textArea.inputEl.addClass("import-export-textarea");
+      });
+
+    this.updateExportContent();
+    const buttonContainer = contentEl.createDiv(
+      "import-export-button-container",
+    );
+
+    const copyButton = buttonContainer.createEl("button", {
+      text: strings.copyClipboard,
+      cls: "mod-cta",
+    });
+
+    copyButton.addEventListener("click", () => {
+      navigator.clipboard
+        .writeText(this.textArea.getValue())
+        .then(() => {
+          new Notice(strings.configurationCopiedClipboard);
+        })
+        .catch((err) => {
+          console.error("editing-toolbar: failed to copy configuration", err);
+          new Notice(strings.failedCopyConfiguration);
+        });
+    });
+  }
+
+  private renderImport(contentEl: HTMLElement) {
+    new Setting(contentEl)
+      .setName(strings.importMode)
+      .setDesc(strings.chooseHowImportConfiguration)
+      .addDropdown((dropdown) => {
+        dropdown
+          .addOption("update", strings.updateModeAddNewItems)
+          .addOption("overwrite", strings.overwriteModeReplaceSettingsImported)
+          .setValue(this.importMode)
+          .onChange((value) => {
+            this.importMode = value as ImportMode;
+            this.importButton.setButtonText(
+              this.importMode === "overwrite"
+                ? strings.overwriteImport
+                : strings.updateImport,
+            );
+            this.warningContent.setText(
+              this.importMode === "overwrite"
+                ? strings.warningOverwriteModeReplaceExisting
+                : strings.warningUpdateModeAddNew,
+            );
+          });
+      });
+    const importContainer = contentEl.createDiv("import-container");
+
+    this.textArea = new TextAreaComponent(importContainer);
+    this.textArea
+      .setValue("")
+      .setPlaceholder(strings.pasteConfigurationHere)
+      .then((textArea) => {
+        textArea.inputEl.addClass("import-export-textarea");
+      });
+
+    const buttonContainer = contentEl.createDiv(
+      "import-export-button-container",
+    );
+
+    new Setting(buttonContainer).addButton((button) => {
+      this.importButton = button
+        .setIcon("import")
+        .setButtonText(strings.importConfiguration)
+        .onClick(() => {
+          this.importConfiguration();
+        });
+    });
+
+    const warningDiv = contentEl.createDiv("import-export-warning");
+
+    this.warningContent = warningDiv.createEl("p", {
+      text: strings.warningUpdateModeAddNew,
+      cls: "warning-text",
+    });
+  }
+
+  private updateExportContent() {
     const settings = this.plugin.settings;
 
     const exportContent: JsonPayload = {
@@ -159,7 +163,7 @@ export class ImportExportModal extends Modal {
     this.textArea.setValue(JSON.stringify(exportContent, null, 2));
   }
 
-  async importConfiguration() {
+  private async importConfiguration() {
     try {
       const importText = this.textArea.getValue();
       if (!importText.trim()) {

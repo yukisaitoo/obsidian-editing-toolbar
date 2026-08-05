@@ -20,7 +20,6 @@ export const registerClipboardAndHistoryCommands: Registrar = ({
     callback: () => runHistoryAction("redo"),
   });
 
-  // Each of these hands focus back to the editor, which the clipboard await drops.
   const addClipboardCommand = (
     id: string,
     name: string,
@@ -31,11 +30,7 @@ export const registerClipboardAndHistoryCommands: Registrar = ({
       id,
       name,
       icon,
-      callback: () =>
-        runOnEditor(async (editor) => {
-          await run(editor);
-          plugin.app.commands.executeCommandById("editor:focus");
-        }),
+      callback: () => runOnEditor(run),
     });
 
   addClipboardCommand("editor-copy", "Copy", "lucide-copy", (editor) =>

@@ -122,16 +122,14 @@ function renderCommandRow(
     configureIconButton(ctx, iconButton, command, false),
   );
 
-  if (isDivider(command.id)) {
-    setting.setClass(DIVIDER_COMMAND_ID);
-  }
-
   setting.setClass("editingToolbarCommandItem").setName(t(command.name));
 
   if (isDivider(command.id)) {
-    setting.addButton((renameButton) =>
-      configureRenameButton(ctx, renameButton, command, false),
-    );
+    setting
+      .setClass(DIVIDER_COMMAND_ID)
+      .addButton((renameButton) =>
+        configureRenameButton(ctx, renameButton, command, false),
+      );
   }
 
   setting

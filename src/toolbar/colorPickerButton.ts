@@ -140,7 +140,7 @@ function paintColorIcons(
   color: string,
 ): void {
   doc
-    .querySelectorAll<HTMLElement>(`.${iconClass}`)
+    .querySelectorAll<SVGElement>(`.${iconClass}`)
     .forEach((el) => (el.style.fill = color));
 }
 
