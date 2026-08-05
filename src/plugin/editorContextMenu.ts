@@ -2,6 +2,8 @@ import { App, Editor, Menu } from "obsidian";
 import type EditingToolbarPlugin from "src/plugin/main";
 import { ownCommand, runCommandById } from "src/plugin/pluginId";
 import { strings, t } from "src/translations/helper";
+import { canRenumber } from "src/util/text/renumber";
+import { canConvertTableToList } from "src/util/text/tables";
 
 export function registerEditorContextMenu(plugin: EditingToolbarPlugin): void {
   plugin.registerEvent(
@@ -47,13 +49,8 @@ function addEditorContextSubmenu(
 
 function buildTextContextIds(editor: Editor): string[] {
   const ids: string[] = [];
-  const hasSelection = editor.somethingSelected();
-  const cursor = editor.getCursor();
-  const lineText = editor.getLine(cursor.line);
-  const isOrderedListLine = /^\d+\.\s/.test(lineText);
-  const isTableContext = lineText.includes("|");
 
-  if (hasSelection) {
+  if (editor.somethingSelected()) {
     ids.push(
       "split-lines",
       "merge-lines",
@@ -66,16 +63,16 @@ function buildTextContextIds(editor: Editor): string[] {
       "remove-whitespace-all",
       "extract-between",
       "list-to-table",
-      "table-to-list",
     );
   } else {
     ids.push("add-wrap", "insert-blank-lines");
-    if (isTableContext) {
-      ids.push("table-to-list");
-    }
   }
 
-  if (isOrderedListLine) {
+  if (canConvertTableToList(editor)) {
+    ids.push("table-to-list");
+  }
+
+  if (canRenumber(editor)) {
     ids.push("renumber-ordered-list");
   }
 

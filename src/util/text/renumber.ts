@@ -23,24 +23,42 @@ function indentWidth(line: string): number {
   return line.match(/^\s*/)?.[0].length ?? 0;
 }
 
-export function renumberSelection(editor: Editor): void {
+/** The lines `renumberSelection` would rewrite, or null when the cursor isn't on an item. */
+function targetRange(
+  editor: Editor,
+): { startLine: number; endLine: number } | null {
   if (editor.somethingSelected()) {
     const from = editor.getCursor("from");
     const to = editor.getCursor("to");
     // A selection ending at the start of a line doesn't include that line.
     const endLine = to.ch === 0 && to.line > from.line ? to.line - 1 : to.line;
-    renumberLines(editor, readLines(editor, from.line, endLine), from.line);
-    return;
+    return { startLine: from.line, endLine };
   }
 
   const cursor = editor.getCursor();
-  if (!parseOrderedItem(editor.getLine(cursor.line))) return;
+  if (!parseOrderedItem(editor.getLine(cursor.line))) return null;
 
-  const { startLine, endLine } = startsList(editor, cursor.line)
+  return startsList(editor, cursor.line)
     ? fullListRange(editor, cursor.line)
     : listRangeFromCursor(editor, cursor.line);
+}
 
+export function renumberSelection(editor: Editor): void {
+  const range = targetRange(editor);
+  if (!range) return;
+
+  const { startLine, endLine } = range;
   renumberLines(editor, readLines(editor, startLine, endLine), startLine);
+}
+
+/** Whether `renumberSelection` has ordered items to work on. */
+export function canRenumber(editor: Editor): boolean {
+  const range = targetRange(editor);
+  if (!range) return false;
+
+  return readLines(editor, range.startLine, range.endLine).some(
+    (line) => parseOrderedItem(line) !== null,
+  );
 }
 
 function readLines(

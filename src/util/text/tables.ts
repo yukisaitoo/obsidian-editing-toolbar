@@ -22,15 +22,23 @@ export function convertListToTableMultiDim(editor: Editor): void {
 }
 
 export function convertTableToList(editor: Editor): void {
-  const selection = selectTableAroundCursor(editor);
-  if (!selection?.includes("|")) {
+  const table = findTable(editor);
+  if (!table) {
     new Notice(strings.pleaseSelectValidMarkdownTable);
     return;
   }
 
-  const rows = selection
-    .split(/\r?\n/)
-    .filter((line) => line.trim() !== "" && !isDelimiterRow(line));
+  if (table.range) {
+    const { startLine, endLine } = table.range;
+    editor.setSelection(
+      { line: startLine, ch: 0 },
+      { line: endLine, ch: editor.getLine(endLine).length },
+    );
+  }
+
+  const rows = table.lines.filter(
+    (line) => line.trim() !== "" && !isDelimiterRow(line),
+  );
 
   const result: string[] = [];
   rows.slice(1).forEach((line) => {
@@ -41,6 +49,11 @@ export function convertTableToList(editor: Editor): void {
 
   editor.replaceSelection(result.join("\n"));
   new Notice(strings.tableConvertedMultiLevelList);
+}
+
+/** Whether `convertTableToList` has a table to convert. */
+export function canConvertTableToList(editor: Editor): boolean {
+  return findTable(editor) !== null;
 }
 
 /** The `|---|:--:|` row that separates a table's header from its body. */
@@ -170,11 +183,38 @@ function renderTable(
   return needsGap ? `\n${table}` : table;
 }
 
-function selectTableAroundCursor(editor: Editor): string | null {
-  const selection = editor.getSelection();
-  if (selection?.includes("|")) return selection;
+interface TableTarget {
+  lines: string[];
+  /** Set when the table came from the cursor, so the caller must select it first. */
+  range: { startLine: number; endLine: number } | null;
+}
 
+function findTable(editor: Editor): TableTarget | null {
+  const selection = editor.getSelection();
+  if (selection) {
+    const lines = selection.split(/\r?\n/);
+    return isTable(lines) ? { lines, range: null } : null;
+  }
+
+  const range = tableRangeAroundCursor(editor);
+  if (!range) return null;
+
+  const lines = readLines(editor, range.startLine, range.endLine);
+  return isTable(lines) ? { lines, range } : null;
+}
+
+// A pipe alone is just prose; the delimiter row is what makes it a table.
+function isTable(lines: string[]): boolean {
+  return lines.some(isDelimiterRow);
+}
+
+/** The contiguous run of piped lines around the cursor, which must be on one. */
+function tableRangeAroundCursor(
+  editor: Editor,
+): { startLine: number; endLine: number } | null {
   const cursor = editor.getCursor("from");
+  if (!editor.getLine(cursor.line).includes("|")) return null;
+
   let startLine = cursor.line;
   let endLine = cursor.line;
 
@@ -188,16 +228,17 @@ function selectTableAroundCursor(editor: Editor): string | null {
     endLine++;
   }
 
-  const tableLines: string[] = [];
-  for (let i = startLine; i <= endLine; i++) {
-    const line = editor.getLine(i);
-    if (line.includes("|")) tableLines.push(line);
-  }
-  if (!tableLines.length) return null;
+  return { startLine, endLine };
+}
 
-  editor.setSelection(
-    { line: startLine, ch: 0 },
-    { line: endLine, ch: editor.getLine(endLine).length },
-  );
-  return tableLines.join("\n");
+function readLines(
+  editor: Editor,
+  startLine: number,
+  endLine: number,
+): string[] {
+  const lines: string[] = [];
+  for (let line = startLine; line <= endLine; line++) {
+    lines.push(editor.getLine(line));
+  }
+  return lines;
 }
