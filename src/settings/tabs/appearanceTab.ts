@@ -3,12 +3,14 @@ import {
   applyAppearanceVars,
   getAppearanceBucket,
   getAppearanceValue,
+  hasAppearanceOverride,
   TOOLBAR_ICON_SIZE_MAX,
   TOOLBAR_ICON_SIZE_MIN,
 } from "src/settings/settingsData";
 import type { SettingsTabContext } from "src/settings/settingsTab";
 import { SHARED_BAR_CLASS } from "src/toolbar/toolbarDom";
 import { strings, t } from "src/translations/helper";
+import { resolveHexColor } from "src/util/color";
 
 const BACKGROUND_SWATCHES = [
   "#F5F8FA",
@@ -96,13 +98,23 @@ function renderColorSetting(
       const pickerContainer = setting.controlEl.createDiv({
         cls: "pickr-container",
       });
+      // Pickr is still seeded with the resolved theme colour below, so the popup
+      // opens on it and Save writes it; only the swatch is left reading as empty.
+      pickerContainer.toggleClass(
+        "pickr-unset",
+        !hasAppearanceOverride(ctx.plugin.settings, config.key),
+      );
 
       ctx.createPickr({
         el: pickerContainer.createDiv({ cls: "picker" }),
         container: pickerContainer,
         swatches: config.swatches,
         opacity: false,
-        defaultColor: getAppearanceValue(ctx.plugin.settings, config.key),
+        defaultColor:
+          resolveHexColor(
+            pickerContainer,
+            getAppearanceValue(ctx.plugin.settings, config.key),
+          ) ?? "#000000",
         onSave: (hexColor) => {
           getAppearanceBucket(ctx.plugin.settings)[config.key] = hexColor;
           applyColor(ctx);

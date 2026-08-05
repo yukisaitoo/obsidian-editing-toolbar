@@ -29,6 +29,13 @@ export function getAppearanceValue<K extends keyof AppearanceSettings>(
   return settings.appearance?.[key] ?? DEFAULT_APPEARANCE[key];
 }
 
+export function hasAppearanceOverride(
+  settings: EditingToolbarSettings,
+  key: keyof AppearanceSettings,
+): boolean {
+  return settings.appearance?.[key] !== undefined;
+}
+
 // The writable bucket, created on demand. Keys left out of it fall back to
 // DEFAULT_APPEARANCE via getAppearanceValue().
 export function getAppearanceBucket(

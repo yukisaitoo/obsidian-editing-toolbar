@@ -59,3 +59,19 @@ export function toHexColor(color: string): string | null {
   const rgb = `#${channel(rgba.r)}${channel(rgba.g)}${channel(rgba.b)}`;
   return rgba.a >= 1 ? rgb : `${rgb}${channel(rgba.a * 255)}`;
 }
+
+// Theme vars are valid CSS but not a colour Pickr can parse, so resolving one
+// means letting the browser do it.
+export function resolveHexColor(
+  parent: HTMLElement,
+  color: string,
+): string | null {
+  const direct = toHexColor(color);
+  if (direct) return direct;
+
+  const probe = parent.createDiv();
+  probe.style.color = color;
+  const computed = getComputedStyle(probe).color;
+  probe.remove();
+  return toHexColor(computed);
+}

@@ -669,6 +669,12 @@ button.editingToolbarSettingsButton {
   gap: 8px;
 }
 
+/* No override set: the toolbar is following the theme, so the swatch keeps
+   Pickr's empty checkerboard instead of a colour the user never picked. */
+.pickr-container.pickr-unset .pcr-button::after {
+  background: none;
+}
+
 /* --- Live toolbar preview ------------------------------------------------- */
 
 .editing-toolbar-settings .toolbar-preview-section {
