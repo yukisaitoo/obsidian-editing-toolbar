@@ -90,28 +90,21 @@ function wireSwatches(
   const table = root.querySelector<HTMLTableElement>(".x-color-picker-table");
   if (!table) return;
 
-  // Every cell, header rows included: a header `th` carries no background colour,
-  // so the `!raw` guard below already skips it.
-  for (const row of Array.from(table.rows)) {
-    for (const cell of Array.from(row.cells)) {
-      cell.addEventListener("click", (event) => {
-        event.preventDefault();
-        event.stopPropagation();
+  table.addEventListener("click", (event) => {
+    event.preventDefault();
+    event.stopPropagation();
 
-        const editor = plugin.commandsManager.getActiveEditor();
-        const raw = cell.style.backgroundColor;
-        if (!editor || !raw) return;
+    const cell = (event.target as HTMLElement | null)?.closest("td");
+    const color = cell && toHexColor(cell.style.backgroundColor);
+    if (!color) return;
 
-        const color = toHexColor(raw);
-        if (!color) return;
-
-        plugin.settings[variant.settingsKey] = color;
-        variant.apply(color, editor);
-        plugin.applyRootColorVars();
-        void plugin.saveSettings();
-      });
-    }
-  }
+    plugin.commandsManager.runOnEditor((editor) => {
+      variant.apply(color, editor);
+      plugin.settings[variant.settingsKey] = color;
+      plugin.applyRootColorVars();
+      void plugin.saveSettings();
+    });
+  });
 }
 
 // The custom swatches this button edits live on the General tab. Straight there by
