@@ -91,7 +91,7 @@ function renderCommandList(
       }
 
       save();
-      ctx.rebuildToolbar();
+      ctx.applyChanges();
     },
   });
 
@@ -198,7 +198,7 @@ function renderSubmenuRow(
         .onChange(async (value) => {
           command.menuType = value as "submenu" | "dropdown";
           await ctx.plugin.saveSettings();
-          ctx.rebuildToolbar();
+          ctx.applyChanges();
           new Notice(
             `${strings.menuTypeChanged}: ${
               value === "dropdown"
@@ -256,7 +256,7 @@ function renderSubmenuRow(
       }
 
       void ctx.plugin.saveSettings();
-      ctx.rebuildToolbar();
+      ctx.applyChanges();
     },
   });
 
@@ -278,8 +278,7 @@ function renderSubmenuRow(
       ctx.createDeleteButton(deleteButton, async () => {
         command.SubmenuCommands.remove(subCommand);
         await ctx.plugin.saveSettings();
-        ctx.refresh();
-        ctx.rebuildToolbar();
+        ctx.applyChanges();
       }),
     );
   });
@@ -308,8 +307,7 @@ async function removeCommand(
 ): Promise<void> {
   commands.remove(command);
   await ctx.plugin.saveSettings();
-  ctx.refresh();
-  ctx.rebuildToolbar();
+  ctx.applyChanges();
 }
 
 function moveWithin(items: Command[], from: number, to: number): void {
@@ -324,8 +322,7 @@ async function insertAfter(
 ): Promise<void> {
   commands.splice(index + 1, 0, command);
   await ctx.plugin.saveSettings();
-  ctx.refresh();
-  ctx.rebuildToolbar();
+  ctx.applyChanges();
 }
 
 function configureIconButton(

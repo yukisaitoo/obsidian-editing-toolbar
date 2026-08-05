@@ -64,7 +64,7 @@ export function renderAppearanceTab(
 
           ctx.plugin.applyRootAppearanceVars();
           await ctx.plugin.saveSettings();
-          ctx.rebuildToolbar();
+          ctx.applyChanges();
         });
     });
 
@@ -82,9 +82,7 @@ interface ColorSettingConfig {
 function applyColor(ctx: SettingsTabContext): void {
   ctx.plugin.applyRootAppearanceVars();
   void ctx.plugin.saveSettings();
-  // No refresh() here: inside a Pickr callback a synchronous re-render would
-  // destroyAndRemove() the instance still dispatching. The rebuild does it on a timer.
-  ctx.rebuildToolbar();
+  ctx.applyChanges();
 }
 
 function renderColorSetting(

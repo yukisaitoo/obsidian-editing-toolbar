@@ -44,7 +44,6 @@ export function renderGeneralTab(
             confirmWarning: true,
             onConfirm: async () => {
               await ctx.plugin.resetSettings();
-              ctx.refresh();
             },
           });
         });
@@ -90,7 +89,7 @@ function renderSwatchRow(
           onClear: () => {
             ctx.plugin.settings[settingKey] = DEFAULT_SETTINGS[settingKey];
             void ctx.plugin.saveSettings();
-            ctx.refresh();
+            ctx.applyChanges();
           },
         });
       }

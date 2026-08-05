@@ -35,8 +35,7 @@ const SETTING_TABS: { id: TabId; name: string; icon: string }[] = [
 export interface SettingsTabContext {
   app: App;
   plugin: EditingToolbarPlugin;
-  refresh(): void;
-  rebuildToolbar(): void;
+  applyChanges(): void;
   createPickr(options: ColorPickrOptions): Pickr;
   createSortable(el: HTMLElement, options: Sortable.Options): void;
   // Arms on the first click, deletes on the second.
@@ -125,8 +124,7 @@ export class EditingToolbarSettingTab extends PluginSettingTab {
     return {
       app: this.app,
       plugin: this.plugin,
-      refresh: () => this.display(),
-      rebuildToolbar: () => this.rebuildToolbar(),
+      applyChanges: () => this.rebuildToolbar(),
       createPickr: (options) => {
         const pickr = createColorPickr(options);
         this.pickrs.push(pickr);
