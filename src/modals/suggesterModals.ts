@@ -9,7 +9,7 @@ import {
   setIcon,
 } from "obsidian";
 import { getAppIcons } from "src/icons/appIcons";
-import { focusAfterOpen } from "src/modals/modalFocus";
+import { focusAfterOpen, submitOnEnter } from "src/modals/modalInput";
 import type EditingToolbarPlugin from "src/plugin/main";
 import { format, strings, t } from "src/translations/helper";
 import { findStoredCommand, toStoredCommand } from "src/util/commandStorage";
@@ -172,12 +172,7 @@ export class ChangeCmdname extends Modal {
       this.close();
     };
 
-    textComponent.inputEl.addEventListener("keydown", (ev) => {
-      // isComposing guards IME users, whose confirm-Enter must not close the modal.
-      if (ev.key !== "Enter" || ev.isComposing) return;
-      ev.preventDefault();
-      void submit();
-    });
+    submitOnEnter(textComponent.inputEl, submit);
 
     const buttons = contentEl.createDiv("modal-button-container");
     new ButtonComponent(buttons)

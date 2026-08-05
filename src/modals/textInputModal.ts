@@ -1,5 +1,5 @@
 import { App, Modal, Setting } from "obsidian";
-import { focusAfterOpen } from "src/modals/modalFocus";
+import { focusAfterOpen, submitOnEnter } from "src/modals/modalInput";
 import { strings } from "src/translations/helper";
 
 interface ITextInputResult {
@@ -62,12 +62,7 @@ export class TextInputModal extends Modal {
           focusAfterOpen(text.inputEl);
         }
 
-        text.inputEl.addEventListener("keydown", (e) => {
-          if (e.key === "Enter") {
-            e.preventDefault();
-            this.submit();
-          }
-        });
+        submitOnEnter(text.inputEl, () => this.submit());
       });
     });
 

@@ -8,7 +8,7 @@ import {
 } from "obsidian";
 import type { CalloutTypeInfo } from "src/modals/callout/calloutTypes";
 import { buildCalloutOptions } from "src/modals/callout/calloutTypes";
-import { focusAfterOpen } from "src/modals/modalFocus";
+import { focusAfterOpen } from "src/modals/modalInput";
 import EditingToolbarPlugin from "src/plugin/main";
 import { strings } from "src/translations/helper";
 import type { CalloutSpec } from "src/util/text/callout";
