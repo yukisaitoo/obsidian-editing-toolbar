@@ -5,7 +5,6 @@ import type { en } from "../en";
 const ui: Partial<Record<keyof typeof en, string>> = {
   dragCommandsHere: "Перетащите сюда",
   add: "Добавить",
-  addPrefixSuffix: "Добавить префикс/суффикс",
   addSeparator: "Добавить разделитель",
   addSubmenu: "Добавить подменю",
   addCommandOntoEditingToolbar:
@@ -37,21 +36,14 @@ const ui: Partial<Record<keyof typeof en, string>> = {
   standardColors: "Стандартные цвета",
   translucentColors: "Полупрозрачные цвета",
   highlighterColors: "Цвета маркера",
-  dedupeLines: "Удалить дубликаты строк",
-  dedupeCompleted: "Удаление дубликатов завершено, осталось {count} строк",
   delete: "Удалить",
-  detectedChineseContextConvertedFull:
-    "Обнаружен китайский контекст: символы преобразованы в полноширинные",
+  detectedCjkContextConvertedFull:
+    "Обнаружен контекст CJK: символы преобразованы в полноширинные",
   detectedCodeEnglishContextConverted:
     "Обнаружен код/английский текст: символы преобразованы в полуширинные",
   doWantContinue: "Вы хотите продолжить?",
   dropdownMenu: "Выпадающее меню",
   editingToolbarCommands: "Команды панели инструментов",
-  endString: "Конечная строка",
-  enterEndString: "Введите конечную строку",
-  enterPrefix: "Введите префикс",
-  enterStartString: "Введите начальную строку",
-  enterSuffix: "Введите суффикс",
   error: "Ошибка: ",
   export: "Экспорт",
   exportConfiguration: "Экспорт конфигурации",
@@ -59,9 +51,6 @@ const ui: Partial<Record<keyof typeof en, string>> = {
     "Экспортируйте конфигурацию панели инструментов, чтобы поделиться ею с другими.",
   exportGenerateJsonConfigurationCan:
     "Экспорт: создаёт JSON-конфигурацию, которую можно сохранить или отправить другим.",
-  extractBetweenStrings: "Извлечь текст между строками",
-  extractedMatches: "Извлечено {count} совпадений",
-  extractionFailed: "Не удалось выполнить извлечение",
   failedCopyConfiguration: "Не удалось скопировать конфигурацию",
   fontColors: "Цвета шрифта",
   fullHalfConverter: "Преобразование полуширинных/полноширинных символов",
@@ -77,27 +66,12 @@ const ui: Partial<Record<keyof typeof en, string>> = {
   inputContent: "Введите содержимое",
   inputTitle: "Введите заголовок",
   insert: "Вставить",
-  insertBlankLines: "Вставить пустые строки",
   invalidImportDataFormat: "Неверный формат импортируемых данных",
-  item: "Элемент",
-  listPatternDetectedAutoSplit:
-    "Обнаружен шаблон списка, выполнено автоматическое разделение",
-  listTable: "Список в таблицу",
   loading: "Загрузка...",
   menuTypeChanged: "Тип меню изменён на",
-  mergeLines: "Объединить строки",
-  mergeLinesSettings: "Настройки объединения строк",
-  mergeCompleted: "Объединение завершено",
-  merged: "Объединено с",
   more: "Ещё",
-  matchesFound: "Совпадений не найдено",
-  obviousSeparatorListPatternDetected:
-    "Не обнаружено явных разделителей или шаблонов списка",
   validConfigurationFoundImportData:
     "В импортируемых данных не найдена корректная конфигурация",
-  numberLinesCustom: "Пронумеровать строки (настраиваемо)",
-  numberLinesConfiguration: "Настройка нумерации строк",
-  numberingCompletedStarting: "Нумерация завершена: начиная с",
   open: "Развернуто",
   optionalLeaveBlankDefaultTitle:
     "Необязательно, оставьте пустым для заголовка по умолчанию",
@@ -107,36 +81,13 @@ const ui: Partial<Record<keyof typeof en, string>> = {
   pasteConfigurationHere: "Вставьте конфигурацию сюда...",
   pleaseEnterNewName: "Введите новое название: ",
   pleasePasteConfigurationDataFirst: "Сначала вставьте данные конфигурации",
-  pleaseSelectValidMarkdownTable:
-    "Сначала выберите корректную таблицу Markdown",
-  pleaseSelectLinesMergeFirst: "Сначала выделите строки для объединения",
   pleaseSelectTextFirst: "Сначала выделите текст",
-  pleaseSelectTextDedupeFirst: "Сначала выделите текст для удаления дубликатов",
-  pleaseSelectTextNumberFirst: "Сначала выделите текст для нумерации",
-  pleaseSpecifyStartEndString: "Укажите начальную или конечную строку",
-  prefix: "Префикс",
-  prefixSuffixAdded: "Префикс/суффикс успешно добавлены",
-  removeAllWhitespace: "Удалить все пробельные символы",
   renumberList: "Перенумеровать список",
   reset: "Сбросить",
-  separator: "Разделитель",
-  separatorLeaveEmptySmartSpacing:
-    "Разделитель (оставьте пустым для умных интервалов)",
   setBackgroundColorToolbar: "Установить цвет фона панели инструментов.",
   setColorToolbarIcon: "Установить цвет значков панели инструментов.",
   setSizeToolbarIconPx:
     "Установить размер значков панели инструментов (px); по умолчанию: 18px",
-  shrinkExtraSpaces: "Сжать лишние пробелы",
-  splitLines: "Разделить строки",
-  startNumber: "Начальный номер",
-  startString: "Начальная строка",
-  step: "Шаг",
-  suffix: "Суффикс",
-  superConversionCompletedContextPreserved:
-    "Суперконвертация завершена: контекст сохранён, макет оптимизирован",
-  tableConvertedMultiLevelList: "Таблица преобразована в многоуровневый список",
-  tableList: "Таблицу в список",
-  textTools: "Текстовые инструменты",
   commandAlreadyExists: "Команда {name} уже существует",
   import3: "Этот импорт выполнит:",
   title: "Заголовок",
@@ -146,7 +97,6 @@ const ui: Partial<Record<keyof typeof en, string>> = {
   toolbarIconSize: "Размер значков панели инструментов",
   toolbarPreviewHypotheticalCommandConfigurati:
     "Предпросмотр панели инструментов (с примерной конфигурацией команд)",
-  trimLineEnds: "Удалить пробелы в начале и конце строк",
   updateImport: "Импорт с обновлением",
   updateModeAddNewItems:
     "Режим обновления (добавить новые элементы и обновить существующие)",
@@ -159,8 +109,6 @@ const ui: Partial<Record<keyof typeof en, string>> = {
     "Предупреждение: режим перезаписи заменит существующие настройки импортированными.",
   warningUpdateModeAddNew:
     "Предупреждение: режим обновления добавит новые элементы и обновит существующие.",
-  whitespaceCleaningCompleted: "Очистка пробельных символов завершена",
-  eGCommaPipeArrow: "например: , или | или →",
   insert2: "вставить",
   updateModeMergeImportedSettings:
     "ℹ️ Режим обновления объединит импортированные настройки с существующими.",
@@ -186,10 +134,6 @@ export const commandNames: Record<string, string> = {
   "section!": "разделе сообщества!",
   "Custom theme": "Пользовательская тема",
   "Insert link": "Вставить ссылку",
-  "Remove blank lines": "Удалить пустые строки",
-  "Line operations": "Операции со строками",
-  "Text processing": "Обработка текста",
-  "Advanced tools": "Дополнительные инструменты",
   "Align text right": "Выровнять по правому краю",
   Bold: "Жирный",
   Checklist: "Чек-лист",
@@ -245,13 +189,4 @@ export const commandNames: Record<string, string> = {
   "Template name and content cannot be empty":
     "Название и содержимое шаблона не могут быть пустыми",
   "Manage Templates": "Управление шаблонами",
-  "Optional. Leave empty unless your server requires authentication.":
-    "Необязательно. Оставьте пустым, если ваш сервер не требует авторизации.",
-  "Get Models": "Получить список",
-  "No models found at this endpoint.": "Не найдено моделей на данном адресе.",
-  "Failed to load models:": "Ошибка загрузки списка моделей:",
-  "Choose a detected model to fill the model field.":
-    "Выберите модель из списка, чтобы заполнить поле названия модели.",
-  "Fetch available models from your server.":
-    "Загрузить список доступных моделей с вашего сервера.",
 };

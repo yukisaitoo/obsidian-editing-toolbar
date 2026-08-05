@@ -19,6 +19,11 @@ export const DEFAULT_TOOLBAR_COMMANDS: Command[] = [
     icon: "eraser",
   },
   {
+    id: ownCommand("smart-symbols"),
+    name: "Convert punctuation width",
+    icon: "lucide-at-sign",
+  },
+  {
     id: ownCommand("header2-text"),
     name: "Header 2",
     icon: "header-2",
@@ -79,99 +84,6 @@ export const DEFAULT_TOOLBAR_COMMANDS: Command[] = [
     id: ownCommand("toggle-highlight"),
     name: "Highlight",
     icon: "highlight-glyph",
-  },
-  {
-    id: "SubmenuCommands-text-tools",
-    name: "Text tools",
-    icon: "box",
-    menuType: "dropdown",
-    SubmenuCommands: [
-      {
-        id: ownCommand("smart-symbols"),
-        name: "Convert punctuation width",
-        icon: "lucide-at-sign",
-      },
-      {
-        id: "editingToolbar-Divider-Line-line-ops",
-        name: "Line operations",
-        icon: "vertical-split",
-      },
-      {
-        id: ownCommand("insert-blank-lines"),
-        name: "Insert blank lines",
-        icon: "lucide-space",
-      },
-      {
-        id: ownCommand("remove-blank-lines"),
-        name: "Remove blank lines",
-        icon: "lucide-minimize-2",
-      },
-      {
-        id: ownCommand("split-lines"),
-        name: "Split lines",
-        icon: "lucide-split",
-      },
-      {
-        id: ownCommand("merge-lines"),
-        name: "Merge lines",
-        icon: "lucide-merge",
-      },
-      {
-        id: ownCommand("dedupe-lines"),
-        name: "Dedupe lines",
-        icon: "lucide-filter",
-      },
-      {
-        id: "editingToolbar-Divider-Line-text-processing",
-        name: "Text processing",
-        icon: "vertical-split",
-      },
-      {
-        id: ownCommand("add-wrap"),
-        name: "Add prefix/suffix",
-        icon: "lucide-wrap-text",
-      },
-      {
-        id: ownCommand("number-lines"),
-        name: "Number lines (custom)",
-        icon: "lucide-list-ordered",
-      },
-      {
-        id: ownCommand("remove-whitespace-trim"),
-        name: "Trim line ends",
-        icon: "lucide-scissors",
-      },
-      {
-        id: ownCommand("remove-whitespace-compress"),
-        name: "Shrink extra spaces",
-        icon: "lucide-minimize",
-      },
-      {
-        id: ownCommand("remove-whitespace-all"),
-        name: "Remove all whitespace",
-        icon: "lucide-eraser",
-      },
-      {
-        id: "editingToolbar-Divider-Line-advanced",
-        name: "Advanced tools",
-        icon: "vertical-split",
-      },
-      {
-        id: ownCommand("list-to-table"),
-        name: "List to table",
-        icon: "lucide-table",
-      },
-      {
-        id: ownCommand("table-to-list"),
-        name: "Table to list",
-        icon: "lucide-list",
-      },
-      {
-        id: ownCommand("extract-between"),
-        name: "Extract between strings",
-        icon: "lucide-brackets",
-      },
-    ],
   },
   {
     id: "SubmenuCommands-lucdf3en5",

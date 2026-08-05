@@ -669,12 +669,6 @@ button.editingToolbarSettingsButton {
   gap: 8px;
 }
 
-.editing-toolbar-textarea-input {
-  width: 100%;
-  min-height: 80px;
-  resize: vertical;
-}
-
 /* --- Live toolbar preview ------------------------------------------------- */
 
 .editing-toolbar-settings .toolbar-preview-section {

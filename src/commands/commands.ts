@@ -5,7 +5,6 @@ import { registerClipboardAndHistoryCommands } from "src/commands/registrars/cli
 import { registerCoreCommands } from "src/commands/registrars/core";
 import { registerFormattingCommands } from "src/commands/registrars/formatting";
 import { registerInsertCommands } from "src/commands/registrars/insert";
-import { registerTextToolCommands } from "src/commands/registrars/textTools";
 import type {
   Registrar,
   RegistrarContext,
@@ -15,7 +14,6 @@ import { selectAt } from "src/util/text/selection";
 
 const REGISTRARS: Registrar[] = [
   registerCoreCommands,
-  registerTextToolCommands,
   registerFormattingCommands,
   registerClipboardAndHistoryCommands,
   registerInsertCommands,

@@ -75,14 +75,12 @@ const ui: Partial<Record<keyof typeof en, string>> = {
   pleasePasteConfigurationDataFirst:
     "Por favor coloque os dados da configuração primeiro",
   pleaseSelectTextFirst: "Por favor selecione o texto primeiro",
-  prefix: "Prefixo",
   renumberList: "Renumerar Lista",
   reset: "Reiniciar",
   setBackgroundColorToolbar: "Definir a cor de fundo da barra de ferramentas.",
   setColorToolbarIcon: "Definir a cor do ícone da barra de ferramentas.",
   setSizeToolbarIconPx:
     "Definir o tamanho do ícone da barra de ferramentas (px); padrão: 18px",
-  suffix: "Sufixo",
   commandAlreadyExists: "O comando {name} já existe",
   import3: "Esta importação irá:",
   title: "Título",

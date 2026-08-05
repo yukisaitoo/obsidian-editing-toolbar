@@ -5,7 +5,6 @@ import type { en } from "../en";
 const ui: Partial<Record<keyof typeof en, string>> = {
   dragCommandsHere: "ここにドラッグ",
   add: "追加",
-  addPrefixSuffix: "接頭辞／接尾辞を追加",
   backgroundColor: "背景色",
   cancel: "キャンセル",
   customBackgroundColor: "背景色を選択",
@@ -16,21 +15,10 @@ const ui: Partial<Record<keyof typeof en, string>> = {
   standardColors: "標準の色",
   translucentColors: "半透明の色",
   highlighterColors: "蛍光ペンの色",
-  dedupeLines: "重複行を削除",
-  extractBetweenStrings: "指定文字列の間を抽出",
   fontColors: "文字色",
   fullHalfConverter: "全角／半角を変換",
-  insertBlankLines: "空行を挿入",
-  listTable: "リストを表に変換",
   loading: "読み込み中...",
-  mergeLines: "行を結合",
   more: "その他",
-  numberLinesCustom: "行番号を付ける",
-  removeAllWhitespace: "空白をすべて削除",
-  shrinkExtraSpaces: "余分な空白をまとめる",
-  splitLines: "行を分割",
-  tableList: "表をリストに変換",
-  trimLineEnds: "行頭・行末の空白を削除",
 };
 
 export default ui;
@@ -83,18 +71,4 @@ export const commandNames: Record<string, string> = {
   "Change font color": "文字色を変更",
   "Change background color": "背景色を変更",
   "Renumber ordered list": "番号付きリストを振り直す",
-  "Remove blank lines": "空行を削除",
-  "Line operations": "行の操作",
-  "Text processing": "テキスト処理",
-  "Advanced tools": "高度なツール",
-  "Optional. Leave empty unless your server requires authentication.":
-    "任意です。サーバーで認証が必要な場合を除き、空欄のままにしてください。",
-  "Get Models": "モデルを取得",
-  "No models found at this endpoint.":
-    "このエンドポイントにモデルが見つかりません。",
-  "Failed to load models:": "モデルの読み込みに失敗しました:",
-  "Choose a detected model to fill the model field.":
-    "検出されたモデルを選択して、モデル名欄に設定します。",
-  "Fetch available models from your server.":
-    "サーバーから利用可能なモデルを取得します。",
 };
