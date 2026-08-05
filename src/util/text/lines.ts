@@ -142,8 +142,10 @@ export function numberList(
 }
 
 function detectListPattern(text: string): RegExp | null {
-  const numberedList = /\s?\d+[.、]\s?/g;
-  const arrowSymbol = /\s?[→=>]\s?/g;
+  // Zero-width so the marker stays on its item and matches once each, keeping the
+  // counts below honest. (?!\d) rules out decimals like "3.5".
+  const numberedList = /(?=\d+[.、](?!\d))/g;
+  const arrowSymbol = /\s*(?:→|⇒|=>|->)\s*/g;
 
   if ((text.match(numberedList) || []).length > 1) return numberedList;
   if ((text.match(arrowSymbol) || []).length > 1) return arrowSymbol;
