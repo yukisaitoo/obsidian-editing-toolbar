@@ -1,4 +1,5 @@
 import {
+  App,
   ButtonComponent,
   Command,
   FuzzyMatch,
@@ -17,24 +18,12 @@ import { toStoredCommand } from "src/util/commandStorage";
 type IconSelectCallback = (iconId: string) => void;
 
 export class ChooseFromIconList extends FuzzySuggestModal<string> {
-  plugin: EditingToolbarPlugin;
-  command: Command;
-  // The settings list the command was rendered from; null when a callback owns
-  // the result and nothing is written to settings.
-  owner: Command[] | null;
-  customCallback: IconSelectCallback | null = null;
   constructor(
-    plugin: EditingToolbarPlugin,
-    command: Command,
-    owner: Command[] | null,
-    callback?: IconSelectCallback,
+    app: App,
+    private onChoose: IconSelectCallback,
   ) {
-    super(plugin.app);
-    this.plugin = plugin;
-    this.command = command;
-    this.owner = owner;
-    this.customCallback = callback || null;
-    this.setPlaceholder(strings.chooseIcon2);
+    super(app);
+    this.setPlaceholder(strings.chooseIcon);
   }
 
   private capitalJoin(string: string): string {
@@ -66,18 +55,8 @@ export class ChooseFromIconList extends FuzzySuggestModal<string> {
     super.renderSuggestion(icon, iconItem);
   }
 
-  async onChooseItem(item: string): Promise<void> {
-    if (this.customCallback) {
-      this.customCallback(item);
-      return;
-    }
-
-    // Removed while the picker was open: nothing to write to.
-    if (!this.owner?.includes(this.command)) return;
-
-    this.command.icon = item;
-    await this.plugin.saveSettings();
-    this.plugin.rebuildToolbars();
+  onChooseItem(item: string): void {
+    this.onChoose(item);
   }
 }
 
@@ -115,9 +94,7 @@ export class CommandPicker extends FuzzySuggestModal<Command> {
 
     if (!item.icon) {
       new ChooseFromIconList(
-        this.plugin,
-        item,
-        null,
+        this.app,
         (icon) => void this.addCommand({ ...item, icon }),
       ).open();
       return;

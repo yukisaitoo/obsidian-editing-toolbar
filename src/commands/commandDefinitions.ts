@@ -1,54 +1,52 @@
 import type { Command } from "obsidian";
 
 export type CommandPlot = {
+  name: string;
   prefix: string;
   suffix: string;
 };
 
 export const WRAP_COMMANDS: Record<string, CommandPlot> = {
   justify: {
+    name: "Justify text",
     prefix: '<p align="justify">',
     suffix: "</p>",
   },
   left: {
+    name: "Align text left",
     prefix: '<p align="left">',
     suffix: "</p>",
   },
   right: {
+    name: "Align text right",
     prefix: '<p align="right">',
     suffix: "</p>",
   },
   center: {
+    name: "Center text",
     prefix: "<center>",
     suffix: "</center>",
   },
   underline: {
+    name: "Toggle underline",
     prefix: "<u>",
     suffix: "</u>",
   },
   superscript: {
+    name: "Toggle superscript",
     prefix: "<sup>",
     suffix: "</sup>",
   },
   subscript: {
+    name: "Toggle subscript",
     prefix: "<sub>",
     suffix: "</sub>",
   },
   codeblock: {
+    name: "Toggle code block",
     prefix: "\n```\n",
     suffix: "\n```\n",
   },
-};
-
-export const WRAP_COMMAND_NAMES: Record<string, string> = {
-  justify: "Justify text",
-  left: "Align text left",
-  right: "Align text right",
-  center: "Center text",
-  underline: "Toggle underline",
-  superscript: "Toggle superscript",
-  subscript: "Toggle subscript",
-  codeblock: "Toggle code block",
 };
 
 // Re-registered under the toolbar's own ids so they can carry an icon.

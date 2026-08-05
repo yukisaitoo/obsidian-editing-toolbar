@@ -15,7 +15,7 @@ const ui: Partial<Record<keyof typeof en, string>> = {
   cancel: "Cancelar",
   changeCommandName: "Alterar Nome do Comando",
   chooseCommand: "Escolha um comando",
-  chooseIcon2: "Escolha um ícone",
+  chooseIcon: "Escolha um ícone",
   chooseHowImportConfiguration: "Escolha como importar a configuração",
   closed: "Fechado",
   collapseState: "Estado de Colapso",
@@ -80,26 +80,26 @@ const ui: Partial<Record<keyof typeof en, string>> = {
   setSizeToolbarIconPx:
     "Definir o tamanho do ícone da barra de ferramentas (px); padrão: 18px",
   commandAlreadyExists: "O comando {name} já existe",
-  import3: "Esta importação irá:",
+  importSummaryHeading: "Esta importação irá:",
   title: "Título",
   toolbarBackgroundColor: "Cor de Fundo da Barra de Ferramentas",
   toolbarCommands: "Comandos da Barra de Ferramentas",
   toolbarIconColor: "Cor do Ícone da Barra de Ferramentas",
   toolbarIconSize: "Tamanho do Ícone da Barra de Ferramentas",
-  toolbarPreviewHypotheticalCommandConfigurati:
+  toolbarPreviewLabel:
     "Visualização da barra de ferramentas (com uma configuração de comandos hipotética).",
   updateImport: "Atualizar Importação",
   updateModeAddNewItems:
     "Modo de Atualização (Adicionar novos itens e atualizar os existentes)",
   updateGeneralSettings: "Atualizar configurações gerais",
   usageInstructions: "Instruções de Uso",
-  warningImportingConfigurationOverwriteCurren:
+  importOverwriteWarning:
     "Aviso: A importação de configuração irá sobrescrever suas configurações atuais. Considere exportar sua configuração atual primeiro como backup.",
   warningOverwriteModeReplaceExisting:
     "Aviso: O modo de sobrescrever irá substituir todas as suas configurações atuais com as importadas.",
   warningUpdateModeAddNew:
     "Aviso: O modo de atualização irá adicionar novos itens e atualizar os existentes com base na configuração importada.",
-  insert2: "para inserir",
+  toInsert: "para inserir",
   updateModeMergeImportedSettings:
     "ℹ️ O modo de atualização irá adicionar novos itens e atualizar os existentes com base na configuração importada.",
   overwriteModeReplaceExistingSettings:

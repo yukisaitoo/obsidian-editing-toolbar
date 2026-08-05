@@ -186,7 +186,7 @@ export class ImportExportModal extends Modal {
       }
 
       const isOverwrite = this.importMode === "overwrite";
-      const summary = [strings.import3];
+      const summary = [strings.importSummaryHeading];
 
       if (containsGeneralSettings) {
         summary.push(`• ${strings.updateGeneralSettings}`);

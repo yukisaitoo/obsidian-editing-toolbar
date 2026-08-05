@@ -32,9 +32,6 @@ export const strings = { ...en, ...active?.ui } as {
 const commandTranslations: Record<string, string> = active?.commands ?? {};
 
 export function t(name: string): string {
-  if (typeof name !== "string" || name.length === 0) {
-    return "";
-  }
   return commandTranslations[name] ?? name;
 }
 

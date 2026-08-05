@@ -17,7 +17,7 @@ const ui: Partial<Record<keyof typeof en, string>> = {
   changeCommandName: "Изменить название команды",
   changeSubmenuName: "Изменить название подменю",
   chooseCommand: "Выберите команду",
-  chooseIcon2: "Выберите значок",
+  chooseIcon: "Выберите значок",
   chooseHowImportConfiguration: "Выберите способ импорта конфигурации",
   closed: "Свернуто",
   collapseState: "Состояние сворачивания",
@@ -82,26 +82,26 @@ const ui: Partial<Record<keyof typeof en, string>> = {
   setSizeToolbarIconPx:
     "Установить размер значков панели инструментов (px); по умолчанию: 18px",
   commandAlreadyExists: "Команда {name} уже существует",
-  import3: "Этот импорт выполнит:",
+  importSummaryHeading: "Этот импорт выполнит:",
   title: "Заголовок",
   toolbarBackgroundColor: "Цвет фона панели инструментов",
   toolbarCommands: "Команды панели инструментов",
   toolbarIconColor: "Цвет значков панели инструментов",
   toolbarIconSize: "Размер значков панели инструментов",
-  toolbarPreviewHypotheticalCommandConfigurati:
+  toolbarPreviewLabel:
     "Предпросмотр панели инструментов (с примерной конфигурацией команд)",
   updateImport: "Импорт с обновлением",
   updateModeAddNewItems:
     "Режим обновления (добавить новые элементы и обновить существующие)",
   updateGeneralSettings: "Обновить основные настройки",
   usageInstructions: "Инструкция по использованию",
-  warningImportingConfigurationOverwriteCurren:
+  importOverwriteWarning:
     "Предупреждение: импорт конфигурации перезапишет текущие настройки. Рекомендуется сначала экспортировать текущую конфигурацию в качестве резервной копии.",
   warningOverwriteModeReplaceExisting:
     "Предупреждение: режим перезаписи заменит существующие настройки импортированными.",
   warningUpdateModeAddNew:
     "Предупреждение: режим обновления добавит новые элементы и обновит существующие.",
-  insert2: "вставить",
+  toInsert: "вставить",
   updateModeMergeImportedSettings:
     "ℹ️ Режим обновления объединит импортированные настройки с существующими.",
   overwriteModeReplaceExistingSettings:

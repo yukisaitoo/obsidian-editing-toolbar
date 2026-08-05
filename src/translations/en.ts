@@ -13,7 +13,7 @@ export const en = {
   changeCommandName: "Change Command Name",
   changeSubmenuName: "Change Submenu Name",
   chooseCommand: "Choose a command",
-  chooseIcon2: "Choose an icon",
+  chooseIcon: "Choose an icon",
   chooseHowImportConfiguration: "Choose how to import the configuration",
   closed: "Closed",
   collapseState: "Collapse State",
@@ -87,25 +87,25 @@ export const en = {
   setColorToolbarIcon: "Set the color of the toolbar icon.",
   setSizeToolbarIconPx: "Set the size of the toolbar icon (px); default: 18px",
   commandAlreadyExists: "The command {name} already exists",
-  import3: "This import will:",
+  importSummaryHeading: "This import will:",
   title: "Title",
   toolbarBackgroundColor: "Toolbar Background Color",
   toolbarCommands: "Toolbar Commands",
   toolbarIconColor: "Toolbar Icon Color",
   toolbarIconSize: "Toolbar Icon Size",
-  toolbarPreviewHypotheticalCommandConfigurati:
+  toolbarPreviewLabel:
     "Toolbar Preview (with hypothetical command configuration)",
   updateImport: "Update Import",
   updateModeAddNewItems: "Update Mode (Add new items and update existing ones)",
   updateGeneralSettings: "Update general settings",
   usageInstructions: "Usage Instructions",
-  warningImportingConfigurationOverwriteCurren:
+  importOverwriteWarning:
     "Warning: Importing configuration will overwrite your current settings. Consider exporting your current configuration first as a backup.",
   warningOverwriteModeReplaceExisting:
     "Warning: Overwrite mode will replace existing settings with imported ones.",
   warningUpdateModeAddNew:
     "Warning: Update mode will add new items and update existing ones.",
-  insert2: "to insert",
+  toInsert: "to insert",
   updateModeMergeImportedSettings:
     "ℹ️ Update mode will merge imported settings with existing ones.",
   overwriteModeReplaceExistingSettings:

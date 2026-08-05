@@ -8,7 +8,7 @@ export function renderImportExportTab(
   containerEl: HTMLElement,
 ): void {
   containerEl.createDiv("import-export-warning").createEl("p", {
-    text: strings.warningImportingConfigurationOverwriteCurren,
+    text: strings.importOverwriteWarning,
     cls: "warning-text",
   });
 

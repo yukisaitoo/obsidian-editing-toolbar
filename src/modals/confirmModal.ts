@@ -11,22 +11,17 @@ interface ConfirmModalOptions {
 }
 
 export class ConfirmModal extends Modal {
-  private options: ConfirmModalOptions;
-
-  constructor(app: App, options: ConfirmModalOptions) {
+  constructor(
+    app: App,
+    private options: ConfirmModalOptions,
+  ) {
     super(app);
-    this.options = {
-      title: strings.confirm,
-      confirmText: strings.confirm,
-      cancelText: strings.cancel,
-      ...options,
-    };
   }
 
   onOpen() {
     const { contentEl } = this;
     contentEl.addClass("confirm-modal");
-    contentEl.createEl("h2", { text: this.options.title });
+    contentEl.createEl("h2", { text: this.options.title ?? strings.confirm });
 
     this.options.message.split("\n").forEach((line) => {
       contentEl.createEl("p", { text: line });

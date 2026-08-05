@@ -188,7 +188,7 @@ function renderSubmenuRow(
       configureIconButton(ctx, iconButton, command, commands),
     )
     .addButton((renameButton) =>
-      configureRenameButton(ctx, renameButton, command, commands, true),
+      configureRenameButton(ctx, renameButton, command, commands),
     )
     .addDropdown((dropdown) => {
       dropdown
@@ -335,8 +335,8 @@ async function insertAfter(
   ctx.applyChanges();
 }
 
-// `owner` is the settings list holding this command, so the modal can write back
-// to the entry the row was rendered from rather than the first one sharing its id.
+// `owner` is the settings list holding this command, so the write lands on the
+// entry the row was rendered from rather than the first one sharing its id.
 function configureIconButton(
   ctx: SettingsTabContext,
   button: ButtonComponent,
@@ -344,10 +344,27 @@ function configureIconButton(
   owner: Command[],
 ): void {
   button.setClass("editingToolbarSettingsIcon").onClick(() => {
-    new ChooseFromIconList(ctx.plugin, command, owner).open();
+    new ChooseFromIconList(
+      ctx.app,
+      (icon) => void setStoredIcon(ctx, command, owner, icon),
+    ).open();
   });
 
   applyButtonIcon(button, command.icon);
+}
+
+async function setStoredIcon(
+  ctx: SettingsTabContext,
+  command: Command,
+  owner: Command[],
+  icon: string,
+): Promise<void> {
+  // Removed while the picker was open: nothing to write to.
+  if (!owner.includes(command)) return;
+
+  command.icon = icon;
+  await ctx.plugin.saveSettings();
+  ctx.plugin.rebuildToolbars();
 }
 
 function configureRenameButton(
@@ -355,12 +372,13 @@ function configureRenameButton(
   button: ButtonComponent,
   command: Command,
   owner: Command[],
-  isSubmenuParent = false,
 ): void {
   button
     .setIcon("pencil")
     .setTooltip(
-      isSubmenuParent ? strings.changeSubmenuName : strings.changeCommandName,
+      hasSubmenu(command)
+        ? strings.changeSubmenuName
+        : strings.changeCommandName,
     )
     .setClass("editingToolbarSettingsButton")
     .onClick(() => {

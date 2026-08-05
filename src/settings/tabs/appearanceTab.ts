@@ -133,7 +133,7 @@ function renderPreview(
 ): void {
   const previewContainer = containerEl.createDiv("toolbar-preview-section");
   previewContainer.createEl("h3", {
-    text: strings.toolbarPreviewHypotheticalCommandConfigurati,
+    text: strings.toolbarPreviewLabel,
     cls: "toolbar-preview-label",
   });
 

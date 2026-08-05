@@ -1,6 +1,5 @@
 import {
   CORE_EDITOR_COMMANDS,
-  WRAP_COMMAND_NAMES,
   WRAP_COMMANDS,
 } from "src/commands/commandDefinitions";
 import type { Registrar } from "src/commands/registrars/types";
@@ -31,11 +30,11 @@ export const registerInsertCommands: Registrar = ({
     callback: () => runOnEditor(insertHorizontalRule),
   });
 
-  Object.entries(WRAP_COMMANDS).forEach(([name, plot]) => {
+  Object.entries(WRAP_COMMANDS).forEach(([id, plot]) => {
     plugin.addCommand({
-      id: name,
-      name: WRAP_COMMAND_NAMES[name] ?? `Toggle ${name}`,
-      icon: `${name}-glyph`,
+      id,
+      name: plot.name,
+      icon: `${id}-glyph`,
       callback: () => runOnEditor((editor) => applyCommand(plot, editor)),
     });
   });
