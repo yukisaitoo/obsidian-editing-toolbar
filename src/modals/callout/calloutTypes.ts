@@ -1,9 +1,3 @@
-export interface AdmonitionIconDefinition {
-  name: string;
-  type: string; // 'default' means Admonition handles it
-  svg?: string;
-}
-
 interface BuiltInCalloutType {
   type: string;
   aliases: string[];
@@ -15,24 +9,8 @@ interface BuiltInCalloutType {
 export interface CalloutTypeInfo {
   type: string;
   label: string;
-  icon: string | AdmonitionIconDefinition;
+  icon: string;
   color: string;
-  isAdmonition: boolean;
-  sourcePlugin?: string;
-}
-
-// An entry in the Admonition plugin's type registry, asserted rather than
-// validated. `icon` is an object on current Admonition and a bare name on older
-// releases, so both are accepted.
-export interface AdmonitionDefinition {
-  type: string;
-  title?: string;
-  icon: string | AdmonitionIconDefinition;
-  color: string; // "R,G,B"
-  command: boolean;
-  injectColor?: boolean;
-  noTitle: boolean;
-  copy?: boolean;
 }
 
 const BUILT_IN_CALLOUT_TYPES: readonly BuiltInCalloutType[] = [
@@ -136,11 +114,8 @@ const BUILT_IN_CALLOUT_TYPES: readonly BuiltInCalloutType[] = [
   },
 ];
 
-// Built-ins first, each alias its own pickable entry, then Admonition's types. A
-// built-in of the same name wins, so Admonition cannot shadow `[!note]`.
-export function buildCalloutOptions(
-  admonitionDefinitions?: Record<string, AdmonitionDefinition>,
-): CalloutTypeInfo[] {
+// One pickable entry per built-in, followed by one for each of its aliases.
+export function buildCalloutOptions(): CalloutTypeInfo[] {
   const options: CalloutTypeInfo[] = [];
 
   for (const builtIn of BUILT_IN_CALLOUT_TYPES) {
@@ -149,7 +124,6 @@ export function buildCalloutOptions(
       label: builtIn.label,
       icon: builtIn.icon,
       color: builtIn.color,
-      isAdmonition: false,
     });
     for (const alias of builtIn.aliases) {
       options.push({
@@ -157,23 +131,8 @@ export function buildCalloutOptions(
         label: `${builtIn.label} (${alias})`,
         icon: builtIn.icon,
         color: builtIn.color,
-        isAdmonition: false,
       });
     }
-  }
-
-  for (const admonition of Object.values(admonitionDefinitions ?? {})) {
-    if (options.some((opt) => opt.type === admonition.type)) continue;
-    options.push({
-      type: admonition.type,
-      label:
-        admonition.title ||
-        admonition.type.charAt(0).toUpperCase() + admonition.type.slice(1),
-      icon: admonition.icon,
-      color: `rgb(${admonition.color})`,
-      isAdmonition: true,
-      sourcePlugin: "Admonition",
-    });
   }
 
   return options;

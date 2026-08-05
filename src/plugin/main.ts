@@ -1,8 +1,6 @@
 import { Notice, Plugin } from "obsidian";
 import { CommandsManager } from "src/commands/commands";
 import addIcons from "src/icons/customIcons";
-import type { AdmonitionDefinition } from "src/modals/callout/calloutTypes";
-import { readAdmonitionDefinitions } from "src/plugin/admonitions";
 import { registerEditorContextMenu } from "src/plugin/editorContextMenu";
 import {
   applyAppearanceVars,
@@ -31,8 +29,6 @@ export default class EditingToolbarPlugin extends Plugin {
   settings!: EditingToolbarSettings;
 
   commandsManager!: CommandsManager;
-  public admonitionDefinitions: Record<string, AdmonitionDefinition> | null =
-    null;
 
   settingTab!: EditingToolbarSettingTab;
 
@@ -70,9 +66,6 @@ export default class EditingToolbarPlugin extends Plugin {
     );
     this.applyRootAppearanceVars();
     this.app.workspace.onLayoutReady(() => this.rebuildToolbars());
-    this.app.workspace.onLayoutReady(() => {
-      this.admonitionDefinitions = readAdmonitionDefinitions(this.app);
-    });
 
     registerEditorContextMenu(this);
   }

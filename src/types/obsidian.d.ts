@@ -2,7 +2,6 @@ import "obsidian";
 
 declare module "obsidian" {
   export interface App {
-    plugins: Plugins;
     commands: Commands;
     hotkeyManager: HotkeyManager;
     setting: SettingsManager;
@@ -15,10 +14,6 @@ declare module "obsidian" {
   interface SettingsManager {
     openTabById(id: string): SettingTab | null;
     open(): void;
-  }
-
-  interface Plugins {
-    getPlugin(pluginId: string): Plugin | null;
   }
 
   interface Plugin {

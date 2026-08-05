@@ -4,7 +4,6 @@ import {
   Modal,
   Platform,
   Setting,
-  sanitizeHTMLToDom,
   setIcon,
 } from "obsidian";
 import type { CalloutTypeInfo } from "src/modals/callout/calloutTypes";
@@ -13,8 +12,6 @@ import { focusAfterOpen } from "src/modals/modalFocus";
 import EditingToolbarPlugin from "src/plugin/main";
 import { strings } from "src/translations/helper";
 import type { CalloutSpec } from "src/util/text/callout";
-
-const SEPARATOR_VALUE = "---separator---";
 
 export class InsertCalloutModal extends Modal {
   private type: string = "note";
@@ -31,18 +28,10 @@ export class InsertCalloutModal extends Modal {
   private constructor(plugin: EditingToolbarPlugin, editor: Editor) {
     super(plugin.app);
     this.containerEl.addClass("insert-callout-modal");
-    this.allCalloutOptions = buildCalloutOptions(
-      plugin.admonitionDefinitions ?? undefined,
-    );
+    this.allCalloutOptions = buildCalloutOptions();
     const selectedText = editor.getSelection();
     if (selectedText) {
       this.content = selectedText;
-    }
-    if (!this.allCalloutOptions.find((opt) => opt.type === this.type)) {
-      this.type =
-        this.allCalloutOptions.length > 0
-          ? this.allCalloutOptions[0].type
-          : "note";
     }
   }
 
@@ -74,33 +63,7 @@ export class InsertCalloutModal extends Modal {
     new Setting(typeContainer)
       .setName(strings.calloutType)
       .addDropdown((dropdown: DropdownComponent) => {
-        const builtIns = this.allCalloutOptions.filter(
-          (opt) => !opt.isAdmonition,
-        );
-        const admonitions = this.allCalloutOptions.filter(
-          (opt) => opt.isAdmonition,
-        );
-        // DropdownComponent has no <optgroup>; a disabled option fakes a separator
-        // that keyboard navigation skips.
-        const addSeparator = (label: string) => {
-          dropdown.addOption(SEPARATOR_VALUE, label);
-          const option =
-            dropdown.selectEl.options[dropdown.selectEl.options.length - 1];
-          if (option) {
-            option.disabled = true;
-          }
-        };
-        const needsSeparators = builtIns.length > 0 && admonitions.length > 0;
-        if (needsSeparators) {
-          addSeparator("---- Admonitions ----");
-        }
-        admonitions.forEach((opt) => {
-          dropdown.addOption(opt.type, `${opt.label} (Admonition)`);
-        });
-        if (needsSeparators) {
-          addSeparator("---- Default ----");
-        }
-        builtIns.forEach((opt) => {
+        this.allCalloutOptions.forEach((opt) => {
           dropdown.addOption(opt.type, opt.label);
         });
         dropdown.setValue(this.type);
@@ -182,30 +145,7 @@ export class InsertCalloutModal extends Modal {
     if (!typeInfo) return;
 
     iconContainer.style.setProperty("--callout-color", typeInfo.color);
-    const icon = typeInfo.icon;
-
-    if (typeof icon === "string") {
-      setIcon(iconContainer, icon);
-      return;
-    }
-
-    // Admonition's inline SVG has no currentColor to inherit, so it is filled
-    // directly rather than through --callout-color.
-    if (icon.type === "custom" && icon.svg) {
-      iconContainer.style.removeProperty("--callout-color");
-      iconContainer.appendChild(sanitizeHTMLToDom(icon.svg));
-      const svgEl = iconContainer.querySelector("svg");
-      if (svgEl) {
-        svgEl.style.fill = typeInfo.color;
-        svgEl.style.width = "var(--icon-size)";
-        svgEl.style.height = "var(--icon-size)";
-      }
-      return;
-    }
-
-    const renderable =
-      icon.name?.startsWith("lucide-") || icon.type === "default";
-    setIcon(iconContainer, renderable ? icon.name : "lucide-box");
+    setIcon(iconContainer, typeInfo.icon);
   }
 
   onClose() {
