@@ -26,7 +26,7 @@ export function processWhitespace(
   let lines = result.split(/\r?\n/);
   if (options.trim) lines = lines.map((line) => line.trim());
   if (options.removeEmptyLines) {
-    lines = lines.filter((line) => line.length > 0);
+    lines = lines.filter((line) => line.trim() !== "");
   }
 
   result = lines.join("\n");
