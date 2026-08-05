@@ -6,6 +6,7 @@ import {
 import type { Registrar } from "src/commands/registrars/types";
 import { InsertCalloutModal } from "src/modals/insertCalloutModal";
 import { insertCallout } from "src/util/text/callout";
+import { insertHorizontalRule } from "src/util/text/horizontalRule";
 
 // Obsidian leaves the cursor inside the markup it inserts for these two.
 const CURSOR_OFFSETS: Record<string, number> = {
@@ -27,6 +28,13 @@ export const registerInsertCommands: Registrar = ({
         const spec = await InsertCalloutModal.prompt(plugin, editor);
         if (spec) insertCallout(editor, spec);
       }),
+  });
+
+  plugin.addCommand({
+    id: "hrline",
+    name: "Insert horizontal rule",
+    icon: "horizontal-rule",
+    callback: () => runOnEditor(insertHorizontalRule),
   });
 
   Object.entries(WRAP_COMMANDS).forEach(([name, plot]) => {

@@ -3,59 +3,44 @@ import type { Command } from "obsidian";
 export type CommandPlot = {
   prefix: string;
   suffix: string;
-  islinehead: boolean;
 };
 
 export const WRAP_COMMANDS: Record<string, CommandPlot> = {
-  hrline: {
-    prefix: "\n---\n",
-    suffix: "",
-    islinehead: true,
-  },
   justify: {
     prefix: '<p align="justify">',
     suffix: "</p>",
-    islinehead: false,
   },
   left: {
     prefix: '<p align="left">',
     suffix: "</p>",
-    islinehead: false,
   },
   right: {
     prefix: '<p align="right">',
     suffix: "</p>",
-    islinehead: false,
   },
   center: {
     prefix: "<center>",
     suffix: "</center>",
-    islinehead: false,
   },
   underline: {
     prefix: "<u>",
     suffix: "</u>",
-    islinehead: false,
   },
   superscript: {
     prefix: "<sup>",
     suffix: "</sup>",
-    islinehead: false,
   },
   subscript: {
     prefix: "<sub>",
     suffix: "</sub>",
-    islinehead: false,
   },
   codeblock: {
     prefix: "\n```\n",
     suffix: "\n```\n",
-    islinehead: false,
   },
 };
 
 export const WRAP_COMMAND_NAMES: Record<string, string> = {
-  hrline: "Insert horizontal rule",
   justify: "Justify text",
   left: "Align text left",
   right: "Align text right",

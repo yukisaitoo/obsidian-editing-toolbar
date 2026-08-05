@@ -60,11 +60,7 @@ export class CommandsManager {
     const selectedText = editor.getSelection();
     const start = editor.getCursor("from");
     const end = editor.getCursor("to");
-    const suffix = command.suffix;
-    const prefix =
-      command.islinehead && start.ch > 0
-        ? "\n" + command.prefix
-        : command.prefix;
+    const { prefix, suffix } = command;
 
     const from = editor.posToOffset(start);
     const preStart = editor.offsetToPos(Math.max(0, from - prefix.length));
