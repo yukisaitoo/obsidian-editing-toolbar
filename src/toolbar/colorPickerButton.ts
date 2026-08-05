@@ -1,8 +1,4 @@
 import { App, ButtonComponent, Command, Editor, setTooltip } from "obsidian";
-import {
-  BACKGROUND_COLOR_ICON_CLASS,
-  FONT_COLOR_ICON_CLASS,
-} from "src/icons/customIcons";
 import type EditingToolbarPlugin from "src/plugin/main";
 import { ownCommand, PLUGIN_ID, runCommandById } from "src/plugin/pluginId";
 import { attachFlyoutClamp } from "src/toolbar/geometry";
@@ -19,7 +15,6 @@ import { setBackgroundColor, setFontColor } from "src/util/text/inlineColor";
 interface PickerVariant {
   tooltip: string;
   customTooltip: string;
-  iconClass: string;
   render: (parent: HTMLElement, plugin: EditingToolbarPlugin) => void;
   settingsKey: "lastFontColor" | "lastHighlightColor";
   apply: (color: string, editor: Editor) => void;
@@ -29,7 +24,6 @@ const VARIANTS: Record<string, PickerVariant> = {
   [ownCommand("change-font-color")]: {
     tooltip: strings.fontColors,
     customTooltip: strings.customFontColor,
-    iconClass: FONT_COLOR_ICON_CLASS,
     render: renderFontColorPicker,
     settingsKey: "lastFontColor",
     apply: setFontColor,
@@ -37,7 +31,6 @@ const VARIANTS: Record<string, PickerVariant> = {
   [ownCommand("change-background-color")]: {
     tooltip: strings.backgroundColor,
     customTooltip: strings.customBackgroundColor,
-    iconClass: BACKGROUND_COLOR_ICON_CLASS,
     render: renderBackgroundColorPicker,
     settingsKey: "lastHighlightColor",
     apply: setBackgroundColor,
@@ -114,34 +107,11 @@ function wireSwatches(
 
         plugin.settings[variant.settingsKey] = color;
         variant.apply(color, editor);
-        paintColorIcons(cell.ownerDocument, variant.iconClass, color);
+        plugin.applyRootVars();
         void plugin.saveSettings();
       });
     }
   }
-}
-
-export function syncColorIcons(
-  doc: Document,
-  settings: { lastFontColor: string; lastHighlightColor: string },
-): void {
-  paintColorIcons(doc, FONT_COLOR_ICON_CLASS, settings.lastFontColor);
-  paintColorIcons(
-    doc,
-    BACKGROUND_COLOR_ICON_CLASS,
-    settings.lastHighlightColor,
-  );
-}
-
-// Every live bar has its own copy of the icon, so this paints all of them.
-function paintColorIcons(
-  doc: Document,
-  iconClass: string,
-  color: string,
-): void {
-  doc
-    .querySelectorAll<SVGElement>(`.${iconClass}`)
-    .forEach((el) => (el.style.fill = color));
 }
 
 // The custom swatches this button edits live on the General tab. Straight there by

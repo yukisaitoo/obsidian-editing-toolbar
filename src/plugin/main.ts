@@ -3,6 +3,7 @@ import { CommandsManager } from "src/commands/commands";
 import addIcons from "src/icons/customIcons";
 import {
   applyAppearanceVars,
+  applyLastColorVars,
   createDefaultSettings,
   EditingToolbarSettings,
 } from "src/settings/settingsData";
@@ -60,17 +61,22 @@ export default class EditingToolbarPlugin extends Plugin {
     // A window born after the last rebuild has none of the root vars yet.
     this.registerEvent(
       this.app.workspace.on("window-open", (win) =>
-        applyAppearanceVars(win.doc.documentElement, this.settings),
+        this.applyDocVars(win.doc.documentElement),
       ),
     );
-    this.applyRootAppearanceVars();
+    this.applyRootVars();
     this.app.workspace.onLayoutReady(() => this.rebuildToolbars());
   }
 
+  private applyDocVars(el: HTMLElement): void {
+    applyAppearanceVars(el, this.settings);
+    applyLastColorVars(el, this.settings);
+  }
+
   // Document-level fallback for anything outside a bar.
-  applyRootAppearanceVars(): void {
+  applyRootVars(): void {
     toolbarDocuments(this.app).forEach((doc) =>
-      applyAppearanceVars(doc.documentElement, this.settings),
+      this.applyDocVars(doc.documentElement),
     );
   }
 
@@ -116,7 +122,7 @@ export default class EditingToolbarPlugin extends Plugin {
 
   rebuildToolbars(): void {
     removeAllToolbars(this);
-    this.applyRootAppearanceVars();
+    this.applyRootVars();
     this.handleEditingToolbar();
     this.rebuildListeners.forEach((listener) => listener());
   }

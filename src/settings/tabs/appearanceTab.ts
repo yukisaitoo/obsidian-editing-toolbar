@@ -62,7 +62,7 @@ export function renderAppearanceTab(
         .onChange(async (value) => {
           getAppearanceBucket(ctx.plugin.settings).toolbarIconSize = value;
 
-          ctx.plugin.applyRootAppearanceVars();
+          ctx.plugin.applyRootVars();
           await ctx.plugin.saveSettings();
           ctx.applyChanges();
         });
@@ -80,7 +80,7 @@ interface ColorSettingConfig {
 }
 
 function applyColor(ctx: SettingsTabContext): void {
-  ctx.plugin.applyRootAppearanceVars();
+  ctx.plugin.applyRootVars();
   void ctx.plugin.saveSettings();
   ctx.applyChanges();
 }

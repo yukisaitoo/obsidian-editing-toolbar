@@ -4,7 +4,6 @@ import {
   applyAppearanceVars,
   EditingToolbarSettings,
 } from "src/settings/settingsData";
-import { syncColorIcons } from "src/toolbar/colorPickerButton";
 import { reflowToolbarOverflow } from "src/toolbar/geometry";
 import {
   closeMoreOverflowPopovers,
@@ -68,7 +67,6 @@ export function ensureToolbar(
   refreshOverflow(bars.bar, bars.popoverBar);
   observeToolbarResize(bars.bar, bars.popoverBar);
 
-  syncColorIcons(doc, plugin.settings);
   return bars.bar;
 }
 

@@ -55,6 +55,19 @@ export function applyAppearanceVars(
   );
 }
 
+// Deliberately not folded into applyAppearanceVars: that one is also applied to
+// individual bars, and a bar-level copy of these would shadow the root and go stale.
+export function applyLastColorVars(
+  el: HTMLElement,
+  settings: EditingToolbarSettings,
+): void {
+  el.style.setProperty("--editing-toolbar-font-color", settings.lastFontColor);
+  el.style.setProperty(
+    "--editing-toolbar-highlight-color",
+    settings.lastHighlightColor,
+  );
+}
+
 // All hold hex strings.
 export type CustomColorKey =
   | `custom_bg${1 | 2 | 3 | 4 | 5}`
