@@ -46,11 +46,12 @@ const MODIFIER_ORDER = Platform.isMacOS
   : ["Mod", "Ctrl", "Meta", "Alt", "Shift"];
 
 export function getHotkey(app: App, cmdId: string): string {
-  const command = app.commands.findCommand(cmdId);
-  if (!command) return NO_HOTKEY;
-
-  const custom = app.hotkeyManager.customKeys[command.id]?.[0];
-  return formatCombo(custom ?? command.hotkeys?.[0]);
+  const { hotkeyManager } = app;
+  // A custom binding replaces the default wholesale, so an empty array means
+  // the user deleted the hotkey.
+  const hotkeys =
+    hotkeyManager.getHotkeys(cmdId) ?? hotkeyManager.getDefaultHotkeys(cmdId);
+  return formatCombo(hotkeys?.[0]);
 }
 
 function formatCombo(

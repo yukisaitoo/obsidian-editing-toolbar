@@ -8,7 +8,8 @@ declare module "obsidian" {
   }
 
   interface HotkeyManager {
-    customKeys: Record<string, Hotkey[]>;
+    getHotkeys(id: string): Hotkey[] | undefined;
+    getDefaultHotkeys(id: string): Hotkey[] | undefined;
   }
 
   interface SettingsManager {
