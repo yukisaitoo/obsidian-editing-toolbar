@@ -6,6 +6,7 @@ import type {
   EditingToolbarSettings,
 } from "src/settings/settingsData";
 import {
+  customColorKeys,
   DEFAULT_APPEARANCE,
   DEFAULT_SETTINGS,
   TOOLBAR_ICON_SIZE_MAX,
@@ -21,40 +22,22 @@ export type JsonPayload = any;
 
 export type ImportMode = "overwrite" | "update";
 
-// Every flat setting the payload carries. The appearance overrides are nested, so
-// they travel separately via mergeAppearance().
-export const GENERAL_SETTING_KEYS: (keyof EditingToolbarSettings)[] = [
-  "toolbarVisible",
-  "lastFontColor",
-  "lastHighlightColor",
-  "custom_bg1",
-  "custom_bg2",
-  "custom_bg3",
-  "custom_bg4",
-  "custom_bg5",
-  "custom_fc1",
-  "custom_fc2",
-  "custom_fc3",
-  "custom_fc4",
-  "custom_fc5",
-];
-
 // Every key holding a colour. All of them reach note markup: the `last*` pair
 // directly, the custom swatches by way of a click.
 const COLOR_SETTING_KEYS = new Set<keyof EditingToolbarSettings>([
   "lastFontColor",
   "lastHighlightColor",
-  "custom_bg1",
-  "custom_bg2",
-  "custom_bg3",
-  "custom_bg4",
-  "custom_bg5",
-  "custom_fc1",
-  "custom_fc2",
-  "custom_fc3",
-  "custom_fc4",
-  "custom_fc5",
+  ...customColorKeys("custom_bg"),
+  ...customColorKeys("custom_fc"),
 ]);
+
+// Every flat setting the payload carries. The colour keys are folded in from the
+// set above, so one cannot be imported without passing through toHexColor(). The
+// appearance overrides are nested, so they travel separately via mergeAppearance().
+export const GENERAL_SETTING_KEYS: (keyof EditingToolbarSettings)[] = [
+  "toolbarVisible",
+  ...COLOR_SETTING_KEYS,
+];
 
 // `appearance` and `commands` are null when the payload did not mention them at
 // all — distinct from an empty one, which overwrite mode is meant to apply.

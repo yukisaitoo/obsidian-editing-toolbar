@@ -75,26 +75,22 @@ export function applyLastColorVars(
   );
 }
 
+const CUSTOM_COLOR_INDEXES = [1, 2, 3, 4, 5] as const;
+
+export type CustomColorPrefix = "custom_bg" | "custom_fc";
 // All hold hex strings.
 export type CustomColorKey =
-  | `custom_bg${1 | 2 | 3 | 4 | 5}`
-  | `custom_fc${1 | 2 | 3 | 4 | 5}`;
+  `${CustomColorPrefix}${(typeof CUSTOM_COLOR_INDEXES)[number]}`;
 
-export interface EditingToolbarSettings {
+export function customColorKeys(prefix: CustomColorPrefix): CustomColorKey[] {
+  return CUSTOM_COLOR_INDEXES.map((i) => `${prefix}${i}` as CustomColorKey);
+}
+
+export interface EditingToolbarSettings extends Record<CustomColorKey, string> {
   lastFontColor: string;
   lastHighlightColor: string;
   commands: Command[];
   toolbarVisible: boolean;
-  custom_bg1: string;
-  custom_bg2: string;
-  custom_bg3: string;
-  custom_bg4: string;
-  custom_bg5: string;
-  custom_fc1: string;
-  custom_fc2: string;
-  custom_fc3: string;
-  custom_fc4: string;
-  custom_fc5: string;
 
   appearance?: AppearanceOverrides;
 }

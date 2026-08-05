@@ -1,7 +1,7 @@
 import { Setting } from "obsidian";
 import { ConfirmModal } from "src/modals/confirmModal";
-import type { CustomColorKey } from "src/settings/settingsData";
-import { DEFAULT_SETTINGS } from "src/settings/settingsData";
+import type { CustomColorPrefix } from "src/settings/settingsData";
+import { customColorKeys, DEFAULT_SETTINGS } from "src/settings/settingsData";
 import type { SettingsTabContext } from "src/settings/settingsTab";
 import { strings } from "src/translations/helper";
 
@@ -57,13 +57,11 @@ function renderSwatchRow(
     name: string;
     desc: string;
     cls: string;
-    keyPrefix: "custom_bg" | "custom_fc";
+    keyPrefix: CustomColorPrefix;
     opacity: boolean;
   },
 ): void {
-  const keys = [1, 2, 3, 4, 5].map(
-    (i) => `${config.keyPrefix}${i}` as CustomColorKey,
-  );
+  const keys = customColorKeys(config.keyPrefix);
   const swatches = keys.map((key) => DEFAULT_SETTINGS[key]);
 
   new Setting(containerEl)

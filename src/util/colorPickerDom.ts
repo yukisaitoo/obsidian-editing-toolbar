@@ -1,4 +1,7 @@
-import { EditingToolbarSettings } from "src/settings/settingsData";
+import {
+  customColorKeys,
+  EditingToolbarSettings,
+} from "src/settings/settingsData";
 import { strings } from "src/translations/helper";
 
 // The toolbar reads each swatch's `background-color`; headers and spacers are inert.
@@ -154,15 +157,7 @@ export function renderFontColorPicker(
       ],
     },
     { header: strings.customFontColors },
-    {
-      colors: [
-        s.custom_fc1,
-        s.custom_fc2,
-        s.custom_fc3,
-        s.custom_fc4,
-        s.custom_fc5,
-      ],
-    },
+    { colors: customColorKeys("custom_fc").map((key) => s[key]) },
   ]);
 }
 
@@ -211,14 +206,6 @@ export function renderBackgroundColorPicker(
       ],
     },
     { header: strings.customColors },
-    {
-      colors: [
-        s.custom_bg1,
-        s.custom_bg2,
-        s.custom_bg3,
-        s.custom_bg4,
-        s.custom_bg5,
-      ],
-    },
+    { colors: customColorKeys("custom_bg").map((key) => s[key]) },
   ]);
 }
