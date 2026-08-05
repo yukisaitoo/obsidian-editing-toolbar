@@ -119,7 +119,7 @@ function renderCommandRow(
   const { command, index, commands } = row;
 
   setting.addButton((iconButton) =>
-    configureIconButton(ctx, iconButton, command, false),
+    configureIconButton(ctx, iconButton, command, commands),
   );
 
   setting.setClass("editingToolbarCommandItem").setName(t(command.name));
@@ -128,7 +128,7 @@ function renderCommandRow(
     setting
       .setClass(DIVIDER_COMMAND_ID)
       .addButton((renameButton) =>
-        configureRenameButton(ctx, renameButton, command, false),
+        configureRenameButton(ctx, renameButton, command, commands),
       );
   }
 
@@ -185,10 +185,10 @@ function renderSubmenuRow(
     .setClass(SUBMENU_BUTTON_CLASS)
     .setName(t(command.name))
     .addButton((iconButton) =>
-      configureIconButton(ctx, iconButton, command, false),
+      configureIconButton(ctx, iconButton, command, commands),
     )
     .addButton((renameButton) =>
-      configureRenameButton(ctx, renameButton, command, false, true),
+      configureRenameButton(ctx, renameButton, command, commands, true),
     )
     .addDropdown((dropdown) => {
       dropdown
@@ -264,13 +264,23 @@ function renderSubmenuRow(
     const subSetting = new Setting(subListEl)
       .setClass("editingToolbarCommandItem")
       .addButton((iconButton) =>
-        configureIconButton(ctx, iconButton, subCommand, true),
+        configureIconButton(
+          ctx,
+          iconButton,
+          subCommand,
+          command.SubmenuCommands,
+        ),
       )
       .setName(t(subCommand.name));
 
     if (isDivider(subCommand.id)) {
       subSetting.addButton((renameButton) =>
-        configureRenameButton(ctx, renameButton, subCommand, true),
+        configureRenameButton(
+          ctx,
+          renameButton,
+          subCommand,
+          command.SubmenuCommands,
+        ),
       );
     }
 
@@ -325,14 +335,16 @@ async function insertAfter(
   ctx.applyChanges();
 }
 
+// `owner` is the settings list holding this command, so the modal can write back
+// to the entry the row was rendered from rather than the first one sharing its id.
 function configureIconButton(
   ctx: SettingsTabContext,
   button: ButtonComponent,
   command: Command,
-  isSubmenuItem: boolean,
+  owner: Command[],
 ): void {
   button.setClass("editingToolbarSettingsIcon").onClick(() => {
-    new ChooseFromIconList(ctx.plugin, command, isSubmenuItem).open();
+    new ChooseFromIconList(ctx.plugin, command, owner).open();
   });
 
   applyButtonIcon(button, command.icon);
@@ -342,7 +354,7 @@ function configureRenameButton(
   ctx: SettingsTabContext,
   button: ButtonComponent,
   command: Command,
-  isSubmenuItem: boolean,
+  owner: Command[],
   isSubmenuParent = false,
 ): void {
   button
@@ -352,6 +364,6 @@ function configureRenameButton(
     )
     .setClass("editingToolbarSettingsButton")
     .onClick(() => {
-      new ChangeCmdname(ctx.plugin, command, isSubmenuItem).open();
+      new ChangeCmdname(ctx.plugin, command, owner).open();
     });
 }

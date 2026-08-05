@@ -12,25 +12,27 @@ import { getAppIcons } from "src/icons/appIcons";
 import { focusAfterOpen, submitOnEnter } from "src/modals/modalInput";
 import type EditingToolbarPlugin from "src/plugin/main";
 import { format, strings, t } from "src/translations/helper";
-import { findStoredCommand, toStoredCommand } from "src/util/commandStorage";
+import { toStoredCommand } from "src/util/commandStorage";
 
 type IconSelectCallback = (iconId: string) => void;
 
 export class ChooseFromIconList extends FuzzySuggestModal<string> {
   plugin: EditingToolbarPlugin;
   command: Command;
-  isSubmenuItem: boolean;
+  // The settings list the command was rendered from; null when a callback owns
+  // the result and nothing is written to settings.
+  owner: Command[] | null;
   customCallback: IconSelectCallback | null = null;
   constructor(
     plugin: EditingToolbarPlugin,
     command: Command,
-    isSubmenuItem: boolean = false,
+    owner: Command[] | null,
     callback?: IconSelectCallback,
   ) {
     super(plugin.app);
     this.plugin = plugin;
     this.command = command;
-    this.isSubmenuItem = isSubmenuItem;
+    this.owner = owner;
     this.customCallback = callback || null;
     this.setPlaceholder(strings.chooseIcon2);
   }
@@ -70,15 +72,10 @@ export class ChooseFromIconList extends FuzzySuggestModal<string> {
       return;
     }
 
-    const target = findStoredCommand(
-      this.command,
-      this.isSubmenuItem,
-      this.plugin.settings.commands,
-    );
     // Removed while the picker was open: nothing to write to.
-    if (!target) return;
+    if (!this.owner?.includes(this.command)) return;
 
-    target.icon = item;
+    this.command.icon = item;
     await this.plugin.saveSettings();
     this.plugin.rebuildToolbars();
   }
@@ -120,7 +117,7 @@ export class CommandPicker extends FuzzySuggestModal<Command> {
       new ChooseFromIconList(
         this.plugin,
         item,
-        false,
+        null,
         (icon) => void this.addCommand({ ...item, icon }),
       ).open();
       return;
@@ -133,28 +130,20 @@ export class CommandPicker extends FuzzySuggestModal<Command> {
 export class ChangeCmdname extends Modal {
   plugin: EditingToolbarPlugin;
   item: Command;
-  isSubmenuItem: boolean;
-  constructor(
-    plugin: EditingToolbarPlugin,
-    item: Command,
-    isSubmenuItem: boolean,
-  ) {
+  // The settings list the command was rendered from.
+  owner: Command[];
+  constructor(plugin: EditingToolbarPlugin, item: Command, owner: Command[]) {
     super(plugin.app);
     this.plugin = plugin;
     this.item = item;
-    this.isSubmenuItem = isSubmenuItem;
+    this.owner = owner;
     this.containerEl.addClass("changename");
   }
   private async commitName(value: string): Promise<void> {
-    const target = findStoredCommand(
-      this.item,
-      this.isSubmenuItem,
-      this.plugin.settings.commands,
-    );
     // Removed while the modal was open: nothing to rename.
-    if (!target) return;
+    if (!this.owner.includes(this.item)) return;
 
-    target.name = value;
+    this.item.name = value;
     await this.plugin.saveSettings();
     this.plugin.rebuildToolbars();
   }

@@ -67,21 +67,3 @@ function parseCommand(item: any, skipped: string[]): Command | null {
 
   return command;
 }
-
-// The stored entry for this command, or null once it is no longer in the list.
-export function findStoredCommand(
-  command: Command,
-  isSubmenuItem: boolean,
-  currentCommands: Command[],
-): Command | null {
-  if (!isSubmenuItem) {
-    return currentCommands.find((v) => v.id === command.id) ?? null;
-  }
-
-  for (const parent of currentCommands) {
-    const match = parent.SubmenuCommands?.find((v) => v.id === command.id);
-    if (match) return match;
-  }
-
-  return null;
-}
