@@ -59,7 +59,11 @@ export class EditingToolbarSettingTab extends PluginSettingTab {
 
     this.plugin.register(
       this.plugin.onRebuild(() => {
-        if (this.isOpen) this.display();
+        if (!this.isOpen) return;
+        // A rebuild re-renders the pane in place; keep the reader where they were.
+        const { scrollTop } = this.containerEl;
+        this.display();
+        this.containerEl.scrollTop = scrollTop;
       }),
     );
   }
