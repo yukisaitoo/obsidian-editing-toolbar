@@ -19,12 +19,8 @@ function recolorSelection(editor: Editor, tag: ColorTag): void {
   const selectText = editor.getSelection();
   if (!selectText.trim()) return;
 
-  // Replacing via a function keeps `$` in a colour from being read as a backreference.
-  const finalText = selectText.match(tag.pair)
-    ? selectText.replace(tag.pair, (_match, inner: string) =>
-        wrapEachLine(inner, tag.open, tag.close),
-      )
-    : wrapEachLine(selectText, tag.open, tag.close);
+  const stripped = selectText.replace(tag.pair, "$1");
+  const finalText = wrapEachLine(stripped, tag.open, tag.close);
 
   if (finalText === selectText) return;
 
