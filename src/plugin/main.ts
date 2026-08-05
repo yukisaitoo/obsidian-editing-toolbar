@@ -2,7 +2,6 @@ import { Notice, Plugin } from "obsidian";
 import { CommandsManager } from "src/commands/commands";
 import addIcons from "src/icons/customIcons";
 import {
-  applyAppearanceVars,
   applyLastColorVars,
   createDefaultSettings,
   EditingToolbarSettings,
@@ -58,25 +57,19 @@ export default class EditingToolbarPlugin extends Plugin {
     this.registerEvent(
       this.app.workspace.on("layout-change", this.handleEditingToolbar),
     );
-    // A window born after the last rebuild has none of the root vars yet.
+    // A window born after the last rebuild has none of the root colour vars yet.
     this.registerEvent(
       this.app.workspace.on("window-open", (win) =>
-        this.applyDocVars(win.doc.documentElement),
+        applyLastColorVars(win.doc.documentElement, this.settings),
       ),
     );
-    this.applyRootVars();
+    this.applyRootColorVars();
     this.app.workspace.onLayoutReady(() => this.rebuildToolbars());
   }
 
-  private applyDocVars(el: HTMLElement): void {
-    applyAppearanceVars(el, this.settings);
-    applyLastColorVars(el, this.settings);
-  }
-
-  // Document-level fallback for anything outside a bar.
-  applyRootVars(): void {
+  applyRootColorVars(): void {
     toolbarDocuments(this.app).forEach((doc) =>
-      this.applyDocVars(doc.documentElement),
+      applyLastColorVars(doc.documentElement, this.settings),
     );
   }
 
@@ -122,7 +115,7 @@ export default class EditingToolbarPlugin extends Plugin {
 
   rebuildToolbars(): void {
     removeAllToolbars(this);
-    this.applyRootVars();
+    this.applyRootColorVars();
     this.handleEditingToolbar();
     this.rebuildListeners.forEach((listener) => listener());
   }

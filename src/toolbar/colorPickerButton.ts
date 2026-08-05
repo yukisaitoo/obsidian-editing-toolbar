@@ -107,7 +107,7 @@ function wireSwatches(
 
         plugin.settings[variant.settingsKey] = color;
         variant.apply(color, editor);
-        plugin.applyRootVars();
+        plugin.applyRootColorVars();
         void plugin.saveSettings();
       });
     }

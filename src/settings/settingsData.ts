@@ -50,7 +50,7 @@ export function applyAppearanceVars(
     getAppearanceValue(settings, "toolbarIconColor"),
   );
   el.style.setProperty(
-    "--toolbar-icon-size",
+    "--editing-toolbar-icon-size",
     `${getAppearanceValue(settings, "toolbarIconSize")}px`,
   );
 }
