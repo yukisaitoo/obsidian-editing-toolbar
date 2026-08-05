@@ -83,7 +83,6 @@ export const commandNames: Record<string, string> = {
   "Change font color": "文字色を変更",
   "Change background color": "背景色を変更",
   "Renumber ordered list": "番号付きリストを振り直す",
-  "Get plain text": "プレーンテキストを取得",
   "Remove blank lines": "空行を削除",
   "Line operations": "行の操作",
   "Text processing": "テキスト処理",

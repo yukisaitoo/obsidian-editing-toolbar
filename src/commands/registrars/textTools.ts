@@ -14,10 +14,7 @@ import {
   convertListToTableMultiDim,
   convertTableToList,
 } from "src/util/text/tables";
-import {
-  copySelectionAsPlainText,
-  processWhitespace,
-} from "src/util/text/whitespace";
+import { processWhitespace } from "src/util/text/whitespace";
 import { addWrap, extractBetween, smartTypography } from "src/util/text/wrap";
 
 export const registerTextToolCommands: Registrar = ({
@@ -30,7 +27,6 @@ export const registerTextToolCommands: Registrar = ({
   const prompt = (title: string, fields: ITextInputField[]) =>
     TextInputModal.prompt(plugin.app, title, fields);
 
-  add("get-plain-text", "Get plain text", copySelectionAsPlainText);
   add("insert-blank-lines", "Insert blank lines", insertBlankLines);
   add("split-lines", "Split lines", splitLines);
   add("smart-symbols", "Convert punctuation width", smartTypography);

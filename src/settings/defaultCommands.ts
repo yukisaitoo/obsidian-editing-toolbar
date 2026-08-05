@@ -87,12 +87,6 @@ export const DEFAULT_TOOLBAR_COMMANDS: Command[] = [
     menuType: "dropdown",
     SubmenuCommands: [
       {
-        id: ownCommand("get-plain-text"),
-        name: "Get plain text",
-        icon: "lucide-file-text",
-      },
-
-      {
         id: ownCommand("smart-symbols"),
         name: "Convert punctuation width",
         icon: "lucide-at-sign",

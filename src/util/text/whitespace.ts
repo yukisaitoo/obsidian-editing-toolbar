@@ -33,24 +33,3 @@ export function processWhitespace(
   editor.replaceSelection(options.removeEmptyLines ? result.trim() : result);
   new Notice(strings.whitespaceCleaningCompleted);
 }
-
-const MARKDOWN_SYNTAX =
-  /(^#+\s|(?<=^|\s)#|^>|^- \[( |x)\]|^\+ |<[^<>]+>|^1\. |^-+$|^\*+$|==|\*+|~~|```|!*\[\[|\]\])/gm;
-
-export function copySelectionAsPlainText(editor: Editor): void {
-  const selection = requireSelection(editor);
-  if (selection === null) return;
-
-  const plainText = selection
-    .replace(/\[([^[\]]*)\]\([^()]+\)/gim, "$1")
-    .replace(MARKDOWN_SYNTAX, "")
-    .replace(/^[ ]+|[ ]+$/gm, "")
-    .replace(/(\r\n|\n)+/gm, "\n");
-
-  navigator.clipboard
-    .writeText(plainText)
-    .then(() => new Notice(strings.plainTextCopiedClipboard))
-    .catch((error) =>
-      console.error("editing-toolbar: failed to copy plain text", error),
-    );
-}

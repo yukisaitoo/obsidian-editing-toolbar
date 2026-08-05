@@ -102,7 +102,6 @@ export const en = {
   overwriteModeReplaceSettingsImported:
     "Overwrite Mode (Replace settings with imported ones)",
   pasteConfigurationHere: "Paste configuration here...",
-  plainTextCopiedClipboard: "Plain text copied to clipboard",
   pleaseEnterNewName: "Please enter a new name: ",
   pleasePasteConfigurationDataFirst: "Please paste configuration data first",
   pleaseSelectValidMarkdownTable: "Please select a valid Markdown table",

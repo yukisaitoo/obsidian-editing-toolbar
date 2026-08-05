@@ -105,8 +105,6 @@ const ui: Partial<Record<keyof typeof en, string>> = {
   overwriteModeReplaceSettingsImported:
     "Режим перезаписи (заменить настройки импортированными)",
   pasteConfigurationHere: "Вставьте конфигурацию сюда...",
-  plainTextCopiedClipboard:
-    "Текст без форматирования скопирован в буфер обмена",
   pleaseEnterNewName: "Введите новое название: ",
   pleasePasteConfigurationDataFirst: "Сначала вставьте данные конфигурации",
   pleaseSelectValidMarkdownTable:
@@ -188,7 +186,6 @@ export const commandNames: Record<string, string> = {
   "section!": "разделе сообщества!",
   "Custom theme": "Пользовательская тема",
   "Insert link": "Вставить ссылку",
-  "Get plain text": "Получить обычный текст",
   "Remove blank lines": "Удалить пустые строки",
   "Line operations": "Операции со строками",
   "Text processing": "Обработка текста",
