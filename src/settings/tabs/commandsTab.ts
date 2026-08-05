@@ -24,6 +24,9 @@ const SHARED_SORTABLE_OPTIONS: Sortable.Options = {
   chosenClass: "sortable-chosen",
   dragClass: "sortable-drag",
   fallbackClass: "sortable-fallback",
+  filter:
+    ".setting-item-control button, .dropdown, .editingToolbarMenuTypeDropdown",
+  preventOnFilter: false,
   dragoverBubble: false,
   forceFallback: true,
   fallbackOnBody: true,
@@ -71,9 +74,6 @@ function renderCommandList(
     ...SHARED_SORTABLE_OPTIONS,
     group: "item",
     animation: 500,
-    filter:
-      ".setting-item-control button, .dropdown, .editingToolbarMenuTypeDropdown",
-    preventOnFilter: false,
     onChoose: (evt) => evt.item.classList.add("sortable-chosen-feedback"),
     onUnchoose: (evt) => evt.item.classList.remove("sortable-chosen-feedback"),
     onSort: (evt) => {
