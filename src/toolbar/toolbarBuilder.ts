@@ -1,4 +1,4 @@
-import { MarkdownView } from "obsidian";
+import { Component, MarkdownView } from "obsidian";
 import type EditingToolbarPlugin from "src/plugin/main";
 import {
   applyAppearanceVars,
@@ -23,7 +23,7 @@ import {
 } from "src/toolbar/toolbarVisibility";
 
 // Bars are per view, so each one needs its own observer.
-const toolbarResizeObservers = new Map<MarkdownView, ResizeObserver>();
+const toolbarResizeOwners = new Map<MarkdownView, Component>();
 
 // Teardown sweeps every document, so restoration has to reach just as far: a bar
 // belongs to its leaf, and its state is a function of that leaf's own mode.
@@ -173,21 +173,26 @@ function observeToolbarResize(
   });
 
   observer.observe(parent);
-  toolbarResizeObservers.set(view, observer);
-  // The view owns the bar, so it owns the observer: closing the tab, or the window
-  // it was popped out into, unloads the view and lands here.
-  view.register(() => stopObservingToolbarResize(view));
+
+  // The view owns the bar, so it owns the observer: closing the tab, or the window it
+  // was popped out into, unloads the view and its children. register() alone would do
+  // that too, but only addChild has a counterpart a rebuild can call.
+  const owner = new Component();
+  owner.register(() => {
+    observer.disconnect();
+    toolbarResizeOwners.delete(view);
+  });
+  toolbarResizeOwners.set(view, owner);
+  view.addChild(owner);
 }
 
 function stopObservingToolbarResize(view: MarkdownView): void {
-  const observer = toolbarResizeObservers.get(view);
-  if (!observer) return;
-  observer.disconnect();
-  toolbarResizeObservers.delete(view);
+  const owner = toolbarResizeOwners.get(view);
+  if (owner) view.removeChild(owner);
 }
 
 // A rebuild throws every bar away while the views stay loaded, so nothing else
 // retires their observers.
 function disconnectToolbarResizeObservers(): void {
-  toolbarResizeObservers.forEach((_, view) => stopObservingToolbarResize(view));
+  toolbarResizeOwners.forEach((_, view) => stopObservingToolbarResize(view));
 }
