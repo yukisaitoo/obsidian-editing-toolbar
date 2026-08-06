@@ -97,13 +97,7 @@ function renderCommandRow(
 
   setting.setClass("editingToolbarCommandItem").setName(t(command.name));
 
-  if (isDivider(command.id)) {
-    setting
-      .setClass(DIVIDER_COMMAND_ID)
-      .addButton((renameButton) =>
-        configureRenameButton(ctx, renameButton, command, commands),
-      );
-  }
+  configureDividerRow(ctx, setting, command, commands);
 
   setting
     .addButton((addSubmenu) => {
@@ -212,37 +206,39 @@ function renderSubmenuRow(
   });
 
   command.SubmenuCommands.forEach((subCommand) => {
-    const subSetting = new Setting(subListEl)
-      .setClass("editingToolbarCommandItem")
-      .addButton((iconButton) =>
-        configureIconButton(
-          ctx,
-          iconButton,
-          subCommand,
-          command.SubmenuCommands,
-        ),
-      )
-      .setName(t(subCommand.name));
-
-    if (isDivider(subCommand.id)) {
-      subSetting.addButton((renameButton) =>
-        configureRenameButton(
-          ctx,
-          renameButton,
-          subCommand,
-          command.SubmenuCommands,
-        ),
-      );
-    }
-
-    subSetting.addButton((deleteButton) =>
-      ctx.createDeleteButton(deleteButton, async () => {
-        command.SubmenuCommands.remove(subCommand);
-        await ctx.plugin.saveSettings();
-        ctx.applyChanges();
-      }),
-    );
+    renderSubcommandRow(ctx, new Setting(subListEl), {
+      command: subCommand,
+      commands: command.SubmenuCommands,
+    });
   });
+}
+
+interface SubcommandRowContext {
+  command: Command;
+  commands: Command[];
+}
+
+function renderSubcommandRow(
+  ctx: SettingsTabContext,
+  setting: Setting,
+  row: SubcommandRowContext,
+): void {
+  const { command, commands } = row;
+
+  setting
+    .setClass("editingToolbarCommandItem")
+    .addButton((iconButton) =>
+      configureIconButton(ctx, iconButton, command, commands),
+    )
+    .setName(t(command.name));
+
+  configureDividerRow(ctx, setting, command, commands);
+
+  setting.addButton((deleteButton) =>
+    ctx.createDeleteButton(deleteButton, () =>
+      removeCommand(ctx, commands, command),
+    ),
+  );
 }
 
 // Every drag list is registered with the array it renders, so a drop reads that
@@ -329,6 +325,23 @@ async function setStoredIcon(
   command.icon = icon;
   await ctx.plugin.saveSettings();
   ctx.plugin.rebuildToolbars();
+}
+
+// A divider's only live control is delete; styles.css hides the rest, keyed off
+// delete being the last button in the row.
+function configureDividerRow(
+  ctx: SettingsTabContext,
+  setting: Setting,
+  command: Command,
+  owner: Command[],
+): void {
+  if (!isDivider(command.id)) return;
+
+  setting
+    .setClass(DIVIDER_COMMAND_ID)
+    .addButton((renameButton) =>
+      configureRenameButton(ctx, renameButton, command, owner),
+    );
 }
 
 function configureRenameButton(

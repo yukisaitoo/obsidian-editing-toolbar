@@ -270,6 +270,26 @@ button.editingToolbarCommandsubItem::after {
   display: none;
 }
 
+/* A flyout is a flex row like the bar, so its divider is the same upright
+   sliver. A plain div — never a button, so it cannot take hover or a click —
+   which is why it needs an explicit width: with no content it would otherwise
+   collapse to nothing. */
+:is(.editing-toolbar-bar, .editingToolbarPopoverBar) .subitem > div.editingToolbar-Divider-Line {
+  width: 0.6px;
+  min-width: unset;
+  height: calc(var(--editing-toolbar-icon-size) + 4px);
+  margin: 0 4px;
+  padding: 0;
+  background-color: var(--background-modifier-border);
+  opacity: 0.8;
+  flex-shrink: 0;
+  align-self: center;
+}
+
+.theme-dark :is(.editing-toolbar-bar, .editingToolbarPopoverBar) .subitem > div.editingToolbar-Divider-Line {
+  background-color: #4f4f5188;
+}
+
 /* --- Colour picker popover ------------------------------------------------ */
 
 /* Centred on its .subitem. (Was right:-50% + translateX(50%), which only
@@ -494,46 +514,52 @@ button.editingToolbarCommandsubItem::after {
   flex: 0;
 }
 
-/* Divider rows are full-bleed inside a padded list. Oversized left/right
-   borders paint the tint out past the container instead of a negative-margin
-   hack, which would break the sortable drop targets. */
-.editingToolbarSettingsTabsContainer .editingToolbar-Divider-Line {
+/* Scoped to the row itself, not to an ancestor: sortable's fallback clones the
+   dragged row onto document.body, where any container-scoped rule would stop
+   matching and the ghost would show the buttons hidden below. */
+.setting-item.editingToolbar-Divider-Line {
   padding: 0;
-  border-left: 200px solid rgba(var(--interactive-accent-rgb), 0.05);
-  border-right: 200px solid rgba(var(--interactive-accent-rgb), 0.05);
   background: rgba(var(--interactive-accent-rgb), 0.2);
   line-height: 0px;
   text-align: center;
 }
 
-.editingToolbarSettingsTabsContainer .editingToolbar-Divider-Line .setting-item-info {
+/* Full-bleed only at the top level. Oversized left/right borders paint the tint
+   out past the container instead of a negative-margin hack, which would break
+   the sortable drop targets. A nested list is too narrow to absorb 400px. */
+.editingToolbarSettingsTabsContainer > .editingToolbar-Divider-Line {
+  border-left: 200px solid rgba(var(--interactive-accent-rgb), 0.05);
+  border-right: 200px solid rgba(var(--interactive-accent-rgb), 0.05);
+}
+
+.setting-item.editingToolbar-Divider-Line .setting-item-info {
   flex: 1 1 auto;
 }
 
-.editingToolbarSettingsTabsContainer .editingToolbar-Divider-Line .setting-item-info .setting-item-name {
+.setting-item.editingToolbar-Divider-Line .setting-item-info .setting-item-name {
   font-size: 12px;
   text-align: right;
 }
 
-.editingToolbarSettingsTabsContainer .editingToolbar-Divider-Line .setting-item-control {
+.setting-item.editingToolbar-Divider-Line .setting-item-control {
   justify-content: flex-start;
 }
 
 /* A divider row only keeps its delete action, re-skinned as an ✖ glyph. */
-.editingToolbarSettingsTabsContainer .editingToolbar-Divider-Line .setting-item-control button:not(:last-child),
-.editingToolbarSettingsTabsContainer .editingToolbar-Divider-Line .setting-item-control button:last-child svg {
+.setting-item.editingToolbar-Divider-Line .setting-item-control button:not(:last-child),
+.setting-item.editingToolbar-Divider-Line .setting-item-control button:last-child svg {
   display: none;
 }
 
-.editingToolbarSettingsTabsContainer .editingToolbar-Divider-Line .setting-item-control button:last-child {
+.setting-item.editingToolbar-Divider-Line .setting-item-control button:last-child {
   margin: 0 8px;
 }
 
-.editingToolbarSettingsTabsContainer .editingToolbar-Divider-Line .setting-item-control button:last-child:not(.mod-warning) {
+.setting-item.editingToolbar-Divider-Line .setting-item-control button:last-child:not(.mod-warning) {
   background-color: transparent !important;
 }
 
-.editingToolbarSettingsTabsContainer .editingToolbar-Divider-Line .setting-item-control button:last-child::before {
+.setting-item.editingToolbar-Divider-Line .setting-item-control button:last-child::before {
   content: url("data:image/svg+xml,%3Csvg width='16' height='16' viewBox='0 0 1024 1024' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M511.674077 66.707284c-246.52265 0-446.347744 199.835328-446.347744 446.347744s199.825095 446.356954 446.347744 446.356954c246.50423 0 446.348768-199.844537 446.348768-446.356954S758.177284 66.707284 511.674077 66.707284zM744.967424 667.159826c21.8701 21.8701 21.8701 57.310264 0 79.199807-21.8701 21.851681-57.30924 21.851681-79.198783-0.019443L511.674077 592.264045 357.56007 746.359632c-21.8701 21.8701-57.30924 21.851681-79.17934-0.019443s-21.8701-57.290821 0-79.160921L432.493713 513.065262 278.379707 358.950232c-21.8701-21.86089-21.8701-57.328683 0-79.18855 21.8701-21.87931 57.30924-21.87931 79.17934 0l154.114007 154.104797 154.095587-154.104797c21.889543-21.87931 57.32766-21.87931 79.198783-0.010233 21.8701 21.8701 21.8701 57.348126 0 79.207993L590.89128 513.065262 744.967424 667.159826z' fill='%23666666'/%3E%3C/svg%3E");
 }
 

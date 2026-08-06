@@ -1,6 +1,7 @@
 import { App, ButtonComponent, Command, Menu } from "obsidian";
 import type EditingToolbarPlugin from "src/plugin/main";
 import { runCommandById } from "src/plugin/pluginId";
+import { DIVIDER_NAME } from "src/settings/defaultCommands";
 import {
   createColorPickerButton,
   isColorPickerCommand,
@@ -67,9 +68,12 @@ function renderDropdown(ctx: RenderContext, item: SubmenuCommand) {
     item.SubmenuCommands.forEach((subitem) => {
       if (isDivider(subitem.id)) {
         menu.addSeparator();
-        menu.addItem((menuItem) => {
-          menuItem.setTitle(t(subitem.name)).setDisabled(true).removeIcon();
-        });
+        // Dividers keep DIVIDER_NAME until renamed; only a chosen name is a label.
+        if (subitem.name !== DIVIDER_NAME) {
+          menu.addItem((menuItem) => {
+            menuItem.setTitle(t(subitem.name)).setDisabled(true).removeIcon();
+          });
+        }
         return;
       }
 
@@ -98,12 +102,17 @@ function renderFlyout(ctx: RenderContext, item: SubmenuCommand) {
   parent.buttonEl.insertAdjacentElement("afterbegin", submenu);
 
   item.SubmenuCommands.forEach((subitem) => {
+    // A divider is a rule, not a control: no command to run, nothing to label.
+    if (isDivider(subitem.id)) {
+      submenu.createDiv(DIVIDER_COMMAND_ID);
+      return;
+    }
+
     const subBtn = new ButtonComponent(submenu)
       .setTooltip(tooltipFor(ctx.app, subitem))
       .setClass("menu-item")
       .onClick(() => runCommandById(ctx.app, subitem.id));
 
-    if (isDivider(subitem.id)) subBtn.setClass(DIVIDER_COMMAND_ID);
     applyButtonIcon(subBtn, subitem.icon);
   });
 
