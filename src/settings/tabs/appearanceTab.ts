@@ -59,9 +59,9 @@ export function renderAppearanceTab(
     .setDesc(strings.setSizeToolbarIconPx)
     .addSlider((slider) => {
       slider
-        .setValue(getAppearanceValue(ctx.plugin.settings, "toolbarIconSize"))
         .setLimits(TOOLBAR_ICON_SIZE_MIN, TOOLBAR_ICON_SIZE_MAX, 1)
-        .setDynamicTooltip()
+        .setValue(getAppearanceValue(ctx.plugin.settings, "toolbarIconSize"))
+        .setDisplayFormat((value) => `${value}px`)
         .onChange(async (value) => {
           getAppearanceBucket(ctx.plugin.settings).toolbarIconSize = value;
 
