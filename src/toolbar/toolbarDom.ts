@@ -1,4 +1,4 @@
-import { App, ButtonComponent, MenuItem, Platform, setIcon } from "obsidian";
+import { App, ButtonComponent, Platform, setIcon } from "obsidian";
 
 // Two separate hooks on purpose: SHARED_BAR_CLASS is styling only (the settings
 // preview wears it too), while the selectors below mark a *live* bar and are what
@@ -20,19 +20,6 @@ export function applyButtonIcon(
   const iconEl = btn.buttonEl.createSpan({ cls: "editing-toolbar-icon" });
   setIcon(iconEl, icon ?? "");
   return iconEl;
-}
-
-export function applyMenuItemIcon(menuItem: MenuItem, icon: string = ""): void {
-  if (!icon) {
-    menuItem.setIcon("");
-    menuItem.iconEl?.empty();
-    return;
-  }
-
-  menuItem.setIcon(icon);
-  if (menuItem.iconEl && menuItem.iconEl.childElementCount === 0) {
-    setIcon(menuItem.iconEl, icon);
-  }
 }
 
 export const NO_HOTKEY = "–";

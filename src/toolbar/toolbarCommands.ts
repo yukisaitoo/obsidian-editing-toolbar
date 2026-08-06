@@ -8,7 +8,6 @@ import {
 import { attachFlyoutClamp } from "src/toolbar/geometry";
 import {
   applyButtonIcon,
-  applyMenuItemIcon,
   getHotkey,
   NO_HOTKEY,
   SUBMENU_BUTTON_CLASS,
@@ -70,8 +69,7 @@ function renderDropdown(ctx: RenderContext, item: SubmenuCommand) {
       if (isDivider(subitem.id)) {
         menu.addSeparator();
         menu.addItem((menuItem) => {
-          menuItem.setTitle(t(subitem.name)).setDisabled(true);
-          applyMenuItemIcon(menuItem, "");
+          menuItem.setTitle(t(subitem.name)).setDisabled(true).removeIcon();
         });
         return;
       }
@@ -79,8 +77,8 @@ function renderDropdown(ctx: RenderContext, item: SubmenuCommand) {
       menu.addItem((menuItem) => {
         menuItem
           .setTitle(t(subitem.name))
+          .setIcon(subitem.icon ?? null)
           .onClick(() => runCommand(ctx, subitem.id));
-        applyMenuItemIcon(menuItem, subitem.icon);
         menuItem.dom
           .createSpan({ cls: "menu-item-hotkey" })
           .setText(getHotkey(ctx.app, subitem.id));

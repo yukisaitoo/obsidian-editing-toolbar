@@ -54,6 +54,7 @@ declare module "obsidian" {
 
   interface MenuItem {
     dom: HTMLElement;
-    iconEl: HTMLElement;
+    // Detaches iconEl outright, unlike setIcon(null) which only empties it.
+    removeIcon(): this;
   }
 }
