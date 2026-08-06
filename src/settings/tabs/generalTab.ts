@@ -74,21 +74,20 @@ function renderSwatchRow(
       });
 
       for (const settingKey of keys) {
+        const persist = (color: string) => {
+          ctx.plugin.settings[settingKey] = color;
+          void ctx.plugin.saveSettings();
+          ctx.applyChanges();
+        };
+
         ctx.createPickr({
           el: pickerContainer.createDiv({ cls: "picker" }),
           container: pickerContainer,
           swatches,
           opacity: config.opacity,
           defaultColor: ctx.plugin.settings[settingKey] || "#000000",
-          onSave: (hexColor) => {
-            ctx.plugin.settings[settingKey] = hexColor;
-            void ctx.plugin.saveSettings();
-          },
-          onClear: () => {
-            ctx.plugin.settings[settingKey] = DEFAULT_SETTINGS[settingKey];
-            void ctx.plugin.saveSettings();
-            ctx.applyChanges();
-          },
+          onSave: persist,
+          onClear: () => persist(DEFAULT_SETTINGS[settingKey]),
         });
       }
     });
