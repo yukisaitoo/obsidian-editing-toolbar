@@ -1,8 +1,8 @@
 // The one place a command's display name and icon are written. It covers both the
 // commands this plugin registers and the core ones the toolbar merely points at, and
-// wins over the registry's own labels wherever a command enters settings — so a
+// it wins over the registry's own labels wherever a command enters settings, so a
 // command re-added from the picker comes back identical to the one that shipped.
-// Names double as translation keys — see `CommandName` in src/settings/defaultCommands.
+// Names double as translation keys; see `CommandName` in src/settings/defaultCommands.
 export const COMMAND_LABELS = {
   // Toolbar itself
   "hide-show-menu": { name: "Toggle toolbar", icon: "editingToolbar" },
@@ -24,14 +24,17 @@ export const COMMAND_LABELS = {
   "header6-text": { name: "Header 6", icon: "header-6" },
 
   // Inline formatting
-  "toggle-bold": { name: "Bold", icon: "bold-glyph" },
-  "toggle-italics": { name: "Italic", icon: "italic-glyph" },
-  "toggle-strikethrough": { name: "Strikethrough", icon: "strikethrough-glyph" },
-  "toggle-highlight": { name: "Highlight", icon: "highlight-glyph" },
+  "editor:toggle-bold": { name: "Bold", icon: "bold-glyph" },
+  "editor:toggle-italics": { name: "Italic", icon: "italic-glyph" },
+  "editor:toggle-strikethrough": {
+    name: "Strikethrough",
+    icon: "strikethrough-glyph",
+  },
+  "editor:toggle-highlight": { name: "Highlight", icon: "highlight-glyph" },
   underline: { name: "Underline", icon: "underline-glyph" },
   superscript: { name: "Superscript", icon: "superscript-glyph" },
   subscript: { name: "Subscript", icon: "subscript-glyph" },
-  "toggle-inline-math": { name: "Inline math", icon: "lucide-sigma" },
+  "editor:toggle-inline-math": { name: "Inline math", icon: "lucide-sigma" },
   "format-eraser": { name: "Clear text formatting", icon: "eraser" },
   "change-font-color": { name: "Change font color", icon: "font-color" },
   "change-background-color": {
@@ -40,10 +43,13 @@ export const COMMAND_LABELS = {
   },
 
   // Lists
-  "toggle-numbered-list": { name: "Ordered list", icon: "ordered-list" },
-  "toggle-bullet-list": { name: "Unordered list", icon: "unordered-list" },
-  "indent-list": { name: "Indent list", icon: "indent-list" },
-  "undent-list": { name: "Unindent list", icon: "unindent-list" },
+  "editor:toggle-numbered-list": { name: "Ordered list", icon: "ordered-list" },
+  "editor:toggle-bullet-list": {
+    name: "Unordered list",
+    icon: "unordered-list",
+  },
+  "editor:indent-list": { name: "Indent list", icon: "indent-list" },
+  "editor:unindent-list": { name: "Unindent list", icon: "unindent-list" },
   "editor:cycle-list-checklist": {
     name: "Cycle list and checklist",
     icon: "check-circle",
@@ -87,15 +93,15 @@ export const COMMAND_LABELS = {
 
 export type CommandId = keyof typeof COMMAND_LABELS;
 
-export type CommandLabel = (typeof COMMAND_LABELS)[CommandId];
+type CommandLabel = (typeof COMMAND_LABELS)[CommandId];
 
-// Ids reaching this come from the registry and settings, so most are not in the table.
 export function labelFor(id: string): CommandLabel | undefined {
   return COMMAND_LABELS[id as CommandId];
 }
 
 // The ids this plugin implements, as opposed to the core ones it only labels.
-// Registration is typed on it so a core command cannot be shadowed by accident.
+// Registration is typed on it because a core id here would be wrong twice over: the
+// toolbar points at it un-namespaced, and Obsidian already has the command.
 export type OwnCommandId = Exclude<CommandId, `editor:${string}`>;
 
 export type RegisteredCommandName =

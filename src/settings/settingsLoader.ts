@@ -14,14 +14,12 @@ import {
   TOOLBAR_ICON_SIZE_MIN,
 } from "src/settings/settingsData";
 import { toHexColor } from "src/util/color";
-import { hasSubmenu, parseCommandList } from "src/util/commandStorage";
+import { parseCommandList } from "src/util/commandStorage";
 
-// Import/export crosses a JSON boundary with no schema: every payload below is
-// whatever the user's file happened to contain.
-// eslint-disable-next-line @typescript-eslint/no-explicit-any -- unvalidated import/export JSON
-export type JsonPayload = any;
-
-export type ImportMode = "overwrite" | "update";
+// data.json has no schema and is a file the user can edit, so everything below is
+// whatever it happened to contain.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- unvalidated data.json
+type JsonPayload = any;
 
 type FlatSettingKey = Exclude<
   keyof EditingToolbarSettings,
@@ -48,24 +46,24 @@ const GENERAL_SANITISERS: {
   ...customColorSanitisers,
 };
 
-export const GENERAL_SETTING_KEYS = Object.keys(
+const GENERAL_SETTING_KEYS = Object.keys(
   GENERAL_SANITISERS,
 ) as FlatSettingKey[];
 
-// `appearance` and `commands` are null when the payload did not mention them at
-// all — distinct from an empty one, which overwrite mode is meant to apply.
-// `skipped` names every value the payload could not supply.
-export interface ParsedImport {
+// `appearance` and `commands` are null when the file did not mention them at all,
+// which is distinct from an empty one. `skipped` names every value that would not
+// parse.
+interface ParsedSettings {
   general: Partial<EditingToolbarSettings>;
   appearance: AppearanceOverrides | null;
   commands: Command[] | null;
   skipped: string[];
 }
 
-// The one place the payload is inspected: everything past here works with typed
-// data. A value that will not parse costs itself alone and is named in `skipped`;
-// null is reserved for a payload that is not an object at all.
-export function parseImport(data: JsonPayload): ParsedImport | null {
+// The one place data.json is inspected: everything past here works with typed data.
+// A value that will not parse costs itself alone and is named in `skipped`; null is
+// reserved for a file that is not an object at all.
+export function parseSettings(data: JsonPayload): ParsedSettings | null {
   if (!data || typeof data !== "object") return null;
 
   const general: Partial<EditingToolbarSettings> = {};
@@ -75,8 +73,7 @@ export function parseImport(data: JsonPayload): ParsedImport | null {
     const value = data[key];
     if (value === undefined) continue;
 
-    // A key left out of `general` keeps whatever the caller already had, which is
-    // the default on load and the current value on import.
+    // A key left out of `general` keeps the default.
     const sanitise = GENERAL_SANITISERS[key] as (
       value: JsonPayload,
     ) => JsonPayload;
@@ -140,58 +137,16 @@ function clampIconSize(size: number): number | null {
   );
 }
 
-// Returns the settings the import would produce, leaving `current` untouched so the
-// caller can put it back if anything downstream fails.
-export function buildImportedSettings(
-  current: EditingToolbarSettings,
-  parsed: ParsedImport,
-  mode: ImportMode,
+// Anything the file did not supply falls back to `defaults`, so a partial or partly
+// unreadable data.json still yields a complete, valid settings object.
+export function buildSettings(
+  defaults: EditingToolbarSettings,
+  parsed: ParsedSettings,
 ): EditingToolbarSettings {
-  const next: EditingToolbarSettings = { ...current, ...parsed.general };
-
-  // Overwrite replaces the bucket outright, so a value the payload cleared stays
-  // cleared; update merges its keys over what is there.
-  if (parsed.appearance) {
-    next.appearance =
-      mode === "overwrite"
-        ? { ...parsed.appearance }
-        : { ...current.appearance, ...parsed.appearance };
-  }
-
-  if (parsed.commands) {
-    next.commands =
-      mode === "overwrite"
-        ? parsed.commands
-        : mergeCommands(current.commands, parsed.commands);
-  }
-
-  return next;
-}
-
-function mergeCommands(existing: Command[], imported: Command[]): Command[] {
-  const merged = [...existing];
-
-  for (const command of imported) {
-    const index = merged.findIndex((cmd) => cmd.id === command.id);
-    if (index < 0) {
-      merged.push(command);
-    } else {
-      merged[index] = mergeCommand(merged[index], command);
-    }
-  }
-
-  return merged;
-}
-
-// A submenu the payload does not mention keeps the entries it had.
-function mergeCommand(existing: Command, imported: Command): Command {
-  if (!hasSubmenu(existing) || !hasSubmenu(imported)) return imported;
-
   return {
-    ...imported,
-    SubmenuCommands: mergeCommands(
-      existing.SubmenuCommands,
-      imported.SubmenuCommands,
-    ),
+    ...defaults,
+    ...parsed.general,
+    ...(parsed.appearance ? { appearance: parsed.appearance } : {}),
+    ...(parsed.commands ? { commands: parsed.commands } : {}),
   };
 }

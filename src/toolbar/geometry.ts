@@ -14,8 +14,8 @@ const POPOVER_EDGE_MARGIN = 12;
 const POPOVER_GAP = 8;
 const OVERFLOW_TOLERANCE = 1;
 
-// `min` wins over `max` so an element wider or taller than its bounds overhangs
-// the end that can be scrolled back into view.
+// `min` wins over `max` so an element larger than its bounds overhangs the end
+// that can be scrolled back into view.
 function clamp(value: number, min: number, max: number): number {
   return Math.min(Math.max(value, min), Math.max(min, max));
 }
@@ -101,7 +101,8 @@ export function reflowToolbarOverflow(
   const available = availableWidth(bar);
   if (available <= 0) return popoverBar.firstElementChild !== null;
 
-  // Forces a layout on every call, so measure once and let that pick a direction.
+  // Each call forces a layout, so take one reading up front to pick a direction
+  // rather than testing both.
   const fits = () => visibleSpan(bar) <= available + OVERFLOW_TOLERANCE;
   const fitsNow = fits();
 

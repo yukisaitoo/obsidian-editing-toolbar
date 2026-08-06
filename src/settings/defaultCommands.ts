@@ -4,8 +4,7 @@ import { COMMAND_LABELS, type CommandId } from "src/commands/commandLabels";
 import type { RegisteredCommandName } from "src/commands/commandLabels";
 import { isCoreCommand, ownCommand } from "src/plugin/pluginId";
 
-// A bare id is a button; an object is a submenu holding buttons. Submenu ids are
-// cosmetic — a submenu is recognised by its SubmenuCommands array.
+// A bare id is a button; an object is a submenu holding buttons.
 type LayoutGroup = {
   readonly id: string;
   readonly name: string;
@@ -26,11 +25,11 @@ const DEFAULT_LAYOUT = [
     icon: "header-n",
     children: ["header1-text", "header4-text", "header5-text", "header6-text"],
   },
-  "toggle-bold",
-  "toggle-italics",
-  "toggle-strikethrough",
+  "editor:toggle-bold",
+  "editor:toggle-italics",
+  "editor:toggle-strikethrough",
   "underline",
-  "toggle-highlight",
+  "editor:toggle-highlight",
   {
     id: "SubmenuCommands-edit",
     name: "Edit",
@@ -64,7 +63,7 @@ const DEFAULT_LAYOUT = [
       "editor:insert-wikilink",
       "editor:insert-embed",
       "hrline",
-      "toggle-inline-math",
+      "editor:toggle-inline-math",
       "editor:insert-mathblock",
     ],
   },
@@ -74,10 +73,10 @@ const DEFAULT_LAYOUT = [
     icon: "bullet-list-glyph",
     children: [
       "editor:toggle-checklist-status",
-      "toggle-numbered-list",
-      "toggle-bullet-list",
-      "undent-list",
-      "indent-list",
+      "editor:toggle-numbered-list",
+      "editor:toggle-bullet-list",
+      "editor:unindent-list",
+      "editor:indent-list",
     ],
   },
   {

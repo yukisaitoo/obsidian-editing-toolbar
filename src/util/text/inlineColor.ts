@@ -9,7 +9,6 @@ function wrapEachLine(text: string, open: string, close: string): string {
 }
 
 interface ColorTag {
-  // One tag pair, capturing the inner text.
   pair: RegExp;
   open: string;
   close: string;
@@ -46,15 +45,15 @@ const MARK_STYLE = String.raw`background:${COLOR_VALUE}(?:\s*;\s*color:[^"'>]*)?
 // written by hand.
 const HIGHLIGHT_CLASS = "editing-toolbar-highlight";
 // The class is optional when matching so a recolour still finds marks written
-// before it existed — recognising them is what lets the rewrite upgrade them
+// before it existed. Recognising them is what lets the rewrite upgrade them
 // rather than nest a second mark inside.
 const MARK_OPEN = String.raw`<mark\s+(?:class=["']?${HIGHLIGHT_CLASS}["']?\s+)?style=["']?${MARK_STYLE}["']?>`;
 const MARK_PAIR = new RegExp(String.raw`${MARK_OPEN}([\s\S]*?)<\/mark>`, "gi");
 
 export function setBackgroundColor(color: string, editor: Editor) {
   // Background only: the chosen colour goes in as-is and the text colour is left
-  // to the theme. Deriving one would mean guessing, and a translucent fill has
-  // no fixed luminance to guess from — it composites over whatever is behind it.
+  // to the theme. Deriving one would mean guessing, and a translucent fill has no
+  // fixed luminance to guess from; it composites over whatever is behind it.
   recolorSelection(editor, {
     pair: MARK_PAIR,
     open: `<mark class="${HIGHLIGHT_CLASS}" style="background:${color}">`,

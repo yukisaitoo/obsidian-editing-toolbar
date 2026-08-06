@@ -11,7 +11,7 @@ const OPEN_CLASS = "editing-toolbar-more-open";
 const DETACHED_POPUP_SELECTOR =
   ".menu, .pcr-app, .modal-container, .suggestion-container";
 
-// Lookup registry: reflow and teardown reach the popover through the popover bar.
+// Reflow and teardown reach a popover through its popover bar.
 const popovers = new WeakMap<HTMLElement, MorePopover>();
 const openPopovers = new Set<MorePopover>();
 

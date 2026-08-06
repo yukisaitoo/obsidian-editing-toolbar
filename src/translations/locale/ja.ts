@@ -2,7 +2,7 @@
 
 import type { CommandName } from "src/settings/defaultCommands";
 
-import type { en } from "../en";
+import type { en } from "src/translations/en";
 
 const ui: Partial<Record<keyof typeof en, string>> = {
   dragCommandsHere: "ここにドラッグ",

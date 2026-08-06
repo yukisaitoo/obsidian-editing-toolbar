@@ -1,25 +1,21 @@
 import { Notice, Plugin } from "obsidian";
-import { CommandsManager } from "src/commands/commands";
+import { registerCommands } from "src/commands/registerCommands";
 import addIcons from "src/icons/customIcons";
 import {
   applyLastColorVars,
+  clearLastColorVars,
   createDefaultSettings,
   EditingToolbarSettings,
 } from "src/settings/settingsData";
-import {
-  buildImportedSettings,
-  parseImport,
-} from "src/settings/settingsTransfer";
+import { buildSettings, parseSettings } from "src/settings/settingsLoader";
 import { closeMoreOverflowPopovers } from "src/toolbar/morePopover";
 import { removeAllToolbars, syncToolbars } from "src/toolbar/toolbarBuilder";
 import { toolbarDocuments } from "src/toolbar/toolbarHost";
 import { strings } from "src/translations/helper";
-import { EditingToolbarSettingTab } from "../settings/settingsTab";
+import { EditingToolbarSettingTab } from "src/settings/settingsTab";
 
 export default class EditingToolbarPlugin extends Plugin {
   settings!: EditingToolbarSettings;
-
-  commandsManager!: CommandsManager;
 
   settingTab!: EditingToolbarSettingTab;
 
@@ -27,7 +23,7 @@ export default class EditingToolbarPlugin extends Plugin {
   private cssReady?: Promise<void>;
 
   // Obsidian injects styles.css only after onload() resolves, so a bar built during
-  // onload paints unstyled — flyouts open.
+  // onload paints unstyled, with every flyout hanging open.
   override loadCSS(): Promise<void> {
     return (this.cssReady ??= super.loadCSS());
   }
@@ -40,8 +36,7 @@ export default class EditingToolbarPlugin extends Plugin {
     this.settingTab = new EditingToolbarSettingTab(this.app, this);
     this.addSettingTab(this.settingTab);
 
-    this.commandsManager = new CommandsManager(this);
-    this.commandsManager.registerCommands();
+    registerCommands(this);
 
     this.registerEvent(
       this.app.workspace.on("active-leaf-change", this.handleEditingToolbar),
@@ -56,7 +51,16 @@ export default class EditingToolbarPlugin extends Plugin {
       ),
     );
     this.applyRootColorVars();
-    this.app.workspace.onLayoutReady(() => this.rebuildToolbars());
+
+    // onLayoutReady hands back no canceller, and layout-ready can land after an
+    // unload, so the guard has to live inside the callback.
+    let unloaded = false;
+    this.register(() => {
+      unloaded = true;
+    });
+    this.app.workspace.onLayoutReady(() => {
+      if (!unloaded) this.rebuildToolbars();
+    });
   }
 
   applyRootColorVars(): void {
@@ -71,14 +75,14 @@ export default class EditingToolbarPlugin extends Plugin {
     const loaded = await this.loadData();
     if (loaded == null) return;
 
-    const parsed = parseImport(loaded);
+    const parsed = parseSettings(loaded);
     if (!parsed) {
       console.warn("editing-toolbar: unreadable data.json", loaded);
       new Notice(strings.unreadableSettingsFile);
       return;
     }
 
-    this.settings = buildImportedSettings(this.settings, parsed, "overwrite");
+    this.settings = buildSettings(this.settings, parsed);
 
     if (parsed.skipped.length) {
       console.warn("editing-toolbar: skipped unreadable settings", parsed.skipped);
@@ -88,6 +92,9 @@ export default class EditingToolbarPlugin extends Plugin {
 
   onunload(): void {
     removeAllToolbars(this);
+    toolbarDocuments(this.app).forEach((doc) =>
+      clearLastColorVars(doc.documentElement),
+    );
   }
 
   // Safe to call as often as the workspace fires events: builds only what is missing.

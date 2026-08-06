@@ -4,12 +4,12 @@ import { moment } from "obsidian";
 
 import type { CommandName } from "src/settings/defaultCommands";
 
-import { en } from "./en";
-import ja, { commandNames as jaCommands } from "./locale/ja";
-import ptBR, { commandNames as ptBRCommands } from "./locale/pt-br";
-import ru, { commandNames as ruCommands } from "./locale/ru";
-import zhCN, { commandNames as zhCNCommands } from "./locale/zh-cn";
-import zhTW, { commandNames as zhTWCommands } from "./locale/zh-tw";
+import { en } from "src/translations/en";
+import ja, { commandNames as jaCommands } from "src/translations/locale/ja";
+import ptBR, { commandNames as ptBRCommands } from "src/translations/locale/pt-br";
+import ru, { commandNames as ruCommands } from "src/translations/locale/ru";
+import zhCN, { commandNames as zhCNCommands } from "src/translations/locale/zh-cn";
+import zhTW, { commandNames as zhTWCommands } from "src/translations/locale/zh-tw";
 
 type UiKey = keyof typeof en;
 type Locale = {

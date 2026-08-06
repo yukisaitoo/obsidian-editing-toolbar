@@ -1,15 +1,20 @@
 /* ==========================================================================
-   1. TOKENS — overridden at runtime from plugin settings.
+   1. TOKENS. Overridden at runtime from plugin settings.
    ========================================================================== */
 
 :root {
   --editing-toolbar-background-color: var(--background-primary);
   --editing-toolbar-icon-color: var(--text-normal);
   --editing-toolbar-icon-size: 18px;
+
+  /* Shapes only. Both are painted through `mask`, so the path fill is discarded
+     and the colour comes from whatever sets background-color at the use site. */
+  --editing-toolbar-chevron: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1024 1024'%3E%3Cpath d='M13.24 80.11 l461.75 560.8 q14.56 16.02 36.41 16.02 q21.85 0 36.42 -16.02 l463.2 -560.8 q10.2 -10.19 12.38 -24.75 q2.18 -14.57 -3.64 -27.68 q-5.82 -13.11 -18.21 -20.39 q-12.39 -7.29 -26.95 -7.29 l-924.95 0 q-20.4 0 -34.23 13.11 q-13.84 13.11 -15.29 32.77 q-1.46 19.66 13.11 34.23 Z'/%3E%3C/svg%3E");
+  --editing-toolbar-cross: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1024 1024'%3E%3Cpath d='M511.674077 66.707284c-246.52265 0-446.347744 199.835328-446.347744 446.347744s199.825095 446.356954 446.347744 446.356954c246.50423 0 446.348768-199.844537 446.348768-446.356954S758.177284 66.707284 511.674077 66.707284zM744.967424 667.159826c21.8701 21.8701 21.8701 57.310264 0 79.199807-21.8701 21.851681-57.30924 21.851681-79.198783-0.019443L511.674077 592.264045 357.56007 746.359632c-21.8701 21.8701-57.30924 21.851681-79.17934-0.019443s-21.8701-57.290821 0-79.160921L432.493713 513.065262 278.379707 358.950232c-21.8701-21.86089-21.8701-57.328683 0-79.18855 21.8701-21.87931 57.30924-21.87931 79.17934 0l154.114007 154.104797 154.095587-154.104797c21.889543-21.87931 57.32766-21.87931 79.198783-0.010233 21.8701 21.8701 21.8701 57.348126 0 79.207993L590.89128 513.065262 744.967424 667.159826z'/%3E%3C/svg%3E");
 }
 
 /* ==========================================================================
-   2. TOOLBAR — the bar itself. Two hooks are in play throughout §2-§4:
+   2. TOOLBAR. The bar itself. Two hooks are in play throughout §2-§4:
 
      .editing-toolbar-bar        chrome and layout. Worn by the real bar AND by
                                  the settings preview, which is a plain div in
@@ -17,15 +22,9 @@
      .editingToolbarModalBar     a LIVE bar in the workspace. Also what every JS
      .editingToolbarPopoverBar   lifecycle query matches, so the preview must
                                  never wear it. Anything that would misplace a
-                                 static preview — stacking, hiding — belongs
+                                 static preview (stacking, hiding) belongs
                                  here rather than on the shared class.
    ========================================================================== */
-
-/* The only way a bar is hidden. `display` carries the bar's flex layout, so
-   hiding must not touch it. */
-.editingToolbarModalBar.is-hidden {
-  visibility: hidden;
-}
 
 .editing-toolbar-bar {
   position: relative;
@@ -145,7 +144,7 @@
 }
 
 /* ==========================================================================
-   3. TOOLBAR — overflow popover bar.
+   3. TOOLBAR. Overflow popover bar.
    ========================================================================== */
 
 .editingToolbarPopoverBar:not(.editing-toolbar-more-open) {
@@ -174,11 +173,19 @@
    4. SUBMENUS, DIVIDERS AND COLOUR PICKERS
    ========================================================================== */
 
-/* Chevron affordance on any button that opens a submenu. */
+/* Chevron affordance on any button that opens a submenu. Drawn as a mask rather
+   than an image so it takes the configured icon colour; a fill inside a data-URI
+   SVG can't be reached from here, and currentColor doesn't cross into one. */
 button.editingToolbarCommandsubItem::after {
-  content: url("data:image/svg+xml,%3Csvg width='4' height='4' version='1.1' xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1024 1024' enable-background='new 0 0 1024 1024' xml:space='preserve'%3E%3Cpath fill='%23808080' d='M13.24 80.11 l461.75 560.8 q14.56 16.02 36.41 16.02 q21.85 0 36.42 -16.02 l463.2 -560.8 q10.2 -10.19 12.38 -24.75 q2.18 -14.57 -3.64 -27.68 q-5.82 -13.11 -18.21 -20.39 q-12.39 -7.29 -26.95 -7.29 l-924.95 0 q-20.4 0 -34.23 13.11 q-13.84 13.11 -15.29 32.77 q-1.46 19.66 13.11 34.23 Z'/%3E%3C/svg%3E");
+  content: "";
+  display: inline-block;
+  width: 4px;
+  height: 4px;
   margin-left: 1px;
   margin-top: 6px;
+  background-color: var(--editing-toolbar-icon-color);
+  -webkit-mask: var(--editing-toolbar-chevron) no-repeat center / contain;
+  mask: var(--editing-toolbar-chevron) no-repeat center / contain;
 }
 
 /* Anchors the flyout to its own button. Without this the nearest positioned
@@ -190,11 +197,11 @@ button.editingToolbarCommandsubItem::after {
 
 /* --flyout-shift is set on the button by clampFlyoutToPane() to pull a flyout
    back inside the pane; 0 (centred under the button) until it needs to move.
-   Only visibility transitions — a transform transition would animate the shift
+   Only visibility transitions: a transform transition would animate the shift
    and make the next measurement read a mid-flight position.
 
    The visibility transition can't go to 0: a panel could sit a few px below 
-   the parent (see .x-color-picker-wrapper's top offset) — without a cushion 
+   the parent (see .x-color-picker-wrapper's top offset). Without a cushion
    the panel blinks out mid-travel and, being visibility: hidden, can't be 
    hovered back. Crossing a few px takes single-digit ms. */
 :is(.editing-toolbar-bar, .editingToolbarPopoverBar) button.editingToolbarCommandsubItem>.subitem {
@@ -242,7 +249,7 @@ button.editingToolbarCommandsubItem::after {
 /* --- Dividers ------------------------------------------------------------
    The bar has the horizontal room to show separators; the popover, which wraps,
    does not. Scoped to direct children so dividers inside a submenu flyout keep
-   showing. These rules must stay after §2 — the second selector ties the base
+   showing. These rules must stay after §2: the second selector ties the base
    button rule on specificity and wins on source order alone. */
 
 .editingToolbarPopoverBar>button.editingToolbar-Divider-Line {
@@ -271,7 +278,7 @@ button.editingToolbarCommandsubItem::after {
 }
 
 /* A flyout is a flex row like the bar, so its divider is the same upright
-   sliver. A plain div — never a button, so it cannot take hover or a click —
+   sliver. A plain div, never a button, so it cannot take hover or a click,
    which is why it needs an explicit width: with no content it would otherwise
    collapse to nothing. */
 :is(.editing-toolbar-bar, .editingToolbarPopoverBar) .subitem > div.editingToolbar-Divider-Line {
@@ -293,7 +300,7 @@ button.editingToolbarCommandsubItem::after {
 /* --- Colour picker popover ------------------------------------------------ */
 
 /* Centred on its .subitem. (Was right:-50% + translateX(50%), which only
-   centred because the colour pickers' .subitem collapses to zero width — its
+   centred because the colour pickers' .subitem collapses to zero width; its
    sole child is this panel, and this panel is absolute.) */
 .x-color-picker-wrapper {
   position: absolute;
@@ -395,7 +402,7 @@ button.editingToolbarCommandsubItem::after {
 
 /* Obsidian's editor tooltips default to a z-index below the toolbar, so an
    autocomplete popup opened under a top-mode bar renders behind it. Scoped to
-   panes that actually have the bar — unscoped this reordered every CodeMirror
+   panes that actually have the bar. Unscoped, this reordered every CodeMirror
    tooltip in the app, including ones this plugin has nothing to do with. */
 .workspace-leaf-content:has(.editingToolbarModalBar) .cm-tooltip {
   z-index: 1000;
@@ -442,7 +449,7 @@ button.editingToolbarCommandsubItem::after {
   flex-wrap: wrap;
 }
 
-/* Must stay after the base rules above — same specificity, wins on order. */
+/* Must stay after the base rules above: same specificity, wins on order. */
 @media screen and (max-width: 1024px) {
   .editing-toolbar-tabs .editing-toolbar-tab:not(.active)>span {
     display: none;
@@ -452,8 +459,7 @@ button.editingToolbarCommandsubItem::after {
 /* --- Section containers --------------------------------------------------- */
 
 .editing-toolbar-settings .custom-paintbrush-container,
-.editing-toolbar-settings .command-lists-container,
-.editing-toolbar-settings .import-export-container {
+.editing-toolbar-settings .command-lists-container {
   margin-bottom: 20px;
   padding: 16px;
   border-radius: 8px;
@@ -545,14 +551,33 @@ button.editingToolbarCommandsubItem::after {
   justify-content: flex-start;
 }
 
-/* A divider row only keeps its delete action, re-skinned as an ✖ glyph. */
-.setting-item.editingToolbar-Divider-Line .setting-item-control button:not(:last-child),
+/* A divider row keeps only rename and delete; the delete is re-skinned as an ✖
+   glyph, so its own icon is hidden too. Rename is opted back in by class rather
+   than by position, which is what the ✖ styling below relies on. */
+.setting-item.editingToolbar-Divider-Line .setting-item-control button:not(:last-child):not(.editingToolbar-divider-rename),
 .setting-item.editingToolbar-Divider-Line .setting-item-control button:last-child svg {
   display: none;
 }
 
-.setting-item.editingToolbar-Divider-Line .setting-item-control button:last-child {
+/* The row is line-height: 0 and unpadded, so both surviving buttons have to carry
+   their own box or they collapse to nothing. */
+.setting-item.editingToolbar-Divider-Line .setting-item-control button:last-child,
+.setting-item.editingToolbar-Divider-Line .setting-item-control button.editingToolbar-divider-rename {
+  display: inline-flex;
+  height: 20px;
   margin: 0 8px;
+  padding: 0 4px;
+  line-height: normal;
+  align-items: center;
+}
+
+.setting-item.editingToolbar-Divider-Line .setting-item-control button.editingToolbar-divider-rename {
+  background-color: transparent !important;
+  opacity: 0.7;
+}
+
+.setting-item.editingToolbar-Divider-Line .setting-item-control button.editingToolbar-divider-rename:hover {
+  opacity: 1;
 }
 
 .setting-item.editingToolbar-Divider-Line .setting-item-control button:last-child:not(.mod-warning) {
@@ -560,7 +585,13 @@ button.editingToolbarCommandsubItem::after {
 }
 
 .setting-item.editingToolbar-Divider-Line .setting-item-control button:last-child::before {
-  content: url("data:image/svg+xml,%3Csvg width='16' height='16' viewBox='0 0 1024 1024' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M511.674077 66.707284c-246.52265 0-446.347744 199.835328-446.347744 446.347744s199.825095 446.356954 446.347744 446.356954c246.50423 0 446.348768-199.844537 446.348768-446.356954S758.177284 66.707284 511.674077 66.707284zM744.967424 667.159826c21.8701 21.8701 21.8701 57.310264 0 79.199807-21.8701 21.851681-57.30924 21.851681-79.198783-0.019443L511.674077 592.264045 357.56007 746.359632c-21.8701 21.8701-57.30924 21.851681-79.17934-0.019443s-21.8701-57.290821 0-79.160921L432.493713 513.065262 278.379707 358.950232c-21.8701-21.86089-21.8701-57.328683 0-79.18855 21.8701-21.87931 57.30924-21.87931 79.17934 0l154.114007 154.104797 154.095587-154.104797c21.889543-21.87931 57.32766-21.87931 79.198783-0.010233 21.8701 21.8701 21.8701 57.348126 0 79.207993L590.89128 513.065262 744.967424 667.159826z' fill='%23666666'/%3E%3C/svg%3E");
+  content: "";
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  background-color: currentColor;
+  -webkit-mask: var(--editing-toolbar-cross) no-repeat center / contain;
+  mask: var(--editing-toolbar-cross) no-repeat center / contain;
 }
 
 /* --- Settings controls ---------------------------------------------------- */
@@ -639,7 +670,7 @@ button.editingToolbarSettingsButton {
 
 /* Both settings tabs build this same container, so layout keys off the container
    rather than each row's class (`.custom_bg`/`.custom_font` in the General tab,
-   `.toolbar_background`/`.toolbar_icon` in Appearance) — an enumeration new rows
+   `.toolbar_background`/`.toolbar_icon` in Appearance). An enumeration new rows
    kept falling out of. No sizing here: Pickr replaces the `div.picker` it is
    handed with its own `div.pickr`, so the swatch box comes from the vendored
    `.pcr-button` in §8. */
@@ -668,92 +699,24 @@ button.editingToolbarSettingsButton {
   padding: 15px;
 }
 
-/* --- Import / export panels ----------------------------------------------- */
-
-.editing-toolbar-settings .import-export-info {
-  margin-top: 20px;
-  padding: 16px;
-  border-radius: 8px;
-  background-color: var(--background-secondary);
-}
-
-.editing-toolbar-settings .import-export-info ul {
-  padding-left: 20px;
-}
-
-.editing-toolbar-settings .import-export-heading,
-.editing-toolbar-settings .community-heading {
-  margin-top: 0;
-}
-
-.editing-toolbar-settings .import-export-warning {
-  margin-top: 20px;
-  margin-bottom: 20px;
-  padding: 16px;
-  border: 1px solid rgba(var(--color-red-rgb), 0.3);
-  border-radius: 8px;
-  background-color: rgba(var(--color-red-rgb), 0.1);
-}
-
-.editing-toolbar-settings .import-export-warning .warning-text {
-  margin: 0;
-}
-
 /* ==========================================================================
    6. MODALS
    ========================================================================== */
 
-/* --- Rename modal (ChangeCmdname) ---------------------------------------- */
+/* --- Rename modal (renameCommandModal.ts) -------------------------------- */
 
-.modal-container.changename .modal-title {
+.modal-container.editing-toolbar-rename-modal .modal-title {
   display: none;
 }
 
-.modal-container.changename .modal-content > b {
+.modal-container.editing-toolbar-rename-modal .modal-content > b {
   display: block;
   margin-bottom: var(--size-4-2);
 }
 
-.modal-container.changename .modal-content input[type='text'] {
+.modal-container.editing-toolbar-rename-modal .modal-content input[type='text'] {
   width: 100%;
   box-shadow: none;
-}
-
-/* --- Import/export modal (ImportExportModal.ts) --------------------------- */
-
-.editing-toolbar-import-export-modal .export-container,
-.editing-toolbar-import-export-modal .import-container {
-  padding: 10px;
-  border: 1px solid var(--background-modifier-border);
-  border-radius: 5px;
-}
-
-.editing-toolbar-import-export-modal .import-export-textarea {
-  width: 100%;
-  height: 200px;
-  padding: 8px;
-  border: 1px solid var(--background-modifier-border);
-  border-radius: 4px;
-  font-family: monospace;
-  font-size: 12px;
-}
-
-.editing-toolbar-import-export-modal .import-export-button-container {
-  display: flex;
-  margin-top: 16px;
-  justify-content: flex-end;
-}
-
-.editing-toolbar-import-export-modal .import-export-warning {
-  margin-top: 16px;
-  padding: 8px 12px;
-  border: 1px solid rgba(var(--color-red-rgb), 0.3);
-  border-radius: 4px;
-  background-color: rgba(var(--color-red-rgb), 0.1);
-}
-
-.editing-toolbar-import-export-modal .import-export-warning p {
-  margin: 0;
 }
 
 /* --- Insert-callout modal ------------------------------------------------- */
@@ -813,22 +776,22 @@ button.editingToolbarSettingsButton {
 /* --- Highlights written by setBackgroundColor() --------------------------- */
 
 /* The UA stylesheet declares `mark { background: mark; color: marktext }`. A
-   declaration on the element always beats an inherited value — inheritance only
-   fills in where nothing is declared — so `body { color: var(--text-normal) }`
+   declaration on the element always beats an inherited value, and inheritance
+   only fills in where nothing is declared, so `body { color: var(--text-normal) }`
    never reaches a `<mark>`, and the text lands on the `marktext` system colour.
    Our highlights set a background and deliberately leave the text alone, so the
    UA declaration has to be handed back to inheritance explicitly.
 
    Class-scoped so nothing else is touched: Obsidian's native `==highlight==` and
    any hand-written `<mark>` keep their own styling. Marks of ours that still
-   carry an inline `color:` keep that too — a style attribute outranks any
-   stylesheet rule — until a recolour rewrites them. */
+   carry an inline `color:` keep that too, because a style attribute outranks any
+   stylesheet rule, until a recolour rewrites them. */
 mark.editing-toolbar-highlight {
   color: inherit;
 }
 
 /* ==========================================================================
-   8. VENDORED — Pickr 1.8.4 "nano" theme (@simonwep/pickr/dist/themes/nano.min.css)
+   8. VENDORED. Pickr 1.8.4 "nano" theme (@simonwep/pickr/dist/themes/nano.min.css)
    Inlined because the plugin ships styles.css directly to the vault and no
    longer bundles CSS through the build. Update if the pinned pickr version changes.
    ========================================================================== */

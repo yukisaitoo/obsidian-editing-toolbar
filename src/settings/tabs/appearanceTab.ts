@@ -24,9 +24,9 @@ const BACKGROUND_SWATCHES = [
 const ICON_SWATCHES = ["#4A5568", "#D4AF37", "#2D3033", "#6D5846", "#4C2A55"];
 
 const PREVIEW_COMMANDS: CommandId[] = [
-  "toggle-bold",
-  "toggle-italics",
-  "toggle-strikethrough",
+  "editor:toggle-bold",
+  "editor:toggle-italics",
+  "editor:toggle-strikethrough",
   "editor:toggle-code",
   "editor:toggle-blockquote",
   "editor:insert-wikilink",

@@ -2,7 +2,7 @@
 
 import type { CommandName } from "src/settings/defaultCommands";
 
-import type { en } from "../en";
+import type { en } from "src/translations/en";
 
 const ui: Partial<Record<keyof typeof en, string>> = {
   dragCommandsHere: "Перетащите сюда",
@@ -20,16 +20,12 @@ const ui: Partial<Record<keyof typeof en, string>> = {
   changeSubmenuName: "Изменить название подменю",
   chooseCommand: "Выберите команду",
   chooseIcon: "Выберите значок",
-  chooseHowImportConfiguration: "Выберите способ импорта конфигурации",
   closed: "Свернуто",
   collapseState: "Состояние сворачивания",
   default: "По умолчанию",
-  configurationCopiedClipboard: "Конфигурация скопирована в буфер обмена",
-  configurationImportedSuccessfully: "Конфигурация успешно импортирована",
   confirm: "Подтвердить",
   confirmDelete: "Подтвердить удаление?",
   content: "Содержимое",
-  copyClipboard: "Копировать",
   customBackgroundColor: "Пользовательский цвет фона",
   customFontColor: "Пользовательский цвет текста",
   customFontColors: "Пользовательские цвета шрифта",
@@ -39,51 +35,25 @@ const ui: Partial<Record<keyof typeof en, string>> = {
   translucentColors: "Полупрозрачные цвета",
   highlighterColors: "Цвета маркера",
   delete: "Удалить",
-  doWantContinue: "Вы хотите продолжить?",
   dropdownMenu: "Выпадающее меню",
   editingToolbarCommands: "Команды панели инструментов",
-  error: "Ошибка: ",
-  export: "Экспорт",
-  exportConfiguration: "Экспорт конфигурации",
-  exportToolbarConfigurationShareOthers:
-    "Экспортируйте конфигурацию панели инструментов, чтобы поделиться ею с другими.",
-  exportGenerateJsonConfigurationCan:
-    "Экспорт: создаёт JSON-конфигурацию, которую можно сохранить или отправить другим.",
-  failedCopyConfiguration: "Не удалось скопировать конфигурацию",
   fontColors: "Цвета шрифта",
   general: "Основные",
-  import: "Импорт",
-  importConfiguration: "Импорт конфигурации",
-  importMode: "Режим импорта",
-  importToolbarConfigurationJson:
-    "Импортировать конфигурацию панели инструментов из JSON.",
-  importExport: "Импорт/экспорт",
-  importPastePreviouslyExportedJson:
-    "Импорт: вставьте ранее экспортированную JSON-конфигурацию.",
   inputContent: "Введите содержимое",
   inputTitle: "Введите заголовок",
   insert: "Вставить",
-  invalidImportDataFormat: "Неверный формат импортируемых данных",
   menuTypeChanged: "Тип меню изменён на",
   more: "Ещё",
-  validConfigurationFoundImportData:
-    "В импортируемых данных не найдена корректная конфигурация",
   open: "Развернуто",
   optionalLeaveBlankDefaultTitle:
     "Необязательно, оставьте пустым для заголовка по умолчанию",
-  overwriteImport: "Импорт с заменой",
-  overwriteModeReplaceSettingsImported:
-    "Режим перезаписи (заменить настройки импортированными)",
-  pasteConfigurationHere: "Вставьте конфигурацию сюда...",
   pleaseEnterNewName: "Введите новое название: ",
-  pleasePasteConfigurationDataFirst: "Сначала вставьте данные конфигурации",
   reset: "Сбросить",
   setBackgroundColorToolbar: "Установить цвет фона панели инструментов.",
   setColorToolbarIcon: "Установить цвет значков панели инструментов.",
   setSizeToolbarIconPx:
     "Установить размер значков панели инструментов (px); по умолчанию: 18px",
   commandAlreadyExists: "Команда {name} уже существует",
-  importSummaryHeading: "Этот импорт выполнит:",
   title: "Заголовок",
   toolbarBackgroundColor: "Цвет фона панели инструментов",
   toolbarCommands: "Команды панели инструментов",
@@ -91,22 +61,7 @@ const ui: Partial<Record<keyof typeof en, string>> = {
   toolbarIconSize: "Размер значков панели инструментов",
   toolbarPreviewLabel:
     "Предпросмотр панели инструментов (с примерной конфигурацией команд)",
-  updateImport: "Импорт с обновлением",
-  updateModeAddNewItems:
-    "Режим обновления (добавить новые элементы и обновить существующие)",
-  updateGeneralSettings: "Обновить основные настройки",
-  usageInstructions: "Инструкция по использованию",
-  importOverwriteWarning:
-    "Предупреждение: импорт конфигурации перезапишет текущие настройки. Рекомендуется сначала экспортировать текущую конфигурацию в качестве резервной копии.",
-  warningOverwriteModeReplaceExisting:
-    "Предупреждение: режим перезаписи заменит существующие настройки импортированными.",
-  warningUpdateModeAddNew:
-    "Предупреждение: режим обновления добавит новые элементы и обновит существующие.",
   toInsert: "вставить",
-  updateModeMergeImportedSettings:
-    "ℹ️ Режим обновления объединит импортированные настройки с существующими.",
-  overwriteModeReplaceExistingSettings:
-    "⚠️ Режим перезаписи заменит существующие настройки импортированными.",
   setCustomBackground: "🎨 Настроить цвет фона",
   setCustomFontColor: "🖌️ Настроить цвет текста",
 };

@@ -13,20 +13,18 @@ import { createColorPickr } from "src/settings/pickr";
 import { renderAppearanceTab } from "src/settings/tabs/appearanceTab";
 import { renderCommandsTab } from "src/settings/tabs/commandsTab";
 import { renderGeneralTab } from "src/settings/tabs/generalTab";
-import { renderImportExportTab } from "src/settings/tabs/importExportTab";
 import { strings } from "src/translations/helper";
 
 const DELETE_CONFIRM_TIMEOUT = 3500;
 
 const RERENDER_DELAY = 100;
 
-type TabId = "general" | "appearance" | "commands" | "importexport";
+type TabId = "general" | "appearance" | "commands";
 
 const SETTING_TABS: { id: TabId; name: string; icon: string }[] = [
   { id: "general", name: strings.general, icon: "gear" },
   { id: "appearance", name: strings.appearance, icon: "brush" },
   { id: "commands", name: strings.toolbarCommands, icon: "lucide-command" },
-  { id: "importexport", name: strings.importExport, icon: "lucide-import" },
 ];
 
 export interface SettingsTabContext {
@@ -102,9 +100,6 @@ export class EditingToolbarSettingTab extends PluginSettingTab {
       case "commands":
         renderCommandsTab(ctx, contentEl);
         break;
-      case "importexport":
-        renderImportExportTab(ctx, contentEl);
-        break;
     }
   }
 
@@ -131,12 +126,12 @@ export class EditingToolbarSettingTab extends PluginSettingTab {
     };
   }
 
-  // A rebuild re-renders this pane in place, tearing down the Pickr/Sortable whose
-  // own callback asked for it — so defer past the current event, and coalesce bursts.
+  // A rebuild re-renders this pane in place, tearing down the Pickr or Sortable
+  // whose own callback asked for it. Defer past the current event, and coalesce
+  // bursts.
   private readonly scheduleRerender = debounce(
     () => {
       if (!this.isOpen) return;
-      // Keep the reader where they were.
       const { scrollTop } = this.containerEl;
       this.display();
       this.containerEl.scrollTop = scrollTop;
@@ -177,7 +172,7 @@ export class EditingToolbarSettingTab extends PluginSettingTab {
   }
 
   // Both hold references that outlive the DOM they were built on, so they are torn
-  // down before every re-render — while their elements are still attached.
+  // down before every re-render, while their elements are still attached.
   private destroyTabResources(): void {
     this.pickrs.forEach((pickr) => pickr.destroyAndRemove());
     this.pickrs = [];

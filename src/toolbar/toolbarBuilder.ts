@@ -17,12 +17,7 @@ import {
   SHARED_BAR_CLASS,
 } from "src/toolbar/toolbarDom";
 import { toolbarDocuments, windowOf } from "src/toolbar/toolbarHost";
-import {
-  applyToolbarState,
-  toolbarStateFor,
-} from "src/toolbar/toolbarVisibility";
 
-// Bars are per view, so each one needs its own observer.
 const toolbarResizeOwners = new Map<MarkdownView, Component>();
 
 // Teardown sweeps every document, so restoration has to reach just as far: a bar
@@ -38,31 +33,29 @@ export function syncToolbars(plugin: EditingToolbarPlugin): void {
     // layout-change, which brings us back here.
     if (leaf.isDeferred || !(leaf.view instanceof MarkdownView)) continue;
 
-    const view = leaf.view;
-    const state = toolbarStateFor(plugin, view);
-    // Only build when visible: a reading-mode pane may not have a source view to
-    // mount into yet.
-    const bar =
-      state === "visible" ? ensureToolbar(plugin, view) : toolbarIn(view);
-    if (bar) applyToolbarState(bar, state);
+    if (shouldShowToolbar(plugin, leaf.view)) ensureToolbar(plugin, leaf.view);
   }
 }
 
-// One bar per pane, mounted inside the view it belongs to.
+// A reading-mode pane may not have a source view to mount into yet, so a hidden bar
+// is one that was never built rather than one that is built and covered up.
+function shouldShowToolbar(
+  plugin: EditingToolbarPlugin,
+  view: MarkdownView,
+): boolean {
+  return plugin.settings.toolbarVisible && view.getMode() !== "preview";
+}
+
 function toolbarIn(view: MarkdownView): HTMLElement | null {
   return view.containerEl.querySelector<HTMLElement>(BAR_SELECTOR);
 }
 
-// Idempotent: calling twice cannot produce a duplicate bar.
 function ensureToolbar(
   plugin: EditingToolbarPlugin,
   view: MarkdownView,
 ): HTMLElement | null {
   const existing = toolbarIn(view);
-  if (existing) {
-    applyAppearanceVars(existing, plugin.settings);
-    return existing;
-  }
+  if (existing) return existing;
 
   const bars = mountBars(plugin.settings, view);
   if (!bars) return null;
@@ -118,7 +111,7 @@ function createBarEl(doc: Document, className: string): HTMLElement {
   el.addClass("editingToolbarDefaultAesthetic");
   // Pressing a button would take focus off the editor, which every command here acts
   // on. Nothing in the bar is focusable, so refusing focus outright beats handing it
-  // back afterwards — that lands mid-command and fights anything that opens a modal.
+  // back afterwards: a restore lands mid-command and fights anything opening a modal.
   el.addEventListener("mousedown", (event) => event.preventDefault());
   return el;
 }
@@ -175,8 +168,8 @@ function observeToolbarResize(
   observer.observe(parent);
 
   // The view owns the bar, so it owns the observer: closing the tab, or the window it
-  // was popped out into, unloads the view and its children. register() alone would do
-  // that too, but only addChild has a counterpart a rebuild can call.
+  // was popped out into, unloads the view and its children. A Component rather than a
+  // bare register() because a rebuild needs to retire one on demand.
   const owner = new Component();
   owner.register(() => {
     observer.disconnect();

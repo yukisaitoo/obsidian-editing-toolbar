@@ -7,14 +7,10 @@ import {
   isColorPickerCommand,
 } from "src/toolbar/colorPickerButton";
 import { attachFlyoutClamp } from "src/toolbar/geometry";
-import {
-  applyButtonIcon,
-  getHotkey,
-  NO_HOTKEY,
-  SUBMENU_BUTTON_CLASS,
-} from "src/toolbar/toolbarDom";
+import { hotkeyLabel } from "src/toolbar/hotkeys";
+import { DIVIDER_COMMAND_ID, isDivider } from "src/toolbar/layoutIds";
+import { applyButtonIcon, SUBMENU_BUTTON_CLASS } from "src/toolbar/toolbarDom";
 import { t } from "src/translations/helper";
-import { DIVIDER_COMMAND_ID, isDivider } from "src/util/commandIds";
 import { hasSubmenu, SubmenuCommand } from "src/util/commandStorage";
 
 interface RenderContext {
@@ -83,8 +79,8 @@ function renderDropdown(ctx: RenderContext, item: SubmenuCommand) {
           .setIcon(subitem.icon ?? null)
           .onClick(() => runCommandById(ctx.app, subitem.id));
 
-        const hotkey = getHotkey(ctx.app, subitem.id);
-        if (hotkey !== NO_HOTKEY) {
+        const hotkey = hotkeyLabel(ctx.app, subitem.id);
+        if (hotkey) {
           menuItem.dom.createSpan({ cls: "menu-item-hotkey" }).setText(hotkey);
         }
       });
@@ -123,6 +119,6 @@ function renderFlyout(ctx: RenderContext, item: SubmenuCommand) {
 
 function tooltipFor(app: App, item: Command): string {
   const label = t(item.name);
-  const hotkey = getHotkey(app, item.id);
-  return hotkey === NO_HOTKEY ? label : `${label}(${hotkey})`;
+  const hotkey = hotkeyLabel(app, item.id);
+  return hotkey ? `${label}(${hotkey})` : label;
 }

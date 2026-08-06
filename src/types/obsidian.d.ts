@@ -38,15 +38,6 @@ declare module "obsidian" {
     floatingSplit?: { children: WorkspaceWindow[] };
   }
 
-  interface Editor {
-    // Undocumented internal editing commands exposed by Obsidian's editor
-    indentList(): void;
-    unindentList(): void;
-    toggleNumberList(): void;
-    toggleBulletList(): void;
-    toggleMarkdownFormatting(format: string): void;
-  }
-
   interface Menu {
     dom: HTMLElement;
   }

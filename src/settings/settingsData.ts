@@ -75,10 +75,16 @@ export function applyLastColorVars(
   );
 }
 
+// These land on documentElement rather than on a bar, so unloading the plugin does
+// not take them with it.
+export function clearLastColorVars(el: HTMLElement): void {
+  el.style.removeProperty("--editing-toolbar-font-color");
+  el.style.removeProperty("--editing-toolbar-highlight-color");
+}
+
 const CUSTOM_COLOR_INDEXES = [1, 2, 3, 4, 5] as const;
 
 export type CustomColorPrefix = "custom_bg" | "custom_fc";
-// All hold hex strings.
 export type CustomColorKey =
   `${CustomColorPrefix}${(typeof CUSTOM_COLOR_INDEXES)[number]}`;
 
@@ -95,10 +101,8 @@ export interface EditingToolbarSettings extends Record<CustomColorKey, string> {
   appearance?: AppearanceOverrides;
 }
 
-// `commands` is filled in by createDefaultSettings(); the empty array is here only to
-// satisfy the type.
-export const DEFAULT_SETTINGS: EditingToolbarSettings = {
-  commands: [],
+// Everything but `commands`, which is built per call by createDefaultSettings().
+export const DEFAULT_SETTINGS: Omit<EditingToolbarSettings, "commands"> = {
   toolbarVisible: true,
   lastFontColor: "#2DC26B",
   lastHighlightColor: "#d3f8b6",
@@ -117,7 +121,8 @@ export const DEFAULT_SETTINGS: EditingToolbarSettings = {
 // Cloned, because the defaults above are shared module constants and callers
 // mutate what they get back.
 export function createDefaultSettings(): EditingToolbarSettings {
-  const settings = structuredClone(DEFAULT_SETTINGS);
-  settings.commands = defaultToolbarCommands();
-  return settings;
+  return {
+    ...structuredClone(DEFAULT_SETTINGS),
+    commands: defaultToolbarCommands(),
+  };
 }

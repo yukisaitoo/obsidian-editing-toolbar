@@ -1,4 +1,4 @@
-import { App, ButtonComponent, Platform, setIcon } from "obsidian";
+import { ButtonComponent, setIcon } from "obsidian";
 
 // Two separate hooks on purpose: SHARED_BAR_CLASS is styling only (the settings
 // preview wears it too), while the selectors below mark a *live* bar and are what
@@ -20,35 +20,4 @@ export function applyButtonIcon(
   const iconEl = btn.buttonEl.createSpan({ cls: "editing-toolbar-icon" });
   setIcon(iconEl, icon ?? "");
   return iconEl;
-}
-
-export const NO_HOTKEY = "–";
-
-const MODIFIER_LABELS: Record<string, string> = Platform.isMacOS
-  ? { Ctrl: "⌃", Alt: "⌥", Shift: "⇧", Meta: "⌘", Mod: "⌘" }
-  : { Ctrl: "Ctrl", Alt: "Alt", Shift: "Shift", Meta: "Win", Mod: "Ctrl" };
-
-const MODIFIER_ORDER = Platform.isMacOS
-  ? ["Ctrl", "Alt", "Shift", "Meta", "Mod"]
-  : ["Mod", "Ctrl", "Meta", "Alt", "Shift"];
-
-export function getHotkey(app: App, cmdId: string): string {
-  const { hotkeyManager } = app;
-  // A custom binding replaces the default wholesale, so an empty array means
-  // the user deleted the hotkey.
-  const hotkeys =
-    hotkeyManager.getHotkeys(cmdId) ?? hotkeyManager.getDefaultHotkeys(cmdId);
-  return formatCombo(hotkeys?.[0]);
-}
-
-function formatCombo(
-  combo: { modifiers?: string[]; key?: string } | undefined,
-): string {
-  if (!combo?.key) return NO_HOTKEY;
-
-  const modifiers = [...(combo.modifiers ?? [])]
-    .sort((a, b) => MODIFIER_ORDER.indexOf(a) - MODIFIER_ORDER.indexOf(b))
-    .map((modifier) => MODIFIER_LABELS[modifier] ?? modifier);
-
-  return [...modifiers, combo.key].join(Platform.isMacOS ? "" : "+");
 }

@@ -1,4 +1,5 @@
 import { App, ButtonComponent, Command, Editor, setTooltip } from "obsidian";
+import { runOnEditor } from "src/commands/registerCommands";
 import type EditingToolbarPlugin from "src/plugin/main";
 import { ownCommand, PLUGIN_ID, runCommandById } from "src/plugin/pluginId";
 import {
@@ -67,7 +68,7 @@ export function createColorPickerButton(
   variant.render(submenu, plugin);
   button.buttonEl.insertAdjacentElement("afterbegin", submenu);
 
-  wireSwatches(plugin, submenu, variant);
+  wireSwatches(app, plugin, submenu, variant);
 
   const wrapper = submenu.querySelector<HTMLElement>(".x-color-picker-wrapper");
   if (wrapper) {
@@ -81,6 +82,7 @@ export function createColorPickerButton(
 }
 
 function wireSwatches(
+  app: App,
   plugin: EditingToolbarPlugin,
   root: ParentNode,
   variant: PickerVariant,
@@ -96,7 +98,7 @@ function wireSwatches(
     const color = cell && toHexColor(cell.style.backgroundColor);
     if (!color) return;
 
-    plugin.commandsManager.runOnEditor((editor) => {
+    runOnEditor(app, (editor) => {
       variant.apply(color, editor);
       plugin.settings[variant.settingsKey] = color;
       plugin.applyRootColorVars();
@@ -105,8 +107,8 @@ function wireSwatches(
   });
 }
 
-// The custom swatches this button edits live on the General tab. Straight there by
-// id — no timer, and no dependence on it happening to be the first tab.
+// The custom swatches this button edits live on the General tab. Reached by id, so
+// this does not depend on General happening to be the first tab.
 function openCustomColorSettings(app: App, plugin: EditingToolbarPlugin): void {
   app.setting.open();
   app.setting.openTabById(PLUGIN_ID);

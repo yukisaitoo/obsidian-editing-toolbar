@@ -15,10 +15,9 @@ function parse(lineText: string) {
   return { prefix, body, heading: body.match(HEADING)?.[0].trim() ?? "" };
 }
 
-// from https://github.com/obsidian-canzi/Enhanced-editing
 export function setHeader(marker: string, editor: Editor) {
-  // Repeating a level clears it, but only where every line already has it — a
-  // mixed selection levels up instead of half-clearing.
+  // Repeating a level clears it, but only where every line already has it. A mixed
+  // selection levels up instead of half-clearing.
   let uniform = true;
 
   editor.processLines(

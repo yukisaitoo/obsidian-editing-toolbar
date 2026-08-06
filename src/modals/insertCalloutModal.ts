@@ -6,8 +6,8 @@ import {
   Setting,
   setIcon,
 } from "obsidian";
-import type { CalloutTypeInfo } from "src/modals/callout/calloutTypes";
-import { buildCalloutOptions } from "src/modals/callout/calloutTypes";
+import type { CalloutTypeInfo } from "src/modals/calloutTypes";
+import { buildCalloutOptions } from "src/modals/calloutTypes";
 import { focusAfterOpen } from "src/modals/modalInput";
 import EditingToolbarPlugin from "src/plugin/main";
 import { strings } from "src/translations/helper";

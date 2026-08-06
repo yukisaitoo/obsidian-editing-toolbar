@@ -1,23 +1,20 @@
 import { ButtonComponent, Command, Notice, Setting } from "obsidian";
 import type Sortable from "sortablejs";
-import {
-  ChangeCmdname,
-  ChooseFromIconList,
-  CommandPicker,
-} from "src/modals/suggesterModals";
+import { RenameCommandModal } from "src/modals/renameCommandModal";
+import { CommandPicker, IconPicker } from "src/modals/suggesterModals";
 import { DIVIDER_NAME, SUBMENU_NAME } from "src/settings/defaultCommands";
 import type { SettingsTabContext } from "src/settings/settingsTab";
-import { applyButtonIcon, SUBMENU_BUTTON_CLASS } from "src/toolbar/toolbarDom";
-import { strings, t } from "src/translations/helper";
 import {
   DIVIDER_COMMAND_ID,
   isDivider,
   newDividerId,
   newSubmenuId,
-} from "src/util/commandIds";
+} from "src/toolbar/layoutIds";
+import { applyButtonIcon, SUBMENU_BUTTON_CLASS } from "src/toolbar/toolbarDom";
+import { strings, t } from "src/translations/helper";
 import { hasSubmenu, SubmenuCommand } from "src/util/commandStorage";
 
-const TOP_LEVEL_CONTAINER_CLASS = "editingToolbarSettingsTabsContainer";
+const DIVIDER_RENAME_CLASS = "editingToolbar-divider-rename";
 
 const SHARED_SORTABLE_OPTIONS: Sortable.Options = {
   draggable: ".setting-item",
@@ -33,6 +30,30 @@ const SHARED_SORTABLE_OPTIONS: Sortable.Options = {
   delayOnTouchOnly: true,
   touchStartThreshold: 5,
 };
+
+// What the two "insert after this row" buttons offer. Only the top-level list gets
+// them: a submenu holds plain commands and dividers it received by drag.
+const INSERTABLE = {
+  submenu: {
+    icon: "editingToolbarSub",
+    tooltip: strings.addSubmenu,
+    make: (): Command => ({
+      id: newSubmenuId(),
+      name: SUBMENU_NAME,
+      icon: "lucide-list-filter",
+      SubmenuCommands: [],
+    }),
+  },
+  divider: {
+    icon: "vertical-split",
+    tooltip: strings.addSeparator,
+    make: (): Command => ({
+      id: newDividerId(),
+      name: DIVIDER_NAME,
+      icon: "vertical-split",
+    }),
+  },
+} as const;
 
 export function renderCommandsTab(
   ctx: SettingsTabContext,
@@ -52,119 +73,65 @@ export function renderCommandsTab(
         .onClick(() => new CommandPicker(ctx.plugin).open());
     });
 
-  renderCommandList(ctx, listContainer);
-}
-
-function renderCommandList(
-  ctx: SettingsTabContext,
-  containerEl: HTMLElement,
-): void {
-  // The live settings array — the handlers below mutate it in place, then save.
+  // The live settings array; every handler below mutates it in place, then saves.
   const commands = ctx.plugin.settings.commands;
-  const listEl = containerEl.createEl("div", {
-    cls: TOP_LEVEL_CONTAINER_CLASS,
-  });
+  const listEl = listContainer.createDiv(
+    "editingToolbarSettingsTabsContainer",
+  );
   const dragList = createDragList(ctx);
 
   dragList(listEl, commands, { group: "item", animation: 500 });
 
-  commands.forEach((command, index) => {
-    const setting = new Setting(listEl);
-    if (hasSubmenu(command)) {
-      renderSubmenuRow(ctx, setting, { command, commands, dragList });
-    } else {
-      renderCommandRow(ctx, setting, { command, index, commands });
-    }
-  });
-}
-
-interface RowContext {
-  command: Command;
-  index: number;
-  commands: Command[];
-}
-
-function renderCommandRow(
-  ctx: SettingsTabContext,
-  setting: Setting,
-  row: RowContext,
-): void {
-  const { command, index, commands } = row;
-
-  setting.addButton((iconButton) =>
-    configureIconButton(ctx, iconButton, command, commands),
+  commands.forEach((command) =>
+    renderRow(ctx, listEl, { command, list: commands, topLevel: true }, dragList),
   );
-
-  setting.setClass("editingToolbarCommandItem").setName(t(command.name));
-
-  configureDividerRow(ctx, setting, command, commands);
-
-  setting
-    .addButton((addSubmenu) => {
-      addSubmenu
-        .setIcon("editingToolbarSub")
-        .setTooltip(strings.addSubmenu)
-        .setClass("editingToolbarSettingsButton")
-        .onClick(() =>
-          insertAfter(ctx, commands, index, {
-            id: newSubmenuId(),
-            name: SUBMENU_NAME,
-            icon: "lucide-list-filter",
-            SubmenuCommands: [],
-          }),
-        );
-    })
-    .addButton((addSeparator) => {
-      addSeparator
-        .setIcon("vertical-split")
-        .setTooltip(strings.addSeparator)
-        .setClass("editingToolbarSettingsButton")
-        .onClick(() =>
-          insertAfter(ctx, commands, index, {
-            id: newDividerId(),
-            name: DIVIDER_NAME,
-            icon: "vertical-split",
-          }),
-        );
-    })
-    .addButton((deleteButton) =>
-      ctx.createDeleteButton(deleteButton, () =>
-        removeCommand(ctx, commands, command),
-      ),
-    );
 }
 
-interface SubmenuRowContext {
-  command: SubmenuCommand;
-  // The list owning this row, for the icon/rename/delete writes — not for drags.
-  commands: Command[];
-  dragList: DragList;
+interface CommandRow {
+  command: Command;
+  // The list this row lives in, for the icon/rename/delete/insert writes.
+  list: Command[];
+  topLevel: boolean;
 }
 
-function renderSubmenuRow(
+function renderRow(
   ctx: SettingsTabContext,
-  setting: Setting,
-  row: SubmenuRowContext,
+  parentEl: HTMLElement,
+  row: CommandRow,
+  dragList: DragList,
 ): void {
-  const { command, commands, dragList } = row;
+  const { command, list, topLevel } = row;
+  const submenu = hasSubmenu(command) ? command : null;
+  const divider = isDivider(command.id);
 
-  setting
+  const setting = new Setting(parentEl)
     .setClass("editingToolbarCommandItem")
-    .setClass(SUBMENU_BUTTON_CLASS)
-    .setName(t(command.name))
-    .addButton((iconButton) =>
-      configureIconButton(ctx, iconButton, command, commands),
-    )
-    .addButton((renameButton) =>
-      configureRenameButton(ctx, renameButton, command, commands),
-    )
-    .addDropdown((dropdown) => {
+    .setName(t(command.name));
+
+  // The Sortable `put` predicate reads this class off the dragged element to keep
+  // submenus out of submenus.
+  if (submenu) setting.setClass(SUBMENU_BUTTON_CLASS);
+  if (divider) setting.setClass(DIVIDER_COMMAND_ID);
+
+  // Order matters: styles.css hides a divider row's buttons by position, so delete
+  // has to stay last and rename has to keep its own class to survive.
+  setting.addButton((button) => configureIconButton(ctx, button, command, list));
+
+  if (submenu || divider) {
+    setting.addButton((button) => {
+      configureRenameButton(ctx, button, command, list);
+      if (divider) button.setClass(DIVIDER_RENAME_CLASS);
+    });
+  }
+
+  if (submenu) {
+    setting.addDropdown((dropdown) => {
       dropdown
         .addOption("submenu", strings.buttonSubmenu)
         .addOption("dropdown", strings.dropdownMenu)
-        .setValue(command.menuType || "submenu")
+        .setValue(submenu.menuType || "submenu")
         .onChange(async (value) => {
-          command.menuType = value as "submenu" | "dropdown";
+          submenu.menuType = value as "submenu" | "dropdown";
           await ctx.plugin.saveSettings();
           ctx.applyChanges();
           new Notice(
@@ -176,16 +143,34 @@ function renderSubmenuRow(
           );
         });
       dropdown.selectEl.addClass("editingToolbarMenuTypeDropdown");
-    })
-    .addButton((deleteButton) =>
-      ctx.createDeleteButton(deleteButton, () =>
-        removeCommand(ctx, commands, command),
-      ),
-    );
+    });
+  }
 
-  const subListEl = setting.settingEl.createEl("div", {
-    cls: "editingToolbarSettingsTabsContainer_sub",
-  });
+  if (topLevel && !submenu) {
+    setting.addButton((button) =>
+      configureInsertButton(ctx, button, command, list, "submenu"),
+    );
+    setting.addButton((button) =>
+      configureInsertButton(ctx, button, command, list, "divider"),
+    );
+  }
+
+  setting.addButton((button) =>
+    ctx.createDeleteButton(button, () => removeCommand(ctx, list, command)),
+  );
+
+  if (submenu) renderSubmenuChildren(ctx, setting, submenu, dragList);
+}
+
+function renderSubmenuChildren(
+  ctx: SettingsTabContext,
+  setting: Setting,
+  submenu: SubmenuCommand,
+  dragList: DragList,
+): void {
+  const subListEl = setting.settingEl.createDiv(
+    "editingToolbarSettingsTabsContainer_sub",
+  );
 
   // The empty-state hint is a CSS ::before, so the translated copy reaches it as a
   // custom property. JSON.stringify produces the quoting `content` expects.
@@ -194,49 +179,23 @@ function renderSubmenuRow(
     JSON.stringify(`✖️${strings.dragCommandsHere}`),
   );
 
-  dragList(subListEl, command.SubmenuCommands, {
+  dragList(subListEl, submenu.SubmenuCommands, {
     animation: 150,
     group: {
       name: "item",
       pull: true,
-      // Submenus take plain commands only — never another submenu.
+      // Submenus take plain commands only, never another submenu.
       put: (_to, _from, dragEl) =>
         !dragEl.classList.contains(SUBMENU_BUTTON_CLASS),
     },
   });
 
-  command.SubmenuCommands.forEach((subCommand) => {
-    renderSubcommandRow(ctx, new Setting(subListEl), {
-      command: subCommand,
-      commands: command.SubmenuCommands,
-    });
-  });
-}
-
-interface SubcommandRowContext {
-  command: Command;
-  commands: Command[];
-}
-
-function renderSubcommandRow(
-  ctx: SettingsTabContext,
-  setting: Setting,
-  row: SubcommandRowContext,
-): void {
-  const { command, commands } = row;
-
-  setting
-    .setClass("editingToolbarCommandItem")
-    .addButton((iconButton) =>
-      configureIconButton(ctx, iconButton, command, commands),
-    )
-    .setName(t(command.name));
-
-  configureDividerRow(ctx, setting, command, commands);
-
-  setting.addButton((deleteButton) =>
-    ctx.createDeleteButton(deleteButton, () =>
-      removeCommand(ctx, commands, command),
+  submenu.SubmenuCommands.forEach((child) =>
+    renderRow(
+      ctx,
+      subListEl,
+      { command: child, list: submenu.SubmenuCommands, topLevel: false },
+      dragList,
     ),
   );
 }
@@ -278,35 +237,49 @@ function createDragList(ctx: SettingsTabContext): DragList {
 
 async function removeCommand(
   ctx: SettingsTabContext,
-  commands: Command[],
+  list: Command[],
   command: Command,
 ): Promise<void> {
-  commands.remove(command);
+  list.remove(command);
   await ctx.plugin.saveSettings();
   ctx.applyChanges();
 }
 
-async function insertAfter(
+function configureInsertButton(
   ctx: SettingsTabContext,
-  commands: Command[],
-  index: number,
-  command: Command,
-): Promise<void> {
-  commands.splice(index + 1, 0, command);
-  await ctx.plugin.saveSettings();
-  ctx.applyChanges();
+  button: ButtonComponent,
+  after: Command,
+  list: Command[],
+  kind: keyof typeof INSERTABLE,
+): void {
+  const { icon, tooltip, make } = INSERTABLE[kind];
+
+  button
+    .setIcon(icon)
+    .setTooltip(tooltip)
+    .setClass("editingToolbarSettingsButton")
+    .onClick(async () => {
+      // Located on click, not on render: a re-render can be pending when this
+      // fires, which would make an index captured earlier point at the wrong row.
+      const index = list.indexOf(after);
+      if (index < 0) return;
+
+      list.splice(index + 1, 0, make());
+      await ctx.plugin.saveSettings();
+      ctx.applyChanges();
+    });
 }
 
 function configureIconButton(
   ctx: SettingsTabContext,
   button: ButtonComponent,
   command: Command,
-  owner: Command[],
+  list: Command[],
 ): void {
   button.setClass("editingToolbarSettingsIcon").onClick(() => {
-    new ChooseFromIconList(
+    new IconPicker(
       ctx.app,
-      (icon) => void setStoredIcon(ctx, command, owner, icon),
+      (icon) => void setStoredIcon(ctx, command, list, icon),
     ).open();
   });
 
@@ -316,39 +289,22 @@ function configureIconButton(
 async function setStoredIcon(
   ctx: SettingsTabContext,
   command: Command,
-  owner: Command[],
+  list: Command[],
   icon: string,
 ): Promise<void> {
   // Removed while the picker was open: nothing to write to.
-  if (!owner.includes(command)) return;
+  if (!list.includes(command)) return;
 
   command.icon = icon;
   await ctx.plugin.saveSettings();
   ctx.applyChanges();
 }
 
-// A divider's only live control is delete; styles.css hides the rest, keyed off
-// delete being the last button in the row.
-function configureDividerRow(
-  ctx: SettingsTabContext,
-  setting: Setting,
-  command: Command,
-  owner: Command[],
-): void {
-  if (!isDivider(command.id)) return;
-
-  setting
-    .setClass(DIVIDER_COMMAND_ID)
-    .addButton((renameButton) =>
-      configureRenameButton(ctx, renameButton, command, owner),
-    );
-}
-
 function configureRenameButton(
   ctx: SettingsTabContext,
   button: ButtonComponent,
   command: Command,
-  owner: Command[],
+  list: Command[],
 ): void {
   button
     .setIcon("pencil")
@@ -359,6 +315,6 @@ function configureRenameButton(
     )
     .setClass("editingToolbarSettingsButton")
     .onClick(() => {
-      new ChangeCmdname(ctx.plugin, command, owner).open();
+      new RenameCommandModal(ctx.plugin, command, list).open();
     });
 }
