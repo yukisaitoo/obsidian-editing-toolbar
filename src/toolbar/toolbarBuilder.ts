@@ -1,4 +1,4 @@
-import { MarkdownView, View } from "obsidian";
+import { MarkdownView } from "obsidian";
 import type EditingToolbarPlugin from "src/plugin/main";
 import {
   applyAppearanceVars,
@@ -49,7 +49,7 @@ export function syncToolbars(plugin: EditingToolbarPlugin): void {
 }
 
 // One bar per pane, mounted inside the view it belongs to.
-export function toolbarIn(view: View): HTMLElement | null {
+function toolbarIn(view: MarkdownView): HTMLElement | null {
   return view.containerEl.querySelector<HTMLElement>(BAR_SELECTOR);
 }
 
@@ -96,7 +96,7 @@ interface MountedBars {
 
 function mountBars(
   settings: EditingToolbarSettings,
-  view: View,
+  view: MarkdownView,
 ): MountedBars | null {
   // A note popped out into its own window has its own Document.
   const doc = view.containerEl.ownerDocument;
@@ -119,26 +119,21 @@ function createBarEl(doc: Document, className: string): HTMLElement {
   return el;
 }
 
+// The bar rides mode switches for free by living inside the source view: Obsidian
+// display:none's that whole element in reading mode. It is built in the MarkdownView
+// constructor, so it is there whenever the view is.
 function mountInView(
-  view: View,
+  view: MarkdownView,
   bar: HTMLElement,
   popoverBar: HTMLElement,
 ): boolean {
-  const target = findMountTarget(view.containerEl);
+  const target =
+    view.contentEl.querySelector<HTMLElement>(".markdown-source-view");
   if (!target) return false;
   target.insertAdjacentElement("afterbegin", bar);
 
   bar.insertAdjacentElement("afterend", popoverBar);
   return true;
-}
-
-function findMountTarget(container: HTMLElement): HTMLElement | null {
-  const target = container.querySelector<HTMLElement>(".markdown-source-view");
-  if (target) return target;
-
-  const viewContent = container.querySelector<HTMLElement>(".view-content");
-  if (!viewContent) return null;
-  return viewContent.querySelector<HTMLElement>(":scope > div") ?? viewContent;
 }
 
 function refreshOverflow(bar: HTMLElement, popoverBar: HTMLElement): void {
