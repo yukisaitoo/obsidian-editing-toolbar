@@ -1,5 +1,6 @@
-// The one place a command's display name and icon are written. Registration reads it
-// so the command palette matches the toolbar, and the toolbar defaults read it so a
+// The one place a command's display name and icon are written. It covers both the
+// commands this plugin registers and the core ones the toolbar merely points at, and
+// wins over the registry's own labels wherever a command enters settings — so a
 // command re-added from the picker comes back identical to the one that shipped.
 // Names double as translation keys — see `CommandName` in src/settings/defaultCommands.
 export const COMMAND_LABELS = {
@@ -85,6 +86,17 @@ export const COMMAND_LABELS = {
 } as const satisfies Record<string, { name: string; icon: string }>;
 
 export type CommandId = keyof typeof COMMAND_LABELS;
+
+export type CommandLabel = (typeof COMMAND_LABELS)[CommandId];
+
+// Ids reaching this come from the registry and settings, so most are not in the table.
+export function labelFor(id: string): CommandLabel | undefined {
+  return COMMAND_LABELS[id as CommandId];
+}
+
+// The ids this plugin implements, as opposed to the core ones it only labels.
+// Registration is typed on it so a core command cannot be shadowed by accident.
+export type OwnCommandId = Exclude<CommandId, `editor:${string}`>;
 
 export type RegisteredCommandName =
   (typeof COMMAND_LABELS)[CommandId]["name"];

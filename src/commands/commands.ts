@@ -33,9 +33,9 @@ export class CommandsManager {
     REGISTRARS.forEach((register) => register(ctx));
   }
 
-  // editorCallback is what keeps these out of the command palette — and out of
-  // reading mode, the note title and the properties panel — when there is no
-  // editor to act on.
+  // editorCallback is what gates these on a live editor — keeping them out of
+  // reading mode, the note title and the properties panel, and out of the command
+  // palette while there is no editor to act on.
   public addEditorCommand = ({ id, run }: EditorCommand): void => {
     this.plugin.addCommand({
       id,
@@ -51,7 +51,8 @@ export class CommandsManager {
     if (editor) this.runOn(editor, action);
   };
 
-  // Focus is restored after: clicking a toolbar button takes it off the editor.
+  // Focus is restored after, for the paths that do lose it — a modal closing, or the
+  // command palette. The toolbar never takes it in the first place.
   private runOn(editor: Editor, action: (editor: Editor) => unknown): void {
     void (async () => {
       try {

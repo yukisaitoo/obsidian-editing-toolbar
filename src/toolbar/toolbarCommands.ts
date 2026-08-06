@@ -82,9 +82,11 @@ function renderDropdown(ctx: RenderContext, item: SubmenuCommand) {
           .setTitle(t(subitem.name))
           .setIcon(subitem.icon ?? null)
           .onClick(() => runCommandById(ctx.app, subitem.id));
-        menuItem.dom
-          .createSpan({ cls: "menu-item-hotkey" })
-          .setText(getHotkey(ctx.app, subitem.id));
+
+        const hotkey = getHotkey(ctx.app, subitem.id);
+        if (hotkey !== NO_HOTKEY) {
+          menuItem.dom.createSpan({ cls: "menu-item-hotkey" }).setText(hotkey);
+        }
       });
     });
 

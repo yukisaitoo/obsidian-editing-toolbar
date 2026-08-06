@@ -116,6 +116,10 @@ function createBarEl(doc: Document, className: string): HTMLElement {
   const el = doc.createElement("div");
   el.addClass(className);
   el.addClass("editingToolbarDefaultAesthetic");
+  // Pressing a button would take focus off the editor, which every command here acts
+  // on. Nothing in the bar is focusable, so refusing focus outright beats handing it
+  // back afterwards — that lands mid-command and fights anything that opens a modal.
+  el.addEventListener("mousedown", (event) => event.preventDefault());
   return el;
 }
 

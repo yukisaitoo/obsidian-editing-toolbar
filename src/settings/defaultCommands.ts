@@ -2,7 +2,7 @@ import type { Command } from "obsidian";
 
 import { COMMAND_LABELS, type CommandId } from "src/commands/commandLabels";
 import type { RegisteredCommandName } from "src/commands/commandLabels";
-import { ownCommand } from "src/plugin/pluginId";
+import { isCoreCommand, ownCommand } from "src/plugin/pluginId";
 
 // A bare id is a button; an object is a submenu holding buttons. Submenu ids are
 // cosmetic — a submenu is recognised by its SubmenuCommands array.
@@ -102,8 +102,13 @@ export type CommandName =
   | typeof SUBMENU_NAME
   | typeof DIVIDER_NAME;
 
+// A core command is pointed at where it lives, so its own hotkey reaches the tooltip;
+// only what this plugin registers is namespaced.
 function toCommand(id: CommandId): Command {
-  return { id: ownCommand(id), ...COMMAND_LABELS[id] };
+  return {
+    id: isCoreCommand(id) ? id : ownCommand(id),
+    ...COMMAND_LABELS[id],
+  };
 }
 
 export function defaultToolbarCommands(): Command[] {

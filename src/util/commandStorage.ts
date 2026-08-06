@@ -1,5 +1,7 @@
 import { Command } from "obsidian";
 
+import { labelFor } from "src/commands/commandLabels";
+
 export type SubmenuCommand = Command & { SubmenuCommands: Command[] };
 
 // A submenu parent holds a list of children, empty until the user drags some in.
@@ -27,10 +29,14 @@ export function commandLabel(name: string): string {
 // Obsidian's command palette, so everything entering settings is copied to plain
 // data first.
 export function toStoredCommand(command: Command): Command {
+  // A labelled id wears the toolbar's own name and icon wherever it came from, so a
+  // core command picked from the list matches the one that ships in the defaults.
+  const preferred = labelFor(command.id);
+
   const stored: Command = {
     id: command.id,
-    name: commandLabel(command.name),
-    icon: command.icon,
+    name: preferred?.name ?? commandLabel(command.name),
+    icon: preferred?.icon ?? command.icon,
   };
   if (command.menuType) stored.menuType = command.menuType;
 

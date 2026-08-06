@@ -1,11 +1,12 @@
 import { Editor } from "obsidian";
 import type { CommandPlot } from "src/commands/commandDefinitions";
-import type { CommandId } from "src/commands/commandLabels";
+import type { OwnCommandId } from "src/commands/commandLabels";
 import type EditingToolbarPlugin from "src/plugin/main";
 
-// Name and icon come from COMMAND_LABELS, keyed by this id.
+// Name and icon come from COMMAND_LABELS, keyed by this id. Core ids are excluded:
+// registering one would shadow Obsidian's command rather than reach it.
 export interface EditorCommand {
-  id: CommandId;
+  id: OwnCommandId;
   run: (editor: Editor) => unknown;
 }
 

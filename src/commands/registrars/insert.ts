@@ -1,11 +1,9 @@
 import {
-  CORE_EDITOR_COMMANDS,
   WRAP_COMMANDS,
   type WrapCommandId,
 } from "src/commands/commandDefinitions";
 import type { Registrar } from "src/commands/registrars/types";
 import { InsertCalloutModal } from "src/modals/insertCalloutModal";
-import { runCommandById } from "src/plugin/pluginId";
 import { insertCallout } from "src/util/text/callout";
 import { insertHorizontalRule } from "src/util/text/horizontalRule";
 
@@ -29,9 +27,5 @@ export const registerInsertCommands: Registrar = ({
       id,
       run: (editor) => applyCommand(WRAP_COMMANDS[id], editor),
     });
-  });
-
-  CORE_EDITOR_COMMANDS.forEach((id) => {
-    addEditorCommand({ id, run: () => runCommandById(plugin.app, id) });
   });
 };
