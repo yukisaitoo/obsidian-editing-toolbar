@@ -18,10 +18,7 @@ import { strings } from "src/translations/helper";
 
 const DELETE_CONFIRM_TIMEOUT = 3500;
 
-// Lets a suggester/modal finish writing before the toolbar rebuilds. Debounced,
-// not a bare timer: a slider fires onChange once per step, and every rebuild tears
-// down all bars and re-renders this pane — including the slider being dragged.
-const REBUILD_DELAY = 100;
+const RERENDER_DELAY = 100;
 
 type TabId = "general" | "appearance" | "commands" | "importexport";
 
@@ -57,15 +54,7 @@ export class EditingToolbarSettingTab extends PluginSettingTab {
     super(app, plugin);
     this.plugin = plugin;
 
-    this.plugin.register(
-      this.plugin.onRebuild(() => {
-        if (!this.isOpen) return;
-        // A rebuild re-renders the pane in place; keep the reader where they were.
-        const { scrollTop } = this.containerEl;
-        this.display();
-        this.containerEl.scrollTop = scrollTop;
-      }),
-    );
+    this.plugin.register(this.plugin.onRebuild(() => this.scheduleRerender()));
   }
 
   setActiveTab(tab: TabId): void {
@@ -75,6 +64,7 @@ export class EditingToolbarSettingTab extends PluginSettingTab {
 
   display(): void {
     this.isOpen = true;
+    this.scheduleRerender.cancel();
     this.destroyTabResources();
 
     const { containerEl } = this;
@@ -121,14 +111,14 @@ export class EditingToolbarSettingTab extends PluginSettingTab {
   hide(): void {
     this.isOpen = false;
     this.destroyTabResources();
-    this.rebuildToolbar();
+    this.plugin.rebuildToolbars();
   }
 
   private tabContext(): SettingsTabContext {
     return {
       app: this.app,
       plugin: this.plugin,
-      applyChanges: () => this.rebuildToolbar(),
+      applyChanges: () => this.plugin.rebuildToolbars(),
       createPickr: (options) => {
         const pickr = createColorPickr(options);
         this.pickrs.push(pickr);
@@ -142,10 +132,17 @@ export class EditingToolbarSettingTab extends PluginSettingTab {
     };
   }
 
-  // `resetTimer` on: a burst of changes collapses into one rebuild after the last.
-  private readonly rebuildToolbar = debounce(
-    () => this.plugin.rebuildToolbars(),
-    REBUILD_DELAY,
+  // A rebuild re-renders this pane in place, tearing down the Pickr/Sortable whose
+  // own callback asked for it — so defer past the current event, and coalesce bursts.
+  private readonly scheduleRerender = debounce(
+    () => {
+      if (!this.isOpen) return;
+      // Keep the reader where they were.
+      const { scrollTop } = this.containerEl;
+      this.display();
+      this.containerEl.scrollTop = scrollTop;
+    },
+    RERENDER_DELAY,
     true,
   );
 

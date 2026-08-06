@@ -1,6 +1,7 @@
 import { Editor } from "obsidian";
 
 import { CommandPlot } from "src/commands/commandDefinitions";
+import { COMMAND_LABELS } from "src/commands/commandLabels";
 import { registerClipboardAndHistoryCommands } from "src/commands/registrars/clipboard";
 import { registerCoreCommands } from "src/commands/registrars/core";
 import { registerFormattingCommands } from "src/commands/registrars/formatting";
@@ -35,11 +36,10 @@ export class CommandsManager {
   // editorCallback is what keeps these out of the command palette — and out of
   // reading mode, the note title and the properties panel — when there is no
   // editor to act on.
-  public addEditorCommand = ({ id, name, icon, run }: EditorCommand): void => {
+  public addEditorCommand = ({ id, run }: EditorCommand): void => {
     this.plugin.addCommand({
       id,
-      name,
-      icon,
+      ...COMMAND_LABELS[id],
       editorCallback: (editor) => this.runOn(editor, run),
     });
   };

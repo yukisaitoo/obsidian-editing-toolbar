@@ -164,4 +164,11 @@ export const commandNames: Record<CommandName, string> = {
   "Change background color": "Alterar cor de fundo",
   Submenu: "Submenu",
   "Vertical split": "Separador",
+  "Toggle toolbar": "Alternar barra de ferramentas",
+  "Remove header level": "Remover nível de título",
+  "Insert link": "Inserir link",
+  "Insert tag": "Inserir tag",
+  "Insert comment": "Inserir comentário",
+  "Insert callout": "Inserir callout",
+  "Clear formatting": "Limpar formatação",
 };

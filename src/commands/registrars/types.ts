@@ -1,11 +1,11 @@
 import { Editor } from "obsidian";
 import type { CommandPlot } from "src/commands/commandDefinitions";
+import type { CommandId } from "src/commands/commandLabels";
 import type EditingToolbarPlugin from "src/plugin/main";
 
+// Name and icon come from COMMAND_LABELS, keyed by this id.
 export interface EditorCommand {
-  id: string;
-  name: string;
-  icon?: string;
+  id: CommandId;
   run: (editor: Editor) => unknown;
 }
 

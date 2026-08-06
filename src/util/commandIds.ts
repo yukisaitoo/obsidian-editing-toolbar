@@ -10,6 +10,7 @@ export function newDividerId(): string {
   return `${DIVIDER_COMMAND_ID}-${crypto.randomUUID()}`;
 }
 
+// Cosmetic prefix; submenus are recognised by their SubmenuCommands array.
 export function newSubmenuId(): string {
   return `SubmenuCommands-${crypto.randomUUID()}`;
 }

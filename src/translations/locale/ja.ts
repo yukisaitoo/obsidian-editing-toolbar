@@ -76,4 +76,11 @@ export const commandNames: Record<CommandName, string> = {
   Alignment: "文字揃え",
   Submenu: "サブメニュー",
   "Vertical split": "区切り線",
+  "Toggle toolbar": "ツールバーの表示切り替え",
+  "Remove header level": "見出しを解除",
+  "Insert link": "リンクを挿入",
+  "Insert tag": "タグを挿入",
+  "Insert comment": "コメントを挿入",
+  "Insert callout": "コールアウトを挿入",
+  "Clear formatting": "書式をクリア",
 };

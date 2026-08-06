@@ -1,4 +1,5 @@
 import { Editor } from "obsidian";
+import type { CommandId } from "src/commands/commandLabels";
 import type { Registrar } from "src/commands/registrars/types";
 import { setFormatEraser } from "src/util/text/formatEraser";
 import { setHeader } from "src/util/text/header";
@@ -6,118 +7,63 @@ import { setBackgroundColor, setFontColor } from "src/util/text/inlineColor";
 
 type MarkdownFormat = Parameters<Editor["toggleMarkdownFormatting"]>[0];
 
-const TOGGLES: {
-  id: string;
-  name: string;
-  icon: string;
-  format: MarkdownFormat;
-}[] = [
-  {
-    id: "toggle-highlight",
-    name: "Toggle highlight",
-    icon: "highlight-glyph",
-    format: "highlight",
-  },
-  {
-    id: "toggle-bold",
-    name: "Toggle bold",
-    icon: "bold-glyph",
-    format: "bold",
-  },
-  {
-    id: "toggle-italics",
-    name: "Toggle italics",
-    icon: "italic-glyph",
-    format: "italic",
-  },
-  {
-    id: "toggle-strikethrough",
-    name: "Toggle strikethrough",
-    icon: "strikethrough-glyph",
-    format: "strikethrough",
-  },
-  {
-    id: "toggle-inline-math",
-    name: "Toggle inline math",
-    icon: "lucide-sigma",
-    format: "math",
-  },
+const TOGGLES: { id: CommandId; format: MarkdownFormat }[] = [
+  { id: "toggle-highlight", format: "highlight" },
+  { id: "toggle-bold", format: "bold" },
+  { id: "toggle-italics", format: "italic" },
+  { id: "toggle-strikethrough", format: "strikethrough" },
+  { id: "toggle-inline-math", format: "math" },
 ];
 
-const LIST_ACTIONS: {
-  id: string;
-  name: string;
-  icon: string;
-  run: (editor: Editor) => void;
-}[] = [
-  {
-    id: "indent-list",
-    name: "Indent list",
-    icon: "indent-glyph",
-    run: (e) => e.indentList(),
-  },
-  {
-    id: "undent-list",
-    name: "Unindent list",
-    icon: "unindent-glyph",
-    run: (e) => e.unindentList(),
-  },
-  {
-    id: "toggle-numbered-list",
-    name: "Toggle ordered list",
-    icon: "number-list-glyph",
-    run: (e) => e.toggleNumberList(),
-  },
-  {
-    id: "toggle-bullet-list",
-    name: "Toggle unordered list",
-    icon: "bullet-list-glyph",
-    run: (e) => e.toggleBulletList(),
-  },
-  {
-    id: "editor:cycle-list-checklist",
-    name: "Cycle list and checklist",
-    icon: "lucide-check-square",
-    run: (e) => e.toggleCheckList(true),
-  },
+const LIST_ACTIONS: { id: CommandId; run: (editor: Editor) => void }[] = [
+  { id: "indent-list", run: (e) => e.indentList() },
+  { id: "undent-list", run: (e) => e.unindentList() },
+  { id: "toggle-numbered-list", run: (e) => e.toggleNumberList() },
+  { id: "toggle-bullet-list", run: (e) => e.toggleBulletList() },
+  { id: "editor:cycle-list-checklist", run: (e) => e.toggleCheckList(true) },
+];
+
+// Level N maps to N hashes, so level 0 strips the header.
+const HEADER_IDS: CommandId[] = [
+  "header0-text",
+  "header1-text",
+  "header2-text",
+  "header3-text",
+  "header4-text",
+  "header5-text",
+  "header6-text",
 ];
 
 export const registerFormattingCommands: Registrar = ({
   plugin,
   addEditorCommand,
 }) => {
-  const add = (
-    id: string,
-    name: string,
-    icon: string,
-    run: (editor: Editor) => void,
-  ) => addEditorCommand({ id, name, icon, run });
+  addEditorCommand({ id: "format-eraser", run: setFormatEraser });
 
-  add("format-eraser", "Format eraser", "eraser", setFormatEraser);
+  addEditorCommand({
+    id: "change-font-color",
+    run: (editor) => setFontColor(plugin.settings.lastFontColor, editor),
+  });
 
-  add("change-font-color", "Change font color", "font-color", (editor) =>
-    setFontColor(plugin.settings.lastFontColor, editor),
+  addEditorCommand({
+    id: "change-background-color",
+    run: (editor) =>
+      setBackgroundColor(plugin.settings.lastHighlightColor, editor),
+  });
+
+  LIST_ACTIONS.forEach(({ id, run }) => addEditorCommand({ id, run }));
+
+  TOGGLES.forEach(({ id, format }) =>
+    addEditorCommand({
+      id,
+      run: (editor) => editor.toggleMarkdownFormatting(format),
+    }),
   );
 
-  add(
-    "change-background-color",
-    "Change background color",
-    "background-color",
-    (editor) => setBackgroundColor(plugin.settings.lastHighlightColor, editor),
+  HEADER_IDS.forEach((id, level) =>
+    addEditorCommand({
+      id,
+      run: (editor) => setHeader("#".repeat(level), editor),
+    }),
   );
-
-  LIST_ACTIONS.forEach(({ id, name, icon, run }) => add(id, name, icon, run));
-
-  TOGGLES.forEach(({ id, name, icon, format }) =>
-    add(id, name, icon, (editor) => editor.toggleMarkdownFormatting(format)),
-  );
-
-  for (let level = 0; level <= 6; level++) {
-    add(
-      `header${level}-text`,
-      level === 0 ? "Remove header level" : `Header ${level}`,
-      level === 0 ? "heading-glyph" : `header-${level}`,
-      (editor) => setHeader("#".repeat(level), editor),
-    );
-  }
 };

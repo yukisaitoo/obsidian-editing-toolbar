@@ -1,297 +1,120 @@
 import type { Command } from "obsidian";
 
+import { COMMAND_LABELS, type CommandId } from "src/commands/commandLabels";
+import type { RegisteredCommandName } from "src/commands/commandLabels";
 import { ownCommand } from "src/plugin/pluginId";
 
-// Obsidian's Command types SubmenuCommands as a mutable array, which an `as const`
-// list cannot satisfy. This shape keeps the literal names for CommandName below.
-type DefaultCommand = {
+// A bare id is a button; an object is a submenu holding buttons. Submenu ids are
+// cosmetic — a submenu is recognised by its SubmenuCommands array.
+type LayoutGroup = {
   readonly id: string;
   readonly name: string;
   readonly icon: string;
-  readonly SubmenuCommands?: readonly DefaultCommand[];
+  readonly children: readonly CommandId[];
 };
+type LayoutEntry = CommandId | LayoutGroup;
 
-export const DEFAULT_TOOLBAR_COMMANDS = [
-  {
-    id: ownCommand("editor-undo"),
-    name: "Undo edit",
-    icon: "undo-glyph",
-  },
-  {
-    id: ownCommand("editor-redo"),
-    name: "Redo edit",
-    icon: "redo-glyph",
-  },
-  {
-    id: ownCommand("format-eraser"),
-    name: "Clear text formatting",
-    icon: "eraser",
-  },
-  {
-    id: ownCommand("header2-text"),
-    name: "Header 2",
-    icon: "header-2",
-  },
-  {
-    id: ownCommand("header3-text"),
-    name: "Header 3",
-    icon: "header-3",
-  },
+const DEFAULT_LAYOUT = [
+  "editor-undo",
+  "editor-redo",
+  "format-eraser",
+  "header2-text",
+  "header3-text",
   {
     id: "SubmenuCommands-header",
     name: "Headings",
     icon: "header-n",
-    SubmenuCommands: [
-      {
-        id: ownCommand("header1-text"),
-        name: "Header 1",
-        icon: "header-1",
-      },
-      {
-        id: ownCommand("header4-text"),
-        name: "Header 4",
-        icon: "header-4",
-      },
-      {
-        id: ownCommand("header5-text"),
-        name: "Header 5",
-        icon: "header-5",
-      },
-      {
-        id: ownCommand("header6-text"),
-        name: "Header 6",
-        icon: "header-6",
-      },
-    ],
+    children: ["header1-text", "header4-text", "header5-text", "header6-text"],
   },
+  "toggle-bold",
+  "toggle-italics",
+  "toggle-strikethrough",
+  "underline",
+  "toggle-highlight",
   {
-    id: ownCommand("toggle-bold"),
-    name: "Bold",
-    icon: "bold-glyph",
-  },
-  {
-    id: ownCommand("toggle-italics"),
-    name: "Italic",
-    icon: "italic-glyph",
-  },
-  {
-    id: ownCommand("toggle-strikethrough"),
-    name: "Strikethrough",
-    icon: "strikethrough-glyph",
-  },
-  {
-    id: ownCommand("underline"),
-    name: "Underline",
-    icon: "underline-glyph",
-  },
-  {
-    id: ownCommand("toggle-highlight"),
-    name: "Highlight",
-    icon: "highlight-glyph",
-  },
-  {
-    id: "SubmenuCommands-lucdf3en5",
+    id: "SubmenuCommands-edit",
     name: "Edit",
     icon: "edit",
-    SubmenuCommands: [
-      {
-        id: ownCommand("editor-cut"),
-        name: "Cut",
-        icon: "lucide-scissors",
-      },
-      {
-        id: ownCommand("editor-copy"),
-        name: "Copy",
-        icon: "lucide-copy",
-      },
-      {
-        id: ownCommand("editor-paste"),
-        name: "Paste",
-        icon: "lucide-clipboard-type",
-      },
-      {
-        id: ownCommand("editor:swap-line-down"),
-        name: "Swap line down",
-        icon: "lucide-corner-right-down",
-      },
-      {
-        id: ownCommand("editor:swap-line-up"),
-        name: "Swap line up",
-        icon: "lucide-corner-right-up",
-      },
+    children: [
+      "editor-cut",
+      "editor-copy",
+      "editor-paste",
+      "editor:swap-line-down",
+      "editor:swap-line-up",
     ],
   },
+  "editor:attach-file",
+  "editor:insert-table",
+  "editor:cycle-list-checklist",
   {
-    id: ownCommand("editor:attach-file"),
-    name: "Attach file",
-    icon: "lucide-paperclip",
-  },
-  {
-    id: ownCommand("editor:insert-table"),
-    name: "Insert table",
-    icon: "lucide-table",
-  },
-  {
-    id: ownCommand("editor:cycle-list-checklist"),
-    name: "Cycle list and checklist",
-    icon: "check-circle",
-  },
-  {
-    id: "SubmenuCommands-luc8efull",
+    id: "SubmenuCommands-quotes",
     name: "Quotes",
     icon: "message-square",
-    SubmenuCommands: [
-      {
-        id: ownCommand("editor:toggle-blockquote"),
-        name: "Blockquote",
-        icon: "lucide-text-quote",
-      },
-      {
-        id: ownCommand("insert-callout"),
-        name: "Callout",
-        icon: "lucide-quote",
-      },
-    ],
+    children: ["editor:toggle-blockquote", "insert-callout"],
   },
   {
-    id: "SubmenuCommands-mdcmder",
+    id: "SubmenuCommands-markdown",
     name: "Markdown syntax",
     icon: "markdown-syntax",
-    SubmenuCommands: [
-      {
-        id: ownCommand("superscript"),
-        name: "Superscript",
-        icon: "superscript-glyph",
-      },
-      {
-        id: ownCommand("subscript"),
-        name: "Subscript",
-        icon: "subscript-glyph",
-      },
-      {
-        id: ownCommand("editor:toggle-code"),
-        name: "Inline code",
-        icon: "code-glyph",
-      },
-      {
-        id: ownCommand("codeblock"),
-        name: "Code block",
-        icon: "codeblock-glyph",
-      },
-      {
-        id: ownCommand("editor:insert-wikilink"),
-        name: "Wikilink",
-        icon: "wikilink",
-      },
-      {
-        id: ownCommand("editor:insert-embed"),
-        name: "Embed",
-        icon: "note-glyph",
-      },
-      {
-        id: ownCommand("hrline"),
-        name: "Horizontal rule",
-        icon: "horizontal-rule",
-      },
-      {
-        id: ownCommand("toggle-inline-math"),
-        name: "Inline math",
-        icon: "lucide-sigma",
-      },
-      {
-        id: ownCommand("editor:insert-mathblock"),
-        name: "Math block",
-        icon: "lucide-sigma-square",
-      },
+    children: [
+      "superscript",
+      "subscript",
+      "editor:toggle-code",
+      "codeblock",
+      "editor:insert-wikilink",
+      "editor:insert-embed",
+      "hrline",
+      "toggle-inline-math",
+      "editor:insert-mathblock",
     ],
   },
   {
     id: "SubmenuCommands-list",
     name: "Lists",
     icon: "bullet-list-glyph",
-    SubmenuCommands: [
-      {
-        id: ownCommand("editor:toggle-checklist-status"),
-        name: "Checklist",
-        icon: "checkbox-glyph",
-      },
-      {
-        id: ownCommand("toggle-numbered-list"),
-        name: "Ordered list",
-        icon: "ordered-list",
-      },
-      {
-        id: ownCommand("toggle-bullet-list"),
-        name: "Unordered list",
-        icon: "unordered-list",
-      },
-      {
-        id: ownCommand("undent-list"),
-        name: "Unindent list",
-        icon: "unindent-list",
-      },
-      {
-        id: ownCommand("indent-list"),
-        name: "Indent list",
-        icon: "indent-list",
-      },
+    children: [
+      "editor:toggle-checklist-status",
+      "toggle-numbered-list",
+      "toggle-bullet-list",
+      "undent-list",
+      "indent-list",
     ],
   },
   {
-    id: "SubmenuCommands-aligin",
+    id: "SubmenuCommands-alignment",
     name: "Alignment",
     icon: "align-center-glyph",
-    SubmenuCommands: [
-      {
-        id: ownCommand("justify"),
-        name: "Justify text",
-        icon: "justify-text",
-      },
-      {
-        id: ownCommand("left"),
-        name: "Align text left",
-        icon: "align-left-glyph",
-      },
-      {
-        id: ownCommand("center"),
-        name: "Center text",
-        icon: "align-center-glyph",
-      },
-      {
-        id: ownCommand("right"),
-        name: "Align text right",
-        icon: "align-right-glyph",
-      },
-    ],
+    children: ["justify", "left", "center", "right"],
   },
-  {
-    id: ownCommand("change-font-color"),
-    name: "Change font color",
-    icon: "font-color",
-  },
-  {
-    id: ownCommand("change-background-color"),
-    name: "Change background color",
-    icon: "background-color",
-  },
-] as const satisfies readonly DefaultCommand[];
+  "change-font-color",
+  "change-background-color",
+] as const satisfies readonly LayoutEntry[];
 
 // Names the settings UI creates on demand rather than shipping in the defaults.
 export const SUBMENU_NAME = "Submenu";
 export const DIVIDER_NAME = "Vertical split";
 
-type NamesOf<T> = T extends { name: infer N; SubmenuCommands?: readonly (infer C)[] }
-  ? N | NamesOf<C>
-  : never;
-
-// Every display name the toolbar can show, submenu children included. Command name
+// Every display name the toolbar can show, submenu parents included. Command name
 // translations are keyed by it, so a name that is not here cannot be translated.
 export type CommandName =
-  | NamesOf<(typeof DEFAULT_TOOLBAR_COMMANDS)[number]>
+  | RegisteredCommandName
+  | Extract<(typeof DEFAULT_LAYOUT)[number], { name: string }>["name"]
   | typeof SUBMENU_NAME
   | typeof DIVIDER_NAME;
 
-// The clone is genuinely mutable; only `as const`'s readonly type has to be shed.
+function toCommand(id: CommandId): Command {
+  return { id: ownCommand(id), ...COMMAND_LABELS[id] };
+}
+
 export function defaultToolbarCommands(): Command[] {
-  return structuredClone(DEFAULT_TOOLBAR_COMMANDS) as unknown as Command[];
+  return DEFAULT_LAYOUT.map((entry) =>
+    typeof entry === "string"
+      ? toCommand(entry)
+      : {
+          id: entry.id,
+          name: entry.name,
+          icon: entry.icon,
+          SubmenuCommands: entry.children.map(toCommand),
+        },
+  );
 }

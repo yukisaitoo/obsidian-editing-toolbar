@@ -153,4 +153,11 @@ export const commandNames: Record<CommandName, string> = {
   Alignment: "对齐",
   Submenu: "子菜单",
   "Vertical split": "分隔线",
+  "Toggle toolbar": "显示/隐藏工具栏",
+  "Remove header level": "取消标题",
+  "Insert link": "插入链接",
+  "Insert tag": "插入标签",
+  "Insert comment": "插入注释",
+  "Insert callout": "插入标注",
+  "Clear formatting": "清除格式",
 };

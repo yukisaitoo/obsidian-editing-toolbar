@@ -166,4 +166,11 @@ export const commandNames: Record<CommandName, string> = {
   Alignment: "Выравнивание",
   Submenu: "Подменю",
   "Vertical split": "Разделитель",
+  "Toggle toolbar": "Показать/скрыть панель инструментов",
+  "Remove header level": "Убрать заголовок",
+  "Insert link": "Вставить ссылку",
+  "Insert tag": "Вставить тег",
+  "Insert comment": "Вставить комментарий",
+  "Insert callout": "Вставить выноску",
+  "Clear formatting": "Очистить форматирование",
 };

@@ -1,5 +1,5 @@
 import { ButtonComponent, Setting } from "obsidian";
-import type { CommandName } from "src/settings/defaultCommands";
+import { COMMAND_LABELS, type CommandId } from "src/commands/commandLabels";
 import {
   applyAppearanceVars,
   getAppearanceBucket,
@@ -23,15 +23,15 @@ const BACKGROUND_SWATCHES = [
 
 const ICON_SWATCHES = ["#4A5568", "#D4AF37", "#2D3033", "#6D5846", "#4C2A55"];
 
-const PREVIEW_COMMANDS: { name: CommandName; icon: string }[] = [
-  { name: "Bold", icon: "bold-glyph" },
-  { name: "Italic", icon: "italic-glyph" },
-  { name: "Strikethrough", icon: "strikethrough-glyph" },
-  { name: "Inline code", icon: "code-glyph" },
-  { name: "Blockquote", icon: "lucide-text-quote" },
-  { name: "Wikilink", icon: "wikilink" },
-  { name: "Checklist", icon: "checkbox-glyph" },
-  { name: "Callout", icon: "lucide-quote" },
+const PREVIEW_COMMANDS: CommandId[] = [
+  "toggle-bold",
+  "toggle-italics",
+  "toggle-strikethrough",
+  "editor:toggle-code",
+  "editor:toggle-blockquote",
+  "editor:insert-wikilink",
+  "editor:toggle-checklist-status",
+  "insert-callout",
 ];
 
 export function renderAppearanceTab(
@@ -146,11 +146,12 @@ function renderPreview(
   // (removeAllToolbars, toolbarIn) must never see the preview.
   previewBar.addClass(SHARED_BAR_CLASS);
 
-  PREVIEW_COMMANDS.forEach((command) => {
+  PREVIEW_COMMANDS.forEach((id) => {
+    const { name, icon } = COMMAND_LABELS[id];
     const button = new ButtonComponent(previewBar);
     button.setClass("editingToolbarCommandItem");
-    button.setTooltip(t(command.name));
-    applyButtonIcon(button, command.icon);
+    button.setTooltip(t(name));
+    applyButtonIcon(button, icon);
   });
 
   applyAppearanceVars(previewBar, ctx.plugin.settings);

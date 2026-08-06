@@ -324,7 +324,7 @@ async function setStoredIcon(
 
   command.icon = icon;
   await ctx.plugin.saveSettings();
-  ctx.plugin.rebuildToolbars();
+  ctx.applyChanges();
 }
 
 // A divider's only live control is delete; styles.css hides the rest, keyed off
