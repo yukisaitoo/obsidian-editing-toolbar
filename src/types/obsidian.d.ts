@@ -48,10 +48,6 @@ declare module "obsidian" {
     toggleMarkdownFormatting(format: string): void;
   }
 
-  interface View {
-    editor: Editor | undefined;
-  }
-
   interface Menu {
     dom: HTMLElement;
   }

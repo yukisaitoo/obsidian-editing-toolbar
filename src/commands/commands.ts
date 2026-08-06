@@ -1,4 +1,4 @@
-import { Editor, ItemView } from "obsidian";
+import { Editor } from "obsidian";
 
 import { CommandPlot } from "src/commands/commandDefinitions";
 import { registerClipboardAndHistoryCommands } from "src/commands/registrars/clipboard";
@@ -32,11 +32,7 @@ export class CommandsManager {
   }
 
   public getActiveEditor(): Editor | null {
-    return (
-      this.plugin.app.workspace?.activeEditor?.editor ??
-      this.plugin.app.workspace.getActiveViewOfType(ItemView)?.editor ??
-      null
-    );
+    return this.plugin.app.workspace.activeEditor?.editor ?? null;
   }
 
   // Focus is restored after: clicking a toolbar button takes it off the editor.
@@ -63,7 +59,7 @@ export class CommandsManager {
     const { prefix, suffix } = command;
 
     const from = editor.posToOffset(start);
-    const preStart = editor.offsetToPos(Math.max(0, from - prefix.length));
+    const preStart = editor.offsetToPos(from - prefix.length);
     const sufEnd = editor.offsetToPos(editor.posToOffset(end) + suffix.length);
 
     if (

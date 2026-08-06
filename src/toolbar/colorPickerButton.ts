@@ -1,15 +1,15 @@
 import { App, ButtonComponent, Command, Editor, setTooltip } from "obsidian";
 import type EditingToolbarPlugin from "src/plugin/main";
 import { ownCommand, PLUGIN_ID, runCommandById } from "src/plugin/pluginId";
+import {
+  renderBackgroundColorPicker,
+  renderFontColorPicker,
+} from "src/toolbar/colorPickerDom";
 import { attachFlyoutClamp } from "src/toolbar/geometry";
 import { applyButtonIcon, SUBMENU_BUTTON_CLASS } from "src/toolbar/toolbarDom";
 import { syncToolbarState } from "src/toolbar/toolbarVisibility";
 import { strings } from "src/translations/helper";
 import { toHexColor } from "src/util/color";
-import {
-  renderBackgroundColorPicker,
-  renderFontColorPicker,
-} from "src/util/colorPickerDom";
 import { setBackgroundColor, setFontColor } from "src/util/text/inlineColor";
 
 interface PickerVariant {

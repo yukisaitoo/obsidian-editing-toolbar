@@ -54,7 +54,7 @@ export function toolbarIn(view: View): HTMLElement | null {
 }
 
 // Idempotent: calling twice cannot produce a duplicate bar.
-export function ensureToolbar(
+function ensureToolbar(
   plugin: EditingToolbarPlugin,
   view: MarkdownView,
 ): HTMLElement | null {
