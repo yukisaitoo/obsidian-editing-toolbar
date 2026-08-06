@@ -12,7 +12,6 @@ import {
   NO_HOTKEY,
   SUBMENU_BUTTON_CLASS,
 } from "src/toolbar/toolbarDom";
-import { syncToolbarState } from "src/toolbar/toolbarVisibility";
 import { t } from "src/translations/helper";
 import { DIVIDER_COMMAND_ID, isDivider } from "src/util/commandIds";
 import { hasSubmenu, SubmenuCommand } from "src/util/commandStorage";
@@ -49,7 +48,7 @@ export function renderToolbarCommands(
 function renderPlainButton(ctx: RenderContext, item: Command) {
   const button = new ButtonComponent(ctx.bar)
     .setTooltip(tooltipFor(ctx.app, item))
-    .onClick(() => runCommand(ctx, item.id));
+    .onClick(() => runCommandById(ctx.app, item.id));
 
   button.setClass("editingToolbarCommandItem");
   if (isDivider(item.id)) button.setClass(DIVIDER_COMMAND_ID);
@@ -78,7 +77,7 @@ function renderDropdown(ctx: RenderContext, item: SubmenuCommand) {
         menuItem
           .setTitle(t(subitem.name))
           .setIcon(subitem.icon ?? null)
-          .onClick(() => runCommand(ctx, subitem.id));
+          .onClick(() => runCommandById(ctx.app, subitem.id));
         menuItem.dom
           .createSpan({ cls: "menu-item-hotkey" })
           .setText(getHotkey(ctx.app, subitem.id));
@@ -102,18 +101,13 @@ function renderFlyout(ctx: RenderContext, item: SubmenuCommand) {
     const subBtn = new ButtonComponent(submenu)
       .setTooltip(tooltipFor(ctx.app, subitem))
       .setClass("menu-item")
-      .onClick(() => runCommand(ctx, subitem.id));
+      .onClick(() => runCommandById(ctx.app, subitem.id));
 
     if (isDivider(subitem.id)) subBtn.setClass(DIVIDER_COMMAND_ID);
     applyButtonIcon(subBtn, subitem.icon);
   });
 
   attachFlyoutClamp(parent.buttonEl);
-}
-
-function runCommand(ctx: RenderContext, commandId: string): void {
-  runCommandById(ctx.app, commandId);
-  syncToolbarState(ctx.plugin, ctx.bar);
 }
 
 function tooltipFor(app: App, item: Command): string {

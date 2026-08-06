@@ -7,7 +7,6 @@ import {
 } from "src/toolbar/colorPickerDom";
 import { attachFlyoutClamp } from "src/toolbar/geometry";
 import { applyButtonIcon, SUBMENU_BUTTON_CLASS } from "src/toolbar/toolbarDom";
-import { syncToolbarState } from "src/toolbar/toolbarVisibility";
 import { strings } from "src/translations/helper";
 import { toHexColor } from "src/util/color";
 import { setBackgroundColor, setFontColor } from "src/util/text/inlineColor";
@@ -58,7 +57,6 @@ export function createColorPickerButton(
       if (target?.closest(".x-color-picker-wrapper, .subitem")) return;
 
       runCommandById(app, item.id);
-      syncToolbarState(plugin, bar);
     });
 
   // On the icon, not the button: the swatch panel below is a child of the button.
