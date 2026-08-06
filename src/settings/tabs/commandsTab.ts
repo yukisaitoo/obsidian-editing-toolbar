@@ -21,10 +21,6 @@ const TOP_LEVEL_CONTAINER_CLASS = "editingToolbarSettingsTabsContainer";
 
 const SHARED_SORTABLE_OPTIONS: Sortable.Options = {
   draggable: ".setting-item",
-  ghostClass: "sortable-ghost",
-  chosenClass: "sortable-chosen",
-  dragClass: "sortable-drag",
-  fallbackClass: "sortable-fallback",
   filter:
     ".setting-item-control button, .dropdown, .editingToolbarMenuTypeDropdown",
   preventOnFilter: false,
@@ -70,12 +66,7 @@ function renderCommandList(
   });
   const dragList = createDragList(ctx);
 
-  dragList(listEl, commands, {
-    group: "item",
-    animation: 500,
-    onChoose: (evt) => evt.item.classList.add("sortable-chosen-feedback"),
-    onUnchoose: (evt) => evt.item.classList.remove("sortable-chosen-feedback"),
-  });
+  dragList(listEl, commands, { group: "item", animation: 500 });
 
   commands.forEach((command, index) => {
     const setting = new Setting(listEl);

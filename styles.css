@@ -458,53 +458,6 @@ button.editingToolbarCommandsubItem::after {
   cursor: grab;
 }
 
-.editingToolbarSettingsTabsContainer :is(.sortable-fallback, .sortable-drag) {
-  box-shadow: 0px 3px 32px rgb(31 38 135 / 15%);
-  cursor: grabbing;
-}
-
-.editingToolbarSettingsTabsContainer .sortable-grab {
-  cursor: grabbing !important;
-}
-
-.editingToolbarSettingsTabsContainer .sortable-ghost {
-  opacity: 0.4;
-  cursor: grabbing;
-}
-
-.editingToolbarSettingsTabsContainer .sortable-chosen {
-  padding: 10px 0 10px 10px;
-  background-color: var(--color-base-10, var(--background-primary));
-  cursor: grabbing;
-}
-
-@keyframes sortable-feedback {
-  0% { transform: scale(1); }
-  50% { transform: scale(0.98); }
-  100% { transform: scale(1); }
-}
-
-@keyframes toolbar-fade-in {
-  from { opacity: 0; }
-  to { opacity: 0.3; }
-}
-
-.sortable-chosen-feedback {
-  position: relative;
-  animation: sortable-feedback 0.3s ease-in-out;
-}
-
-.sortable-chosen-feedback::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: 4px;
-  background: var(--background-modifier-hover);
-  opacity: 0;
-  animation: toolbar-fade-in 0.3s ease-in-out forwards;
-  pointer-events: none;
-}
-
 .editingToolbarSettingsTabsContainer .editingToolbarCommandItem .setting-item-info {
   margin: 0;
   flex: 30%;
