@@ -111,7 +111,6 @@ export class EditingToolbarSettingTab extends PluginSettingTab {
   hide(): void {
     this.isOpen = false;
     this.destroyTabResources();
-    this.plugin.rebuildToolbars();
   }
 
   private tabContext(): SettingsTabContext {
