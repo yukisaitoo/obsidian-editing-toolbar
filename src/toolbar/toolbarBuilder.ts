@@ -23,7 +23,7 @@ import {
 } from "src/toolbar/toolbarVisibility";
 
 // Bars are per view, so each one needs its own observer.
-const toolbarResizeObservers = new Map<HTMLElement, ResizeObserver>();
+const toolbarResizeObservers = new Map<MarkdownView, ResizeObserver>();
 
 // Teardown sweeps every document, so restoration has to reach just as far: a bar
 // belongs to its leaf, and its state is a function of that leaf's own mode.
@@ -73,7 +73,7 @@ function ensureToolbar(
   );
 
   refreshOverflow(bars.bar, bars.popoverBar);
-  observeToolbarResize(bars.bar, bars.popoverBar);
+  observeToolbarResize(view, bars.bar, bars.popoverBar);
 
   return bars.bar;
 }
@@ -150,16 +150,11 @@ function refreshOverflow(bar: HTMLElement, popoverBar: HTMLElement): void {
 // Observe the PANE, not the bar: moving buttons resizes the bar, so observing the
 // bar would feed its own reflow back into itself.
 function observeToolbarResize(
+  view: MarkdownView,
   bar: HTMLElement,
   popoverBar: HTMLElement,
 ): void {
-  // A bar removed with its tab never fires again, so nothing else retires its
-  // observer.
-  for (const [observedBar, stale] of toolbarResizeObservers) {
-    if (observedBar.isConnected) continue;
-    stale.disconnect();
-    toolbarResizeObservers.delete(observedBar);
-  }
+  stopObservingToolbarResize(view);
 
   const parent = bar.parentElement;
   if (!parent) return;
@@ -168,21 +163,27 @@ function observeToolbarResize(
   const ObserverCtor = (windowOf(bar) as Window & typeof globalThis)
     .ResizeObserver;
   const observer = new ObserverCtor(() => {
-    if (!bar.isConnected) {
-      observer.disconnect();
-      toolbarResizeObservers.delete(bar);
-      return;
-    }
     refreshOverflow(bar, popoverBar);
     const popover = morePopoverFor(popoverBar);
     if (popover?.isOpen) popover.reposition();
   });
 
   observer.observe(parent);
-  toolbarResizeObservers.set(bar, observer);
+  toolbarResizeObservers.set(view, observer);
+  // The view owns the bar, so it owns the observer: closing the tab, or the window
+  // it was popped out into, unloads the view and lands here.
+  view.register(() => stopObservingToolbarResize(view));
 }
 
+function stopObservingToolbarResize(view: MarkdownView): void {
+  const observer = toolbarResizeObservers.get(view);
+  if (!observer) return;
+  observer.disconnect();
+  toolbarResizeObservers.delete(view);
+}
+
+// A rebuild throws every bar away while the views stay loaded, so nothing else
+// retires their observers.
 function disconnectToolbarResizeObservers(): void {
-  toolbarResizeObservers.forEach((observer) => observer.disconnect());
-  toolbarResizeObservers.clear();
+  toolbarResizeObservers.forEach((_, view) => stopObservingToolbarResize(view));
 }
