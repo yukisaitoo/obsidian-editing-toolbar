@@ -59,7 +59,6 @@ const ui: Partial<Record<keyof typeof en, string>> = {
   inputTitle: "输入标题",
   insert: "插入",
   invalidImportDataFormat: "无效的导入数据格式",
-  loading: "加载中...",
   menuTypeChanged: "菜单类型已更改为",
   more: "更多",
   validConfigurationFoundImportData: "导入数据中未找到有效配置",

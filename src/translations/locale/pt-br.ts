@@ -62,7 +62,6 @@ const ui: Partial<Record<keyof typeof en, string>> = {
   inputTitle: "Digite o título",
   insert: "Inserir",
   invalidImportDataFormat: "Formato de dados de importação inválido",
-  loading: "Carregando...",
   more: "Mais",
   validConfigurationFoundImportData:
     "Nenhuma configuração válida encontrada nos dados de importação",

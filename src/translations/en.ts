@@ -58,7 +58,6 @@ export const en = {
   inputTitle: "Input title",
   insert: "Insert",
   invalidImportDataFormat: "Invalid import data format",
-  loading: "Loading...",
   menuTypeChanged: "Menu type changed to",
   more: "More",
   updateCommands: "Update toolbar commands",

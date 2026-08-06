@@ -18,7 +18,6 @@ const ui: Partial<Record<keyof typeof en, string>> = {
   translucentColors: "半透明の色",
   highlighterColors: "蛍光ペンの色",
   fontColors: "文字色",
-  loading: "読み込み中...",
   more: "その他",
 };
 

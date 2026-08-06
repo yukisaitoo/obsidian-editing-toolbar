@@ -8,7 +8,11 @@ import {
 } from "obsidian";
 import { ConfirmModal } from "src/modals/confirmModal";
 import type EditingToolbarPlugin from "src/plugin/main";
-import type { ImportMode, JsonPayload } from "src/settings/settingsTransfer";
+import type {
+  ImportMode,
+  JsonPayload,
+  ParsedImport,
+} from "src/settings/settingsTransfer";
 import {
   buildImportedSettings,
   GENERAL_SETTING_KEYS,
@@ -58,12 +62,7 @@ export class ImportExportModal extends Modal {
     const exportContainer = contentEl.createDiv("export-container");
 
     this.textArea = new TextAreaComponent(exportContainer);
-    this.textArea
-      .setValue("")
-      .setPlaceholder(strings.loading)
-      .then((textArea) => {
-        textArea.inputEl.addClass("import-export-textarea");
-      });
+    this.textArea.inputEl.addClass("import-export-textarea");
 
     this.updateExportContent();
     const buttonContainer = contentEl.createDiv(
@@ -114,12 +113,8 @@ export class ImportExportModal extends Modal {
     const importContainer = contentEl.createDiv("import-container");
 
     this.textArea = new TextAreaComponent(importContainer);
-    this.textArea
-      .setValue("")
-      .setPlaceholder(strings.pasteConfigurationHere)
-      .then((textArea) => {
-        textArea.inputEl.addClass("import-export-textarea");
-      });
+    this.textArea.setPlaceholder(strings.pasteConfigurationHere);
+    this.textArea.inputEl.addClass("import-export-textarea");
 
     const buttonContainer = contentEl.createDiv(
       "import-export-button-container",
@@ -163,93 +158,107 @@ export class ImportExportModal extends Modal {
     this.textArea.setValue(JSON.stringify(exportContent, null, 2));
   }
 
-  private async importConfiguration() {
+  private importConfiguration() {
+    const parsed = this.parsePayload(this.textArea.getValue());
+    if (!parsed) return;
+
+    ConfirmModal.show(this.app, {
+      message: this.summarise(parsed),
+      confirmWarning: true,
+      onConfirm: () => this.applyImport(parsed),
+    });
+  }
+
+  // Null once the user has been told why the payload is unusable.
+  private parsePayload(text: string): ParsedImport | null {
+    if (!text.trim()) {
+      new Notice(strings.pleasePasteConfigurationDataFirst);
+      return null;
+    }
+
+    // parseImport never throws, so the one thing this guards is JSON.parse, and
+    // both failures mean the same thing to the user: wrong text in the box.
+    let parsed: ParsedImport | null = null;
     try {
-      const importText = this.textArea.getValue();
-      if (!importText.trim()) {
-        new Notice(strings.pleasePasteConfigurationDataFirst);
-        return;
-      }
+      parsed = parseImport(JSON.parse(text));
+    } catch (error) {
+      console.error("editing-toolbar: could not parse import payload", error);
+    }
 
-      const parsed = parseImport(JSON.parse(importText));
-      if (!parsed) {
-        new Notice(strings.invalidImportDataFormat);
-        return;
-      }
+    if (!parsed) {
+      new Notice(strings.invalidImportDataFormat);
+      return null;
+    }
 
-      const { general, appearance, commands } = parsed;
-      const containsGeneralSettings = Object.keys(general).length > 0;
+    if (
+      !parsed.commands &&
+      !parsed.appearance &&
+      Object.keys(parsed.general).length === 0
+    ) {
+      new Notice(strings.validConfigurationFoundImportData);
+      return null;
+    }
 
-      if (!commands && !containsGeneralSettings && !appearance) {
-        new Notice(strings.validConfigurationFoundImportData);
-        return;
-      }
+    return parsed;
+  }
 
-      const isOverwrite = this.importMode === "overwrite";
-      const summary = [strings.importSummaryHeading];
+  private summarise(parsed: ParsedImport): string {
+    const { general, commands } = parsed;
+    const isOverwrite = this.importMode === "overwrite";
+    const summary = [strings.importSummaryHeading];
 
-      if (containsGeneralSettings) {
-        summary.push(`• ${strings.updateGeneralSettings}`);
-      }
-      if (commands?.length) {
-        summary.push(`• ${strings.updateCommands} (${commands.length})`);
-      } else if (commands && isOverwrite) {
-        summary.push(`• ${strings.clearAllCommands} ⚠️`);
-      }
-      if (parsed.skipped.length) {
-        summary.push(
-          `• ${strings.skipUnreadableEntries} (${parsed.skipped.length}) ⚠️`,
-        );
-      }
-
+    if (Object.keys(general).length > 0) {
+      summary.push(`• ${strings.updateGeneralSettings}`);
+    }
+    if (commands?.length) {
+      summary.push(`• ${strings.updateCommands} (${commands.length})`);
+    } else if (commands && isOverwrite) {
+      summary.push(`• ${strings.clearAllCommands} ⚠️`);
+    }
+    if (parsed.skipped.length) {
       summary.push(
-        "",
-        isOverwrite
-          ? strings.overwriteModeReplaceExistingSettings
-          : strings.updateModeMergeImportedSettings,
-        strings.doWantContinue,
+        `• ${strings.skipUnreadableEntries} (${parsed.skipped.length}) ⚠️`,
+      );
+    }
+
+    summary.push(
+      "",
+      isOverwrite
+        ? strings.overwriteModeReplaceExistingSettings
+        : strings.updateModeMergeImportedSettings,
+      strings.doWantContinue,
+    );
+
+    return summary.join("\n");
+  }
+
+  private async applyImport(parsed: ParsedImport) {
+    const previous = this.plugin.settings;
+
+    try {
+      this.plugin.settings = buildImportedSettings(
+        previous,
+        parsed,
+        this.importMode,
       );
 
-      ConfirmModal.show(this.app, {
-        message: summary.join("\n"),
-        confirmWarning: true,
-        onConfirm: async () => {
-          const previous = this.plugin.settings;
+      this.plugin.rebuildToolbars();
 
-          try {
-            this.plugin.settings = buildImportedSettings(
-              previous,
-              parsed,
-              this.importMode,
-            );
+      // Saving last keeps a failed import off disk.
+      await this.plugin.saveSettings();
 
-            this.plugin.rebuildToolbars();
-
-            // Saving last keeps a failed import off disk.
-            await this.plugin.saveSettings();
-
-            new Notice(strings.configurationImportedSuccessfully);
-          } catch (error) {
-            this.plugin.settings = previous;
-            this.plugin.rebuildToolbars();
-            console.error("editing-toolbar: import failed", error);
-            new Notice(
-              strings.error +
-                " " +
-                (error instanceof Error ? error.message : String(error)),
-            );
-          }
-          this.close();
-        },
-      });
+      new Notice(strings.configurationImportedSuccessfully);
     } catch (error) {
-      console.error("Import error: ", error);
+      this.plugin.settings = previous;
+      this.plugin.rebuildToolbars();
+      console.error("editing-toolbar: import failed", error);
       new Notice(
         strings.error +
           " " +
           (error instanceof Error ? error.message : String(error)),
       );
     }
+    this.close();
   }
 
   onClose() {

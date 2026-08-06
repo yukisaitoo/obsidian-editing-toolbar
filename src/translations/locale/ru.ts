@@ -64,7 +64,6 @@ const ui: Partial<Record<keyof typeof en, string>> = {
   inputTitle: "Введите заголовок",
   insert: "Вставить",
   invalidImportDataFormat: "Неверный формат импортируемых данных",
-  loading: "Загрузка...",
   menuTypeChanged: "Тип меню изменён на",
   more: "Ещё",
   validConfigurationFoundImportData:
