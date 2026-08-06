@@ -109,7 +109,7 @@ function renderCommandRow(
           insertAfter(ctx, commands, index, {
             id: newSubmenuId(),
             name: SUBMENU_NAME,
-            icon: "remix-Filter3Line",
+            icon: "lucide-list-filter",
             SubmenuCommands: [],
           }),
         );

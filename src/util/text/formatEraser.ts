@@ -3,11 +3,15 @@ import { Editor } from "obsidian";
 // Emphasis delimiters have to hug non-space and sit on a word boundary, or
 // `snake_case`, `a * b` and underscored URLs get eaten.
 const MARKDOWN_STRIPPERS: [RegExp, string][] = [
+  // Ahead of the block rules, which are anchored at `^ {0,3}` and would otherwise
+  // miss the marker on a list nested four spaces deep.
+  [/^[ \t]+/gm, ""],
   [/^ {0,3}```.*$/gm, ""],
   [/^ {0,3}([-*_])(?:[ \t]*\1){2,}[ \t]*$/gm, ""],
   [/^ {0,3}(?:> ?)+\[![\w\s-]*\][+-]?[ \t]*/gm, ""],
   [/^ {0,3}(?:#{1,6} +|> ?|- \[[ x]\] +|[-*+] +|\d+\. +)+/gm, ""],
-  [/<[^<>]+>/g, ""],
+  // A tag name has to follow the bracket, or `a < b > c` loses its middle.
+  [/<\/?[A-Za-z!][^<>]*>/g, ""],
   [/!?\[\[[^[\]]*\|([^[\]|]+)\]\]/g, "$1"],
   [/!?\[\[([^[\]|]+)\]\]/g, "$1"],
   [/!?\[([^[\]]*)\]\([^()]*\)/g, "$1"],

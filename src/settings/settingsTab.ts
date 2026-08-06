@@ -179,7 +179,7 @@ export class EditingToolbarSettingTab extends PluginSettingTab {
   // Both hold references that outlive the DOM they were built on, so they are torn
   // down before every re-render — while their elements are still attached.
   private destroyTabResources(): void {
-    this.pickrs.forEach((pickr) => pickr?.destroyAndRemove());
+    this.pickrs.forEach((pickr) => pickr.destroyAndRemove());
     this.pickrs = [];
     this.sortables.forEach((sortable) => sortable.destroy());
     this.sortables = [];

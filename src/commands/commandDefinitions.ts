@@ -27,6 +27,7 @@ export const CORE_EDITOR_COMMANDS: CommandId[] = [
   "editor:toggle-code",
   "editor:toggle-blockquote",
   "editor:toggle-checklist-status",
+  "editor:cycle-list-checklist",
   "editor:toggle-comments",
   "editor:insert-callout",
   "editor:insert-mathblock",

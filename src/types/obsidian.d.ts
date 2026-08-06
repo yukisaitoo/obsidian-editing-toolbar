@@ -44,7 +44,6 @@ declare module "obsidian" {
     unindentList(): void;
     toggleNumberList(): void;
     toggleBulletList(): void;
-    toggleCheckList(state?: boolean): void;
     toggleMarkdownFormatting(format: string): void;
   }
 

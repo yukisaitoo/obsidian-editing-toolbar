@@ -20,7 +20,6 @@ const LIST_ACTIONS: { id: CommandId; run: (editor: Editor) => void }[] = [
   { id: "undent-list", run: (e) => e.unindentList() },
   { id: "toggle-numbered-list", run: (e) => e.toggleNumberList() },
   { id: "toggle-bullet-list", run: (e) => e.toggleBulletList() },
-  { id: "editor:cycle-list-checklist", run: (e) => e.toggleCheckList(true) },
 ];
 
 // Level N maps to N hashes, so level 0 strips the header.
