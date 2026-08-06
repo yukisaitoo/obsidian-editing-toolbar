@@ -11,8 +11,7 @@ const OPEN_CLASS = "editing-toolbar-more-open";
 const DETACHED_POPUP_SELECTOR =
   ".menu, .pcr-app, .modal-container, .suggestion-container";
 
-// One live popover per popover bar. The bar outlives the » button across rebuilds,
-// so keying on the bar is what lets a rebuild retire the old instance.
+// Lookup registry: reflow and teardown reach the popover through the popover bar.
 const popovers = new WeakMap<HTMLElement, MorePopover>();
 const openPopovers = new Set<MorePopover>();
 
@@ -25,8 +24,6 @@ export class MorePopover {
     bar: HTMLElement,
     private readonly popoverBar: HTMLElement,
   ) {
-    popovers.get(popoverBar)?.destroy();
-
     this.el = bar.createEl("span");
     this.el.addClass("more-menu");
     this.doc = this.el.ownerDocument;
@@ -63,14 +60,6 @@ export class MorePopover {
 
   reposition(): void {
     anchorPopoverToButton(this.button.buttonEl, this.popoverBar);
-  }
-
-  destroy(): void {
-    this.close();
-    this.el.remove();
-    if (popovers.get(this.popoverBar) === this) {
-      popovers.delete(this.popoverBar);
-    }
   }
 
   private onPointerDown = (evt: PointerEvent) => {

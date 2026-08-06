@@ -90,9 +90,8 @@ export default class EditingToolbarPlugin extends Plugin {
     removeAllToolbars(this);
   }
 
-  // Safe to call as often as the workspace fires events: builds only what is
-  // missing. Popovers close here rather than in syncToolbars, so clicking a
-  // command inside the » popover does not close it out from under the user.
+  // Safe to call as often as the workspace fires events: builds only what is missing.
+  // A layout change can move the pane out from under an open popover, so close first.
   handleEditingToolbar = () => {
     closeMoreOverflowPopovers();
     syncToolbars(this);

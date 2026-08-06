@@ -301,8 +301,6 @@ async function insertAfter(
   ctx.applyChanges();
 }
 
-// `owner` is the settings list holding this command, so the write lands on the
-// entry the row was rendered from rather than the first one sharing its id.
 function configureIconButton(
   ctx: SettingsTabContext,
   button: ButtonComponent,

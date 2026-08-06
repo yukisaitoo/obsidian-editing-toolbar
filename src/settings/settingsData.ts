@@ -95,8 +95,8 @@ export interface EditingToolbarSettings extends Record<CustomColorKey, string> {
   appearance?: AppearanceOverrides;
 }
 
-// The command list is seeded by createDefaultSettings() rather than here, so a
-// list the user deliberately cleared is not re-filled on every load.
+// `commands` is filled in by createDefaultSettings(); the empty array is here only to
+// satisfy the type.
 export const DEFAULT_SETTINGS: EditingToolbarSettings = {
   commands: [],
   toolbarVisible: true,
