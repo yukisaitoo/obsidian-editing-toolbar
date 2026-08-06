@@ -3,6 +3,7 @@ import type { Command } from "obsidian";
 import type {
   AppearanceOverrides,
   AppearanceSettings,
+  CustomColorKey,
   EditingToolbarSettings,
 } from "src/settings/settingsData";
 import {
@@ -22,22 +23,34 @@ export type JsonPayload = any;
 
 export type ImportMode = "overwrite" | "update";
 
-// Every key holding a colour. All of them reach note markup: the `last*` pair
-// directly, the custom swatches by way of a click.
-const COLOR_SETTING_KEYS = new Set<keyof EditingToolbarSettings>([
-  "lastFontColor",
-  "lastHighlightColor",
-  ...customColorKeys("custom_bg"),
-  ...customColorKeys("custom_fc"),
-]);
+type FlatSettingKey = Exclude<
+  keyof EditingToolbarSettings,
+  "commands" | "appearance"
+>;
 
-// Every flat setting the payload carries. The colour keys are folded in from the
-// set above, so one cannot be imported without passing through toHexColor(). The
-// appearance overrides are nested, so they travel separately via mergeAppearance().
-export const GENERAL_SETTING_KEYS: (keyof EditingToolbarSettings)[] = [
-  "toolbarVisible",
-  ...COLOR_SETTING_KEYS,
-];
+// Every custom swatch reaches note markup by way of a click, so all of them are hex.
+const customColorSanitisers = Object.fromEntries(
+  [...customColorKeys("custom_bg"), ...customColorKeys("custom_fc")].map(
+    (key) => [key, toHexColor],
+  ),
+) as Record<CustomColorKey, typeof toHexColor>;
+
+// Every flat setting the payload carries, paired with the sanitiser its value must
+// pass. The appearance overrides are nested, so they travel separately.
+const GENERAL_SANITISERS: {
+  [K in FlatSettingKey]: (
+    value: EditingToolbarSettings[K],
+  ) => EditingToolbarSettings[K] | null;
+} = {
+  toolbarVisible: (value) => value,
+  lastFontColor: toHexColor,
+  lastHighlightColor: toHexColor,
+  ...customColorSanitisers,
+};
+
+export const GENERAL_SETTING_KEYS = Object.keys(
+  GENERAL_SANITISERS,
+) as FlatSettingKey[];
 
 // `appearance` and `commands` are null when the payload did not mention them at
 // all — distinct from an empty one, which overwrite mode is meant to apply.
@@ -64,12 +77,11 @@ export function parseImport(data: JsonPayload): ParsedImport | null {
 
     // A key left out of `general` keeps whatever the caller already had, which is
     // the default on load and the current value on import.
+    const sanitise = GENERAL_SANITISERS[key] as (
+      value: JsonPayload,
+    ) => JsonPayload;
     const clean =
-      typeof value !== typeof DEFAULT_SETTINGS[key]
-        ? null
-        : COLOR_SETTING_KEYS.has(key)
-          ? toHexColor(value)
-          : value;
+      typeof value === typeof DEFAULT_SETTINGS[key] ? sanitise(value) : null;
 
     if (clean === null) skipped.push(key);
     else (general as JsonPayload)[key] = clean;
