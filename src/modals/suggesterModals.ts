@@ -13,7 +13,11 @@ import { getAppIcons } from "src/icons/appIcons";
 import { focusAfterOpen, submitOnEnter } from "src/modals/modalInput";
 import type EditingToolbarPlugin from "src/plugin/main";
 import { format, strings, t } from "src/translations/helper";
-import { toStoredCommand } from "src/util/commandStorage";
+import {
+  commandLabel,
+  commandSource,
+  toStoredCommand,
+} from "src/util/commandStorage";
 
 type IconSelectCallback = (iconId: string) => void;
 
@@ -71,8 +75,10 @@ export class CommandPicker extends FuzzySuggestModal<Command> {
     return this.app.commands.listCommands();
   }
 
+  // The list spans every registered command, so the source prefix stays on to keep
+  // same-named commands from different plugins apart.
   getItemText(item: Command): string {
-    return t(item.name);
+    return commandSource(item.name) + t(commandLabel(item.name));
   }
 
   // Read afresh rather than reusing the list from onChooseItem: the icon picker sits
@@ -86,7 +92,7 @@ export class CommandPicker extends FuzzySuggestModal<Command> {
   async onChooseItem(item: Command): Promise<void> {
     if (this.plugin.settings.commands.some((v) => v.id === item.id)) {
       new Notice(
-        format(strings.commandAlreadyExists, { name: t(item.name) }),
+        format(strings.commandAlreadyExists, { name: this.getItemText(item) }),
         3000,
       );
       return;
