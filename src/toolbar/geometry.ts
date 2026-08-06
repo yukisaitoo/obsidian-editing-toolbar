@@ -87,9 +87,10 @@ function clampFlyoutToPane(button: HTMLElement): void {
   if (shift) button.style.setProperty(FLYOUT_SHIFT_VAR, `${shift}px`);
 }
 
-// Shuffles buttons between the bar and the » popover so the bar fits its pane.
-// Available room is the PANE's width: the bar shrink-to-fits and so never reports
-// overflow itself. Returns whether » is still needed.
+// Shuffles buttons between the bar and the » popover so the bar fits its pane,
+// moving only as many as the size change asks for. Available room is the PANE's
+// width: the bar shrink-to-fits and so never reports overflow itself. Returns
+// whether » is still needed.
 export function reflowToolbarOverflow(
   bar: HTMLElement,
   popoverBar: HTMLElement | null,
@@ -100,34 +101,43 @@ export function reflowToolbarOverflow(
   const available = availableWidth(bar);
   if (available <= 0) return popoverBar.firstElementChild !== null;
 
-  const existingMore = bar.querySelector<HTMLElement>(":scope > .more-menu");
-  const overflowing = () => visibleSpan(bar) > available + OVERFLOW_TOLERANCE;
+  // Forces a layout on every call, so measure once and let that pick a direction.
+  const fits = () => visibleSpan(bar) <= available + OVERFLOW_TOLERANCE;
+  const fitsNow = fits();
 
-  if (!existingMore && !popoverBar.firstElementChild && !overflowing()) {
-    return false;
+  let more = bar.querySelector<HTMLElement>(":scope > .more-menu");
+  if (!more) {
+    if (fitsNow) return false;
+    more = createMore();
   }
 
-  const more = existingMore ?? createMore();
-
-  // » only earns its width while the popover holds something, so try the whole set
-  // with it hidden first.
-  more.style.display = "none";
-  while (popoverBar.firstElementChild) {
-    bar.insertBefore(popoverBar.firstElementChild, more);
+  // » stays last, so the button before it is always the next one to give up and
+  // the popover's first is always the next one to take back.
+  if (fitsNow) {
+    while (popoverBar.firstElementChild) {
+      const taken = popoverBar.firstElementChild;
+      bar.insertBefore(taken, more);
+      syncMore(more, popoverBar);
+      if (fits()) continue;
+      popoverBar.insertBefore(taken, popoverBar.firstChild);
+      break;
+    }
+  } else {
+    do {
+      const given = more.previousElementSibling;
+      if (!given) break;
+      popoverBar.insertBefore(given, popoverBar.firstChild);
+      syncMore(more, popoverBar);
+    } while (!fits());
   }
-  if (!overflowing()) return false;
 
-  // » stays last, so the button before it is always the next one to give up.
-  more.style.display = "";
-  while (overflowing()) {
-    const last = more.previousElementSibling;
-    if (!last) break;
-    popoverBar.insertBefore(last, popoverBar.firstChild);
-  }
+  syncMore(more, popoverBar);
+  return popoverBar.firstElementChild !== null;
+}
 
-  const hasOverflow = popoverBar.firstElementChild !== null;
-  more.style.display = hasOverflow ? "" : "none";
-  return hasOverflow;
+// » only earns its width while the popover holds something.
+function syncMore(more: HTMLElement, popoverBar: HTMLElement): void {
+  more.style.display = popoverBar.firstElementChild ? "" : "none";
 }
 
 function availableWidth(bar: HTMLElement): number {
