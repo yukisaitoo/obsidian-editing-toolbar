@@ -1,4 +1,4 @@
-import { ButtonComponent, setIcon, Setting } from "obsidian";
+import { ButtonComponent, Setting } from "obsidian";
 import type { CommandName } from "src/settings/defaultCommands";
 import {
   applyAppearanceVars,
@@ -9,7 +9,7 @@ import {
   TOOLBAR_ICON_SIZE_MIN,
 } from "src/settings/settingsData";
 import type { SettingsTabContext } from "src/settings/settingsTab";
-import { SHARED_BAR_CLASS } from "src/toolbar/toolbarDom";
+import { applyButtonIcon, SHARED_BAR_CLASS } from "src/toolbar/toolbarDom";
 import { strings, t } from "src/translations/helper";
 import { resolveHexColor } from "src/util/color";
 
@@ -141,7 +141,6 @@ function renderPreview(
   const wrapper = previewContainer.createDiv("preview-toolbar-wrapper");
 
   const previewBar = wrapper.createDiv();
-  previewBar.addClass("editing-toolbar-preview");
   previewBar.addClass("editingToolbarDefaultAesthetic");
   // The shared chrome class, but not the live-instance one: the toolbar lifecycle
   // (removeAllToolbars, toolbarIn) must never see the preview.
@@ -151,7 +150,7 @@ function renderPreview(
     const button = new ButtonComponent(previewBar);
     button.setClass("editingToolbarCommandItem");
     button.setTooltip(t(command.name));
-    setIcon(button.buttonEl, command.icon);
+    applyButtonIcon(button, command.icon);
   });
 
   applyAppearanceVars(previewBar, ctx.plugin.settings);

@@ -2,21 +2,20 @@ import { Editor } from "obsidian";
 import type { Registrar } from "src/commands/registrars/types";
 
 export const registerClipboardAndHistoryCommands: Registrar = ({
-  plugin,
-  runOnEditor,
+  addEditorCommand,
 }) => {
-  plugin.addCommand({
+  addEditorCommand({
     id: "editor-undo",
     name: "Undo edit",
     icon: "undo-glyph",
-    callback: () => runOnEditor((editor) => editor.undo()),
+    run: (editor) => editor.undo(),
   });
 
-  plugin.addCommand({
+  addEditorCommand({
     id: "editor-redo",
     name: "Redo edit",
     icon: "redo-glyph",
-    callback: () => runOnEditor((editor) => editor.redo()),
+    run: (editor) => editor.redo(),
   });
 
   const addClipboardCommand = (
@@ -24,13 +23,7 @@ export const registerClipboardAndHistoryCommands: Registrar = ({
     name: string,
     icon: string,
     run: (editor: Editor) => Promise<void>,
-  ) =>
-    plugin.addCommand({
-      id,
-      name,
-      icon,
-      callback: () => runOnEditor(run),
-    });
+  ) => addEditorCommand({ id, name, icon, run });
 
   addClipboardCommand("editor-copy", "Copy", "lucide-copy", async (editor) => {
     const text = editor.getSelection();

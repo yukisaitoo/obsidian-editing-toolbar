@@ -2,12 +2,19 @@ import { Editor } from "obsidian";
 import type { CommandPlot } from "src/commands/commandDefinitions";
 import type EditingToolbarPlugin from "src/plugin/main";
 
-// What a registrar may do. `runOnEditor` is the single validation and failure
-// boundary for editor-backed commands: downstream actions get a live editor, never
-// re-check it, and never need their own try/catch.
+export interface EditorCommand {
+  id: string;
+  name: string;
+  icon?: string;
+  run: (editor: Editor) => unknown;
+}
+
+// What a registrar may do. Editor-backed commands go through `addEditorCommand`,
+// never `plugin.addCommand`: it registers them as `editorCallback`, so Obsidian
+// decides when an editor is available and `run` always gets a live one.
 export interface RegistrarContext {
   plugin: EditingToolbarPlugin;
-  runOnEditor(action: (editor: Editor) => unknown): void;
+  addEditorCommand(command: EditorCommand): void;
   applyCommand(command: CommandPlot, editor: Editor): void;
 }
 

@@ -84,14 +84,14 @@ const LIST_ACTIONS: {
 
 export const registerFormattingCommands: Registrar = ({
   plugin,
-  runOnEditor,
+  addEditorCommand,
 }) => {
   const add = (
     id: string,
     name: string,
     icon: string,
     run: (editor: Editor) => void,
-  ) => plugin.addCommand({ id, name, icon, callback: () => runOnEditor(run) });
+  ) => addEditorCommand({ id, name, icon, run });
 
   add("format-eraser", "Format eraser", "eraser", setFormatEraser);
 

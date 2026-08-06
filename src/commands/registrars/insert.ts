@@ -9,43 +9,41 @@ import { insertHorizontalRule } from "src/util/text/horizontalRule";
 
 export const registerInsertCommands: Registrar = ({
   plugin,
-  runOnEditor,
+  addEditorCommand,
   applyCommand,
 }) => {
-  plugin.addCommand({
+  addEditorCommand({
     id: "insert-callout",
     name: "Insert callout…",
     icon: "lucide-quote",
-    callback: () =>
-      runOnEditor(async (editor) => {
-        const spec = await InsertCalloutModal.prompt(plugin, editor);
-        if (spec) insertCallout(editor, spec);
-      }),
+    run: async (editor) => {
+      const spec = await InsertCalloutModal.prompt(plugin, editor);
+      if (spec) insertCallout(editor, spec);
+    },
   });
 
-  plugin.addCommand({
+  addEditorCommand({
     id: "hrline",
     name: "Insert horizontal rule",
     icon: "horizontal-rule",
-    callback: () => runOnEditor(insertHorizontalRule),
+    run: insertHorizontalRule,
   });
 
   Object.entries(WRAP_COMMANDS).forEach(([id, plot]) => {
-    plugin.addCommand({
+    addEditorCommand({
       id,
       name: plot.name,
       icon: `${id}-glyph`,
-      callback: () => runOnEditor((editor) => applyCommand(plot, editor)),
+      run: (editor) => applyCommand(plot, editor),
     });
   });
 
   CORE_EDITOR_COMMANDS.forEach((command) => {
-    plugin.addCommand({
+    addEditorCommand({
       id: command.id,
       name: command.name,
       icon: command.icon,
-      callback: () =>
-        runOnEditor(() => plugin.app.commands.executeCommandById(command.id)),
+      run: () => plugin.app.commands.executeCommandById(command.id),
     });
   });
 };

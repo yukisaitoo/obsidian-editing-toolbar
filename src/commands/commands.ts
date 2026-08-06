@@ -6,6 +6,7 @@ import { registerCoreCommands } from "src/commands/registrars/core";
 import { registerFormattingCommands } from "src/commands/registrars/formatting";
 import { registerInsertCommands } from "src/commands/registrars/insert";
 import type {
+  EditorCommand,
   Registrar,
   RegistrarContext,
 } from "src/commands/registrars/types";
@@ -25,20 +26,33 @@ export class CommandsManager {
   public registerCommands(): void {
     const ctx: RegistrarContext = {
       plugin: this.plugin,
-      runOnEditor: this.runOnEditor,
+      addEditorCommand: this.addEditorCommand,
       applyCommand: this.applyCommand,
     };
     REGISTRARS.forEach((register) => register(ctx));
   }
 
-  public getActiveEditor(): Editor | null {
-    return this.plugin.app.workspace.activeEditor?.editor ?? null;
-  }
+  // editorCallback is what keeps these out of the command palette — and out of
+  // reading mode, the note title and the properties panel — when there is no
+  // editor to act on.
+  public addEditorCommand = ({ id, name, icon, run }: EditorCommand): void => {
+    this.plugin.addCommand({
+      id,
+      name,
+      icon,
+      editorCallback: (editor) => this.runOn(editor, run),
+    });
+  };
+
+  // For toolbar handlers that are not commands — the colour swatch grid — and so
+  // get no gating from Obsidian.
+  public runOnEditor = (action: (editor: Editor) => unknown): void => {
+    const editor = this.plugin.app.workspace.activeEditor?.editor;
+    if (editor) this.runOn(editor, action);
+  };
 
   // Focus is restored after: clicking a toolbar button takes it off the editor.
-  public runOnEditor = (action: (editor: Editor) => unknown): void => {
-    const editor = this.getActiveEditor();
-    if (!editor) return;
+  private runOn(editor: Editor, action: (editor: Editor) => unknown): void {
     void (async () => {
       try {
         await action(editor);
@@ -48,7 +62,7 @@ export class CommandsManager {
         editor.focus();
       }
     })();
-  };
+  }
 
   // Wraps the selection in `command`'s prefix/suffix, or unwraps it when the text
   // already matches — the toggle behind bold, italics and friends.
