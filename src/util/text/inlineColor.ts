@@ -1,11 +1,42 @@
 import { Editor } from "obsidian";
+import { HTML_TAG, VOID_TAG } from "src/util/text/html";
 import { replaceSelectionAndSelect } from "src/util/text/selection";
 
-function wrapEachLine(text: string, open: string, close: string): string {
-  return text
-    .split("\n")
-    .map((line) => (line.trim() ? `${open}${line}${close}` : line))
+// Leading indent and a trailing hard break (two spaces, or a `\`) stay outside the
+// tag, or the break is silently destroyed.
+const EDGE = /^(\s*)(.*?)(\\?\s*)$/;
+
+// Counts only; `</u>a<u>` reads as balanced. Ordering would only matter for a
+// selection that starts mid-pair, which nothing here can fix anyway.
+function balanced(line: string): boolean {
+  const tags = (line.match(HTML_TAG) ?? []).filter(
+    (tag) => !tag.endsWith("/>") && !VOID_TAG.test(tag),
+  );
+  const closes = tags.filter((tag) => tag.startsWith("</"));
+  return tags.length === closes.length * 2;
+}
+
+// A pair spanning a newline comes back misnested when each line is wrapped alone, so
+// a paragraph that has one is wrapped once instead.
+function wrapLines(paragraph: string, open: string, close: string): string {
+  const lines = paragraph.split("\n");
+  if (!lines.every(balanced)) return `${open}${paragraph}${close}`;
+
+  return lines
+    .map((line) => {
+      const [, pre, body, post] = EDGE.exec(line) ?? [];
+      return body ? `${pre}${open}${body}${close}${post}` : line;
+    })
     .join("\n");
+}
+
+// Never across a blank line: markdown ends the paragraph there and the browser drops
+// the close tag, losing the colour on everything after it.
+function wrapParagraphs(text: string, open: string, close: string): string {
+  return text
+    .split(/(\n(?:[ \t]*\n)+)/)
+    .map((part) => (part.trim() ? wrapLines(part, open, close) : part))
+    .join("");
 }
 
 interface ColorTag {
@@ -19,7 +50,7 @@ function recolorSelection(editor: Editor, tag: ColorTag): void {
   if (!selectText.trim()) return;
 
   const stripped = selectText.replace(tag.pair, "$1");
-  const finalText = wrapEachLine(stripped, tag.open, tag.close);
+  const finalText = wrapParagraphs(stripped, tag.open, tag.close);
 
   if (finalText === selectText) return;
 

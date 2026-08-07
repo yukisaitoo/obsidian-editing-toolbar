@@ -1,4 +1,5 @@
 import { Editor } from "obsidian";
+import { HTML_TAG } from "src/util/text/html";
 
 // Emphasis bodies are lazy, or `**A** and **B**` closes on the last delimiter and
 // swallows the gap. They hug non-space so `a * b` survives, and only the `_` forms
@@ -13,10 +14,7 @@ const MARKDOWN_STRIPPERS: [RegExp, string][] = [
   [/^ {0,3}(?:#{1,6} +|> ?|- \[[ x]\] +|[-*+] +|\d+\. +)+/gm, ""],
   // Autolinks unwrap rather than vanish, or the URL goes with the brackets.
   [/<([a-z][\w+.-]*:[^<>\s]+|[^<>\s@]+@[^<>\s]+)>/gi, "$1"],
-  // Attributes need an `=`, or `a<b and c>d` and `Map<K, V>` read as tags. `!` stays
-  // out so `<!-- -->` survives, as `%%…%%` does: comments are hidden text, not
-  // formatting.
-  [/<\/?[A-Za-z][\w-]*(?:\s[^<>]*=[^<>]*)?\s*\/?>/g, ""],
+  [HTML_TAG, ""],
   [/!?\[\[[^[\]]*\|([^[\]|]+)\]\]/g, "$1"],
   [/!?\[\[([^[\]|]+)\]\]/g, "$1"],
   [/!?\[([^[\]]*)\]\([^()]*\)/g, "$1"],
