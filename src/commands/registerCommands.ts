@@ -1,4 +1,4 @@
-import { App, Editor } from "obsidian";
+import { Editor } from "obsidian";
 
 import { COMMAND_LABELS, type OwnCommandId } from "src/commands/commandLabels";
 import { InsertCalloutModal } from "src/modals/insertCalloutModal";
@@ -92,16 +92,6 @@ export function registerCommands(plugin: EditingToolbarPlugin): void {
     );
     add(id as OwnCommandId, (editor) => wrapSelection(editor, wrap, group));
   }
-}
-
-// For toolbar handlers that are not commands (the colour swatch grid) and so get
-// no gating from Obsidian.
-export function runOnEditor(
-  app: App,
-  action: (editor: Editor) => unknown,
-): void {
-  const editor = app.workspace.activeEditor?.editor;
-  if (editor) runOn(editor, action);
 }
 
 // Restores focus for the paths that lose it (a modal closing, the palette); the

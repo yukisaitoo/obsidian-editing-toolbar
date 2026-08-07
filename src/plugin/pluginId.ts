@@ -16,8 +16,9 @@ export function isCoreCommand<T extends string>(
 }
 
 // Ids come from settings and can go stale when a plugin is removed or renames one.
-// executeCommandById returns false both for an id nothing knows and for a command
-// that declined to run, so look the id up first to warn about only the former.
+// executeCommandById reports nothing useful: it discards its command's checkCallback
+// result, so declining to run is indistinguishable from running. Look the id up first
+// to warn about the one case worth warning about.
 export function runCommandById(app: App, id: string): void {
   if (!app.commands.findCommand(id)) {
     console.warn(`${PLUGIN_ID}: unknown command ${id}`);

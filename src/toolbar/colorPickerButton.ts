@@ -1,5 +1,4 @@
-import { App, ButtonComponent, Command, Editor, setTooltip } from "obsidian";
-import { runOnEditor } from "src/commands/registerCommands";
+import { App, ButtonComponent, Command, setTooltip } from "obsidian";
 import type EditingToolbarPlugin from "src/plugin/main";
 import { ownCommand, PLUGIN_ID, runCommandById } from "src/plugin/pluginId";
 import {
@@ -11,14 +10,12 @@ import { applyButtonIcon, SUBMENU_BUTTON_CLASS } from "src/toolbar/toolbarDom";
 import { strings } from "src/translations/helper";
 import { toHexColor } from "src/util/color";
 import { displayIcon, displayName } from "src/util/displayName";
-import { setBackgroundColor, setFontColor } from "src/util/text/inlineColor";
 
 interface PickerVariant {
   // The swatch panel's palette icon is not a command, so it has no registry name.
   customTooltip: string;
   render: (parent: HTMLElement, plugin: EditingToolbarPlugin) => void;
   settingsKey: "lastFontColor" | "lastHighlightColor";
-  apply: (color: string, editor: Editor) => void;
 }
 
 const VARIANTS: Record<string, PickerVariant | undefined> = {
@@ -26,13 +23,11 @@ const VARIANTS: Record<string, PickerVariant | undefined> = {
     customTooltip: strings.customFontColor,
     render: renderFontColorPicker,
     settingsKey: "lastFontColor",
-    apply: setFontColor,
   },
   [ownCommand("change-background-color")]: {
     customTooltip: strings.customBackgroundColor,
     render: renderBackgroundColorPicker,
     settingsKey: "lastHighlightColor",
-    apply: setBackgroundColor,
   },
 };
 
@@ -69,7 +64,7 @@ export function createColorPickerButton(
   variant.render(submenu, plugin);
   button.buttonEl.insertAdjacentElement("afterbegin", submenu);
 
-  wireSwatches(app, plugin, submenu, variant);
+  wireSwatches(app, plugin, submenu, variant, item.id);
 
   const wrapper = submenu.querySelector<HTMLElement>(".x-color-picker-wrapper");
   if (wrapper) {
@@ -87,6 +82,7 @@ function wireSwatches(
   plugin: EditingToolbarPlugin,
   root: ParentNode,
   variant: PickerVariant,
+  commandId: string,
 ): void {
   const table = root.querySelector<HTMLTableElement>(".x-color-picker-table");
   if (!table) return;
@@ -99,12 +95,11 @@ function wireSwatches(
     const color = cell && toHexColor(cell.style.backgroundColor);
     if (!color) return;
 
-    runOnEditor(app, (editor) => {
-      variant.apply(color, editor);
-      plugin.settings[variant.settingsKey] = color;
-      plugin.applyRootColorVars();
-      void plugin.saveSettings();
-    });
+    // The command reads the colour back out of settings, so store it first.
+    plugin.settings[variant.settingsKey] = color;
+    plugin.applyRootColorVars();
+    void plugin.saveSettings();
+    runCommandById(app, commandId);
   });
 }
 
