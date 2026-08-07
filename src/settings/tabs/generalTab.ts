@@ -84,7 +84,7 @@ function renderSwatchRow(
           container: pickerContainer,
           swatches,
           opacity: config.opacity,
-          defaultColor: ctx.plugin.settings[settingKey] || "#000000",
+          defaultColor: ctx.plugin.settings[settingKey],
           onSave: saveColor,
           onClear: () => saveColor(DEFAULT_SETTINGS[settingKey]),
         });

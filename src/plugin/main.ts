@@ -1,4 +1,4 @@
-import { Notice, Plugin } from "obsidian";
+import { Plugin } from "obsidian";
 import { registerCommands } from "src/commands/registerCommands";
 import addIcons from "src/icons/customIcons";
 import {
@@ -7,11 +7,9 @@ import {
   createDefaultSettings,
   EditingToolbarSettings,
 } from "src/settings/settingsData";
-import { buildSettings, parseSettings } from "src/settings/settingsLoader";
 import { closeMoreOverflowPopovers } from "src/toolbar/morePopover";
 import { removeAllToolbars, syncToolbars } from "src/toolbar/toolbarBuilder";
 import { toolbarDocuments } from "src/toolbar/toolbarHost";
-import { strings } from "src/translations/helper";
 import { EditingToolbarSettingTab } from "src/settings/settingsTab";
 
 export default class EditingToolbarPlugin extends Plugin {
@@ -33,6 +31,8 @@ export default class EditingToolbarPlugin extends Plugin {
     await this.loadCSS();
     await this.loadSettings();
 
+    // Registered before anything reads settings.commands: a hand-broken data.json that
+    // throws during a toolbar build then still leaves Reset configuration reachable.
     this.settingTab = new EditingToolbarSettingTab(this.app, this);
     this.addSettingTab(this.settingTab);
 
@@ -69,25 +69,12 @@ export default class EditingToolbarPlugin extends Plugin {
     );
   }
 
+  // data.json is trusted: nothing but this plugin writes it, and hand-breaking one is
+  // a Reset away. Spreading over complete defaults still fills in whatever the file
+  // omits. Spread rather than Object.assign, which would run a `__proto__` key from
+  // the file through Object.prototype's setter; both no-op on the first-run null.
   async loadSettings(): Promise<void> {
-    this.settings = createDefaultSettings();
-
-    const loaded = await this.loadData();
-    if (loaded == null) return;
-
-    const parsed = parseSettings(loaded);
-    if (!parsed) {
-      console.warn("editing-toolbar: unreadable data.json", loaded);
-      new Notice(strings.unreadableSettingsFile);
-      return;
-    }
-
-    this.settings = buildSettings(this.settings, parsed);
-
-    if (parsed.skipped.length) {
-      console.warn("editing-toolbar: skipped unreadable settings", parsed.skipped);
-      new Notice(strings.skippedSettingsValues);
-    }
+    this.settings = { ...createDefaultSettings(), ...(await this.loadData()) };
   }
 
   onunload(): void {

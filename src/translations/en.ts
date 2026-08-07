@@ -45,10 +45,6 @@ export const en = {
     "Restore all settings and toolbar command lists to their defaults. This can't be undone.",
   resetConfigurationConfirm:
     "This restores every setting and all toolbar command lists to their defaults.\nThis can't be undone.",
-  skippedSettingsValues:
-    "Some settings could not be read and kept their defaults. Everything else loaded. Back up data.json before changing any setting.",
-  unreadableSettingsFile:
-    "Settings file could not be read, so defaults were loaded. Back up data.json before changing any setting.",
   setBackgroundColorToolbar: "Set the background color of the toolbar.",
   setColorToolbarIcon: "Set the color of the toolbar icon.",
   setSizeToolbarIconPx: "Set the size of the toolbar icon (px); default: 18px",

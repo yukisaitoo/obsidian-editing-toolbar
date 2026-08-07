@@ -5,20 +5,13 @@ interface Rgba {
   a: number;
 }
 
-// Accepts `#rgb`, `#rgba`, `#rrggbb`, `#rrggbbaa`, and the plain-number forms of
-// `rgb()` / `rgba()`. Percentage and named colours are out of scope because nothing
-// here writes them: Pickr emits hex, swatch clicks read back CSSOM `rgb()`. They
-// only arrive from a hand-edited config, where landing in `skipped` is correct.
+// Covers everything the two inputs can produce: `#rrggbb` / `#rrggbbaa` from Pickr,
+// and the plain-number `rgb()` / `rgba()` that comes back off the CSSOM. Shorthand,
+// percentage and named colours are out of scope because nothing here writes them.
 function parseColor(color: string): Rgba | null {
   const hex = color.trim().match(/^#([0-9a-fA-F]+)$/);
   if (hex) {
-    let digits = hex[1];
-    if (digits.length === 3 || digits.length === 4) {
-      digits = digits
-        .split("")
-        .map((d) => d + d)
-        .join("");
-    }
+    const digits = hex[1];
     if (digits.length !== 6 && digits.length !== 8) return null;
     return {
       r: parseInt(digits.slice(0, 2), 16),
@@ -46,7 +39,8 @@ function parseColor(color: string): Rgba | null {
 }
 
 // Serialises back to hex, keeping alpha as the 8-digit form. Null for anything
-// parseColor does not understand, which makes this the colour validator too.
+// parseColor does not understand, which is how a swatch click rejects a cell whose
+// background the CSSOM dropped as invalid.
 export function toHexColor(color: string): string | null {
   const rgba = parseColor(color);
   if (!rgba) return null;

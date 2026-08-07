@@ -19,7 +19,7 @@ export class RenameCommandModal extends Modal {
     contentEl.createEl("b", { text: strings.pleaseEnterNewName });
 
     const textComponent = new TextComponent(contentEl);
-    textComponent.setPlaceholder("").setValue(this.item.name ?? "");
+    textComponent.setPlaceholder("").setValue(this.item.name);
     focusAfterOpen(textComponent.inputEl);
 
     const submit = async () => {

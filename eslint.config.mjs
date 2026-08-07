@@ -14,9 +14,6 @@ export default tseslint.config(
       sourceType: "module",
     },
     rules: {
-      // All remaining `any`s are deliberate and carry an inline eslint-disable with
-      // a reason (Obsidian internals / vendor APIs / external JSON boundaries), so
-      // new unannotated ones are now blocked.
       "@typescript-eslint/no-explicit-any": "error",
       "@typescript-eslint/no-unused-vars": [
         "warn",
