@@ -11,23 +11,25 @@ const MARKDOWN_STRIPPERS: [RegExp, string][] = [
   [/^ {0,3}```.*$/gm, ""],
   [/^ {0,3}([-*_])(?:[ \t]*\1){2,}[ \t]*$/gm, ""],
   [/^ {0,3}(?:> ?)+\[![\w\s-]*\][+-]?[ \t]*/gm, ""],
-  [/^ {0,3}(?:#{1,6} +|> ?|- \[[ x]\] +|[-*+] +|\d+\. +)+/gm, ""],
+  [/^ {0,3}(?:#{1,6} +|> ?|(?:[-*+]|\d+[.)]) +(?:\[[^\]]\] +)?)+/gm, ""],
   // Autolinks unwrap rather than vanish, or the URL goes with the brackets.
   [/<([a-z][\w+.-]*:[^<>\s]+|[^<>\s@]+@[^<>\s]+)>/gi, "$1"],
   [HTML_TAG, ""],
   [/!?\[\[[^[\]]*\|([^[\]|]+)\]\]/g, "$1"],
   [/!?\[\[([^[\]|]+)\]\]/g, "$1"],
   [/!?\[([^[\]]*)\]\([^()]*\)/g, "$1"],
-  [/`([^`\n]+)`/g, "$1"],
+  // The body is optional, or a span HTML_TAG just emptied keeps its backticks.
+  [/`([^`\n]*)`/g, "$1"],
   // A tag needs at least one non-digit, so `#1` in prose survives.
   [/(?<=^|\s)#([\w/-]*[A-Za-z_/-][\w/-]*)/g, "$1"],
   [/\*\*\*(\S(?:.*?\S)??)\*\*\*/g, "$1"],
   [/\*\*(\S(?:.*?\S)??)\*\*/g, "$1"],
-  // A lone `*` keeps the word boundaries, or `5*3*2` collapses to `532`.
-  [/(?<!\w)\*(\S(?:.*?\S)??)\*(?!\w)/g, "$1"],
-  [/(?<!\w)___(\S(?:.*?\S)??)___(?!\w)/g, "$1"],
-  [/(?<!\w)__(\S(?:.*?\S)??)__(?!\w)/g, "$1"],
-  [/(?<!\w)_(\S(?:.*?\S)??)_(?!\w)/g, "$1"],
+  // A lone `*` keeps the word boundaries, or `5*3*2` collapses to `532`. The
+  // backslash goes with them, or `\*not em\*` loses the delimiter but not the escape.
+  [/(?<![\w\\])\*(\S(?:.*?\S)??)\*(?!\w)/g, "$1"],
+  [/(?<![\w\\])___(\S(?:.*?\S)??)___(?!\w)/g, "$1"],
+  [/(?<![\w\\])__(\S(?:.*?\S)??)__(?!\w)/g, "$1"],
+  [/(?<![\w\\])_(\S(?:.*?\S)??)_(?!\w)/g, "$1"],
   [/==(\S(?:.*?\S)??)==/g, "$1"],
   [/~~(\S(?:.*?\S)??)~~/g, "$1"],
   [/^[ \t]+|[ \t]+$/gm, ""],

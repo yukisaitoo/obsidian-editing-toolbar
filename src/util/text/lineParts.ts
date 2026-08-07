@@ -7,9 +7,10 @@ export const BLOCK_PREFIX = new RegExp(
 );
 // A callout title renders as inline markdown, so it can never hold a heading.
 export const CALLOUT_TITLE = new RegExp(String.raw`^\s*(?:>\s*)+${CALLOUT}`);
-// Heading, bullet, ordered and task markers all give way to a new heading.
+// Heading, bullet, ordered and task markers all give way to a new heading. The task
+// box holds any single character, as Obsidian's own list regex does.
 export const LINE_MARKERS =
-  /^(?:(?:#{1,6}\s+)|(?:[-+*]\s+)|(?:\d+\.\s+)|(?:\[[ xX]\]\s+))+/;
+  /^(?:(?:#{1,6}\s+)|(?:[-+*]\s+)|(?:\d+[.)]\s+)|(?:\[[^\]]\]\s+))+/;
 
 // Everything ahead of the line's own text: indent, blockquote or callout lead-in,
 // and any heading, list or task marker.
