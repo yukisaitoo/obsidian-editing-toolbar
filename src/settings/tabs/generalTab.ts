@@ -44,6 +44,7 @@ export function renderGeneralTab(
             confirmWarning: true,
             onConfirm: async () => {
               await ctx.plugin.resetSettings();
+              ctx.refresh();
             },
           });
         });
@@ -86,7 +87,11 @@ function renderSwatchRow(
           opacity: config.opacity,
           defaultColor: ctx.plugin.settings[settingKey],
           onSave: saveColor,
-          onClear: () => saveColor(DEFAULT_SETTINGS[settingKey]),
+          // Pickr repaints and reseeds itself on save, but not on clear.
+          onClear: () => {
+            saveColor(DEFAULT_SETTINGS[settingKey]);
+            ctx.refresh();
+          },
         });
       }
     });

@@ -17,7 +17,6 @@ export default class EditingToolbarPlugin extends Plugin {
 
   settingTab!: EditingToolbarSettingTab;
 
-  private rebuildListeners = new Set<() => void>();
   private cssReady?: Promise<void>;
 
   // Obsidian injects styles.css only after onload() resolves, so a bar built during
@@ -95,12 +94,6 @@ export default class EditingToolbarPlugin extends Plugin {
     removeAllToolbars(this);
     this.applyRootColorVars();
     this.handleLayoutChange();
-    this.rebuildListeners.forEach((listener) => listener());
-  }
-
-  onRebuild(listener: () => void): () => void {
-    this.rebuildListeners.add(listener);
-    return () => this.rebuildListeners.delete(listener);
   }
 
   async saveSettings() {

@@ -1,16 +1,16 @@
 import { ButtonComponent, Command, Modal, TextComponent } from "obsidian";
 import { focusAfterOpen, submitOnEnter } from "src/modals/modalInput";
-import type EditingToolbarPlugin from "src/plugin/main";
+import type { SettingsTabContext } from "src/settings/settingsTab";
 import { strings } from "src/translations/helper";
 
 export class RenameCommandModal extends Modal {
   constructor(
-    private plugin: EditingToolbarPlugin,
+    private ctx: SettingsTabContext,
     private item: Command,
     // The settings list the command was rendered from.
     private owner: Command[],
   ) {
-    super(plugin.app);
+    super(ctx.app);
     this.containerEl.addClass("editing-toolbar-rename-modal");
   }
 
@@ -48,7 +48,7 @@ export class RenameCommandModal extends Modal {
     if (!this.owner.includes(this.item)) return;
 
     this.item.name = value;
-    await this.plugin.saveSettings();
-    this.plugin.rebuildToolbars();
+    await this.ctx.persist();
+    this.ctx.refresh();
   }
 }

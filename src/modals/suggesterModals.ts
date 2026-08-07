@@ -7,7 +7,7 @@ import {
   setIcon,
 } from "obsidian";
 import { getAppIcons } from "src/icons/appIcons";
-import type EditingToolbarPlugin from "src/plugin/main";
+import type { SettingsTabContext } from "src/settings/settingsTab";
 import { format, strings } from "src/translations/helper";
 import { toStoredCommand } from "src/util/commandStorage";
 
@@ -45,8 +45,8 @@ export class IconPicker extends FuzzySuggestModal<string> {
 }
 
 export class CommandPicker extends FuzzySuggestModal<Command> {
-  constructor(private plugin: EditingToolbarPlugin) {
-    super(plugin.app);
+  constructor(private ctx: SettingsTabContext) {
+    super(ctx.app);
     this.setPlaceholder(strings.chooseCommand);
   }
 
@@ -61,7 +61,7 @@ export class CommandPicker extends FuzzySuggestModal<Command> {
   }
 
   async onChooseItem(item: Command): Promise<void> {
-    if (this.plugin.settings.commands.some((v) => v.id === item.id)) {
+    if (this.ctx.plugin.settings.commands.some((v) => v.id === item.id)) {
       new Notice(
         format(strings.commandAlreadyExists, { name: this.getItemText(item) }),
         3000,
@@ -83,8 +83,8 @@ export class CommandPicker extends FuzzySuggestModal<Command> {
   // Reads the list afresh: the icon picker sits open in between, so the reference
   // from onChooseItem can be stale by the time an icon is chosen.
   private async addCommand(command: Command): Promise<void> {
-    this.plugin.settings.commands.push(toStoredCommand(command));
-    await this.plugin.saveSettings();
-    this.plugin.rebuildToolbars();
+    this.ctx.plugin.settings.commands.push(toStoredCommand(command));
+    await this.ctx.persist();
+    this.ctx.refresh();
   }
 }

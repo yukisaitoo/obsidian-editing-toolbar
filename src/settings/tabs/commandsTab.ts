@@ -68,9 +68,8 @@ export function renderCommandsTab(
       addButton
         .setIcon("plus")
         .setTooltip(strings.add)
-        // No rebuild here: this fires when the picker *opens*, long before a
-        // command is chosen. CommandPicker rebuilds once it has one.
-        .onClick(() => new CommandPicker(ctx.plugin).open());
+        // Fires when the picker opens, not when a command is chosen; it saves.
+        .onClick(() => new CommandPicker(ctx).open());
     });
 
   // The live settings array; every handler below mutates it in place, then saves.
@@ -220,8 +219,13 @@ function createDragList(ctx: SettingsTabContext): DragList {
       // owns the move so it lands exactly once. Within one list source === target,
       // where the splice pair is already a move.
       onSort: (evt) => {
-        if (evt.oldIndex == null || evt.newIndex == null) return;
         if (evt.to !== listEl) return;
+
+        // A row that changed lists keeps handlers bound to the old array. Above
+        // the guards below, which can return with the DOM moved but the model not.
+        if (evt.from !== evt.to) ctx.refresh();
+
+        if (evt.oldIndex == null || evt.newIndex == null) return;
 
         const source = listsByEl.get(evt.from);
         if (!source || evt.oldIndex >= source.length) return;
@@ -241,6 +245,7 @@ async function removeCommand(
 ): Promise<void> {
   list.remove(command);
   await ctx.persist();
+  ctx.refresh();
 }
 
 function configureInsertButton(
@@ -264,6 +269,7 @@ function configureInsertButton(
 
       list.splice(index + 1, 0, make());
       await ctx.persist();
+      ctx.refresh();
     });
 }
 
@@ -294,6 +300,7 @@ async function setStoredIcon(
 
   command.icon = icon;
   await ctx.persist();
+  ctx.refresh();
 }
 
 function configureRenameButton(
@@ -311,6 +318,6 @@ function configureRenameButton(
     )
     .setClass("editingToolbarSettingsButton")
     .onClick(() => {
-      new RenameCommandModal(ctx.plugin, command, list).open();
+      new RenameCommandModal(ctx, command, list).open();
     });
 }

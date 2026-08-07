@@ -41,20 +41,37 @@ export function renderAppearanceTab(
   containerEl: HTMLElement,
 ): void {
   const toolbarContainer = containerEl.createDiv("custom-toolbar-container");
-  renderColorSetting(ctx, toolbarContainer, {
-    name: strings.toolbarBackgroundColor,
-    desc: strings.setBackgroundColorToolbar,
-    cls: "toolbar_background",
-    key: "toolbarBackgroundColor",
-    swatches: BACKGROUND_SWATCHES,
-  });
-  renderColorSetting(ctx, toolbarContainer, {
-    name: strings.toolbarIconColor,
-    desc: strings.setColorToolbarIcon,
-    cls: "toolbar_icon",
-    key: "toolbarIconColor",
-    swatches: ICON_SWATCHES,
-  });
+
+  // On the container, not the bar: the vars inherit, and the controls that
+  // repaint the preview are built before the bar exists.
+  const applyPreview = () =>
+    applyAppearanceVars(toolbarContainer, ctx.plugin.settings);
+  applyPreview();
+
+  renderColorSetting(
+    ctx,
+    toolbarContainer,
+    {
+      name: strings.toolbarBackgroundColor,
+      desc: strings.setBackgroundColorToolbar,
+      cls: "toolbar_background",
+      key: "toolbarBackgroundColor",
+      swatches: BACKGROUND_SWATCHES,
+    },
+    applyPreview,
+  );
+  renderColorSetting(
+    ctx,
+    toolbarContainer,
+    {
+      name: strings.toolbarIconColor,
+      desc: strings.setColorToolbarIcon,
+      cls: "toolbar_icon",
+      key: "toolbarIconColor",
+      swatches: ICON_SWATCHES,
+    },
+    applyPreview,
+  );
 
   new Setting(toolbarContainer)
     .setName(strings.toolbarIconSize)
@@ -66,6 +83,7 @@ export function renderAppearanceTab(
         .setDisplayFormat((value) => `${value}px`)
         .onChange(async (value) => {
           getAppearanceBucket(ctx.plugin.settings).toolbarIconSize = value;
+          applyPreview();
           await ctx.persist();
         });
     });
@@ -85,6 +103,7 @@ function renderColorSetting(
   ctx: SettingsTabContext,
   containerEl: HTMLElement,
   config: ColorSettingConfig,
+  applyPreview: () => void,
 ): void {
   new Setting(containerEl)
     .setName(config.name)
@@ -113,11 +132,15 @@ function renderColorSetting(
           ) ?? "#000000",
         onSave: (hexColor) => {
           getAppearanceBucket(ctx.plugin.settings)[config.key] = hexColor;
+          pickerContainer.removeClass("pickr-unset");
+          applyPreview();
           void ctx.persist();
         },
+        // Pickr repaints and reseeds itself on save, but not on clear.
         onClear: () => {
           delete getAppearanceBucket(ctx.plugin.settings)[config.key];
           void ctx.persist();
+          ctx.refresh();
         },
       });
     });
@@ -148,6 +171,4 @@ function renderPreview(
     button.setTooltip(displayName(ctx.app, command));
     applyButtonIcon(button, displayIcon(ctx.app, command));
   });
-
-  applyAppearanceVars(previewBar, ctx.plugin.settings);
 }

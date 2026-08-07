@@ -17,7 +17,7 @@ import { strings } from "src/translations/helper";
 
 const DELETE_CONFIRM_TIMEOUT = 3500;
 
-const RERENDER_DELAY = 100;
+const RERENDER_DELAY = 0;
 
 type TabId = "general" | "appearance" | "commands";
 
@@ -31,6 +31,8 @@ export interface SettingsTabContext {
   app: App;
   plugin: EditingToolbarPlugin;
   persist(): Promise<void>;
+  // Only for state a handler cannot repaint in place.
+  refresh(): void;
   createPickr(options: ColorPickrOptions): Pickr;
   createSortable(el: HTMLElement, options: Sortable.Options): void;
   createDeleteButton(
@@ -50,8 +52,6 @@ export class EditingToolbarSettingTab extends PluginSettingTab {
   constructor(app: App, plugin: EditingToolbarPlugin) {
     super(app, plugin);
     this.plugin = plugin;
-
-    this.plugin.register(this.plugin.onRebuild(() => this.scheduleRerender()));
   }
 
   setActiveTab(tab: TabId): void {
@@ -115,6 +115,7 @@ export class EditingToolbarSettingTab extends PluginSettingTab {
         await this.plugin.saveSettings();
         this.plugin.rebuildToolbars();
       },
+      refresh: () => this.scheduleRerender(),
       createPickr: (options) => {
         const pickr = createColorPickr(options);
         this.pickrs.push(pickr);
@@ -128,9 +129,8 @@ export class EditingToolbarSettingTab extends PluginSettingTab {
     };
   }
 
-  // A rebuild re-renders this pane in place, tearing down the Pickr or Sortable
-  // whose own callback asked for it. Defer past the current event, and coalesce
-  // bursts.
+  // Callers run inside the callback of the Sortable or Pickr that
+  // destroyTabResources() then tears down, so this must not run during it.
   private readonly scheduleRerender = debounce(
     () => {
       if (!this.isOpen) return;
