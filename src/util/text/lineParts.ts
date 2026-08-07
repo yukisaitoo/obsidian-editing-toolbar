@@ -1,7 +1,12 @@
-// Blockquote and callout lead-in. Held aside and re-attached, so a heading change
-// never rewrites it. `[!name]` requires the `!` so a top-level `[x] task` is not
-// mistaken for a callout.
-export const BLOCK_PREFIX = /^\s*(?:>\s*)*(?:\[!\w+\]\s*)?/;
+// Obsidian's own callout syntax, read from the text after the blockquote markers.
+const CALLOUT = String.raw`\[![^\]]+\][-+]?(?=\s|$)`;
+// Blockquote and callout lead-in. Held aside and re-attached, so a line change never
+// rewrites it.
+export const BLOCK_PREFIX = new RegExp(
+  String.raw`^\s*(?:(?:>\s*)+(?:${CALLOUT}\s*)?)?`,
+);
+// A callout title renders as inline markdown, so it can never hold a heading.
+export const CALLOUT_TITLE = new RegExp(String.raw`^\s*(?:>\s*)+${CALLOUT}`);
 // Heading, bullet, ordered and task markers all give way to a new heading.
 export const LINE_MARKERS =
   /^(?:(?:#{1,6}\s+)|(?:[-+*]\s+)|(?:\d+\.\s+)|(?:\[[ xX]\]\s+))+/;

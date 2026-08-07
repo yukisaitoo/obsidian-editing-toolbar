@@ -1,5 +1,9 @@
 import { Editor } from "obsidian";
-import { BLOCK_PREFIX, LINE_MARKERS } from "src/util/text/lineParts";
+import {
+  BLOCK_PREFIX,
+  CALLOUT_TITLE,
+  LINE_MARKERS,
+} from "src/util/text/lineParts";
 
 const HEADING = /^#{1,6}\s+/;
 
@@ -16,10 +20,15 @@ export function setHeader(marker: string, editor: Editor) {
 
   editor.processLines(
     (_line, lineText) => {
-      if (parseHeadingLine(lineText).heading !== marker) uniform = false;
-      return true;
+      const isCalloutTitle = CALLOUT_TITLE.test(lineText);
+      if (!isCalloutTitle && parseHeadingLine(lineText).heading !== marker) {
+        uniform = false;
+      }
+      return isCalloutTitle;
     },
-    (line, lineText) => {
+    (line, lineText, isCalloutTitle) => {
+      if (isCalloutTitle) return;
+
       const { prefix, body } = parseHeadingLine(lineText);
       const removing = marker === "" || uniform;
       const stripped = removing
