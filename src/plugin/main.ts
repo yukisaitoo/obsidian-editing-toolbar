@@ -39,10 +39,10 @@ export default class EditingToolbarPlugin extends Plugin {
     registerCommands(this);
 
     this.registerEvent(
-      this.app.workspace.on("active-leaf-change", this.handleEditingToolbar),
+      this.app.workspace.on("active-leaf-change", this.handleLayoutChange),
     );
     this.registerEvent(
-      this.app.workspace.on("layout-change", this.handleEditingToolbar),
+      this.app.workspace.on("layout-change", this.handleLayoutChange),
     );
     // A window born after the last rebuild has none of the root colour vars yet.
     this.registerEvent(
@@ -99,7 +99,7 @@ export default class EditingToolbarPlugin extends Plugin {
 
   // Safe to call as often as the workspace fires events: builds only what is missing.
   // A layout change can move the pane out from under an open popover, so close first.
-  handleEditingToolbar = () => {
+  handleLayoutChange = () => {
     closeMoreOverflowPopovers();
     syncToolbars(this);
   };
@@ -107,7 +107,7 @@ export default class EditingToolbarPlugin extends Plugin {
   rebuildToolbars(): void {
     removeAllToolbars(this);
     this.applyRootColorVars();
-    this.handleEditingToolbar();
+    this.handleLayoutChange();
     this.rebuildListeners.forEach((listener) => listener());
   }
 

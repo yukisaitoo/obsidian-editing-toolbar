@@ -33,6 +33,12 @@ export function renderToolbarCommands(
       return;
     }
 
+    // A divider is a rule, not a control: no command to run, nothing to label.
+    if (isDivider(item.id)) {
+      ctx.bar.createDiv(DIVIDER_COMMAND_ID);
+      return;
+    }
+
     if (isColorPickerCommand(item.id)) {
       createColorPickerButton(ctx.app, ctx.plugin, ctx.bar, item);
       return;
@@ -48,7 +54,6 @@ function renderPlainButton(ctx: RenderContext, item: Command) {
     .onClick(() => runCommandById(ctx.app, item.id));
 
   button.setClass("editingToolbarCommandItem");
-  if (isDivider(item.id)) button.setClass(DIVIDER_COMMAND_ID);
   applyButtonIcon(button, item.icon);
 }
 
@@ -100,7 +105,6 @@ function renderFlyout(ctx: RenderContext, item: SubmenuCommand) {
   parent.buttonEl.insertAdjacentElement("afterbegin", submenu);
 
   item.SubmenuCommands.forEach((subitem) => {
-    // A divider is a rule, not a control: no command to run, nothing to label.
     if (isDivider(subitem.id)) {
       submenu.createDiv(DIVIDER_COMMAND_ID);
       return;

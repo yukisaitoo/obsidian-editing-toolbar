@@ -4,7 +4,6 @@ import { labelFor } from "src/commands/commandLabels";
 
 export type SubmenuCommand = Command & { SubmenuCommands: Command[] };
 
-// A submenu parent holds a list of children, empty until the user drags some in.
 export function hasSubmenu(command: Command): command is SubmenuCommand {
   return Array.isArray(command.SubmenuCommands);
 }
@@ -24,13 +23,12 @@ export function commandLabel(name: string): string {
   return end === -1 ? name : name.slice(end + SOURCE_SEPARATOR.length);
 }
 
-// `app.commands.listCommands()` hands back the LIVE registry objects. Storing one
-// in settings means a later rename or icon change writes straight through to
-// Obsidian's command palette, so everything entering settings is copied to plain
-// data first.
+// `listCommands()` hands back the live registry objects, and storing one would let
+// a later rename or icon change write straight through to Obsidian's palette, so
+// everything entering settings is copied to plain data first.
 export function toStoredCommand(command: Command): Command {
-  // A labelled id wears the toolbar's own name and icon wherever it came from, so a
-  // core command picked from the list matches the one that ships in the defaults.
+  // A core command picked from the list gets the toolbar's own label, matching the
+  // one that ships in the defaults.
   const preferred = labelFor(command.id);
 
   const stored: Command = {

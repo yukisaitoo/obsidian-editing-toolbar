@@ -26,15 +26,13 @@ type FlatSettingKey = Exclude<
   "commands" | "appearance"
 >;
 
-// Every custom swatch reaches note markup by way of a click, so all of them are hex.
+// Custom swatch colours end up in note markup, so they have to be hex.
 const customColorSanitisers = Object.fromEntries(
   [...customColorKeys("custom_bg"), ...customColorKeys("custom_fc")].map(
     (key) => [key, toHexColor],
   ),
 ) as Record<CustomColorKey, typeof toHexColor>;
 
-// Every flat setting the payload carries, paired with the sanitiser its value must
-// pass. The appearance overrides are nested, so they travel separately.
 const GENERAL_SANITISERS: {
   [K in FlatSettingKey]: (
     value: EditingToolbarSettings[K],
@@ -51,8 +49,8 @@ const GENERAL_SETTING_KEYS = Object.keys(
 ) as FlatSettingKey[];
 
 // `appearance` and `commands` are null when the file did not mention them at all,
-// which is distinct from an empty one. `skipped` names every value that would not
-// parse.
+// as opposed to mentioning an empty one. `skipped` names every value that failed
+// to parse.
 interface ParsedSettings {
   general: Partial<EditingToolbarSettings>;
   appearance: AppearanceOverrides | null;
@@ -60,9 +58,8 @@ interface ParsedSettings {
   skipped: string[];
 }
 
-// The one place data.json is inspected: everything past here works with typed data.
-// A value that will not parse costs itself alone and is named in `skipped`; null is
-// reserved for a file that is not an object at all.
+// The one place data.json is inspected; everything past here works with typed data.
+// A bad value costs itself alone; null means the file was not an object at all.
 export function parseSettings(data: JsonPayload): ParsedSettings | null {
   if (!data || typeof data !== "object") return null;
 
@@ -73,7 +70,6 @@ export function parseSettings(data: JsonPayload): ParsedSettings | null {
     const value = data[key];
     if (value === undefined) continue;
 
-    // A key left out of `general` keeps the default.
     const sanitise = GENERAL_SANITISERS[key] as (
       value: JsonPayload,
     ) => JsonPayload;
@@ -114,7 +110,7 @@ function parseAppearance(
     const entry = value[key];
     if (entry === undefined) return;
 
-    // An omitted key already means "use DEFAULT_APPEARANCE", so dropping it recovers.
+    // Dropping a bad key recovers: omitted already means "use DEFAULT_APPEARANCE".
     const clean =
       typeof entry === typeof DEFAULT_APPEARANCE[key] ? sanitise(entry) : null;
 

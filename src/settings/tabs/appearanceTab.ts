@@ -64,9 +64,7 @@ export function renderAppearanceTab(
         .setDisplayFormat((value) => `${value}px`)
         .onChange(async (value) => {
           getAppearanceBucket(ctx.plugin.settings).toolbarIconSize = value;
-
-          await ctx.plugin.saveSettings();
-          ctx.applyChanges();
+          await ctx.persist();
         });
     });
 
@@ -79,11 +77,6 @@ interface ColorSettingConfig {
   cls: string;
   key: "toolbarBackgroundColor" | "toolbarIconColor";
   swatches: string[];
-}
-
-function applyColor(ctx: SettingsTabContext): void {
-  void ctx.plugin.saveSettings();
-  ctx.applyChanges();
 }
 
 function renderColorSetting(
@@ -118,11 +111,11 @@ function renderColorSetting(
           ) ?? "#000000",
         onSave: (hexColor) => {
           getAppearanceBucket(ctx.plugin.settings)[config.key] = hexColor;
-          applyColor(ctx);
+          void ctx.persist();
         },
         onClear: () => {
           delete getAppearanceBucket(ctx.plugin.settings)[config.key];
-          applyColor(ctx);
+          void ctx.persist();
         },
       });
     });
@@ -143,7 +136,7 @@ function renderPreview(
   const previewBar = wrapper.createDiv();
   previewBar.addClass("editingToolbarDefaultAesthetic");
   // The shared chrome class, but not the live-instance one: the toolbar lifecycle
-  // (removeAllToolbars, toolbarIn) must never see the preview.
+  // (removeAllToolbars, findToolbar) must never see the preview.
   previewBar.addClass(SHARED_BAR_CLASS);
 
   PREVIEW_COMMANDS.forEach((id) => {

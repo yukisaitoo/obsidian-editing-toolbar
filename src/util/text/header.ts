@@ -9,7 +9,7 @@ const LINE_MARKERS =
   /^(?:(?:#{1,6}\s+)|(?:[-+*]\s+)|(?:\d+\.\s+)|(?:\[[ xX]\]\s+))+/;
 const HEADING = /^#{1,6}\s+/;
 
-function parse(lineText: string) {
+function parseHeadingLine(lineText: string) {
   const prefix = lineText.match(BLOCK_PREFIX)?.[0] ?? "";
   const body = lineText.slice(prefix.length);
   return { prefix, body, heading: body.match(HEADING)?.[0].trim() ?? "" };
@@ -22,11 +22,11 @@ export function setHeader(marker: string, editor: Editor) {
 
   editor.processLines(
     (_line, lineText) => {
-      if (parse(lineText).heading !== marker) uniform = false;
+      if (parseHeadingLine(lineText).heading !== marker) uniform = false;
       return true;
     },
     (line, lineText) => {
-      const { prefix, body } = parse(lineText);
+      const { prefix, body } = parseHeadingLine(lineText);
       const removing = marker === "" || uniform;
       const stripped = removing
         ? (body.match(HEADING)?.[0].length ?? 0)

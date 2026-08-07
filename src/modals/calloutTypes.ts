@@ -114,7 +114,6 @@ const BUILT_IN_CALLOUT_TYPES: readonly BuiltInCalloutType[] = [
   },
 ];
 
-// One pickable entry per built-in, followed by one for each of its aliases.
 export function buildCalloutOptions(): CalloutTypeInfo[] {
   const options: CalloutTypeInfo[] = [];
 

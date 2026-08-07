@@ -1,6 +1,4 @@
-/* ==========================================================================
-   1. TOKENS. Overridden at runtime from plugin settings.
-   ========================================================================== */
+/* Tokens, overridden at runtime from plugin settings. */
 
 :root {
   --editing-toolbar-background-color: var(--background-primary);
@@ -13,28 +11,20 @@
   --editing-toolbar-cross: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1024 1024'%3E%3Cpath d='M511.674077 66.707284c-246.52265 0-446.347744 199.835328-446.347744 446.347744s199.825095 446.356954 446.347744 446.356954c246.50423 0 446.348768-199.844537 446.348768-446.356954S758.177284 66.707284 511.674077 66.707284zM744.967424 667.159826c21.8701 21.8701 21.8701 57.310264 0 79.199807-21.8701 21.851681-57.30924 21.851681-79.198783-0.019443L511.674077 592.264045 357.56007 746.359632c-21.8701 21.8701-57.30924 21.851681-79.17934-0.019443s-21.8701-57.290821 0-79.160921L432.493713 513.065262 278.379707 358.950232c-21.8701-21.86089-21.8701-57.328683 0-79.18855 21.8701-21.87931 57.30924-21.87931 79.17934 0l154.114007 154.104797 154.095587-154.104797c21.889543-21.87931 57.32766-21.87931 79.198783-0.010233 21.8701 21.8701 21.8701 57.348126 0 79.207993L590.89128 513.065262 744.967424 667.159826z'/%3E%3C/svg%3E");
 }
 
-/* ==========================================================================
-   2. TOOLBAR. The bar itself. Two hooks are in play throughout §2-§4:
-
-     .editing-toolbar-bar        chrome and layout. Worn by the real bar AND by
-                                 the settings preview, which is a plain div in
-                                 normal flow.
-     .editingToolbarModalBar     a LIVE bar in the workspace. Also what every JS
-     .editingToolbarPopoverBar   lifecycle query matches, so the preview must
-                                 never wear it. Anything that would misplace a
-                                 static preview (stacking, hiding) belongs
-                                 here rather than on the shared class.
-   ========================================================================== */
+/* The toolbar. Two hooks are in play throughout: .editing-toolbar-bar is chrome
+   and layout, worn by the real bar and by the settings preview (a plain div in
+   normal flow). .editingToolbarModalBar and .editingToolbarPopoverBar mark a live
+   bar in the workspace and are what the JS lifecycle queries match, so the preview
+   must never wear them; anything that would misplace a static preview (stacking,
+   hiding) belongs on them, not on the shared class. */
 
 .editing-toolbar-bar {
   position: relative;
   display: flex;
   height: calc(var(--editing-toolbar-icon-size) + 18px);
-  /* The bar can't grow wider than the pane (which is what pushed icons
-     off-screen). Keep it pinned to the pane width and let JS
-     (reflowToolbarOverflow) move the excess into the "more" popover. Overflow
-     must stay visible: the §4 submenu flyouts hang below the bar's box, so any
-     clipping here reduces them to a hairline. */
+  /* The bar can't grow wider than the pane; reflowToolbarOverflow() moves the
+     excess into the » popover. Overflow must stay visible: submenu flyouts hang
+     below the bar's box, so any clipping here reduces them to a hairline. */
   min-width: 0;
   max-width: 100%;
   overflow: visible;
@@ -69,9 +59,9 @@
   cursor: default;
 }
 
-/* Button chrome shared by both bars. Dividers deliberately match here too, so
-   they inherit border/box-shadow resets; §4 narrows their box afterwards and
-   relies on source order to win (equal specificity). */
+/* Button chrome shared by both bars. Dividers match here too, so they inherit
+   the border/box-shadow resets; the divider rules further down narrow their box
+   and rely on source order to win (equal specificity). */
 :is(.editing-toolbar-bar, .editingToolbarPopoverBar) :is(.editingToolbarCommandItem, button.editingToolbarCommandsubItem) {
   display: inline-flex;
   /* Grows with the icon so large sizes push the bar taller rather than
@@ -118,7 +108,7 @@
   align-items: center;
 }
 
-/* --- Default aesthetic ---------------------------------------------------- */
+/* Default aesthetic */
 
 .editingToolbarDefaultAesthetic {
   background-color: var(--editing-toolbar-background-color);
@@ -143,18 +133,16 @@
   opacity: 0;
 }
 
-/* ==========================================================================
-   3. TOOLBAR. Overflow popover bar.
-   ========================================================================== */
+/* Overflow popover bar */
 
 .editingToolbarPopoverBar:not(.editing-toolbar-more-open) {
   display: none;
 }
 
-/* left/top come from anchorPopoverToButton(), measured off the » button. Fixed
-   rather than absolute on purpose: the bar is inserted into whichever element
-   the view type maps to, and none of those is a guaranteed positioned ancestor,
-   so CSS offsets here would resolve against something arbitrary. */
+/* left/top come from anchorPopoverToButton(), measured off the » button. Fixed,
+   not absolute: the bar is inserted into whichever element the view type maps to,
+   none of which is a guaranteed positioned ancestor, so absolute offsets would
+   resolve against something arbitrary. */
 .editingToolbarPopoverBar {
   position: fixed;
   display: inline-flex;
@@ -169,13 +157,11 @@
   z-index: var(--layer-popover);
 }
 
-/* ==========================================================================
-   4. SUBMENUS, DIVIDERS AND COLOUR PICKERS
-   ========================================================================== */
+/* Submenus, dividers and colour pickers */
 
-/* Chevron affordance on any button that opens a submenu. Drawn as a mask rather
-   than an image so it takes the configured icon colour; a fill inside a data-URI
-   SVG can't be reached from here, and currentColor doesn't cross into one. */
+/* Chevron affordance on any button that opens a submenu. A mask, not an image,
+   so it takes the configured icon colour; a fill inside a data-URI SVG can't be
+   reached from here, and currentColor doesn't cross into one. */
 button.editingToolbarCommandsubItem::after {
   content: "";
   display: inline-block;
@@ -200,9 +186,9 @@ button.editingToolbarCommandsubItem::after {
    Only visibility transitions: a transform transition would animate the shift
    and make the next measurement read a mid-flight position.
 
-   The visibility transition can't go to 0: a panel could sit a few px below 
+   The visibility transition can't go to 0: a panel could sit a few px below
    the parent (see .x-color-picker-wrapper's top offset). Without a cushion
-   the panel blinks out mid-travel and, being visibility: hidden, can't be 
+   the panel blinks out mid-travel and, being visibility: hidden, can't be
    hovered back. Crossing a few px takes single-digit ms. */
 :is(.editing-toolbar-bar, .editingToolbarPopoverBar) button.editingToolbarCommandsubItem>.subitem {
   position: absolute;
@@ -246,17 +232,12 @@ button.editingToolbarCommandsubItem::after {
   background-color: transparent;
 }
 
-/* --- Dividers ------------------------------------------------------------
-   The bar has the horizontal room to show separators; the popover, which wraps,
-   does not. Scoped to direct children so dividers inside a submenu flyout keep
-   showing. These rules must stay after §2: the second selector ties the base
-   button rule on specificity and wins on source order alone. */
+/* Dividers. A plain div, never a button, so it takes no hover, no click and no
+   tab stop, and so it declares its own box rather than inheriting the button
+   chrome above. It has no content, so the width has to be explicit or it
+   collapses to nothing. */
 
-.editingToolbarPopoverBar>button.editingToolbar-Divider-Line {
-  display: none;
-}
-
-:is(.editing-toolbar-bar, .editingToolbarPopoverBar) button.editingToolbar-Divider-Line {
+:is(.editing-toolbar-bar, .editingToolbarPopoverBar) div.editingToolbar-Divider-Line {
   display: inline-flex;
   width: 0.6px;
   min-width: unset;
@@ -269,39 +250,27 @@ button.editingToolbarCommandsubItem::after {
   align-self: center;
 }
 
-.theme-dark :is(.editing-toolbar-bar, .editingToolbarPopoverBar) button.editingToolbar-Divider-Line {
+.theme-dark :is(.editing-toolbar-bar, .editingToolbarPopoverBar) div.editingToolbar-Divider-Line {
   background-color: #4f4f5188;
 }
 
-:is(.editing-toolbar-bar, .editingToolbarPopoverBar) button.editingToolbar-Divider-Line svg {
+/* The bar has the horizontal room to show separators; the popover, which wraps,
+   does not. Scoped to direct children so dividers inside a submenu flyout keep
+   showing, and placed after the rule above, which it ties on specificity and so
+   beats on source order alone. */
+.editingToolbarPopoverBar>div.editingToolbar-Divider-Line {
   display: none;
 }
 
-/* A flyout is a flex row like the bar, so its divider is the same upright
-   sliver. A plain div, never a button, so it cannot take hover or a click,
-   which is why it needs an explicit width: with no content it would otherwise
-   collapse to nothing. */
+/* A flyout is a flex row like the bar, so its divider is already the same
+   upright sliver; a wrapping column just has the room to set it apart more. */
 :is(.editing-toolbar-bar, .editingToolbarPopoverBar) .subitem > div.editingToolbar-Divider-Line {
-  width: 0.6px;
-  min-width: unset;
-  height: calc(var(--editing-toolbar-icon-size) + 4px);
   margin: 0 4px;
-  padding: 0;
-  background-color: var(--background-modifier-border);
-  opacity: 0.8;
-  flex-shrink: 0;
-  align-self: center;
 }
 
-.theme-dark :is(.editing-toolbar-bar, .editingToolbarPopoverBar) .subitem > div.editingToolbar-Divider-Line {
-  background-color: #4f4f5188;
-}
+/* Colour picker popover */
 
-/* --- Colour picker popover ------------------------------------------------ */
-
-/* Centred on its .subitem. (Was right:-50% + translateX(50%), which only
-   centred because the colour pickers' .subitem collapses to zero width; its
-   sole child is this panel, and this panel is absolute.) */
+/* Centred on the colour picker's zero-width .subitem. */
 .x-color-picker-wrapper {
   position: absolute;
   top: 1.8em;
@@ -350,7 +319,7 @@ button.editingToolbarCommandsubItem::after {
   box-shadow: 0 3px 6px -4px rgba(0, 0, 0, .12), 0 6px 16px 0 rgba(0, 0, 0, .08), 0 9px 28px 8px rgba(0, 0, 0, .05);
 }
 
-/* --- Dropdown-menu variant (Obsidian Menu, rendered outside the bar) ------- */
+/* Dropdown-menu variant (Obsidian Menu, rendered outside the bar) */
 
 /* Category headings are rendered as disabled menu items; the ::before/::after
    rules draw the rule line on either side of the label. */
@@ -408,9 +377,7 @@ button.editingToolbarCommandsubItem::after {
   z-index: 1000;
 }
 
-/* ==========================================================================
-   5. SETTINGS TAB
-   ========================================================================== */
+/* Settings tab */
 
 .editing-toolbar-tabs {
   display: flex;
@@ -443,7 +410,7 @@ button.editingToolbarCommandsubItem::after {
   align-items: center;
 }
 
-/* Doubled class beats Obsidian's `.setting-item .setting-item-*` rules, which 
+/* Doubled class beats Obsidian's `.setting-item .setting-item-*` rules, which
    otherwise force the command row onto a single non-wrapping line. */
 .editing-toolbar-content .editingToolbarCommandItem.editingToolbarCommandItem {
   flex-wrap: wrap;
@@ -456,7 +423,7 @@ button.editingToolbarCommandsubItem::after {
   }
 }
 
-/* --- Section containers --------------------------------------------------- */
+/* Section containers */
 
 .editing-toolbar-settings .custom-paintbrush-container,
 .editing-toolbar-settings .command-lists-container {
@@ -472,7 +439,7 @@ button.editingToolbarCommandsubItem::after {
   background-color: var(--background-secondary);
 }
 
-/* --- Command list rows and drag-and-drop ---------------------------------- */
+/* Command list rows and drag-and-drop */
 
 .editingToolbarSettingsTabsContainer {
   padding-top: var(--size-4-2);
@@ -594,7 +561,7 @@ button.editingToolbarCommandsubItem::after {
   mask: var(--editing-toolbar-cross) no-repeat center / contain;
 }
 
-/* --- Settings controls ---------------------------------------------------- */
+/* Settings controls */
 
 button.editingToolbarSettingsButton {
   padding: 4px 14px;
@@ -605,6 +572,10 @@ button.editingToolbarSettingsButton {
   display: flex;
   max-width: 1.3em;
   max-height: 1.3em;
+}
+
+button.editing-toolbar-delete svg {
+  color: var(--text-error);
 }
 
 .setting-item button.editingToolbarSettingsIcon {
@@ -685,7 +656,7 @@ button.editingToolbarSettingsButton {
   background: none;
 }
 
-/* --- Live toolbar preview ------------------------------------------------- */
+/* Live toolbar preview */
 
 .editing-toolbar-settings .toolbar-preview-section {
   margin-top: 20px;
@@ -699,11 +670,9 @@ button.editingToolbarSettingsButton {
   padding: 15px;
 }
 
-/* ==========================================================================
-   6. MODALS
-   ========================================================================== */
+/* Modals */
 
-/* --- Rename modal (renameCommandModal.ts) -------------------------------- */
+/* Rename modal (renameCommandModal.ts) */
 
 .modal-container.editing-toolbar-rename-modal .modal-title {
   display: none;
@@ -719,7 +688,7 @@ button.editingToolbarSettingsButton {
   box-shadow: none;
 }
 
-/* --- Insert-callout modal ------------------------------------------------- */
+/* Insert-callout modal */
 
 .insert-callout-modal textarea {
   width: 100%;
@@ -756,7 +725,7 @@ button.editingToolbarSettingsButton {
   opacity: 0.7;
 }
 
-/* --- Confirm modal -------------------------------------------------------- */
+/* Confirm modal */
 
 .confirm-modal .confirm-modal-buttons {
   display: flex;
@@ -769,31 +738,16 @@ button.editingToolbarSettingsButton {
   line-height: 1.6;
 }
 
-/* ==========================================================================
-   7. EDITOR AND HOST INTEGRATIONS
-   ========================================================================== */
-
-/* --- Highlights written by setBackgroundColor() --------------------------- */
-
-/* The UA stylesheet declares `mark { background: mark; color: marktext }`. A
-   declaration on the element always beats an inherited value, and inheritance
-   only fills in where nothing is declared, so `body { color: var(--text-normal) }`
-   never reaches a `<mark>`, and the text lands on the `marktext` system colour.
-   Our highlights set a background and deliberately leave the text alone, so the
-   UA declaration has to be handed back to inheritance explicitly.
-
-   Class-scoped so nothing else is touched: Obsidian's native `==highlight==` and
-   any hand-written `<mark>` keep their own styling. Marks of ours that still
-   carry an inline `color:` keep that too, because a style attribute outranks any
-   stylesheet rule, until a recolour rewrites them. */
+/* Highlights written by setBackgroundColor(). The UA stylesheet declares
+   `mark { color: marktext }`, which beats anything inherited, so the text colour
+   has to be handed back to inheritance explicitly. Class-scoped so Obsidian's
+   native ==highlight== and hand-written <mark>s keep their own styling. */
 mark.editing-toolbar-highlight {
   color: inherit;
 }
 
-/* ==========================================================================
-   8. VENDORED. Pickr 1.8.4 "nano" theme (@simonwep/pickr/dist/themes/nano.min.css)
-   Inlined because the plugin ships styles.css directly to the vault and no
-   longer bundles CSS through the build. Update if the pinned pickr version changes.
-   ========================================================================== */
+/* Vendored: Pickr 1.8.4 "nano" theme (@simonwep/pickr/dist/themes/nano.min.css),
+   inlined because styles.css ships directly to the vault with no CSS build step.
+   Update when the pinned pickr version changes. */
 /*! Pickr 1.8.4 MIT | https://github.com/Simonwep/pickr */
 .pickr{position:relative;overflow:visible;transform:translateY(0)}.pickr *{box-sizing:border-box;outline:none;border:none;-webkit-appearance:none}.pickr .pcr-button{position:relative;height:2em;width:2em;padding:0.5em;cursor:pointer;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Roboto","Helvetica Neue",Arial,sans-serif;border-radius:.15em;background:url('data:image/svg+xml;utf8, <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 50 50" stroke="%2342445A" stroke-width="5px" stroke-linecap="round"><path d="M45,45L5,5"></path><path d="M45,5L5,45"></path></svg>') no-repeat center;background-size:0;transition:all 0.3s}.pickr .pcr-button::before{position:absolute;content:'';top:0;left:0;width:100%;height:100%;background:url('data:image/svg+xml;utf8, <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2 2"><path fill="white" d="M1,0H2V1H1V0ZM0,1H1V2H0V1Z"/><path fill="gray" d="M0,0H1V1H0V0ZM1,1H2V2H1V1Z"/></svg>');background-size:.5em;border-radius:.15em;z-index:-1}.pickr .pcr-button::before{z-index:initial}.pickr .pcr-button::after{position:absolute;content:'';top:0;left:0;height:100%;width:100%;transition:background 0.3s;background:var(--pcr-color);border-radius:.15em}.pickr .pcr-button.clear{background-size:70%}.pickr .pcr-button.clear::before{opacity:0}.pickr .pcr-button.clear:focus{box-shadow:0 0 0 1px rgba(255,255,255,0.85),0 0 0 3px var(--pcr-color)}.pickr .pcr-button.disabled{cursor:not-allowed}.pickr *,.pcr-app *{box-sizing:border-box;outline:none;border:none;-webkit-appearance:none}.pickr input:focus,.pickr input.pcr-active,.pickr button:focus,.pickr button.pcr-active,.pcr-app input:focus,.pcr-app input.pcr-active,.pcr-app button:focus,.pcr-app button.pcr-active{box-shadow:0 0 0 1px rgba(255,255,255,0.85),0 0 0 3px var(--pcr-color)}.pickr .pcr-palette,.pickr .pcr-slider,.pcr-app .pcr-palette,.pcr-app .pcr-slider{transition:box-shadow 0.3s}.pickr .pcr-palette:focus,.pickr .pcr-slider:focus,.pcr-app .pcr-palette:focus,.pcr-app .pcr-slider:focus{box-shadow:0 0 0 1px rgba(255,255,255,0.85),0 0 0 3px rgba(0,0,0,0.25)}.pcr-app{position:fixed;display:flex;flex-direction:column;z-index:10000;border-radius:0.1em;background:#fff;opacity:0;visibility:hidden;transition:opacity 0.3s, visibility 0s 0.3s;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Roboto","Helvetica Neue",Arial,sans-serif;box-shadow:0 0.15em 1.5em 0 rgba(0,0,0,0.1),0 0 1em 0 rgba(0,0,0,0.03);left:0;top:0}.pcr-app.visible{transition:opacity 0.3s;visibility:visible;opacity:1}.pcr-app .pcr-swatches{display:flex;flex-wrap:wrap;margin-top:0.75em}.pcr-app .pcr-swatches.pcr-last{margin:0}@supports (display: grid){.pcr-app .pcr-swatches{display:grid;align-items:center;grid-template-columns:repeat(auto-fit, 1.75em)}}.pcr-app .pcr-swatches>button{font-size:1em;position:relative;width:calc(1.75em - 5px);height:calc(1.75em - 5px);border-radius:0.15em;cursor:pointer;margin:2.5px;flex-shrink:0;justify-self:center;transition:all 0.15s;overflow:hidden;background:transparent;z-index:1}.pcr-app .pcr-swatches>button::before{position:absolute;content:'';top:0;left:0;width:100%;height:100%;background:url('data:image/svg+xml;utf8, <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2 2"><path fill="white" d="M1,0H2V1H1V0ZM0,1H1V2H0V1Z"/><path fill="gray" d="M0,0H1V1H0V0ZM1,1H2V2H1V1Z"/></svg>');background-size:6px;border-radius:.15em;z-index:-1}.pcr-app .pcr-swatches>button::after{content:'';position:absolute;top:0;left:0;width:100%;height:100%;background:var(--pcr-color);border:1px solid rgba(0,0,0,0.05);border-radius:0.15em;box-sizing:border-box}.pcr-app .pcr-swatches>button:hover{filter:brightness(1.05)}.pcr-app .pcr-swatches>button:not(.pcr-active){box-shadow:none}.pcr-app .pcr-interaction{display:flex;flex-wrap:wrap;align-items:center;margin:0 -0.2em 0 -0.2em}.pcr-app .pcr-interaction>*{margin:0 0.2em}.pcr-app .pcr-interaction input{letter-spacing:0.07em;font-size:0.75em;text-align:center;cursor:pointer;color:#75797e;background:#f1f3f4;border-radius:.15em;transition:all 0.15s;padding:0.45em 0.5em;margin-top:0.75em}.pcr-app .pcr-interaction input:hover{filter:brightness(0.975)}.pcr-app .pcr-interaction input:focus{box-shadow:0 0 0 1px rgba(255,255,255,0.85),0 0 0 3px rgba(66,133,244,0.75)}.pcr-app .pcr-interaction .pcr-result{color:#75797e;text-align:left;flex:1 1 8em;min-width:8em;transition:all 0.2s;border-radius:.15em;background:#f1f3f4;cursor:text}.pcr-app .pcr-interaction .pcr-result::-moz-selection{background:#4285f4;color:#fff}.pcr-app .pcr-interaction .pcr-result::selection{background:#4285f4;color:#fff}.pcr-app .pcr-interaction .pcr-type.active{color:#fff;background:#4285f4}.pcr-app .pcr-interaction .pcr-save,.pcr-app .pcr-interaction .pcr-cancel,.pcr-app .pcr-interaction .pcr-clear{color:#fff;width:auto}.pcr-app .pcr-interaction .pcr-save,.pcr-app .pcr-interaction .pcr-cancel,.pcr-app .pcr-interaction .pcr-clear{color:#fff}.pcr-app .pcr-interaction .pcr-save:hover,.pcr-app .pcr-interaction .pcr-cancel:hover,.pcr-app .pcr-interaction .pcr-clear:hover{filter:brightness(0.925)}.pcr-app .pcr-interaction .pcr-save{background:#4285f4}.pcr-app .pcr-interaction .pcr-clear,.pcr-app .pcr-interaction .pcr-cancel{background:#f44250}.pcr-app .pcr-interaction .pcr-clear:focus,.pcr-app .pcr-interaction .pcr-cancel:focus{box-shadow:0 0 0 1px rgba(255,255,255,0.85),0 0 0 3px rgba(244,66,80,0.75)}.pcr-app .pcr-selection .pcr-picker{position:absolute;height:18px;width:18px;border:2px solid #fff;border-radius:100%;-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none}.pcr-app .pcr-selection .pcr-color-palette,.pcr-app .pcr-selection .pcr-color-chooser,.pcr-app .pcr-selection .pcr-color-opacity{position:relative;-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none;display:flex;flex-direction:column;cursor:grab;cursor:-webkit-grab}.pcr-app .pcr-selection .pcr-color-palette:active,.pcr-app .pcr-selection .pcr-color-chooser:active,.pcr-app .pcr-selection .pcr-color-opacity:active{cursor:grabbing;cursor:-webkit-grabbing}.pcr-app[data-theme='nano']{width:14.25em;max-width:95vw}.pcr-app[data-theme='nano'] .pcr-swatches{margin-top:.6em;padding:0 .6em}.pcr-app[data-theme='nano'] .pcr-interaction{padding:0 .6em .6em .6em}.pcr-app[data-theme='nano'] .pcr-selection{display:grid;grid-gap:.6em;grid-template-columns:1fr 4fr;grid-template-rows:5fr auto auto;align-items:center;height:10.5em;width:100%;align-self:flex-start}.pcr-app[data-theme='nano'] .pcr-selection .pcr-color-preview{grid-area:2 / 1 / 4 / 1;height:100%;width:100%;display:flex;flex-direction:row;justify-content:center;margin-left:.6em}.pcr-app[data-theme='nano'] .pcr-selection .pcr-color-preview .pcr-last-color{display:none}.pcr-app[data-theme='nano'] .pcr-selection .pcr-color-preview .pcr-current-color{position:relative;background:var(--pcr-color);width:2em;height:2em;border-radius:50em;overflow:hidden}.pcr-app[data-theme='nano'] .pcr-selection .pcr-color-preview .pcr-current-color::before{position:absolute;content:'';top:0;left:0;width:100%;height:100%;background:url('data:image/svg+xml;utf8, <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2 2"><path fill="white" d="M1,0H2V1H1V0ZM0,1H1V2H0V1Z"/><path fill="gray" d="M0,0H1V1H0V0ZM1,1H2V2H1V1Z"/></svg>');background-size:.5em;border-radius:.15em;z-index:-1}.pcr-app[data-theme='nano'] .pcr-selection .pcr-color-palette{grid-area:1 / 1 / 2 / 3;width:100%;height:100%;z-index:1}.pcr-app[data-theme='nano'] .pcr-selection .pcr-color-palette .pcr-palette{border-radius:.15em;width:100%;height:100%}.pcr-app[data-theme='nano'] .pcr-selection .pcr-color-palette .pcr-palette::before{position:absolute;content:'';top:0;left:0;width:100%;height:100%;background:url('data:image/svg+xml;utf8, <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2 2"><path fill="white" d="M1,0H2V1H1V0ZM0,1H1V2H0V1Z"/><path fill="gray" d="M0,0H1V1H0V0ZM1,1H2V2H1V1Z"/></svg>');background-size:.5em;border-radius:.15em;z-index:-1}.pcr-app[data-theme='nano'] .pcr-selection .pcr-color-chooser{grid-area:2 / 2 / 2 / 2}.pcr-app[data-theme='nano'] .pcr-selection .pcr-color-opacity{grid-area:3 / 2 / 3 / 2}.pcr-app[data-theme='nano'] .pcr-selection .pcr-color-chooser,.pcr-app[data-theme='nano'] .pcr-selection .pcr-color-opacity{height:0.5em;margin:0 .6em}.pcr-app[data-theme='nano'] .pcr-selection .pcr-color-chooser .pcr-picker,.pcr-app[data-theme='nano'] .pcr-selection .pcr-color-opacity .pcr-picker{top:50%;transform:translateY(-50%)}.pcr-app[data-theme='nano'] .pcr-selection .pcr-color-chooser .pcr-slider,.pcr-app[data-theme='nano'] .pcr-selection .pcr-color-opacity .pcr-slider{flex-grow:1;border-radius:50em}.pcr-app[data-theme='nano'] .pcr-selection .pcr-color-chooser .pcr-slider{background:linear-gradient(to right, red, #ff0, lime, cyan, blue, #f0f, red)}.pcr-app[data-theme='nano'] .pcr-selection .pcr-color-opacity .pcr-slider{background:linear-gradient(to right, transparent, black),url('data:image/svg+xml;utf8, <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2 2"><path fill="white" d="M1,0H2V1H1V0ZM0,1H1V2H0V1Z"/><path fill="gray" d="M0,0H1V1H0V0ZM1,1H2V2H1V1Z"/></svg>');background-size:100%, 0.25em}

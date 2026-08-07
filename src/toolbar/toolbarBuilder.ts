@@ -20,8 +20,6 @@ import { toolbarDocuments, windowOf } from "src/toolbar/toolbarHost";
 
 const toolbarResizeOwners = new Map<MarkdownView, Component>();
 
-// Teardown sweeps every document, so restoration has to reach just as far: a bar
-// belongs to its leaf, and its state is a function of that leaf's own mode.
 export function syncToolbars(plugin: EditingToolbarPlugin): void {
   if (!plugin.settings.commands.length) {
     removeAllToolbars(plugin);
@@ -37,8 +35,6 @@ export function syncToolbars(plugin: EditingToolbarPlugin): void {
   }
 }
 
-// A reading-mode pane may not have a source view to mount into yet, so a hidden bar
-// is one that was never built rather than one that is built and covered up.
 function shouldShowToolbar(
   plugin: EditingToolbarPlugin,
   view: MarkdownView,
@@ -46,7 +42,7 @@ function shouldShowToolbar(
   return plugin.settings.toolbarVisible && view.getMode() !== "preview";
 }
 
-function toolbarIn(view: MarkdownView): HTMLElement | null {
+function findToolbar(view: MarkdownView): HTMLElement | null {
   return view.containerEl.querySelector<HTMLElement>(BAR_SELECTOR);
 }
 
@@ -54,7 +50,7 @@ function ensureToolbar(
   plugin: EditingToolbarPlugin,
   view: MarkdownView,
 ): HTMLElement | null {
-  const existing = toolbarIn(view);
+  const existing = findToolbar(view);
   if (existing) return existing;
 
   const bars = mountBars(plugin.settings, view);
@@ -109,9 +105,8 @@ function createBarEl(doc: Document, className: string): HTMLElement {
   const el = doc.createElement("div");
   el.addClass(className);
   el.addClass("editingToolbarDefaultAesthetic");
-  // Pressing a button would take focus off the editor, which every command here acts
-  // on. Nothing in the bar is focusable, so refusing focus outright beats handing it
-  // back afterwards: a restore lands mid-command and fights anything opening a modal.
+  // Nothing in the bar needs focus, and refusing it beats restoring it afterwards:
+  // a restore lands mid-command and fights anything opening a modal.
   el.addEventListener("mousedown", (event) => event.preventDefault());
   return el;
 }
@@ -144,7 +139,7 @@ function refreshOverflow(bar: HTMLElement, popoverBar: HTMLElement): void {
   if (!hasOverflow) morePopoverFor(popoverBar)?.close();
 }
 
-// Observe the PANE, not the bar: moving buttons resizes the bar, so observing the
+// Observe the pane, not the bar: moving buttons resizes the bar, so observing the
 // bar would feed its own reflow back into itself.
 function observeToolbarResize(
   view: MarkdownView,
@@ -167,9 +162,8 @@ function observeToolbarResize(
 
   observer.observe(parent);
 
-  // The view owns the bar, so it owns the observer: closing the tab, or the window it
-  // was popped out into, unloads the view and its children. A Component rather than a
-  // bare register() because a rebuild needs to retire one on demand.
+  // The view owns the observer: closing its tab or window unloads the view and its
+  // children. A Component, not a bare register(), so a rebuild can retire one early.
   const owner = new Component();
   owner.register(() => {
     observer.disconnect();

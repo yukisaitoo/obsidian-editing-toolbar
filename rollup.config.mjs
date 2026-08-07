@@ -1,7 +1,7 @@
 import typescript from "@rollup/plugin-typescript";
 import { nodeResolve } from "@rollup/plugin-node-resolve";
 import commonjs from "@rollup/plugin-commonjs";
-import terser from '@rollup/plugin-terser';
+import terser from "@rollup/plugin-terser";
 
 export default {
   input: "src/plugin/main.ts",
@@ -23,9 +23,7 @@ export default {
     "@lezer/lr",
   ],
   plugins: [
-    // Rollup 4's @rollup/plugin-typescript requires rootDir/outDir to line up
-    // with the output `dir`; keep them here rather than in tsconfig so the
-    // `tsc --noEmit` typecheck script stays emit-agnostic.
+    // rootDir/outDir live here, not in tsconfig, so `tsc --noEmit` stays emit-agnostic.
     typescript({ rootDir: "src", outDir: "./dist" }),
     nodeResolve({
       browser: true,

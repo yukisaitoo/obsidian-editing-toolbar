@@ -35,7 +35,7 @@ export class InsertCalloutModal extends Modal {
     }
   }
 
-  /** Resolves with the callout to insert, or null if the modal was dismissed. */
+  // Resolves with the callout to insert, or null if the modal was dismissed.
   static prompt(
     plugin: EditingToolbarPlugin,
     editor: Editor,

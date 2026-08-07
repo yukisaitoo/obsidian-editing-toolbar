@@ -5,7 +5,6 @@ interface ConfirmModalOptions {
   title?: string;
   message: string;
   confirmText?: string;
-  cancelText?: string;
   confirmWarning?: boolean;
   onConfirm: () => Promise<void> | void;
 }
@@ -30,7 +29,7 @@ export class ConfirmModal extends Modal {
     const buttonContainer = contentEl.createDiv("confirm-modal-buttons");
 
     new ButtonComponent(buttonContainer)
-      .setButtonText(this.options.cancelText ?? strings.cancel)
+      .setButtonText(strings.cancel)
       .onClick(() => this.close());
 
     const confirmButton = new ButtonComponent(buttonContainer)

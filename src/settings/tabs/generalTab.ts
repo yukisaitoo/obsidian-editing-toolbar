@@ -74,10 +74,9 @@ function renderSwatchRow(
       });
 
       for (const settingKey of keys) {
-        const persist = (color: string) => {
+        const saveColor = (color: string) => {
           ctx.plugin.settings[settingKey] = color;
-          void ctx.plugin.saveSettings();
-          ctx.applyChanges();
+          void ctx.persist();
         };
 
         ctx.createPickr({
@@ -86,8 +85,8 @@ function renderSwatchRow(
           swatches,
           opacity: config.opacity,
           defaultColor: ctx.plugin.settings[settingKey] || "#000000",
-          onSave: persist,
-          onClear: () => persist(DEFAULT_SETTINGS[settingKey]),
+          onSave: saveColor,
+          onClear: () => saveColor(DEFAULT_SETTINGS[settingKey]),
         });
       }
     });

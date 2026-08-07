@@ -6,7 +6,6 @@ import type EditingToolbarPlugin from "src/plugin/main";
 import { insertCallout } from "src/util/text/callout";
 import { setFormatEraser } from "src/util/text/formatEraser";
 import { setHeader } from "src/util/text/header";
-import { insertHorizontalRule } from "src/util/text/horizontalRule";
 import { setBackgroundColor, setFontColor } from "src/util/text/inlineColor";
 import { selectAt } from "src/util/text/selection";
 
@@ -23,7 +22,6 @@ const WRAP_COMMANDS = {
   underline: { prefix: "<u>", suffix: "</u>" },
   superscript: { prefix: "<sup>", suffix: "</sup>" },
   subscript: { prefix: "<sub>", suffix: "</sub>" },
-  codeblock: { prefix: "\n```\n", suffix: "\n```\n" },
 } as const satisfies Partial<Record<OwnCommandId, Wrap>>;
 
 // Level N maps to N hashes, so level 0 strips the header.
@@ -38,9 +36,8 @@ const HEADER_IDS: OwnCommandId[] = [
 ];
 
 export function registerCommands(plugin: EditingToolbarPlugin): void {
-  // editorCallback is what gates a command on a live editor, keeping it out of
-  // reading mode, the note title and the properties panel, and out of the command
-  // palette while there is no editor to act on.
+  // editorCallback gates each command on a live editor, keeping it out of reading
+  // mode, the note title, the properties panel, and the palette.
   const add = (id: OwnCommandId, run: (editor: Editor) => unknown) =>
     plugin.addCommand({
       id,
@@ -98,15 +95,13 @@ export function registerCommands(plugin: EditingToolbarPlugin): void {
     if (spec) insertCallout(editor, spec);
   });
 
-  add("hrline", insertHorizontalRule);
-
   for (const [id, wrap] of Object.entries(WRAP_COMMANDS)) {
     add(id as OwnCommandId, (editor) => wrapSelection(editor, wrap));
   }
 }
 
-// For toolbar handlers that are not commands, the colour swatch grid, and so get no
-// gating from Obsidian.
+// For toolbar handlers that are not commands (the colour swatch grid) and so get
+// no gating from Obsidian.
 export function runOnEditor(
   app: App,
   action: (editor: Editor) => unknown,
@@ -115,8 +110,8 @@ export function runOnEditor(
   if (editor) runOn(editor, action);
 }
 
-// Focus is restored after, for the paths that do lose it: a modal closing, or the
-// command palette. The toolbar never takes it in the first place.
+// Restores focus for the paths that lose it (a modal closing, the palette); the
+// toolbar itself never takes it.
 function runOn(editor: Editor, action: (editor: Editor) => unknown): void {
   void (async () => {
     try {
@@ -129,8 +124,7 @@ function runOn(editor: Editor, action: (editor: Editor) => unknown): void {
   })();
 }
 
-// Wraps the selection in the given prefix/suffix, or unwraps it when the text
-// already matches: the toggle behind underline, superscript and friends.
+// Unwraps when the wrap is already there, which is what makes these toggles.
 function wrapSelection(editor: Editor, { prefix, suffix }: Wrap): void {
   const selectedText = editor.getSelection();
   const start = editor.getCursor("from");

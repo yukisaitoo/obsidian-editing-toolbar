@@ -30,10 +30,9 @@ const SETTING_TABS: { id: TabId; name: string; icon: string }[] = [
 export interface SettingsTabContext {
   app: App;
   plugin: EditingToolbarPlugin;
-  applyChanges(): void;
+  persist(): Promise<void>;
   createPickr(options: ColorPickrOptions): Pickr;
   createSortable(el: HTMLElement, options: Sortable.Options): void;
-  // Arms on the first click, deletes on the second.
   createDeleteButton(
     button: ButtonComponent,
     onDelete: () => Promise<void>,
@@ -112,7 +111,10 @@ export class EditingToolbarSettingTab extends PluginSettingTab {
     return {
       app: this.app,
       plugin: this.plugin,
-      applyChanges: () => this.plugin.rebuildToolbars(),
+      persist: async () => {
+        await this.plugin.saveSettings();
+        this.plugin.rebuildToolbars();
+      },
       createPickr: (options) => {
         const pickr = createColorPickr(options);
         this.pickrs.push(pickr);
@@ -149,12 +151,13 @@ export class EditingToolbarSettingTab extends PluginSettingTab {
 
     const disarm = () => {
       clearTimeout(confirmTimeout);
-      button.setIcon("editingToolbarDelete").setTooltip(tooltip);
+      button.setIcon("lucide-trash-2").setTooltip(tooltip);
       button.buttonEl.removeClass("mod-warning");
     };
 
+    button.buttonEl.addClass("editing-toolbar-delete");
     button
-      .setIcon("editingToolbarDelete")
+      .setIcon("lucide-trash-2")
       .setTooltip(tooltip)
       .onClick(async () => {
         if (button.buttonEl.hasClass("mod-warning")) {

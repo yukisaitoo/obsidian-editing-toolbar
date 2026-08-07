@@ -8,7 +8,6 @@ const MODIFIER_ORDER = Platform.isMacOS
   ? ["Ctrl", "Alt", "Shift", "Meta", "Mod"]
   : ["Mod", "Ctrl", "Meta", "Alt", "Shift"];
 
-// The command's shortcut as the user would read it, or null when it has none.
 export function hotkeyLabel(app: App, commandId: string): string | null {
   const { hotkeyManager } = app;
   // A custom binding replaces the default wholesale, so an empty array means the

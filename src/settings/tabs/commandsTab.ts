@@ -31,11 +31,10 @@ const SHARED_SORTABLE_OPTIONS: Sortable.Options = {
   touchStartThreshold: 5,
 };
 
-// What the two "insert after this row" buttons offer. Only the top-level list gets
-// them: a submenu holds plain commands and dividers it received by drag.
+// Only top-level rows get insert buttons; a submenu receives its contents by drag.
 const INSERTABLE = {
   submenu: {
-    icon: "editingToolbarSub",
+    icon: "lucide-list-plus",
     tooltip: strings.addSubmenu,
     make: (): Command => ({
       id: newSubmenuId(),
@@ -132,8 +131,7 @@ function renderRow(
         .setValue(submenu.menuType || "submenu")
         .onChange(async (value) => {
           submenu.menuType = value as "submenu" | "dropdown";
-          await ctx.plugin.saveSettings();
-          ctx.applyChanges();
+          await ctx.persist();
           new Notice(
             `${strings.menuTypeChanged}: ${
               value === "dropdown"
@@ -217,7 +215,7 @@ function createDragList(ctx: SettingsTabContext): DragList {
     ctx.createSortable(listEl, {
       ...SHARED_SORTABLE_OPTIONS,
       ...options,
-      // Sortable fires onSort on BOTH lists of a cross-list drag; the destination
+      // Sortable fires onSort on both lists of a cross-list drag; the destination
       // owns the move so it lands exactly once. Within one list source === target,
       // where the splice pair is already a move.
       onSort: (evt) => {
@@ -227,9 +225,9 @@ function createDragList(ctx: SettingsTabContext): DragList {
         const source = listsByEl.get(evt.from);
         if (!source || evt.oldIndex >= source.length) return;
 
-        list.splice(evt.newIndex, 0, source.splice(evt.oldIndex, 1)[0]);
-        void ctx.plugin.saveSettings();
-        ctx.applyChanges();
+        const [moved] = source.splice(evt.oldIndex, 1);
+        list.splice(evt.newIndex, 0, moved);
+        void ctx.persist();
       },
     });
   };
@@ -241,8 +239,7 @@ async function removeCommand(
   command: Command,
 ): Promise<void> {
   list.remove(command);
-  await ctx.plugin.saveSettings();
-  ctx.applyChanges();
+  await ctx.persist();
 }
 
 function configureInsertButton(
@@ -265,8 +262,7 @@ function configureInsertButton(
       if (index < 0) return;
 
       list.splice(index + 1, 0, make());
-      await ctx.plugin.saveSettings();
-      ctx.applyChanges();
+      await ctx.persist();
     });
 }
 
@@ -296,8 +292,7 @@ async function setStoredIcon(
   if (!list.includes(command)) return;
 
   command.icon = icon;
-  await ctx.plugin.saveSettings();
-  ctx.applyChanges();
+  await ctx.persist();
 }
 
 function configureRenameButton(

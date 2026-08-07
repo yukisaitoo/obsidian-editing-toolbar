@@ -7,7 +7,6 @@ export function selectAt(editor: Editor, offset: number, length: number): void {
   );
 }
 
-/** Replaces the selection and leaves the replacement itself selected. */
 export function replaceSelectionAndSelect(editor: Editor, text: string): void {
   const start = editor.posToOffset(editor.getCursor("from"));
   editor.replaceSelection(text);

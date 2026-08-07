@@ -30,15 +30,11 @@ export class IconPicker extends FuzzySuggestModal<string> {
 
   // "lucide-chevron-right" reads as "Chevron Right".
   getItemText(item: string): string {
-    return item
+    const words = item
       .replace(/^lucide-/, "")
-      .replace(/([A-Z])/g, " $1")
-      .trim()
-      .replace(/-/g, " ")
-      .split(" ")
-      .filter((word) => word.length > 0)
-      .map((word) => word[0].toUpperCase() + word.substring(1))
-      .join(" ");
+      .split(/-|(?=[A-Z])/)
+      .filter(Boolean);
+    return words.map((word) => word[0].toUpperCase() + word.slice(1)).join(" ");
   }
 
   renderSuggestion(icon: FuzzyMatch<string>, iconItem: HTMLElement): void {
@@ -88,8 +84,8 @@ export class CommandPicker extends FuzzySuggestModal<Command> {
     await this.addCommand(item);
   }
 
-  // Read afresh rather than reusing the list from onChooseItem: the icon picker sits
-  // open in between, so that reference can be stale by the time an icon is chosen.
+  // Reads the list afresh: the icon picker sits open in between, so the reference
+  // from onChooseItem can be stale by the time an icon is chosen.
   private async addCommand(command: Command): Promise<void> {
     this.plugin.settings.commands.push(toStoredCommand(command));
     await this.plugin.saveSettings();

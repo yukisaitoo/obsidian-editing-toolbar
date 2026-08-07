@@ -36,8 +36,6 @@ export function hasAppearanceOverride(
   return settings.appearance?.[key] !== undefined;
 }
 
-// The writable bucket, created on demand. Keys left out of it fall back to
-// DEFAULT_APPEARANCE via getAppearanceValue().
 export function getAppearanceBucket(
   settings: EditingToolbarSettings,
 ): AppearanceOverrides {
@@ -62,8 +60,8 @@ export function applyAppearanceVars(
   );
 }
 
-// Deliberately not folded into applyAppearanceVars: that one is also applied to
-// individual bars, and a bar-level copy of these would shadow the root and go stale.
+// Kept out of applyAppearanceVars, which is also applied per bar: a bar-level copy
+// of these would shadow the root and go stale.
 export function applyLastColorVars(
   el: HTMLElement,
   settings: EditingToolbarSettings,
@@ -75,8 +73,8 @@ export function applyLastColorVars(
   );
 }
 
-// These land on documentElement rather than on a bar, so unloading the plugin does
-// not take them with it.
+// The vars sit on documentElement, which survives unload, so they need explicit
+// removal.
 export function clearLastColorVars(el: HTMLElement): void {
   el.style.removeProperty("--editing-toolbar-font-color");
   el.style.removeProperty("--editing-toolbar-highlight-color");
@@ -101,7 +99,6 @@ export interface EditingToolbarSettings extends Record<CustomColorKey, string> {
   appearance?: AppearanceOverrides;
 }
 
-// Everything but `commands`, which is built per call by createDefaultSettings().
 export const DEFAULT_SETTINGS: Omit<EditingToolbarSettings, "commands"> = {
   toolbarVisible: true,
   lastFontColor: "#2DC26B",

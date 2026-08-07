@@ -4,7 +4,6 @@ import { COMMAND_LABELS, type CommandId } from "src/commands/commandLabels";
 import type { RegisteredCommandName } from "src/commands/commandLabels";
 import { isCoreCommand, ownCommand } from "src/plugin/pluginId";
 
-// A bare id is a button; an object is a submenu holding buttons.
 type LayoutGroup = {
   readonly id: string;
   readonly name: string;
@@ -22,7 +21,7 @@ const DEFAULT_LAYOUT = [
   {
     id: "SubmenuCommands-header",
     name: "Headings",
-    icon: "header-n",
+    icon: "lucide-heading",
     children: ["header1-text", "header4-text", "header5-text", "header6-text"],
   },
   "editor:toggle-bold",
@@ -54,15 +53,15 @@ const DEFAULT_LAYOUT = [
   {
     id: "SubmenuCommands-markdown",
     name: "Markdown syntax",
-    icon: "markdown-syntax",
+    icon: "lucide-file-code",
     children: [
       "superscript",
       "subscript",
       "editor:toggle-code",
-      "codeblock",
+      "editor:insert-codeblock",
       "editor:insert-wikilink",
       "editor:insert-embed",
-      "hrline",
+      "editor:insert-horizontal-rule",
       "editor:toggle-inline-math",
       "editor:insert-mathblock",
     ],
@@ -82,14 +81,14 @@ const DEFAULT_LAYOUT = [
   {
     id: "SubmenuCommands-alignment",
     name: "Alignment",
-    icon: "align-center-glyph",
+    icon: "lucide-align-center",
     children: ["justify", "left", "center", "right"],
   },
   "change-font-color",
   "change-background-color",
 ] as const satisfies readonly LayoutEntry[];
 
-// Names the settings UI creates on demand rather than shipping in the defaults.
+// Created by the settings UI, not shipped in the default layout.
 export const SUBMENU_NAME = "Submenu";
 export const DIVIDER_NAME = "Vertical split";
 

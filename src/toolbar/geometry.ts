@@ -1,9 +1,8 @@
-// Two facts from Obsidian's app.css drive every function here:
-//  1. `.workspace-leaf` is `contain: strict`, so `position: fixed` inside a pane
-//     resolves against the PANE and anything outside it is clipped, not just
-//     off-centre. Read where offset 0,0 lands and convert against that.
-//  2. Measure with getBoundingClientRect, never scrollWidth: submenu buttons hang
-//     `visibility: hidden` flyouts that inflate scroll size by phantom pixels.
+// Everything here works around two things in Obsidian's app.css. `.workspace-leaf`
+// is `contain: strict`, so `position: fixed` inside a pane resolves against the
+// pane and anything outside it is clipped: read where offset 0,0 lands and convert
+// against that. And submenu buttons hang `visibility: hidden` flyouts that inflate
+// scroll sizes, so measure with getBoundingClientRect, never scrollWidth.
 
 import { BAR_SELECTOR, POPOVER_SELECTOR } from "src/toolbar/toolbarDom";
 import { windowOf } from "src/toolbar/toolbarHost";
@@ -14,10 +13,11 @@ const POPOVER_EDGE_MARGIN = 12;
 const POPOVER_GAP = 8;
 const OVERFLOW_TOLERANCE = 1;
 
-// `min` wins over `max` so an element larger than its bounds overhangs the end
-// that can be scrolled back into view.
+// `min` wins when an element is larger than its bounds, so the overhang lands on
+// the end that can be scrolled back into view.
 function clamp(value: number, min: number, max: number): number {
-  return Math.min(Math.max(value, min), Math.max(min, max));
+  if (max < min) max = min;
+  return Math.min(Math.max(value, min), max);
 }
 
 function paneRelativeBounds(bar: HTMLElement | null, margin: number) {
@@ -87,8 +87,8 @@ function clampFlyoutToPane(button: HTMLElement): void {
   if (shift) button.style.setProperty(FLYOUT_SHIFT_VAR, `${shift}px`);
 }
 
-// Shuffles buttons between the bar and the » popover so the bar fits its pane,
-// moving only as many as the size change asks for. Available room is the PANE's
+// Shuffles buttons between the bar and the » popover until the bar fits its pane,
+// moving only as many as the size change asks for. Available room is the pane's
 // width: the bar shrink-to-fits and so never reports overflow itself. Returns
 // whether » is still needed.
 export function reflowToolbarOverflow(
@@ -116,18 +116,18 @@ export function reflowToolbarOverflow(
   // the popover's first is always the next one to take back.
   if (fitsNow) {
     while (popoverBar.firstElementChild) {
-      const taken = popoverBar.firstElementChild;
-      bar.insertBefore(taken, more);
+      const button = popoverBar.firstElementChild;
+      bar.insertBefore(button, more);
       syncMore(more, popoverBar);
       if (fits()) continue;
-      popoverBar.insertBefore(taken, popoverBar.firstChild);
+      popoverBar.insertBefore(button, popoverBar.firstChild);
       break;
     }
   } else {
     do {
-      const given = more.previousElementSibling;
-      if (!given) break;
-      popoverBar.insertBefore(given, popoverBar.firstChild);
+      const button = more.previousElementSibling;
+      if (!button) break;
+      popoverBar.insertBefore(button, popoverBar.firstChild);
       syncMore(more, popoverBar);
     } while (!fits());
   }
@@ -136,7 +136,6 @@ export function reflowToolbarOverflow(
   return popoverBar.firstElementChild !== null;
 }
 
-// » only earns its width while the popover holds something.
 function syncMore(more: HTMLElement, popoverBar: HTMLElement): void {
   more.style.display = popoverBar.firstElementChild ? "" : "none";
 }
@@ -144,9 +143,9 @@ function syncMore(more: HTMLElement, popoverBar: HTMLElement): void {
 function availableWidth(bar: HTMLElement): number {
   const parent = bar.parentElement;
   if (!parent) return bar.clientWidth;
-  const cs = getComputedStyle(parent);
+  const style = getComputedStyle(parent);
   const padX =
-    (parseFloat(cs.paddingLeft) || 0) + (parseFloat(cs.paddingRight) || 0);
+    (parseFloat(style.paddingLeft) || 0) + (parseFloat(style.paddingRight) || 0);
   return parent.clientWidth - padX;
 }
 

@@ -2,8 +2,8 @@ import { ButtonComponent } from "obsidian";
 import { anchorPopoverToButton } from "src/toolbar/geometry";
 import { strings } from "src/translations/helper";
 
-// A class rather than inline visibility: a hovered flyout inside the popover sets
-// its own `visibility: visible` and would survive a hidden parent.
+// A CSS class, not inline visibility: a hovered flyout inside the popover sets its
+// own `visibility: visible` and would survive a hidden parent.
 const OPEN_CLASS = "editing-toolbar-more-open";
 
 // Menus, pickers, modals and suggesters render at the document root but belong to
@@ -11,7 +11,6 @@ const OPEN_CLASS = "editing-toolbar-more-open";
 const DETACHED_POPUP_SELECTOR =
   ".menu, .pcr-app, .modal-container, .suggestion-container";
 
-// Reflow and teardown reach a popover through its popover bar.
 const popovers = new WeakMap<HTMLElement, MorePopover>();
 const openPopovers = new Set<MorePopover>();
 
@@ -32,7 +31,7 @@ export class MorePopover {
       .setClass("editingToolbarCommandItem")
       .setTooltip(strings.more)
       .onClick(() => (this.isOpen ? this.close() : this.open()));
-    this.button.setIcon("more-chevron");
+    this.button.setIcon("lucide-chevrons-right");
 
     popovers.set(popoverBar, this);
   }
