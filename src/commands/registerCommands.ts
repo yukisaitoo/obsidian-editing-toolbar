@@ -66,24 +66,6 @@ export function registerCommands(plugin: EditingToolbarPlugin): void {
   add("editor-undo", (editor) => editor.undo());
   add("editor-redo", (editor) => editor.redo());
 
-  add("editor-copy", async (editor) => {
-    const text = editor.getSelection();
-    if (!text) return;
-    await navigator.clipboard.writeText(text);
-  });
-
-  add("editor-cut", async (editor) => {
-    const text = editor.getSelection();
-    if (!text) return;
-    await navigator.clipboard.writeText(text);
-    editor.replaceSelection("");
-  });
-
-  add("editor-paste", async (editor) => {
-    const text = await navigator.clipboard.readText();
-    if (text) editor.replaceSelection(text);
-  });
-
   add("format-eraser", setFormatEraser);
 
   add("change-font-color", (editor) =>

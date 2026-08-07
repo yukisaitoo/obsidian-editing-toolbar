@@ -67,9 +67,6 @@ export const commandNames: Record<CommandName, string> = {
 
   "Undo edit": "Desfazer",
   "Redo edit": "Refazer",
-  Cut: "Recortar",
-  Copy: "Copiar",
-  Paste: "Colar",
 
   "Remove header level": "Remover nível de título",
   "Header 1": "Título 1",
@@ -94,9 +91,7 @@ export const commandNames: Record<CommandName, string> = {
   Callout: "Callout",
 
   Headings: "Títulos",
-  Edit: "Editar",
-  Quotes: "Citações",
-  "Markdown syntax": "Sintaxe Markdown",
+  Insert: "Inserir",
   Lists: "Listas",
   Alignment: "Alinhamento",
   Submenu: "Submenu",

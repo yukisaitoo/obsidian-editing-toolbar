@@ -67,9 +67,6 @@ export const commandNames: Record<CommandName, string> = {
 
   "Undo edit": "撤销编辑",
   "Redo edit": "重做编辑",
-  Cut: "剪切",
-  Copy: "复制",
-  Paste: "粘贴",
 
   "Remove header level": "取消标题",
   "Header 1": "标题 1",
@@ -94,9 +91,7 @@ export const commandNames: Record<CommandName, string> = {
   Callout: "标注",
 
   Headings: "标题",
-  Edit: "编辑",
-  Quotes: "引用",
-  "Markdown syntax": "Markdown 语法",
+  Insert: "插入",
   Lists: "列表",
   Alignment: "对齐",
   Submenu: "子菜单",

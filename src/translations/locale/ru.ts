@@ -71,9 +71,6 @@ export const commandNames: Record<CommandName, string> = {
 
   "Undo edit": "Отменить действие",
   "Redo edit": "Повторить действие",
-  Cut: "Вырезать",
-  Copy: "Копировать",
-  Paste: "Вставить",
 
   "Remove header level": "Убрать заголовок",
   "Header 1": "Заголовок 1",
@@ -98,9 +95,7 @@ export const commandNames: Record<CommandName, string> = {
   Callout: "Выноска",
 
   Headings: "Заголовки",
-  Edit: "Правка",
-  Quotes: "Цитаты",
-  "Markdown syntax": "Синтаксис Markdown",
+  Insert: "Вставка",
   Lists: "Списки",
   Alignment: "Выравнивание",
   Submenu: "Подменю",

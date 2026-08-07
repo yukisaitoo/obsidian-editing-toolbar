@@ -1,10 +1,11 @@
 import { Editor } from "obsidian";
 import { HTML_TAG, VOID_TAG } from "src/util/text/html";
+import { linePrefix } from "src/util/text/lineParts";
 import { replaceSelectionAndSelect } from "src/util/text/selection";
 
-// Leading indent and a trailing hard break (two spaces, or a `\`) stay outside the
-// tag, or the break is silently destroyed.
-const EDGE = /^(\s*)(.*?)(\\?\s*)$/;
+// A trailing hard break (two spaces, or a `\`) stays outside the tag, or it is
+// silently destroyed.
+const EDGE = /^(.*?)(\\?\s*)$/;
 
 // Counts only; `</u>a<u>` reads as balanced. Ordering would only matter for a
 // selection that starts mid-pair, which nothing here can fix anyway.
@@ -24,7 +25,10 @@ function wrapLines(paragraph: string, open: string, close: string): string {
 
   return lines
     .map((line) => {
-      const [, pre, body, post] = EDGE.exec(line) ?? [];
+      // The block marker stays outside the tag, or the line no longer starts with
+      // one and the heading, list or quote is gone.
+      const pre = linePrefix(line);
+      const [, body, post] = EDGE.exec(line.slice(pre.length)) ?? [];
       return body ? `${pre}${open}${body}${close}${post}` : line;
     })
     .join("\n");

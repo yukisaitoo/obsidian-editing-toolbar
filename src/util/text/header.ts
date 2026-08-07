@@ -1,12 +1,6 @@
 import { Editor } from "obsidian";
+import { BLOCK_PREFIX, LINE_MARKERS } from "src/util/text/lineParts";
 
-// Blockquote and callout lead-in. Held aside and re-attached, so a heading change
-// never rewrites it. `[!name]` requires the `!` so a top-level `[x] task` is not
-// mistaken for a callout.
-const BLOCK_PREFIX = /^\s*(?:>\s*)*(?:\[!\w+\]\s*)?/;
-// Heading, bullet, ordered and task markers all give way to a new heading.
-const LINE_MARKERS =
-  /^(?:(?:#{1,6}\s+)|(?:[-+*]\s+)|(?:\d+\.\s+)|(?:\[[ xX]\]\s+))+/;
 const HEADING = /^#{1,6}\s+/;
 
 function parseHeadingLine(lineText: string) {

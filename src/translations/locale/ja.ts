@@ -26,9 +26,6 @@ export const commandNames: Record<CommandName, string> = {
 
   "Undo edit": "元に戻す",
   "Redo edit": "やり直す",
-  Cut: "切り取り",
-  Copy: "コピー",
-  Paste: "貼り付け",
 
   "Remove header level": "見出しを解除",
   "Header 1": "見出し1",
@@ -53,9 +50,7 @@ export const commandNames: Record<CommandName, string> = {
   Callout: "コールアウト",
 
   Headings: "見出し",
-  Edit: "編集",
-  Quotes: "引用",
-  "Markdown syntax": "Markdown記法",
+  Insert: "挿入",
   Lists: "リスト",
   Alignment: "文字揃え",
   Submenu: "サブメニュー",

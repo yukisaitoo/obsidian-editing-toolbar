@@ -4,9 +4,6 @@ export const COMMAND_LABELS = {
 
   "editor-undo": { name: "Undo edit", icon: "undo-glyph" },
   "editor-redo": { name: "Redo edit", icon: "redo-glyph" },
-  "editor-cut": { name: "Cut", icon: "lucide-scissors" },
-  "editor-copy": { name: "Copy", icon: "lucide-copy" },
-  "editor-paste": { name: "Paste", icon: "lucide-clipboard-type" },
 
   "header0-text": { name: "Remove header level", icon: "heading-glyph" },
   "header1-text": { name: "Header 1", icon: "lucide-heading-1" },
@@ -34,8 +31,8 @@ export const COMMAND_LABELS = {
   "insert-callout": { name: "Callout", icon: "lucide-quote" },
 } as const satisfies Record<string, { name: string; icon: string }>;
 
-// Obsidian's own icon is used unless it collides with another button on the same bar:
-// check-square also lands on Checklist, quote on the Callout beside it under Quotes.
+// Obsidian's own icon unless it collides on the same bar: check-square also lands
+// on Checklist inside the Lists menu, quote on the Callout button beside it.
 const CORE_ICONS = {
   "editor:cycle-list-checklist": "check-circle",
   "editor:toggle-blockquote": "lucide-text-quote",
