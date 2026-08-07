@@ -6,7 +6,7 @@ import {
   Setting,
   setIcon,
 } from "obsidian";
-import { buildCalloutOptions } from "src/modals/calloutTypes";
+import { CALLOUT_OPTIONS } from "src/modals/calloutTypes";
 import { focusAfterOpen } from "src/modals/modalInput";
 import EditingToolbarPlugin from "src/plugin/main";
 import { strings } from "src/translations/helper";
@@ -19,7 +19,6 @@ export class InsertCalloutModal extends Modal {
   private collapse: "none" | "open" | "closed" = "none";
   private insertButton!: HTMLElement;
   private contentTextArea!: HTMLTextAreaElement;
-  private allCalloutOptions = buildCalloutOptions();
   private iconContainerEl!: HTMLElement;
   private inserted = false;
   private resolve!: (spec: CalloutSpec | null) => void;
@@ -61,7 +60,7 @@ export class InsertCalloutModal extends Modal {
     new Setting(typeContainer)
       .setName(strings.calloutType)
       .addDropdown((dropdown: DropdownComponent) => {
-        this.allCalloutOptions.forEach((opt) => {
+        CALLOUT_OPTIONS.forEach((opt) => {
           dropdown.addOption(opt.type, opt.label);
         });
         dropdown.setValue(this.type);
@@ -139,7 +138,7 @@ export class InsertCalloutModal extends Modal {
     const iconContainer = this.iconContainerEl;
     iconContainer.empty();
 
-    const typeInfo = this.allCalloutOptions.find((t) => t.type === typeKey);
+    const typeInfo = CALLOUT_OPTIONS.find((t) => t.type === typeKey);
     if (!typeInfo) return;
 
     iconContainer.style.setProperty("--callout-color", typeInfo.color);

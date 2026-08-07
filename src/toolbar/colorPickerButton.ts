@@ -21,7 +21,7 @@ interface PickerVariant {
   apply: (color: string, editor: Editor) => void;
 }
 
-const VARIANTS: Record<string, PickerVariant> = {
+const VARIANTS: Record<string, PickerVariant | undefined> = {
   [ownCommand("change-font-color")]: {
     customTooltip: strings.customFontColor,
     render: renderFontColorPicker,
@@ -36,8 +36,8 @@ const VARIANTS: Record<string, PickerVariant> = {
   },
 };
 
-export function isColorPickerCommand(id: string): boolean {
-  return id in VARIANTS;
+export function colorPickerVariant(id: string): PickerVariant | undefined {
+  return VARIANTS[id];
 }
 
 export function createColorPickerButton(
@@ -45,9 +45,8 @@ export function createColorPickerButton(
   plugin: EditingToolbarPlugin,
   bar: HTMLElement,
   item: Command,
+  variant: PickerVariant,
 ): void {
-  const variant = VARIANTS[item.id];
-
   const button = new ButtonComponent(bar)
     .setClass(SUBMENU_BUTTON_CLASS)
     .setClass("editingToolbarColorPickerItem")

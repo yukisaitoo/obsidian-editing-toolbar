@@ -1,16 +1,12 @@
-interface BuiltInCalloutType {
-  type: string;
-  aliases: string[];
-  icon: string;
-  label: string;
-  color: string;
-}
-
 export interface CalloutTypeInfo {
   type: string;
   label: string;
   icon: string;
   color: string;
+}
+
+interface BuiltInCalloutType extends CalloutTypeInfo {
+  aliases: string[];
 }
 
 const BUILT_IN_CALLOUT_TYPES: readonly BuiltInCalloutType[] = [
@@ -114,25 +110,13 @@ const BUILT_IN_CALLOUT_TYPES: readonly BuiltInCalloutType[] = [
   },
 ];
 
-export function buildCalloutOptions(): CalloutTypeInfo[] {
-  const options: CalloutTypeInfo[] = [];
-
-  for (const builtIn of BUILT_IN_CALLOUT_TYPES) {
-    options.push({
-      type: builtIn.type,
-      label: builtIn.label,
-      icon: builtIn.icon,
-      color: builtIn.color,
-    });
-    for (const alias of builtIn.aliases) {
-      options.push({
-        type: alias,
-        label: `${builtIn.label} (${alias})`,
-        icon: builtIn.icon,
-        color: builtIn.color,
-      });
-    }
-  }
-
-  return options;
-}
+// Aliases are offered as their own options so the dropdown can write them verbatim.
+export const CALLOUT_OPTIONS: readonly CalloutTypeInfo[] =
+  BUILT_IN_CALLOUT_TYPES.flatMap(({ aliases, ...info }) => [
+    info,
+    ...aliases.map((alias) => ({
+      ...info,
+      type: alias,
+      label: `${info.label} (${alias})`,
+    })),
+  ]);

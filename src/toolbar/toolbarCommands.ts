@@ -1,10 +1,10 @@
-import { App, ButtonComponent, Command, Menu } from "obsidian";
+import { App, ButtonComponent, Command, Menu, setTooltip } from "obsidian";
 import type EditingToolbarPlugin from "src/plugin/main";
 import { runCommandById } from "src/plugin/pluginId";
 import { DIVIDER_NAME } from "src/settings/defaultCommands";
 import {
+  colorPickerVariant,
   createColorPickerButton,
-  isColorPickerCommand,
 } from "src/toolbar/colorPickerButton";
 import { attachFlyoutClamp } from "src/toolbar/geometry";
 import { hotkeyLabel } from "src/toolbar/hotkeys";
@@ -39,8 +39,9 @@ export function renderToolbarCommands(
       return;
     }
 
-    if (isColorPickerCommand(item.id)) {
-      createColorPickerButton(ctx.app, ctx.plugin, ctx.bar, item);
+    const variant = colorPickerVariant(item.id);
+    if (variant) {
+      createColorPickerButton(ctx.app, ctx.plugin, ctx.bar, item, variant);
       return;
     }
 
@@ -102,7 +103,12 @@ function renderDropdown(ctx: RenderContext, item: SubmenuCommand) {
 function renderFlyout(ctx: RenderContext, item: SubmenuCommand) {
   const parent = new ButtonComponent(ctx.bar);
   parent.setClass(SUBMENU_BUTTON_CLASS);
-  applyButtonIcon(parent, displayIcon(ctx.app, item));
+
+  // On the icon, not the button: the flyout below is a child of the button.
+  setTooltip(
+    applyButtonIcon(parent, displayIcon(ctx.app, item)),
+    tooltipFor(ctx.app, item),
+  );
 
   const submenu = createDiv("subitem");
   parent.buttonEl.insertAdjacentElement("afterbegin", submenu);
