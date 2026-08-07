@@ -459,7 +459,7 @@ button.editingToolbarCommandsubItem::after {
 }
 
 .editingToolbarSettingsTabsContainer .editingToolbarSettingsTabsContainer_sub:empty {
-  border: 2px dashed rgba(var(--interactive-accent-rgb), 0.5);
+  border: 2px dashed color-mix(in oklch, var(--interactive-accent) 50%, transparent);
 }
 
 /* Copy comes from src/translations via the custom property, set in
@@ -484,7 +484,7 @@ button.editingToolbarCommandsubItem::after {
    matching and the ghost would show the buttons hidden below. */
 .setting-item.editingToolbar-Divider-Line {
   padding: 0;
-  background: rgba(var(--interactive-accent-rgb), 0.2);
+  background: color-mix(in oklch, var(--interactive-accent) 20%, transparent);
   line-height: 0px;
   text-align: center;
 }
@@ -493,8 +493,8 @@ button.editingToolbarCommandsubItem::after {
    out past the container instead of a negative-margin hack, which would break
    the sortable drop targets. A nested list is too narrow to absorb 400px. */
 .editingToolbarSettingsTabsContainer > .editingToolbar-Divider-Line {
-  border-left: 200px solid rgba(var(--interactive-accent-rgb), 0.05);
-  border-right: 200px solid rgba(var(--interactive-accent-rgb), 0.05);
+  border-left: 200px solid color-mix(in oklch, var(--interactive-accent) 5%, transparent);
+  border-right: 200px solid color-mix(in oklch, var(--interactive-accent) 5%, transparent);
 }
 
 .setting-item.editingToolbar-Divider-Line .setting-item-info {
@@ -696,7 +696,7 @@ button.editing-toolbar-delete svg {
 .callout-icon-container svg {
   width: 16px;
   height: 16px;
-  color: rgb(var(--callout-color));
+  color: var(--callout-color);
 }
 
 .insert-callout-modal .shortcut-hint {
