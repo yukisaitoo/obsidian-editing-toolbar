@@ -1,17 +1,15 @@
 import { getIconIds } from "obsidian";
-import { pickerIconNames } from "src/icons/customIcons";
+import { customIconNames, pickerIconNames } from "src/icons/customIcons";
 
-// Call only after addIcons(). Legacy ids that would display under the same name as
-// a "lucide-" one are dropped, so the picker shows no visual duplicates.
+// addIcons() has already run by the time a picker opens, so getIconIds() hands back
+// the custom ids too: skip all of them, then pin back the two worth showing.
 export function getAppIcons(): string[] {
-  const seen = new Set(pickerIconNames);
+  const seen = new Set<string>(customIconNames);
   const rest: string[] = [];
 
   for (const id of getIconIds()) {
     if (seen.has(id)) continue;
-    const name = id.replace(/^lucide-/, "");
-    if (seen.has(name)) continue;
-    seen.add(name);
+    seen.add(id);
     rest.push(id);
   }
 

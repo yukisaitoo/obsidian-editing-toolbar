@@ -52,5 +52,6 @@ cp -f "$ROOT_DIR/manifest.json" "$DEST_DIR/manifest.json"
 cp -f "$ROOT_DIR/styles.css"    "$DEST_DIR/styles.css"
 
 echo "Deployed '$PLUGIN_ID' to $DEST_DIR."
+echo ""
 echo "Reload the plugin in Obsidian to pick up the new build:"
-echo "Settings > Community plugins > toggle it off and on, or reload the app."
+echo " Settings > Community plugins > toggle it off and on, or reload the app."

@@ -72,16 +72,25 @@ export const COMMAND_LABELS = {
   "editor:insert-embed": { name: "Embed", icon: "note-glyph" },
   "editor:insert-link": { name: "Insert link", icon: "link-glyph" },
   "editor:insert-tag": { name: "Insert tag", icon: "price-tag-glyph" },
-  "editor:insert-mathblock": { name: "Math block", icon: "lucide-sigma-square" },
+  "editor:insert-mathblock": {
+    name: "Math block",
+    icon: "lucide-sigma-square",
+  },
   "editor:insert-table": { name: "Insert table", icon: "lucide-table" },
   "editor:insert-callout": { name: "Insert callout", icon: "lucide-quote" },
   "editor:toggle-comments": {
     name: "Insert comment",
     icon: "percent-sign-glyph",
   },
-  "editor:clear-formatting": { name: "Clear formatting", icon: "lucide-eraser" },
+  "editor:clear-formatting": {
+    name: "Clear formatting",
+    icon: "lucide-eraser",
+  },
   "editor:attach-file": { name: "Attach file", icon: "lucide-paperclip" },
-  "editor:swap-line-up": { name: "Swap line up", icon: "lucide-corner-right-up" },
+  "editor:swap-line-up": {
+    name: "Swap line up",
+    icon: "lucide-corner-right-up",
+  },
   "editor:swap-line-down": {
     name: "Swap line down",
     icon: "lucide-corner-right-down",
@@ -99,5 +108,4 @@ export function labelFor(id: string): CommandLabel | undefined {
 // The ids this plugin registers itself, as opposed to the core ones it only labels.
 export type OwnCommandId = Exclude<CommandId, `editor:${string}`>;
 
-export type RegisteredCommandName =
-  (typeof COMMAND_LABELS)[CommandId]["name"];
+export type RegisteredCommandName = (typeof COMMAND_LABELS)[CommandId]["name"];
