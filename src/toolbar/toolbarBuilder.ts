@@ -20,6 +20,11 @@ import { toolbarDocuments, windowOf } from "src/toolbar/toolbarHost";
 
 const toolbarResizeOwners = new Map<MarkdownView, Component>();
 
+// A tab dragged into another window keeps its DOM: same view, same bar, re-adopted
+// into the new Document. Adoption rewrites ownerDocument on the bar too, so only a
+// window read at mount time can tell us the bar moved underneath us.
+const barWindows = new WeakMap<HTMLElement, Window>();
+
 export function syncToolbars(plugin: EditingToolbarPlugin): void {
   if (!plugin.settings.commands.length) {
     removeAllToolbars(plugin);
@@ -51,7 +56,12 @@ function ensureToolbar(
   view: MarkdownView,
 ): HTMLElement | null {
   const existing = findToolbar(view);
-  if (existing) return existing;
+  if (existing) {
+    // Its resize observer and its » popover's listeners belong to the window the
+    // bar was built in, and neither can be re-pointed at another one.
+    if (barWindows.get(existing) === windowOf(existing)) return existing;
+    removeToolbar(view, existing);
+  }
 
   const bars = mountBars(plugin.settings, view);
   if (!bars) return null;
@@ -78,6 +88,21 @@ export function removeAllToolbars(plugin: EditingToolbarPlugin): void {
   );
 }
 
+function removeToolbar(view: MarkdownView, bar: HTMLElement): void {
+  stopObservingToolbarResize(view);
+
+  const popoverBar =
+    view.containerEl.querySelector<HTMLElement>(POPOVER_SELECTOR);
+  if (popoverBar) {
+    // close() unregisters from the document the popover captured, which is the one
+    // open() registered on, stale or not.
+    morePopoverFor(popoverBar)?.close();
+    popoverBar.remove();
+  }
+
+  bar.remove();
+}
+
 interface MountedBars {
   bar: HTMLElement;
   popoverBar: HTMLElement;
@@ -98,7 +123,10 @@ function mountBars(
   applyAppearanceVars(bar, settings);
   applyAppearanceVars(popoverBar, settings);
 
-  return mountInView(view, bar, popoverBar) ? { bar, popoverBar } : null;
+  if (!mountInView(view, bar, popoverBar)) return null;
+
+  barWindows.set(bar, windowOf(bar));
+  return { bar, popoverBar };
 }
 
 function createBarEl(doc: Document, className: string): HTMLElement {
