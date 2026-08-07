@@ -13,11 +13,6 @@ export function hasSubmenu(command: Command): command is SubmenuCommand {
 // Split on the first ": ", as the command palette does.
 const SOURCE_SEPARATOR = ": ";
 
-export function commandSource(name: string): string {
-  const end = name.indexOf(SOURCE_SEPARATOR);
-  return end === -1 ? "" : name.slice(0, end + SOURCE_SEPARATOR.length);
-}
-
 export function commandLabel(name: string): string {
   const end = name.indexOf(SOURCE_SEPARATOR);
   return end === -1 ? name : name.slice(end + SOURCE_SEPARATOR.length);

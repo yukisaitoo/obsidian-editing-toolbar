@@ -6,7 +6,6 @@ import {
   Setting,
   setIcon,
 } from "obsidian";
-import type { CalloutTypeInfo } from "src/modals/calloutTypes";
 import { buildCalloutOptions } from "src/modals/calloutTypes";
 import { focusAfterOpen } from "src/modals/modalInput";
 import EditingToolbarPlugin from "src/plugin/main";
@@ -20,7 +19,7 @@ export class InsertCalloutModal extends Modal {
   private collapse: "none" | "open" | "closed" = "none";
   private insertButton!: HTMLElement;
   private contentTextArea!: HTMLTextAreaElement;
-  private allCalloutOptions: CalloutTypeInfo[] = [];
+  private allCalloutOptions = buildCalloutOptions();
   private iconContainerEl!: HTMLElement;
   private inserted = false;
   private resolve!: (spec: CalloutSpec | null) => void;
@@ -28,7 +27,6 @@ export class InsertCalloutModal extends Modal {
   private constructor(plugin: EditingToolbarPlugin, editor: Editor) {
     super(plugin.app);
     this.containerEl.addClass("insert-callout-modal");
-    this.allCalloutOptions = buildCalloutOptions();
     const selectedText = editor.getSelection();
     if (selectedText) {
       this.content = selectedText;
@@ -49,7 +47,7 @@ export class InsertCalloutModal extends Modal {
 
   onOpen() {
     this.scope.register(["Mod"], "Enter", () => {
-      this.insertButton?.click();
+      this.insertButton.click();
       return false;
     });
     this.buildForm();
@@ -69,10 +67,10 @@ export class InsertCalloutModal extends Modal {
         dropdown.setValue(this.type);
         dropdown.onChange((value) => {
           this.type = value;
-          this.updateIconAndColor(this.iconContainerEl, value);
+          this.updateIconAndColor(value);
         });
       });
-    this.updateIconAndColor(this.iconContainerEl, this.type);
+    this.updateIconAndColor(this.type);
 
     new Setting(contentEl)
       .setName(strings.title)
@@ -137,8 +135,8 @@ export class InsertCalloutModal extends Modal {
 
     focusAfterOpen(this.contentTextArea);
   }
-  private updateIconAndColor(iconContainer: HTMLElement, typeKey: string) {
-    if (!iconContainer) return;
+  private updateIconAndColor(typeKey: string) {
+    const iconContainer = this.iconContainerEl;
     iconContainer.empty();
 
     const typeInfo = this.allCalloutOptions.find((t) => t.type === typeKey);

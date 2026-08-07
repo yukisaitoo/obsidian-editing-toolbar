@@ -43,20 +43,12 @@
   z-index: var(--layer-status-bar);
 }
 
+/* Only what the shared rule below doesn't already set: it is more specific, so
+   anything repeated here would lose. */
 .editing-toolbar-bar .editingToolbarCommandItem {
   position: relative;
-  display: flex;
-  height: auto;
   margin: auto 0 auto 4px;
-  padding: 0;
-  border: none;
-  border-radius: var(--radius-s);
-  background-color: transparent;
-  box-shadow: none;
   font-size: initial !important;
-  align-items: center;
-  justify-content: center;
-  cursor: default;
 }
 
 /* Button chrome shared by both bars. Dividers match here too, so they inherit
@@ -214,7 +206,7 @@ button.editingToolbarCommandsubItem::after {
   max-height: 1.3em;
 }
 
-:is(.editing-toolbar-bar, .editingToolbarPopoverBar) button.editingToolbarCommandsubItem>.subitem button.menu-item:not(.editingToolbar-Divider-Line) {
+:is(.editing-toolbar-bar, .editingToolbarPopoverBar) button.editingToolbarCommandsubItem>.subitem button.menu-item {
   display: inline-flex;
   background-color: transparent;
   box-shadow: none;
@@ -588,11 +580,6 @@ button.editing-toolbar-delete svg {
   max-height: 1.5em;
 }
 
-/* A command with no icon still needs a hit target, so show a placeholder. */
-.setting-item .editingToolbarSettingsIcon:empty::before {
-  content: "❗";
-}
-
 .modal.mod-settings button:not(.mod-cta):not(.mod-warning).editingToolbarSettingsIcon {
   background-color: transparent;
   box-shadow: 0 1px 1px 0px var(--background-modifier-border);
@@ -600,10 +587,6 @@ button.editing-toolbar-delete svg {
 
 .modal.mod-settings button:not(.mod-cta):not(.mod-warning).editingToolbarSettingsIcon:hover {
   background-color: var(--interactive-accent-hover);
-}
-
-.editing-toolbar-settings .setting-item-name .editingToolbarSettingsIcon {
-  margin-right: 8px;
 }
 
 .editingToolbarIconPick {
@@ -640,11 +623,9 @@ button.editing-toolbar-delete svg {
 }
 
 /* Both settings tabs build this same container, so layout keys off the container
-   rather than each row's class (`.custom_bg`/`.custom_font` in the General tab,
-   `.toolbar_background`/`.toolbar_icon` in Appearance). An enumeration new rows
-   kept falling out of. No sizing here: Pickr replaces the `div.picker` it is
-   handed with its own `div.pickr`, so the swatch box comes from the vendored
-   `.pcr-button` in §8. */
+   rather than per-row classes — an enumeration new rows kept falling out of. No
+   sizing here either: Pickr replaces the div it is handed with its own
+   `div.pickr`, so the swatch box comes from the vendored `.pcr-button` in §8. */
 .setting-item .pickr-container {
   display: flex;
   gap: 8px;

@@ -17,5 +17,7 @@ export function applyButtonIcon(
 ): HTMLElement {
   const iconEl = btn.buttonEl.createSpan({ cls: "editing-toolbar-icon" });
   setIcon(iconEl, icon ?? "");
+  // setIcon draws nothing for a missing or unknown name, leaving a blank button.
+  if (!iconEl.firstChild) setIcon(iconEl, "circle-dashed");
   return iconEl;
 }

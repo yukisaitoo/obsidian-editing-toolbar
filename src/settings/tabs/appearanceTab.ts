@@ -54,7 +54,6 @@ export function renderAppearanceTab(
     {
       name: strings.toolbarBackgroundColor,
       desc: strings.setBackgroundColorToolbar,
-      cls: "toolbar_background",
       key: "toolbarBackgroundColor",
       swatches: BACKGROUND_SWATCHES,
     },
@@ -66,7 +65,6 @@ export function renderAppearanceTab(
     {
       name: strings.toolbarIconColor,
       desc: strings.setColorToolbarIcon,
-      cls: "toolbar_icon",
       key: "toolbarIconColor",
       swatches: ICON_SWATCHES,
     },
@@ -94,7 +92,6 @@ export function renderAppearanceTab(
 interface ColorSettingConfig {
   name: string;
   desc: string;
-  cls: string;
   key: "toolbarBackgroundColor" | "toolbarIconColor";
   swatches: string[];
 }
@@ -108,7 +105,6 @@ function renderColorSetting(
   new Setting(containerEl)
     .setName(config.name)
     .setDesc(config.desc)
-    .setClass(config.cls)
     .then((setting) => {
       const pickerContainer = setting.controlEl.createDiv({
         cls: "pickr-container",
@@ -121,7 +117,7 @@ function renderColorSetting(
       );
 
       ctx.createPickr({
-        el: pickerContainer.createDiv({ cls: "picker" }),
+        el: pickerContainer.createDiv(),
         container: pickerContainer,
         swatches: config.swatches,
         opacity: false,

@@ -15,7 +15,6 @@ export function renderGeneralTab(
   renderSwatchRow(ctx, paintbrushContainer, {
     name: strings.setCustomBackground,
     desc: strings.setCustomBackgroundDesc,
-    cls: "custom_bg",
     keyPrefix: "custom_bg",
     // `<mark style="background:…">` carry alpha
     opacity: true,
@@ -23,7 +22,6 @@ export function renderGeneralTab(
   renderSwatchRow(ctx, paintbrushContainer, {
     name: strings.setCustomFontColor,
     desc: strings.setCustomFontColorDesc,
-    cls: "custom_font",
     keyPrefix: "custom_fc",
     // `<font color=…>` cannot carry alpha
     opacity: false,
@@ -57,7 +55,6 @@ function renderSwatchRow(
   config: {
     name: string;
     desc: string;
-    cls: string;
     keyPrefix: CustomColorPrefix;
     opacity: boolean;
   },
@@ -68,7 +65,6 @@ function renderSwatchRow(
   new Setting(containerEl)
     .setName(config.name)
     .setDesc(config.desc)
-    .setClass(config.cls)
     .then((setting) => {
       const pickerContainer = setting.controlEl.createDiv({
         cls: "pickr-container",
@@ -81,7 +77,7 @@ function renderSwatchRow(
         };
 
         ctx.createPickr({
-          el: pickerContainer.createDiv({ cls: "picker" }),
+          el: pickerContainer.createDiv(),
           container: pickerContainer,
           swatches,
           opacity: config.opacity,
