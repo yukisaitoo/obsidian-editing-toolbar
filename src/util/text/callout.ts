@@ -19,11 +19,14 @@ export function insertCallout(editor: Editor, spec: CalloutSpec): void {
   calloutText += `\n> ${spec.content.replace(/\n/g, "\n> ")}`;
 
   const from = editor.getCursor("from");
+  const to = editor.getCursor("to");
   if (editor.getLine(from.line).slice(0, from.ch).trim() !== "") {
     calloutText = "\n" + calloutText;
   }
+  // An unprefixed line below a blockquote is absorbed into it.
+  if (editor.getLine(to.line).slice(to.ch).trim() !== "") {
+    calloutText += "\n";
+  }
 
-  // The trailing newline leaves the cursor on a fresh line below the callout and
-  // pushes any text that followed the cursor down with it.
   editor.replaceSelection(calloutText + "\n");
 }
