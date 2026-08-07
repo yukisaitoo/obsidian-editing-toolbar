@@ -1,6 +1,10 @@
 import type { Command } from "obsidian";
 
-import { COMMAND_LABELS, type CommandId } from "src/commands/commandLabels";
+import {
+  COMMAND_LABELS,
+  type CommandId,
+  iconFor,
+} from "src/commands/commandLabels";
 import type { RegisteredCommandName } from "src/commands/commandLabels";
 import { isCoreCommand, ownCommand } from "src/plugin/pluginId";
 
@@ -92,21 +96,27 @@ const DEFAULT_LAYOUT = [
 export const SUBMENU_NAME = "Submenu";
 export const DIVIDER_NAME = "Vertical split";
 
-// Every display name the toolbar can show, submenu parents included. Command name
-// translations are keyed by it, so a name that is not here cannot be translated.
+// The names the toolbar supplies itself: own commands, submenu groups, dividers.
+// Translations are keyed by this, so anything outside it stays untranslated.
 export type CommandName =
   | RegisteredCommandName
   | Extract<(typeof DEFAULT_LAYOUT)[number], { name: string }>["name"]
   | typeof SUBMENU_NAME
   | typeof DIVIDER_NAME;
 
+// Fallback for a core command that stops existing. "editor:toggle-bold" reads as
+// "Toggle bold".
+function nameFromId(id: string): string {
+  const words = id.slice(id.indexOf(":") + 1).replace(/-/g, " ");
+  return words.charAt(0).toUpperCase() + words.slice(1);
+}
+
 // A core command is pointed at where it lives, so its own hotkey reaches the tooltip;
 // only what this plugin registers is namespaced.
-function toCommand(id: CommandId): Command {
-  return {
-    id: isCoreCommand(id) ? id : ownCommand(id),
-    ...COMMAND_LABELS[id],
-  };
+export function toCommand(id: CommandId): Command {
+  return isCoreCommand(id)
+    ? { id, name: nameFromId(id), icon: iconFor(id) }
+    : { id: ownCommand(id), ...COMMAND_LABELS[id] };
 }
 
 export function defaultToolbarCommands(): Command[] {

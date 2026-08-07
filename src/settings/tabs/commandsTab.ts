@@ -11,8 +11,9 @@ import {
   newSubmenuId,
 } from "src/toolbar/layoutIds";
 import { applyButtonIcon, SUBMENU_BUTTON_CLASS } from "src/toolbar/toolbarDom";
-import { strings, t } from "src/translations/helper";
+import { strings } from "src/translations/helper";
 import { hasSubmenu, SubmenuCommand } from "src/util/commandStorage";
+import { displayIcon, displayName } from "src/util/displayName";
 
 const DIVIDER_RENAME_CLASS = "editingToolbar-divider-rename";
 
@@ -105,7 +106,7 @@ function renderRow(
 
   const setting = new Setting(parentEl)
     .setClass("editingToolbarCommandItem")
-    .setName(t(command.name));
+    .setName(displayName(ctx.app, command));
 
   // The Sortable `put` predicate reads this class off the dragged element to keep
   // submenus out of submenus.
@@ -279,7 +280,7 @@ function configureIconButton(
     ).open();
   });
 
-  applyButtonIcon(button, command.icon);
+  applyButtonIcon(button, displayIcon(ctx.app, command));
 }
 
 async function setStoredIcon(

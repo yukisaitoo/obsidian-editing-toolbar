@@ -10,8 +10,8 @@ import { attachFlyoutClamp } from "src/toolbar/geometry";
 import { hotkeyLabel } from "src/toolbar/hotkeys";
 import { DIVIDER_COMMAND_ID, isDivider } from "src/toolbar/layoutIds";
 import { applyButtonIcon, SUBMENU_BUTTON_CLASS } from "src/toolbar/toolbarDom";
-import { t } from "src/translations/helper";
 import { hasSubmenu, SubmenuCommand } from "src/util/commandStorage";
+import { displayIcon, displayName } from "src/util/displayName";
 
 interface RenderContext {
   app: App;
@@ -54,13 +54,13 @@ function renderPlainButton(ctx: RenderContext, item: Command) {
     .onClick(() => runCommandById(ctx.app, item.id));
 
   button.setClass("editingToolbarCommandItem");
-  applyButtonIcon(button, item.icon);
+  applyButtonIcon(button, displayIcon(ctx.app, item));
 }
 
 function renderDropdown(ctx: RenderContext, item: SubmenuCommand) {
   const parent = new ButtonComponent(ctx.bar);
   parent.setClass(SUBMENU_BUTTON_CLASS);
-  applyButtonIcon(parent, item.icon);
+  applyButtonIcon(parent, displayIcon(ctx.app, item));
   parent.setTooltip(tooltipFor(ctx.app, item));
 
   parent.onClick((evt: MouseEvent) => {
@@ -72,7 +72,10 @@ function renderDropdown(ctx: RenderContext, item: SubmenuCommand) {
         // Dividers keep DIVIDER_NAME until renamed; only a chosen name is a label.
         if (subitem.name !== DIVIDER_NAME) {
           menu.addItem((menuItem) => {
-            menuItem.setTitle(t(subitem.name)).setDisabled(true).removeIcon();
+            menuItem
+              .setTitle(displayName(ctx.app, subitem))
+              .setDisabled(true)
+              .removeIcon();
           });
         }
         return;
@@ -80,8 +83,8 @@ function renderDropdown(ctx: RenderContext, item: SubmenuCommand) {
 
       menu.addItem((menuItem) => {
         menuItem
-          .setTitle(t(subitem.name))
-          .setIcon(subitem.icon ?? null)
+          .setTitle(displayName(ctx.app, subitem))
+          .setIcon(displayIcon(ctx.app, subitem) ?? null)
           .onClick(() => runCommandById(ctx.app, subitem.id));
 
         const hotkey = hotkeyLabel(ctx.app, subitem.id);
@@ -99,7 +102,7 @@ function renderDropdown(ctx: RenderContext, item: SubmenuCommand) {
 function renderFlyout(ctx: RenderContext, item: SubmenuCommand) {
   const parent = new ButtonComponent(ctx.bar);
   parent.setClass(SUBMENU_BUTTON_CLASS);
-  applyButtonIcon(parent, item.icon);
+  applyButtonIcon(parent, displayIcon(ctx.app, item));
 
   const submenu = createDiv("subitem");
   parent.buttonEl.insertAdjacentElement("afterbegin", submenu);
@@ -115,14 +118,14 @@ function renderFlyout(ctx: RenderContext, item: SubmenuCommand) {
       .setClass("menu-item")
       .onClick(() => runCommandById(ctx.app, subitem.id));
 
-    applyButtonIcon(subBtn, subitem.icon);
+    applyButtonIcon(subBtn, displayIcon(ctx.app, subitem));
   });
 
   attachFlyoutClamp(parent.buttonEl);
 }
 
 function tooltipFor(app: App, item: Command): string {
-  const label = t(item.name);
+  const label = displayName(app, item);
   const hotkey = hotkeyLabel(app, item.id);
   return hotkey ? `${label}(${hotkey})` : label;
 }

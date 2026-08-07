@@ -5,7 +5,6 @@ export const en = {
   addCommandOntoEditingToolbar:
     "Add a command onto Editing Toolbar from Obsidian's commands library. To reorder the commands, drag and drop the command items. To delete them, use the delete button to the right of the command item.",
   appearance: "Appearance",
-  backgroundColor: "Background color",
   buttonSubmenu: "Button Submenu",
   calloutType: "Callout Type",
   cancel: "Cancel",
@@ -31,7 +30,6 @@ export const en = {
   dragCommandsHere: "Drag it here",
   dropdownMenu: "Dropdown Menu",
   editingToolbarCommands: "Editing Toolbar Commands",
-  fontColors: "Font Colors",
   general: "General",
   inputContent: "Input content",
   inputTitle: "Input title",

@@ -8,12 +8,8 @@ import {
 } from "obsidian";
 import { getAppIcons } from "src/icons/appIcons";
 import type EditingToolbarPlugin from "src/plugin/main";
-import { format, strings, t } from "src/translations/helper";
-import {
-  commandLabel,
-  commandSource,
-  toStoredCommand,
-} from "src/util/commandStorage";
+import { format, strings } from "src/translations/helper";
+import { toStoredCommand } from "src/util/commandStorage";
 
 export class IconPicker extends FuzzySuggestModal<string> {
   constructor(
@@ -58,10 +54,10 @@ export class CommandPicker extends FuzzySuggestModal<Command> {
     return this.app.commands.listCommands();
   }
 
-  // The list spans every registered command, so the source prefix stays on to keep
-  // same-named commands from different plugins apart.
+  // Verbatim: names are already localized, and the source prefix keeps same-named
+  // commands from different plugins apart.
   getItemText(item: Command): string {
-    return commandSource(item.name) + t(commandLabel(item.name));
+    return item.name;
   }
 
   async onChooseItem(item: Command): Promise<void> {

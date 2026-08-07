@@ -10,10 +10,11 @@ import { attachFlyoutClamp } from "src/toolbar/geometry";
 import { applyButtonIcon, SUBMENU_BUTTON_CLASS } from "src/toolbar/toolbarDom";
 import { strings } from "src/translations/helper";
 import { toHexColor } from "src/util/color";
+import { displayIcon, displayName } from "src/util/displayName";
 import { setBackgroundColor, setFontColor } from "src/util/text/inlineColor";
 
 interface PickerVariant {
-  tooltip: string;
+  // The swatch panel's palette icon is not a command, so it has no registry name.
   customTooltip: string;
   render: (parent: HTMLElement, plugin: EditingToolbarPlugin) => void;
   settingsKey: "lastFontColor" | "lastHighlightColor";
@@ -22,14 +23,12 @@ interface PickerVariant {
 
 const VARIANTS: Record<string, PickerVariant> = {
   [ownCommand("change-font-color")]: {
-    tooltip: strings.fontColors,
     customTooltip: strings.customFontColor,
     render: renderFontColorPicker,
     settingsKey: "lastFontColor",
     apply: setFontColor,
   },
   [ownCommand("change-background-color")]: {
-    tooltip: strings.backgroundColor,
     customTooltip: strings.customBackgroundColor,
     render: renderBackgroundColorPicker,
     settingsKey: "lastHighlightColor",
@@ -61,7 +60,10 @@ export function createColorPickerButton(
     });
 
   // On the icon, not the button: the swatch panel below is a child of the button.
-  setTooltip(applyButtonIcon(button, item.icon), variant.tooltip);
+  setTooltip(
+    applyButtonIcon(button, displayIcon(app, item)),
+    displayName(app, item),
+  );
 
   const submenu = createEl("div");
   submenu.addClass("subitem");

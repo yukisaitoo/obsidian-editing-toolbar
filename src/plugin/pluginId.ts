@@ -9,7 +9,9 @@ export function ownCommand(id: string): string {
 // Obsidian namespaces its editor commands with this prefix and the toolbar's own
 // ids never use it, so it tells apart an id Obsidian owns from one this plugin
 // registers. Core's other prefixes (`app:`, `workspace:`) never reach here.
-export function isCoreCommand(id: string): boolean {
+export function isCoreCommand<T extends string>(
+  id: T,
+): id is T & `editor:${string}` {
   return id.startsWith("editor:");
 }
 

@@ -1,6 +1,6 @@
 import { Command } from "obsidian";
 
-import { labelFor } from "src/commands/commandLabels";
+import { iconFor } from "src/commands/commandLabels";
 
 export type SubmenuCommand = Command & { SubmenuCommands: Command[] };
 
@@ -27,14 +27,11 @@ export function commandLabel(name: string): string {
 // a later rename or icon change write straight through to Obsidian's palette, so
 // everything entering settings is copied to plain data first.
 export function toStoredCommand(command: Command): Command {
-  // A core command picked from the list gets the toolbar's own label, matching the
-  // one that ships in the defaults.
-  const preferred = labelFor(command.id);
-
+  // Both are fallbacks; `displayName` and `displayIcon` prefer the live registry.
   const stored: Command = {
     id: command.id,
-    name: preferred?.name ?? commandLabel(command.name),
-    icon: preferred?.icon ?? command.icon,
+    name: commandLabel(command.name),
+    icon: iconFor(command.id) ?? command.icon,
   };
   if (command.menuType) stored.menuType = command.menuType;
 

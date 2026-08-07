@@ -1,5 +1,6 @@
 import { ButtonComponent, Setting } from "obsidian";
-import { COMMAND_LABELS, type CommandId } from "src/commands/commandLabels";
+import { type CommandId } from "src/commands/commandLabels";
+import { toCommand } from "src/settings/defaultCommands";
 import {
   applyAppearanceVars,
   getAppearanceBucket,
@@ -10,8 +11,9 @@ import {
 } from "src/settings/settingsData";
 import type { SettingsTabContext } from "src/settings/settingsTab";
 import { applyButtonIcon, SHARED_BAR_CLASS } from "src/toolbar/toolbarDom";
-import { strings, t } from "src/translations/helper";
+import { strings } from "src/translations/helper";
 import { resolveHexColor } from "src/util/color";
+import { displayIcon, displayName } from "src/util/displayName";
 
 const BACKGROUND_SWATCHES = [
   "#F5F8FA",
@@ -140,11 +142,11 @@ function renderPreview(
   previewBar.addClass(SHARED_BAR_CLASS);
 
   PREVIEW_COMMANDS.forEach((id) => {
-    const { name, icon } = COMMAND_LABELS[id];
+    const command = toCommand(id);
     const button = new ButtonComponent(previewBar);
     button.setClass("editingToolbarCommandItem");
-    button.setTooltip(t(name));
-    applyButtonIcon(button, icon);
+    button.setTooltip(displayName(ctx.app, command));
+    applyButtonIcon(button, displayIcon(ctx.app, command));
   });
 
   applyAppearanceVars(previewBar, ctx.plugin.settings);

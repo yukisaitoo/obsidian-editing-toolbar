@@ -3,6 +3,7 @@ import { App, Editor } from "obsidian";
 import { COMMAND_LABELS, type OwnCommandId } from "src/commands/commandLabels";
 import { InsertCalloutModal } from "src/modals/insertCalloutModal";
 import type EditingToolbarPlugin from "src/plugin/main";
+import { t } from "src/translations/helper";
 import { insertCallout } from "src/util/text/callout";
 import { setFormatEraser } from "src/util/text/formatEraser";
 import { setHeader } from "src/util/text/header";
@@ -35,19 +36,26 @@ const HEADER_IDS: OwnCommandId[] = [
   "header6-text",
 ];
 
+// Translated here so the palette matches the toolbar and `displayName` can read both
+// off the registry.
+function label(id: OwnCommandId) {
+  const { name, icon } = COMMAND_LABELS[id];
+  return { name: t(name), icon };
+}
+
 export function registerCommands(plugin: EditingToolbarPlugin): void {
   // editorCallback gates each command on a live editor, keeping it out of reading
   // mode, the note title, the properties panel, and the palette.
   const add = (id: OwnCommandId, run: (editor: Editor) => unknown) =>
     plugin.addCommand({
       id,
-      ...COMMAND_LABELS[id],
+      ...label(id),
       editorCallback: (editor) => runOn(editor, run),
     });
 
   plugin.addCommand({
     id: "hide-show-menu",
-    ...COMMAND_LABELS["hide-show-menu"],
+    ...label("hide-show-menu"),
     callback: async () => {
       plugin.settings.toolbarVisible = !plugin.settings.toolbarVisible;
       await plugin.saveSettings();
