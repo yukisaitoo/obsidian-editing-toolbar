@@ -13,16 +13,17 @@ import { selectAt } from "src/util/text/selection";
 interface Wrap {
   prefix: string;
   suffix: string;
+  group: string;
 }
 
 const WRAP_COMMANDS = {
-  justify: { prefix: '<p align="justify">', suffix: "</p>" },
-  left: { prefix: '<p align="left">', suffix: "</p>" },
-  right: { prefix: '<p align="right">', suffix: "</p>" },
-  center: { prefix: "<center>", suffix: "</center>" },
-  underline: { prefix: "<u>", suffix: "</u>" },
-  superscript: { prefix: "<sup>", suffix: "</sup>" },
-  subscript: { prefix: "<sub>", suffix: "</sub>" },
+  justify: { prefix: '<p align="justify">', suffix: "</p>", group: "align" },
+  left: { prefix: '<p align="left">', suffix: "</p>", group: "align" },
+  right: { prefix: '<p align="right">', suffix: "</p>", group: "align" },
+  center: { prefix: "<center>", suffix: "</center>", group: "align" },
+  underline: { prefix: "<u>", suffix: "</u>", group: "underline" },
+  superscript: { prefix: "<sup>", suffix: "</sup>", group: "script" },
+  subscript: { prefix: "<sub>", suffix: "</sub>", group: "script" },
 } as const satisfies Partial<Record<OwnCommandId, Wrap>>;
 
 // Level N maps to N hashes, so level 0 strips the header.
@@ -86,7 +87,10 @@ export function registerCommands(plugin: EditingToolbarPlugin): void {
   });
 
   for (const [id, wrap] of Object.entries(WRAP_COMMANDS)) {
-    add(id as OwnCommandId, (editor) => wrapSelection(editor, wrap));
+    const group = Object.values(WRAP_COMMANDS).filter(
+      (w) => w.group === wrap.group,
+    );
+    add(id as OwnCommandId, (editor) => wrapSelection(editor, wrap, group));
   }
 }
 
@@ -114,25 +118,39 @@ function runOn(editor: Editor, action: (editor: Editor) => unknown): void {
   })();
 }
 
-// Unwraps when the wrap is already there, which is what makes these toggles.
-function wrapSelection(editor: Editor, { prefix, suffix }: Wrap): void {
-  const selectedText = editor.getSelection();
-  const start = editor.getCursor("from");
-  const end = editor.getCursor("to");
+// A wrap replaces whichever member of its group is already there, so switching
+// alignment (or sup <-> sub) swaps the tags instead of nesting a second pair.
+function wrapSelection(
+  editor: Editor,
+  wrap: Wrap,
+  group: readonly Wrap[],
+): void {
+  const text = editor.getSelection();
+  const from = editor.posToOffset(editor.getCursor("from"));
+  const to = editor.posToOffset(editor.getCursor("to"));
 
-  const from = editor.posToOffset(start);
-  const preStart = editor.offsetToPos(from - prefix.length);
-  const sufEnd = editor.offsetToPos(editor.posToOffset(end) + suffix.length);
+  const existing = group.find((w) => surrounds(editor, w, from, to));
+  const start = existing ? from - existing.prefix.length : from;
+  const end = existing ? to + existing.suffix.length : to;
+  const off = existing === wrap;
 
-  if (
-    editor.getRange(preStart, start) === prefix &&
-    editor.getRange(end, sufEnd) === suffix
-  ) {
-    editor.replaceRange(selectedText, preStart, sufEnd);
-    selectAt(editor, from - prefix.length, selectedText.length);
-    return;
-  }
+  editor.replaceRange(
+    off ? text : `${wrap.prefix}${text}${wrap.suffix}`,
+    editor.offsetToPos(start),
+    editor.offsetToPos(end),
+  );
+  selectAt(editor, start + (off ? 0 : wrap.prefix.length), text.length);
+}
 
-  editor.replaceSelection(`${prefix}${selectedText}${suffix}`);
-  selectAt(editor, from + prefix.length, selectedText.length);
+function surrounds(
+  editor: Editor,
+  { prefix, suffix }: Wrap,
+  from: number,
+  to: number,
+): boolean {
+  const at = (offset: number) => editor.offsetToPos(offset);
+  return (
+    editor.getRange(at(from - prefix.length), at(from)) === prefix &&
+    editor.getRange(at(to), at(to + suffix.length)) === suffix
+  );
 }
