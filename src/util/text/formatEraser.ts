@@ -10,13 +10,14 @@ const MARKDOWN_STRIPPERS: [RegExp, string][] = [
   [/^ {0,3}([-*_])(?:[ \t]*\1){2,}[ \t]*$/gm, ""],
   [/^ {0,3}(?:> ?)+\[![\w\s-]*\][+-]?[ \t]*/gm, ""],
   [/^ {0,3}(?:#{1,6} +|> ?|- \[[ x]\] +|[-*+] +|\d+\. +)+/gm, ""],
-  // A tag name has to follow the bracket, or `a < b > c` loses its middle.
-  [/<\/?[A-Za-z!][^<>]*>/g, ""],
+  // A tag name has to follow the bracket, or `a < b > c` loses its middle. `!` stays
+  // out so `<!-- -->` survives, as `%%…%%` does: comments are hidden text, not
+  // formatting.
+  [/<\/?[A-Za-z][^<>]*>/g, ""],
   [/!?\[\[[^[\]]*\|([^[\]|]+)\]\]/g, "$1"],
   [/!?\[\[([^[\]|]+)\]\]/g, "$1"],
   [/!?\[([^[\]]*)\]\([^()]*\)/g, "$1"],
   [/`([^`\n]+)`/g, "$1"],
-  [/%%([\s\S]*?)%%/g, "$1"],
   // A tag needs at least one non-digit, so `#1` in prose survives.
   [/(?<=^|\s)#([\w/-]*[A-Za-z_/-][\w/-]*)/g, "$1"],
   [/(?<!\w)(\*\*\*|___)(\S(?:.*?\S)?)\1(?!\w)/g, "$2"],
