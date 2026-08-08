@@ -72,7 +72,7 @@ export class CommandPicker extends FuzzySuggestModal<Command> {
     if (!item.icon) {
       new IconPicker(
         this.app,
-        (icon) => void this.addCommand({ ...item, icon }),
+        (icon) => void this.addCommand(item, icon),
       ).open();
       return;
     }
@@ -82,8 +82,8 @@ export class CommandPicker extends FuzzySuggestModal<Command> {
 
   // Reads the list afresh: the icon picker sits open in between, so the reference
   // from onChooseItem can be stale by the time an icon is chosen.
-  private async addCommand(command: Command): Promise<void> {
-    this.ctx.plugin.settings.commands.push(toStoredCommand(command));
+  private async addCommand(command: Command, icon?: string): Promise<void> {
+    this.ctx.plugin.settings.commands.push(toStoredCommand(command, icon));
     await this.ctx.persist();
     this.ctx.refresh();
   }

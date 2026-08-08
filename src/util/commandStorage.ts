@@ -21,17 +21,20 @@ export function commandLabel(name: string): string {
 // `listCommands()` hands back the live registry objects, and storing one would let
 // a later rename or icon change write straight through to Obsidian's palette, so
 // everything entering settings is copied to plain data first.
-export function toStoredCommand(command: Command): Command {
-  // Both are fallbacks; `displayName` and `displayIcon` prefer the live registry.
+export function toStoredCommand(command: Command, icon?: string): Command {
+  // The stored name is a fallback (`displayName` prefers the registry); the stored
+  // icon is an override (`displayIcon` prefers it). Unset tracks Obsidian's.
   const stored: Command = {
     id: command.id,
     name: commandLabel(command.name),
-    icon: iconFor(command.id) ?? command.icon,
+    icon: icon ?? iconFor(command.id),
   };
   if (command.menuType) stored.menuType = command.menuType;
 
   if (hasSubmenu(command)) {
-    stored.SubmenuCommands = command.SubmenuCommands.map(toStoredCommand);
+    stored.SubmenuCommands = command.SubmenuCommands.map((child) =>
+      toStoredCommand(child),
+    );
   }
 
   return stored;

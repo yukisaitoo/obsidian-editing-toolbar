@@ -8,25 +8,26 @@ export interface CalloutSpec {
 }
 
 export function insertCallout(editor: Editor, spec: CalloutSpec): void {
-  let calloutText = `> [!${spec.type}]`;
-  if (spec.collapse !== "none") {
-    calloutText += `${spec.collapse === "open" ? "+" : "-"}`;
+  const mark =
+    spec.collapse === "open" ? "+" : spec.collapse === "closed" ? "-" : "";
+  const title = spec.title ? ` ${spec.title}` : "";
+  const lines = [`> [!${spec.type}]${mark}${title}`];
+  if (spec.content) {
+    lines.push(...spec.content.split("\n").map((l) => (l ? `> ${l}` : ">")));
   }
-  if (spec.title) {
-    calloutText += ` ${spec.title}`;
-  }
-
-  calloutText += `\n> ${spec.content.replace(/\n/g, "\n> ")}`;
 
   const from = editor.getCursor("from");
   const to = editor.getCursor("to");
-  if (editor.getLine(from.line).slice(0, from.ch).trim() !== "") {
-    calloutText = "\n" + calloutText;
-  }
-  // An unprefixed line below a blockquote is absorbed into it.
-  if (editor.getLine(to.line).slice(to.ch).trim() !== "") {
-    calloutText += "\n";
-  }
+  const before = editor.getLine(from.line).slice(0, from.ch);
+  const after = editor.getLine(to.line).slice(to.ch);
+  // An unprefixed line above or below a blockquote is absorbed into it. What ends
+  // up below is the tail the cursor pushes down, or the next line if there is none.
+  const below =
+    after || (to.line < editor.lastLine() ? editor.getLine(to.line + 1) : "");
 
-  editor.replaceSelection(calloutText + "\n");
+  if (before.trim()) lines.unshift("");
+  if (below.trim()) lines.push("");
+
+  // The trailing break only exists to put a real tail on its own line.
+  editor.replaceSelection(lines.join("\n") + (after ? "\n" : ""));
 }

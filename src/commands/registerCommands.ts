@@ -26,16 +26,7 @@ const WRAP_COMMANDS = {
   subscript: { prefix: "<sub>", suffix: "</sub>", group: "script" },
 } as const satisfies Partial<Record<OwnCommandId, Wrap>>;
 
-// Level N maps to N hashes, so level 0 strips the header.
-const HEADER_IDS: OwnCommandId[] = [
-  "header0-text",
-  "header1-text",
-  "header2-text",
-  "header3-text",
-  "header4-text",
-  "header5-text",
-  "header6-text",
-];
+const HEADER_LEVELS = [0, 1, 2, 3, 4, 5, 6] as const;
 
 // Translated here so the palette matches the toolbar and `displayName` can read both
 // off the registry.
@@ -77,8 +68,8 @@ export function registerCommands(plugin: EditingToolbarPlugin): void {
     setBackgroundColor(plugin.settings.lastHighlightColor, editor),
   );
 
-  HEADER_IDS.forEach((id, level) =>
-    add(id, (editor) => setHeader("#".repeat(level), editor)),
+  HEADER_LEVELS.forEach((level) =>
+    add(`header${level}-text`, (editor) => setHeader("#".repeat(level), editor)),
   );
 
   add("insert-callout", async (editor) => {

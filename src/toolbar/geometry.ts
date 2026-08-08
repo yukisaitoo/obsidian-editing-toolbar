@@ -149,14 +149,22 @@ function availableWidth(bar: HTMLElement): number {
   return parent.clientWidth - padX;
 }
 
+// The bar is `nowrap` with no `order`, so DOM order is visual order.
 function visibleSpan(bar: HTMLElement): number {
-  let left = Infinity;
-  let right = -Infinity;
+  let first: HTMLElement | undefined;
+  let last: HTMLElement | undefined;
   for (const el of Array.from(bar.children) as HTMLElement[]) {
     if (el.style.display === "none") continue;
-    const r = el.getBoundingClientRect();
-    if (r.left < left) left = r.left;
-    if (r.right > right) right = r.right;
+    first ??= el;
+    last = el;
   }
-  return right > left ? right - left : 0;
+  if (!first || !last) return 0;
+
+  // Rects are border boxes, so the leading margin falls outside them.
+  const lead = parseFloat(getComputedStyle(first).marginLeft) || 0;
+  return (
+    last.getBoundingClientRect().right -
+    first.getBoundingClientRect().left +
+    lead
+  );
 }
